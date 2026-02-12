@@ -1,6 +1,6 @@
 import { CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ColorTheme } from "@/lib/settingsTypes";
+import type { ColorTheme } from "../lib/settingsTypes";
 
 interface ColorThemeButtonProps {
   colorKey: ColorTheme;

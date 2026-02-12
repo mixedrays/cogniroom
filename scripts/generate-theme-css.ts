@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Import theme colors from the source
-import { THEME_COLORS } from "../src/lib/themeColors";
+import { THEME_COLORS } from "../src/modules/settings/lib/themeColors";
 
 // Variables that themes override (subset of all variables)
 const THEME_SPECIFIC_VARS = [

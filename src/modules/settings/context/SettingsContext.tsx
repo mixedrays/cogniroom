@@ -12,15 +12,15 @@ import type {
   AppearanceSettings,
   LLMSettings,
   ThemeMode,
-} from "@/lib/settingsTypes";
-import { DEFAULT_SETTINGS } from "@/lib/settingsTypes";
-import { getSettings, saveSettings as apiSaveSettings } from "@/lib/settings";
+} from "../lib/settingsTypes";
+import { DEFAULT_SETTINGS } from "../lib/settingsTypes";
+import { getSettings, saveSettings as apiSaveSettings } from "../lib/settings";
 import {
   applyThemeColors,
   applyRadius,
   applyDarkMode,
   getSystemPreference,
-} from "@/lib/themeColors";
+} from "../lib/themeColors";
 
 const SETTINGS_CACHE_KEY = "settings-cache";
 

@@ -7,12 +7,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SunIcon, MoonIcon, MonitorIcon } from "lucide-react";
-import { useSettings } from "@/context/SettingsContext";
+import { useSettings } from "../context/SettingsContext";
 import {
   COLOR_THEMES,
   type ColorTheme,
   type ThemeMode,
-} from "@/lib/settingsTypes";
+} from "../lib/settingsTypes";
 import { ColorThemeButton } from "./ColorThemeButton";
 
 const THEME_MODES: {

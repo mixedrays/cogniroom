@@ -9,7 +9,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import AppSidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { SidebarProvider } from "../components/ui/sidebar";
-import { SettingsProvider } from "@/context/SettingsContext";
+import { SettingsProvider } from "@/modules/settings";
 import type { RouterContext } from "@/lib/routerContext";
 import appCss from "../styles.css?url";
 import themeCss from "../themes.css?url";

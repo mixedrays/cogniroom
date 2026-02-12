@@ -6,7 +6,7 @@ import {
   getModelLabelWithPrice,
   getValidModel,
 } from "@/lib/llmModels";
-import { useSettings } from "@/context/SettingsContext";
+import { useSettings } from "@/modules/settings";
 
 import {
   Dialog,

@@ -2,14 +2,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TrashIcon, RotateCcwIcon } from "lucide-react";
-import { useSettings } from "@/context/SettingsContext";
-import { COLOR_THEMES, type SettingsHistoryEntry } from "@/lib/settingsTypes";
+import { useSettings } from "../context/SettingsContext";
+import { COLOR_THEMES, type SettingsHistoryEntry } from "../lib/settingsTypes";
 import { AVAILABLE_MODELS } from "@/lib/llmModels";
 import {
   getSettingsHistory,
   deleteHistoryEntry,
   restoreFromHistory,
-} from "@/lib/settings";
+} from "../lib/settings";
 
 export function HistorySettings() {
   const { applySettings, loadSettings } = useSettings();

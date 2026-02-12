@@ -8,7 +8,7 @@ import {
   ChevronDown,
   Settings,
 } from "lucide-react";
-import { SettingsDialog } from "@/components/Settings";
+import { SettingsDialog } from "@/modules/settings";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Course } from "@/lib/types";
