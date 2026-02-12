@@ -1,0 +1,40 @@
+node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+.env
+.env.local
+.env.*.local
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+.agents
+.github/skills
+.claude/skills
+.vscode
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+
+# Temp files
+tmp/
+temp/
+*.tmp
+
+# User settings
+.settings/
+
+data/

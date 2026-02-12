@@ -1,0 +1,9 @@
+dist
+node_modules
+.output
+.vinxi
+coverage
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+src/components/ui

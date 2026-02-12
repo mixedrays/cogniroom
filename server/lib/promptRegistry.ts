@@ -1,0 +1,197 @@
+export interface PromptDefinition {
+  id: string;
+  label: string;
+  description: string;
+  category: string;
+  variables: string[];
+  defaultContent: string;
+}
+
+export const PROMPT_REGISTRY: PromptDefinition[] = [
+  // ── Course generation ──────────────────────────────────────────
+  {
+    id: "course-generation",
+    label: "Course Generation",
+    description: "Prompt used when generating a new course roadmap.",
+    category: "Course",
+    variables: ["topic", "level"],
+    defaultContent: [
+      "You generate structured learning courses.",
+      "Return content that is practical, progressive, and tailored to the learner's level.",
+      "Keep titles short and action-oriented. Keep descriptions concise (1-2 sentences) and focused on what the learner will achieve.",
+      "Avoid overly generic topics; include concrete milestones and hands-on exercises.",
+      "Order lessons from foundational concepts to advanced application, ensuring each builds on the previous.",
+      "",
+      "Create a learning roadmap for: {{topic}}",
+      "Learner level: {{level}}",
+      "",
+      "Constraints:",
+      "- 4 to 8 topics, logically grouped by theme or progression",
+      "- 2 to 6 lessons per topic",
+      "- Lesson titles should be concrete tasks or outcomes (e.g. 'Build a REST API with Express', not 'APIs')",
+      "- Include at least one hands-on project topic near the end of the roadmap",
+      "- Each topic should have a clear description of its learning goals",
+      "- Avoid duplicate or overlapping lesson content across topics",
+    ].join("\n"),
+  },
+
+  // ── Lesson generation ──────────────────────────────────────────
+  {
+    id: "lesson-generation",
+    label: "Lesson Generation",
+    description: "Prompt used when generating lesson content.",
+    category: "Lesson",
+    variables: [
+      "courseTitle",
+      "topicTitle",
+      "topicDescription",
+      "lessonTitle",
+      "lessonDescription",
+      "additionalInstructions",
+    ],
+    defaultContent: [
+      "You are an expert technical educator creating a single lesson for a learning roadmap.",
+      "Output in Markdown format. Structure the lesson clearly with:",
+      "- A brief introduction explaining the 'Why' — why this topic matters and what the learner will gain",
+      "- Core concepts and theory with clear explanations",
+      "- Concrete examples or code snippets (use fenced code blocks with language tags)",
+      "- A practical exercise or 'Challenge' at the end to reinforce learning",
+      "- A brief summary of key takeaways",
+      "",
+      "Guidelines:",
+      "- Aim for 800-1500 words of substantive content",
+      "- Keep the tone encouraging but technical and precise",
+      "- Use H2 (##) for major sections and H3 (###) for subsections",
+      "- Do not include the Lesson Title as an H1 at the top (it will be rendered by the UI)",
+      "- When including code, provide working, copy-pasteable examples",
+      "",
+      "Course: {{courseTitle}}",
+      "Topic: {{topicTitle}} - {{topicDescription}}",
+      "Lesson: {{lessonTitle}} - {{lessonDescription}}",
+      "{{additionalInstructions}}",
+      "Generate the lesson content.",
+    ].join("\n"),
+  },
+
+  // ── Tests generation ───────────────────────────────────────────
+  {
+    id: "tests-generation",
+    label: "Tests Generation",
+    description: "Prompt used when generating flashcards and quiz questions.",
+    category: "Tests",
+    variables: [
+      "courseTitle",
+      "topicTitle",
+      "topicDescription",
+      "lessonTitle",
+      "lessonDescription",
+      "additionalInstructions",
+    ],
+    defaultContent: [
+      "You generate study tests for lessons.",
+      "",
+      "Course: {{courseTitle}}",
+      "Topic: {{topicTitle}} - {{topicDescription}}",
+      "Lesson: {{lessonTitle}} - {{lessonDescription}}",
+      "",
+      "Generate flashcards AND multiple-choice quiz questions for this lesson.",
+      "",
+      "Flashcard guidelines:",
+      "- Generate at least 5 flashcards covering the key concepts",
+      "- Keep questions concise and focused on a single concept",
+      "- Keep answers short but accurate (1-3 sentences)",
+      "- Include a mix of definition, concept, and application questions",
+      "",
+      "Quiz guidelines:",
+      "- Generate at least 3 quiz questions",
+      "- Each quiz question must have exactly 4 options. The answer must be one of the options",
+      "- Include a mix of easy, medium, and hard difficulty questions",
+      "- Make incorrect options plausible but clearly wrong to someone who studied the material",
+      "{{additionalInstructions}}",
+    ].join("\n"),
+  },
+
+  // ── Exercises generation ───────────────────────────────────────
+  {
+    id: "exercises-generation",
+    label: "Exercises Generation",
+    description: "Prompt used when generating exercises for a lesson.",
+    category: "Exercises",
+    variables: [
+      "courseTitle",
+      "topicTitle",
+      "topicDescription",
+      "lessonTitle",
+      "lessonDescription",
+      "additionalInstructions",
+    ],
+    defaultContent: [
+      "You are an expert technical educator creating exercises for a learning roadmap lesson.",
+      "Output in Markdown format. Keep the tone encouraging but technical and precise.",
+      "",
+      "Course: {{courseTitle}}",
+      "Topic: {{topicTitle}} - {{topicDescription}}",
+      "Lesson: {{lessonTitle}} - {{lessonDescription}}",
+      "",
+      "Generate practical exercises for this lesson. For each exercise, include:",
+      "- A clear objective stating what the learner will practice",
+      "- Step-by-step instructions to complete the task",
+      "- Expected output or success criteria",
+      "- Hints or tips for learners who get stuck",
+      "",
+      "Guidelines:",
+      "- Include 3-5 exercises with increasing difficulty",
+      "- Mix exercise types: code-along, fill-in-the-blank, build-from-scratch, debugging",
+      "- Make exercises self-contained and practical — the learner should be able to complete each one independently",
+      "{{additionalInstructions}}",
+    ].join("\n"),
+  },
+
+  // ── Instruction enhancement ────────────────────────────────────
+  {
+    id: "instruction-enhancement",
+    label: "Instruction Enhancement",
+    description: "Prompt for enhancing user instructions before content generation.",
+    category: "Enhancement",
+    variables: [
+      "contentType",
+      "courseTitle",
+      "topicTitle",
+      "lessonTitle",
+      "skillLevel",
+      "contentTypeGuidelines",
+      "userInstruction",
+    ],
+    defaultContent: [
+      "You are an expert prompt engineer specializing in educational content generation.",
+      "Enhance the user-provided instruction to create a more effective prompt for AI content generation.",
+      "",
+      "When enhancing instructions:",
+      "- Preserve the user's original intent and core requirements",
+      "- Add specific, actionable details that improve output quality",
+      "- Include relevant pedagogical considerations",
+      "- Suggest appropriate structure and format for the content type",
+      "- Consider the target audience and skill level",
+      "- Keep the enhanced instruction concise but comprehensive",
+      "",
+      "Output the enhanced instruction directly, without preamble, explanation, or markdown formatting.",
+      "",
+      "Content Type: {{contentType}}",
+      "Course: {{courseTitle}}",
+      "Topic: {{topicTitle}}",
+      "Lesson: {{lessonTitle}}",
+      "Target Skill Level: {{skillLevel}}",
+      "",
+      "{{contentTypeGuidelines}}",
+      "",
+      'Original User Instruction:',
+      '"{{userInstruction}}"',
+      "",
+      "Enhanced Instruction:",
+    ].join("\n"),
+  },
+];
+
+export function getPromptDefinition(id: string): PromptDefinition | undefined {
+  return PROMPT_REGISTRY.find((p) => p.id === id);
+}
