@@ -34,6 +34,7 @@ Skills Learning Platform - A platform for creating, managing, and tracking skill
 - Use size class for square elements (e.g., `w-4 h-4` can be replaced with `size-4`).
 
 ## ShadCn UI Guidelines
+
 - Use Shadcn UI components for consistent design and functionality.
 - Do not customize Shadcn components with additional styles or classes. Use the provided variants, and props for customization.
 
@@ -56,9 +57,12 @@ Skills Learning Platform - A platform for creating, managing, and tracking skill
 ## Development Commands
 
 Run and validate tests
-```
-npm run test
-```
+
+`npm run test`
+
+Run development server
+
+`npm run dev`
 
 ## Testing Requirements
 
@@ -71,7 +75,7 @@ All testing must use browser automation tools (puppeteer-based):
 
 Test like a human user with mouse and keyboard. Take screenshots at each step. Never bypass UI with JavaScript evaluation.
 
-## Architecture
+## Layout and Design
 
 - **Left Sidebar**: Interactive Skills Roadmap visualization
 - **Center Column**: Lesson Content, Tests, Exercises Area (clean, focused reading environment)
