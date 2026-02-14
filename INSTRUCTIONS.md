@@ -28,6 +28,10 @@ Skills Learning Platform - A platform for creating, managing, and tracking skill
 - Use Tailwind utility classes for styling. Avoid custom CSS unless necessary.
 - Use size class for square elements (e.g., `w-4 h-4` can be replaced with `size-4`).
 
+## ShadCn UI Guidelines
+- Use Shadcn UI components for consistent design and functionality.
+- Do not customize Shadcn components with additional styles or classes. Use the provided variants, and props for customization.
+
 ## CLI Initializers (Token Optimization)
 
 **IMPORTANT**: Always use library CLI initializers instead of generating boilerplate files manually:
