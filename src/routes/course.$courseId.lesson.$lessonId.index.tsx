@@ -10,7 +10,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { Suspense, useEffect, useState, useCallback } from "react";
-import ReactMarkdown from "react-markdown";
+import { Markdown } from "@/modules/markdown";
 import { Loader2, Plus } from "lucide-react";
 import {
   getLesson,
@@ -268,9 +268,7 @@ function LessonComponent() {
               )}
             </div>
 
-            <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-p:leading-relaxed">
-              <ReactMarkdown>{content}</ReactMarkdown>
-            </div>
+            <Markdown content={content} variant="lesson" />
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full min-h-[50vh] gap-6 p-6">

@@ -15,7 +15,7 @@ import { useSlidesApi } from "@/modules/flashcards/hooks/useSlidesApi";
 import { useQuiz } from "../hooks/useQuiz";
 import { useQuizAnswers } from "../hooks/useQuizAnswers";
 import { QuizOption } from "./QuizOption";
-import ReactMarkdown from "react-markdown";
+import { Markdown } from "@/modules/markdown";
 
 type QuizContextValue = ReturnType<typeof useQuiz> &
   ReturnType<typeof useQuizAnswers> & {
@@ -155,9 +155,7 @@ const QuizQuestionView = () => {
             className="flex h-full w-full snap-start snap-always items-start justify-center px-4 pb-6 pt-4"
           >
             <div className="w-full max-w-2xl space-y-6 m-auto">
-              <div className="prose dark:prose-invert text-lg">
-                <ReactMarkdown>{q.question}</ReactMarkdown>
-              </div>
+              <Markdown content={q.question} variant="quiz" />
               <div className="space-y-2">
                 {options.map((option) => (
                   <QuizOption

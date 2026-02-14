@@ -1,0 +1,153 @@
+@import "katex/dist/katex.min.css";
+
+/* Shiki theme: always use dark token colors since code bg is always dark */
+code[data-theme] span {
+  color: var(--shiki-dark);
+}
+
+/* rehype-pretty-code: highlighted lines */
+[data-highlighted-line] {
+  background-color: oklch(0.5 0 0 / 10%);
+  border-left: 2px solid oklch(0.6 0.15 250);
+  padding-left: calc(1rem - 2px);
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding-right: 1rem;
+}
+
+.dark [data-highlighted-line] {
+  background-color: oklch(0.8 0 0 / 8%);
+}
+
+/* rehype-pretty-code: code block title */
+[data-rehype-pretty-code-title] {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid var(--code-border);
+  border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--code-bg);
+  color: var(--code-fg);
+  opacity: 0.8;
+}
+
+[data-rehype-pretty-code-title] + pre {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* rehype-pretty-code: line numbers */
+code[data-line-numbers] {
+  counter-reset: line;
+}
+
+code[data-line-numbers] > [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 1.5rem;
+  margin-right: 1.5rem;
+  text-align: right;
+  color: oklch(0.5 0 0 / 50%);
+  font-size: 0.85em;
+}
+
+/* GitHub-style admonitions */
+.markdown-alert {
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  border-left: 4px solid;
+  border-radius: 0.375rem;
+}
+
+.markdown-alert > :first-child {
+  margin-top: 0;
+}
+
+.markdown-alert > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-alert-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.markdown-alert-note {
+  border-color: oklch(0.65 0.15 250);
+  background-color: oklch(0.65 0.15 250 / 8%);
+}
+
+.markdown-alert-note .markdown-alert-title {
+  color: oklch(0.55 0.15 250);
+}
+
+.markdown-alert-tip {
+  border-color: oklch(0.65 0.2 150);
+  background-color: oklch(0.65 0.2 150 / 8%);
+}
+
+.markdown-alert-tip .markdown-alert-title {
+  color: oklch(0.55 0.2 150);
+}
+
+.markdown-alert-important {
+  border-color: oklch(0.6 0.2 300);
+  background-color: oklch(0.6 0.2 300 / 8%);
+}
+
+.markdown-alert-important .markdown-alert-title {
+  color: oklch(0.55 0.2 300);
+}
+
+.markdown-alert-warning {
+  border-color: oklch(0.7 0.18 80);
+  background-color: oklch(0.7 0.18 80 / 8%);
+}
+
+.markdown-alert-warning .markdown-alert-title {
+  color: oklch(0.6 0.18 80);
+}
+
+.markdown-alert-caution {
+  border-color: oklch(0.6 0.22 27);
+  background-color: oklch(0.6 0.22 27 / 8%);
+}
+
+.markdown-alert-caution .markdown-alert-title {
+  color: oklch(0.55 0.22 27);
+}
+
+/* Definition lists */
+.prose dl {
+  margin: 1.25em 0;
+}
+
+.prose dt {
+  font-weight: 600;
+  margin-top: 1em;
+}
+
+.prose dt:first-child {
+  margin-top: 0;
+}
+
+.prose dd {
+  margin-left: 1.5em;
+  margin-top: 0.25em;
+}
+
+/* Heading anchors */
+.prose :is(h1, h2, h3, h4, h5, h6) a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.prose :is(h1, h2, h3, h4, h5, h6) a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}

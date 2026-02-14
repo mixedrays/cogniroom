@@ -1,7 +1,7 @@
 import React from "react";
 import { QtyIndicator } from "@/components/QtyIndicator";
 import { cn } from "@/lib/utils";
-import ReactMarkdown from "react-markdown";
+import { Markdown } from "@/modules/markdown";
 
 interface FlashcardSideProps {
   content: string;
@@ -36,7 +36,7 @@ export const FlashcardSide = ({
       )}
 
       <div className="max-h-full max-w-full overflow-auto text-lg">
-        <ReactMarkdown>{content}</ReactMarkdown>
+        <Markdown content={content} variant="flashcard" />
       </div>
     </div>
   );
