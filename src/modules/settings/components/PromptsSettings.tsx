@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -19,7 +20,12 @@ import {
   type PromptInfo,
 } from "@/lib/prompts";
 
-export function PromptsSettings() {
+interface PromptsSettingsProps {
+  defaultPromptId?: string;
+}
+
+export function PromptsSettings({ defaultPromptId }: PromptsSettingsProps) {
+  const queryClient = useQueryClient();
   const [prompts, setPrompts] = useState<PromptInfo[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -39,8 +45,11 @@ export function PromptsSettings() {
     if (result.success) {
       setPrompts(result.prompts);
       if (!selectedId && result.prompts.length > 0) {
-        setSelectedId(result.prompts[0].id);
-        setDraft(result.prompts[0].content);
+        const initial =
+          result.prompts.find((p) => p.id === defaultPromptId) ??
+          result.prompts[0];
+        setSelectedId(initial.id);
+        setDraft(initial.content);
       }
     }
     setIsLoading(false);
@@ -64,6 +73,7 @@ export function PromptsSettings() {
             : p
         )
       );
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
     }
     setIsSaving(false);
   };
@@ -81,6 +91,7 @@ export function PromptsSettings() {
             : p
         )
       );
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
     }
     setIsSaving(false);
   };

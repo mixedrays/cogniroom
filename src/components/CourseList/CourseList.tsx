@@ -113,7 +113,9 @@ export default function CourseList() {
                     <BookOpen className="size-4" />
                   </div>
                   <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-semibold">{import.meta.env.APP_NAME}</span>
+                    <span className="font-semibold">
+                      {import.meta.env.APP_NAME}
+                    </span>
                     <span className="">v{APP_VERSION}</span>
                   </div>
                 </Link>
@@ -187,7 +189,7 @@ export default function CourseList() {
                         />
 
                         <CollapsibleContent>
-                          <SidebarMenuSub className="mr-0">
+                          <SidebarMenuSub className="mr-0 pr-0">
                             <SidebarMenuSubItem>
                               <div className="flex flex-col gap-2 pt-2">
                                 <span className="text-xs text-muted-foreground">
@@ -204,14 +206,13 @@ export default function CourseList() {
 
                                 <div className="flex items-center justify-between gap-2">
                                   <Button
-                                    size="sm"
                                     variant="secondary"
                                     render={
                                       <Link
                                         to="/course/$courseId"
                                         params={{ courseId: course.id }}
                                       >
-                                        View
+                                        View Course
                                       </Link>
                                     }
                                   />
@@ -227,9 +228,8 @@ export default function CourseList() {
                                     <AlertDialogTrigger
                                       render={
                                         <Button
-                                          variant="ghost"
-                                          size="icon-sm"
-                                          className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 px-2"
+                                          size="icon"
+                                          variant="destructive"
                                           onClick={(e) => e.stopPropagation()}
                                         >
                                           <Trash2 />

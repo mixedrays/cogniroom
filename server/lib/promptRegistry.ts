@@ -14,7 +14,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
     label: "Course Generation",
     description: "Prompt used when generating a new course roadmap.",
     category: "Course",
-    variables: ["topic", "level"],
+    variables: ["topic", "level", "additionalInstructions"],
     defaultContent: [
       "You generate structured learning courses.",
       "Return content that is practical, progressive, and tailored to the learner's level.",
@@ -32,6 +32,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "- Include at least one hands-on project topic near the end of the roadmap",
       "- Each topic should have a clear description of its learning goals",
       "- Avoid duplicate or overlapping lesson content across topics",
+      "{{additionalInstructions}}",
     ].join("\n"),
   },
 

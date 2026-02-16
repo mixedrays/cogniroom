@@ -605,16 +605,15 @@ function CreateModeDialog({
                 size="sm"
                 onClick={handleEnhanceDescription}
                 disabled={isEnhanceDisabled}
-                className="h-7 text-xs gap-1.5"
               >
                 {enhancement.isEnhancing ? (
                   <>
-                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <Loader2 className="animate-spin" />
                     Enhancing...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3 h-3" />
+                    <Sparkles />
                     Enhance with AI
                   </>
                 )}
@@ -884,16 +883,15 @@ function GenerateModeDialog({
                 size="sm"
                 onClick={handleEnhanceInstructions}
                 disabled={isEnhanceDisabled}
-                className="h-7 text-xs gap-1.5"
               >
                 {enhancement.isEnhancing ? (
                   <>
-                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <Loader2 className="animate-spin" />
                     Enhancing...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3 h-3" />
+                    <Sparkles />
                     Enhance with AI
                   </>
                 )}

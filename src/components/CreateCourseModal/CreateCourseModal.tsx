@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Sparkles,
   FileJson,
@@ -19,6 +19,7 @@ import {
   getValidModel,
 } from "@/lib/llmModels";
 import { useSettings } from "@/modules/settings";
+import { useInstructionEnhancement } from "@/hooks/use-instruction-enhancement";
 
 import {
   Dialog,
@@ -39,7 +40,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { PromptPreview } from "@/components/PromptPreview/PromptPreview";
+import { EnhancedInstructionPreview } from "@/components/EnhancedInstructionPreview";
 interface CreateCourseModalProps {
   onCreated: (course: Course) => void;
 }
@@ -55,14 +58,40 @@ export default function CreateCourseModal({
   // Generate tab state
   const [skillTopic, setSkillTopic] = useState("");
   const [skillLevel, setSkillLevel] = useState<CourseSkillLevel>("beginner");
+  const [instructions, setInstructions] = useState("");
 
   const [model, setModel] = useState<string>(() =>
     getValidModel(settings.llm.defaultModel)
   );
 
+  const enhancement = useInstructionEnhancement();
+
+  const isEnhanceDisabled =
+    isLoading ||
+    enhancement.isEnhancing ||
+    !enhancement.canEnhance(instructions);
+
   useEffect(() => {
     setModel(getValidModel(settings.llm.defaultModel));
   }, [settings.llm.defaultModel]);
+
+  const handleEnhanceInstructions = useCallback(async () => {
+    if (isEnhanceDisabled) return;
+    await enhancement.enhance(instructions, {
+      contentType: "course",
+    });
+  }, [instructions, isEnhanceDisabled, enhancement]);
+
+  const handleAcceptEnhancement = useCallback(() => {
+    const enhanced = enhancement.accept();
+    if (enhanced) {
+      setInstructions(enhanced);
+    }
+  }, [enhancement]);
+
+  const handleRejectEnhancement = useCallback(() => {
+    enhancement.reject();
+  }, [enhancement]);
 
   // Import tab state
   const [importJson, setImportJson] = useState("");
@@ -84,6 +113,7 @@ export default function CreateCourseModal({
         topic: skillTopic,
         level: skillLevel,
         model,
+        instructions: instructions.trim() || undefined,
       });
 
       if (!gen.success || !gen.course) {
@@ -226,23 +256,20 @@ export default function CreateCourseModal({
   const resetForm = () => {
     setSkillTopic("");
     setSkillLevel("beginner");
+    setInstructions("");
     setModel(getValidModel(settings.llm.defaultModel));
     setImportJson("");
     setExtractUrl("");
     setError(null);
+    enhancement.reset();
   };
 
-  const coursePromptVariables = useMemo(
-    () => ({ topic: skillTopic, level: skillLevel }),
-    [skillTopic, skillLevel]
-  );
-
-  console.log(
-    "Default model:",
-    settings.llm.defaultModel,
-    "Using model:",
-    model
-  );
+  const coursePromptVariables = useMemo(() => {
+    const additionalInstructions = instructions.trim()
+      ? `\nAdditional Instructions from user: ${instructions.trim()}`
+      : "";
+    return { topic: skillTopic, level: skillLevel, additionalInstructions };
+  }, [skillTopic, skillLevel, instructions]);
 
   return (
     <Dialog>
@@ -290,20 +317,29 @@ export default function CreateCourseModal({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="level">Your current level</Label>
-                <Select
-                  value={skillLevel}
-                  onValueChange={(value: any) => setSkillLevel(value)}
+                <Label>Your current level</Label>
+                <ToggleGroup
+                  value={[skillLevel]}
+                  onValueChange={(values) => {
+                    if (values.length > 0) {
+                      setSkillLevel(
+                        values[values.length - 1] as CourseSkillLevel
+                      );
+                    }
+                  }}
+                  className="w-full"
+                  variant="outline"
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="p-1">
-                    <SelectItem value="beginner">Beginner</SelectItem>
-                    <SelectItem value="intermediate">Intermediate</SelectItem>
-                    <SelectItem value="advanced">Advanced</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <ToggleGroupItem value="beginner" className="flex-1">
+                    Beginner
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="intermediate" className="flex-1">
+                    Intermediate
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="advanced" className="flex-1">
+                    Advanced
+                  </ToggleGroupItem>
+                </ToggleGroup>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="model">Model</Label>
@@ -323,6 +359,62 @@ export default function CreateCourseModal({
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="instructions">
+                    Additional Instructions (Optional)
+                  </Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleEnhanceInstructions}
+                    disabled={isEnhanceDisabled}
+                  >
+                    {enhancement.isEnhancing ? (
+                      <>
+                        <Loader2 className="animate-spin" />
+                        Enhancing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles />
+                        Enhance with AI
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <Textarea
+                  id="instructions"
+                  placeholder="e.g., Focus on practical projects, include real-world examples..."
+                  value={instructions}
+                  onChange={(e) => {
+                    setInstructions(e.target.value);
+                    if (enhancement.enhancedInstruction) {
+                      enhancement.reject();
+                    }
+                  }}
+                  className="h-32 resize-none"
+                  disabled={isLoading || enhancement.isEnhancing}
+                />
+
+                {enhancement.error && (
+                  <div className="text-sm text-destructive bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                    {enhancement.error}
+                  </div>
+                )}
+
+                {enhancement.enhancedInstruction && (
+                  <EnhancedInstructionPreview
+                    enhancedInstruction={enhancement.enhancedInstruction}
+                    onAccept={handleAcceptEnhancement}
+                    onReject={handleRejectEnhancement}
+                    title="Enhanced Instructions"
+                    disabled={isLoading}
+                  />
+                )}
+              </div>
+
               <PromptPreview
                 promptId="course-generation"
                 variables={coursePromptVariables}

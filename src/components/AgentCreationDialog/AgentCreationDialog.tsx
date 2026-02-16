@@ -122,7 +122,12 @@ export function AgentCreationDialog({
     setInstructions(defaultInstructions);
     setError(null);
     enhancement.reset();
-  }, [defaultName, defaultInstructions, settings.llm.defaultModel, enhancement]);
+  }, [
+    defaultName,
+    defaultInstructions,
+    settings.llm.defaultModel,
+    enhancement,
+  ]);
 
   const handleEnhanceInstructions = useCallback(async () => {
     if (isEnhanceDisabled) return;
@@ -191,7 +196,9 @@ export function AgentCreationDialog({
       resetForm();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "An error occurred while creating the agent"
+        err instanceof Error
+          ? err.message
+          : "An error occurred while creating the agent"
       );
     } finally {
       setIsSubmitting(false);
@@ -216,8 +223,8 @@ export function AgentCreationDialog({
             Create Learning Agent
           </DialogTitle>
           <DialogDescription>
-            Configure an AI agent to assist with learning. Choose a model and provide
-            instructions that define how the agent should behave.
+            Configure an AI agent to assist with learning. Choose a model and
+            provide instructions that define how the agent should behave.
           </DialogDescription>
         </DialogHeader>
 
@@ -269,19 +276,17 @@ export function AgentCreationDialog({
               <Button
                 type="button"
                 variant="ghost"
-                size="sm"
                 onClick={handleEnhanceInstructions}
                 disabled={isEnhanceDisabled}
-                className="h-7 text-xs gap-1.5"
               >
                 {enhancement.isEnhancing ? (
                   <>
-                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <Loader2 className="animate-spin" />
                     Enhancing...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3 h-3" />
+                    <Sparkles />
                     Enhance with AI
                   </>
                 )}
@@ -321,12 +326,15 @@ export function AgentCreationDialog({
             )}
 
             <p className="text-xs text-muted-foreground">
-              These instructions define the agent's personality, expertise, and behavior.
+              These instructions define the agent's personality, expertise, and
+              behavior.
             </p>
           </div>
 
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" disabled={isLoading} />}>
+            <DialogClose
+              render={<Button variant="outline" disabled={isLoading} />}
+            >
               Cancel
             </DialogClose>
             <Button type="submit" disabled={isLoading}>

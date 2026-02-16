@@ -32,11 +32,13 @@ type SettingsTab = (typeof NAV_ITEMS)[number]["key"];
 
 interface SettingsContentProps {
   defaultTab?: SettingsTab;
+  defaultPromptId?: string;
   className?: string;
 }
 
 export function SettingsContent({
   defaultTab = "appearance",
+  defaultPromptId,
   className,
 }: SettingsContentProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>(defaultTab);
@@ -81,7 +83,7 @@ export function SettingsContent({
         <div className="p-4 h-full overflow-auto">
           {activeTab === "appearance" && <AppearanceSettings />}
           {activeTab === "llm" && <LLMSettings />}
-          {activeTab === "prompts" && <PromptsSettings />}
+          {activeTab === "prompts" && <PromptsSettings defaultPromptId={defaultPromptId} />}
           {activeTab === "history" && <HistorySettings />}
         </div>
       </div>

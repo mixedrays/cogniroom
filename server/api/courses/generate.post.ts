@@ -35,6 +35,7 @@ type GenerateRoadmapRequest = {
   topic: string;
   level?: SkillLevel;
   model?: string;
+  instructions?: string;
 };
 
 function toSafeErrorMessage(error: unknown): string {
@@ -53,12 +54,15 @@ export default defineEventHandler(async (event) => {
     const topic = body?.topic?.trim();
     const level = (body?.level ?? "beginner") as SkillLevel;
     const model = (body?.model ?? "gpt-4o-mini").trim();
+    const additionalInstructions = body?.instructions?.trim()
+      ? `\nAdditional Instructions from user: ${body.instructions.trim()}`
+      : "";
 
     if (!topic) {
       return { success: false, error: "Missing topic" };
     }
 
-    const prompt = await getRenderedPrompt("course-generation", { topic, level });
+    const prompt = await getRenderedPrompt("course-generation", { topic, level, additionalInstructions });
 
     const result = await generateText({
       model: getOpenAIClient(model as AvailableModelsId),

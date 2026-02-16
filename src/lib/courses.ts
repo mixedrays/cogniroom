@@ -56,6 +56,7 @@ export async function generateCourse(params: {
   topic: string;
   level: CourseSkillLevel;
   model: string;
+  instructions?: string;
 }): Promise<{
   success: boolean;
   course?: Course;
