@@ -28,21 +28,15 @@ export default defineEventHandler(async (event) => {
         const lessons = await Promise.all(
           (topic.lessons ?? []).map(async (lesson: any) => {
             // Check lesson content
-            const lessonStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}.md`);
+            const lessonStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/lesson.md`);
             const hasContent = lessonStat !== null && !lessonStat.isDirectory && lessonStat.size > 0;
 
-            // Check tests (JSON or legacy markdown)
-            let hasTests = false;
-            const testsJsonStat = await storageApi.stat(`courses/${id}/tests/${lesson.id}.json`);
-            if (testsJsonStat !== null && !testsJsonStat.isDirectory && testsJsonStat.size > 0) {
-              hasTests = true;
-            } else {
-              const testsMdStat = await storageApi.stat(`courses/${id}/tests/${lesson.id}.md`);
-              hasTests = testsMdStat !== null && !testsMdStat.isDirectory && testsMdStat.size > 0;
-            }
+            // Check tests
+            const testsJsonStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/tests.json`);
+            const hasTests = testsJsonStat !== null && !testsJsonStat.isDirectory && testsJsonStat.size > 0;
 
             // Check exercises
-            const exercisesStat = await storageApi.stat(`courses/${id}/exercises/${lesson.id}.md`);
+            const exercisesStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/exercise.md`);
             const hasExercises = exercisesStat !== null && !exercisesStat.isDirectory && exercisesStat.size > 0;
 
             return { ...lesson, hasContent, hasTests, hasExercises };

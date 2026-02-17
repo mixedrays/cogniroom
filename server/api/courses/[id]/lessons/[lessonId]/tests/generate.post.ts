@@ -118,7 +118,7 @@ export default defineEventHandler(async (event) => {
 
     // Save tests (auto-creates parent directories)
     await storageApi.post(
-      `courses/${courseId}/tests/${lessonId}.json`,
+      `courses/${courseId}/lessons/${lessonId}/tests.json`,
       normalizedContent
     );
 

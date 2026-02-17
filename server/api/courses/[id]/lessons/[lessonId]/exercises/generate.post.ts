@@ -74,7 +74,7 @@ export default defineEventHandler(async (event) => {
     const content = result.text;
 
     // Save exercises (auto-creates parent directories)
-    await storageApi.post(`courses/${courseId}/exercises/${lessonId}.md`, content);
+    await storageApi.post(`courses/${courseId}/lessons/${lessonId}/exercise.md`, content);
 
     return { success: true, content };
   } catch (error: any) {

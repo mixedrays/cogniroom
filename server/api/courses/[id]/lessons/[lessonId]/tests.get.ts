@@ -13,27 +13,11 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Try JSON format first
-    const jsonResponse = await storage<any>(`courses/${courseId}/tests/${lessonId}.json`);
+    const jsonResponse = await storage<any>(`courses/${courseId}/lessons/${lessonId}/tests.json`);
 
     if (jsonResponse.ok) {
       const parsed = await jsonResponse.json();
       return { content: parsed };
-    }
-
-    // Fall back to legacy markdown format
-    const mdResponse = await storage<string>(`courses/${courseId}/tests/${lessonId}.md`);
-
-    if (mdResponse.ok) {
-      const legacyContent = await mdResponse.text();
-      return {
-        content: {
-          version: 1,
-          flashcards: [],
-          quizQuestions: [],
-          legacyMarkdown: legacyContent,
-        },
-      };
     }
 
     throw createError({

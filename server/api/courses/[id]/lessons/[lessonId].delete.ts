@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Delete the lesson content file
-    const deleteResponse = await storageApi.delete(`courses/${courseId}/lessons/${lessonId}.md`);
+    const deleteResponse = await storageApi.delete(`courses/${courseId}/lessons/${lessonId}/lesson.md`);
     if (!deleteResponse.ok && deleteResponse.status !== 404) {
       return { success: false, error: deleteResponse.statusText };
     }

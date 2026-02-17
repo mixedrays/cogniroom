@@ -37,34 +37,26 @@ export function getCourseLessonsDir(courseId: string): string {
 }
 
 export function getLessonFilePath(courseId: string, lessonId: string): string {
-  return join(getCourseLessonsDir(courseId), `${lessonId}.md`);
-}
-
-export function getCourseTestsDir(courseId: string): string {
-  return join(getCoursePath(courseId), "tests");
+  return join(getCourseLessonsDir(courseId), lessonId, "lesson.md");
 }
 
 export function getTestFilePath(courseId: string, lessonId: string): string {
-  return join(getCourseTestsDir(courseId), `${lessonId}.json`);
-}
-
-export function getCourseExercisesDir(courseId: string): string {
-  return join(getCoursePath(courseId), "exercises");
+  return join(getCourseLessonsDir(courseId), lessonId, "tests.json");
 }
 
 export function getExerciseFilePath(
   courseId: string,
   lessonId: string
 ): string {
-  return join(getCourseExercisesDir(courseId), `${lessonId}.md`);
+  return join(getCourseLessonsDir(courseId), lessonId, "exercise.md");
 }
 
 // Legacy flat directories (for migration support)
 /** @deprecated Use getCourseLessonsDir instead */
 export const LESSONS_DIR = join(DATA_PATH, "lessons");
-/** @deprecated Use getCourseTestsDir instead */
+/** @deprecated */
 export const TESTS_DIR = join(DATA_PATH, "tests");
-/** @deprecated Use getCourseExercisesDir instead */
+/** @deprecated */
 export const EXERCISES_DIR = join(DATA_PATH, "exercises");
 
 // Settings directory - stored in project root

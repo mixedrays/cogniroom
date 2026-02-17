@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const response = await storage<string>(`courses/${courseId}/exercises/${lessonId}.md`);
+    const response = await storage<string>(`courses/${courseId}/lessons/${lessonId}/exercise.md`);
 
     if (!response.ok) {
       throw createError({

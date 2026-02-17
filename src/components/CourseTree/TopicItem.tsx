@@ -32,10 +32,14 @@ export function TopicItem({ topic, index }: TopicItemProps) {
 
   return (
     <SidebarMenuItem>
-      <Collapsible className="group/collapsible" open={open} onOpenChange={setOpen}>
+      <Collapsible
+        className="group/collapsible"
+        open={open}
+        onOpenChange={setOpen}
+      >
         <CollapsibleTrigger
           render={
-            <SidebarMenuButton className="font-medium">
+            <SidebarMenuButton className="pl-1">
               <div className="flex items-center gap-2 w-full">
                 <span className="flex size-6 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground">
                   {index + 1}

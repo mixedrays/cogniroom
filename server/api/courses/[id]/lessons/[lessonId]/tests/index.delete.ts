@@ -10,12 +10,9 @@ export default defineEventHandler(async (event) => {
       return { success: false, error: "Missing courseId or lessonId" };
     }
 
-    // Delete tests file (JSON format)
-    const jsonDelete = await storageApi.delete(`courses/${courseId}/tests/${lessonId}.json`);
-    // Also try legacy markdown format
-    const mdDelete = await storageApi.delete(`courses/${courseId}/tests/${lessonId}.md`);
+    const jsonDelete = await storageApi.delete(`courses/${courseId}/lessons/${lessonId}/tests.json`);
 
-    if (!jsonDelete.ok && jsonDelete.status !== 404 && !mdDelete.ok && mdDelete.status !== 404) {
+    if (!jsonDelete.ok && jsonDelete.status !== 404) {
       return { success: false, error: "Failed to delete tests content" };
     }
 
