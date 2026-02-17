@@ -312,13 +312,6 @@ function LessonTestsComponent() {
         </div>
       </PageHeader>
 
-      {/* <LessonTabs
-        courseId={courseId}
-        lessonId={lessonId}
-        value="tests"
-        className="max-w-4xl w-full mx-auto px-8 pt-4"
-      /> */}
-
       {hasContent ? (
         <Tabs
           value={activeTab}

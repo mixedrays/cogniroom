@@ -21,7 +21,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PageHeader } from "@/components/PageHeader";
-import { LessonTabs } from "@/components/LessonTabs/LessonTabs";
 import {
   ContentCreationDialog,
   type ContentGenerationData,
@@ -240,13 +239,6 @@ function LessonComponent() {
           )}
         </div>
       </PageHeader>
-
-      {/* <LessonTabs
-        className="max-w-4xl w-full mx-auto px-8 pt-4"
-        courseId={courseId}
-        lessonId={lessonId}
-        value="theory"
-      /> */}
 
       <Suspense
         fallback={
