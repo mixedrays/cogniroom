@@ -148,6 +148,82 @@ export async function deleteLessonContent(
   }
 }
 
+export async function generateLessonFlashcards(
+  courseId: string,
+  lessonId: string,
+  additionalInstructions?: string,
+  model?: string
+): Promise<{ success: boolean; content?: TestsContent; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards/generate`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ additionalInstructions, model }),
+      }
+    );
+    return await response.json();
+  } catch (e) {
+    console.error("Error generating flashcards:", e);
+    return { success: false, error: String(e) };
+  }
+}
+
+export async function deleteLessonFlashcards(
+  courseId: string,
+  lessonId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards`,
+      { method: "DELETE" }
+    );
+    return await response.json();
+  } catch (e) {
+    console.error("Error deleting flashcards:", e);
+    return { success: false, error: String(e) };
+  }
+}
+
+export async function generateLessonQuiz(
+  courseId: string,
+  lessonId: string,
+  additionalInstructions?: string,
+  model?: string
+): Promise<{ success: boolean; content?: TestsContent; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz/generate`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ additionalInstructions, model }),
+      }
+    );
+    return await response.json();
+  } catch (e) {
+    console.error("Error generating quiz:", e);
+    return { success: false, error: String(e) };
+  }
+}
+
+export async function deleteLessonQuiz(
+  courseId: string,
+  lessonId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz`,
+      { method: "DELETE" }
+    );
+    return await response.json();
+  } catch (e) {
+    console.error("Error deleting quiz:", e);
+    return { success: false, error: String(e) };
+  }
+}
+
 // Delete lesson tests
 export async function deleteLessonTests(
   courseId: string,
@@ -202,13 +278,13 @@ export async function getLesson(
   }
 }
 
-export async function getLessonTests(
+export async function getLessonFlashcards(
   courseId: string,
   lessonId: string
-): Promise<{ content: TestsContent } | null> {
+): Promise<{ content: { version: number; flashcards: import("./types").Flashcard[] } } | null> {
   try {
     const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/tests`
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards`
     );
     if (!response.ok) {
       if (response.status === 404) return null;
@@ -216,7 +292,26 @@ export async function getLessonTests(
     }
     return await response.json();
   } catch (e) {
-    console.error(`Error getting lesson tests ${lessonId}:`, e);
+    console.error(`Error getting flashcards ${lessonId}:`, e);
+    return null;
+  }
+}
+
+export async function getLessonQuiz(
+  courseId: string,
+  lessonId: string
+): Promise<{ content: { version: number; quizQuestions: import("./types").QuizQuestion[] } } | null> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz`
+    );
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      throw new Error(response.statusText);
+    }
+    return await response.json();
+  } catch (e) {
+    console.error(`Error getting quiz ${lessonId}:`, e);
     return null;
   }
 }

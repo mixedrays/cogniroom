@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 
-type ActiveTab = "theory" | "tests" | "exercises";
+type ActiveTab = "theory" | "flashcards" | "quiz" | "exercises";
 
 interface LessonPageHeaderProps {
   courseId: string;
@@ -15,6 +16,7 @@ interface LessonPageHeaderProps {
   isCompleting: boolean;
   completionError: string | null;
   onToggleComplete: () => void;
+  extraActions?: ReactNode;
 }
 
 export function LessonPageHeader({
@@ -28,6 +30,7 @@ export function LessonPageHeader({
   isCompleting,
   completionError,
   onToggleComplete,
+  extraActions,
 }: LessonPageHeaderProps) {
   return (
     <PageHeader>
@@ -53,12 +56,20 @@ export function LessonPageHeader({
               current: activeTab === "theory",
             },
             {
-              title: "Tests",
+              title: "Flashcards",
               link: {
-                to: "/course/$courseId/lesson/$lessonId/tests",
+                to: "/course/$courseId/lesson/$lessonId/flashcards",
                 params: { courseId, lessonId },
               },
-              current: activeTab === "tests",
+              current: activeTab === "flashcards",
+            },
+            {
+              title: "Quiz",
+              link: {
+                to: "/course/$courseId/lesson/$lessonId/quiz",
+                params: { courseId, lessonId },
+              },
+              current: activeTab === "quiz",
             },
             {
               title: "Exercises",
@@ -78,6 +89,7 @@ export function LessonPageHeader({
             {completionError}
           </p>
         )}
+        {extraActions}
         {showMarkComplete && (
           <Button
             onClick={onToggleComplete}

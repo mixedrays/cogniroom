@@ -61,7 +61,7 @@ export type ContentType = "lesson" | "topic" | "exercise";
 /**
  * The type of content being generated via AI
  */
-export type GenerationType = "theory" | "exercises" | "tests";
+export type GenerationType = "theory" | "exercises" | "flashcards" | "quiz";
 
 /**
  * Base content data shared across all content types
@@ -309,14 +309,25 @@ const GENERATION_TYPE_CONFIG: Record<GenerationType, GenerationTypeConfig> = {
     buttonText: "Generate Content",
     generatingText: "Generating...",
   },
-  tests: {
-    label: "Tests",
+  flashcards: {
+    label: "Flashcards",
     icon: <BookOpen className="w-4 h-4" />,
-    dialogTitle: "Generate Tests Content",
+    dialogTitle: "Generate Flashcards",
     dialogDescription:
-      "Use AI to generate tests for this lesson. You can provide additional instructions to tailor the result.",
+      "Use AI to generate flashcards for this lesson. You can provide additional instructions to tailor the result.",
     instructionsPlaceholder:
-      "E.g., Include multiple choice questions, focus on key definitions...",
+      "E.g., Focus on key definitions, include application questions...",
+    buttonText: "Generate Content",
+    generatingText: "Generating...",
+  },
+  quiz: {
+    label: "Quiz",
+    icon: <ListChecks className="w-4 h-4" />,
+    dialogTitle: "Generate Quiz",
+    dialogDescription:
+      "Use AI to generate multiple-choice quiz questions for this lesson. You can provide additional instructions to tailor the result.",
+    instructionsPlaceholder:
+      "E.g., Focus on practical application, include tricky edge-case questions...",
     buttonText: "Generate Content",
     generatingText: "Generating...",
   },
@@ -726,7 +737,8 @@ function GenerateModeDialog({
         return "lesson";
       case "exercises":
         return "exercise";
-      case "tests":
+      case "flashcards":
+      case "quiz":
         return "test";
       default:
         return "lesson";
@@ -815,7 +827,9 @@ function GenerateModeDialog({
       ? "lesson-generation"
       : generationType === "exercises"
         ? "exercises-generation"
-        : "tests-generation";
+        : generationType === "flashcards"
+          ? "flashcards-generation"
+          : "quiz-generation";
 
   const promptVariables = useMemo(() => {
     const additionalInstructions = instructions.trim()

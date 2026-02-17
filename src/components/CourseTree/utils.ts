@@ -2,7 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import type { Course } from "@/lib/types";
 import { getCourse } from "@/lib/courses";
 
-export type ActiveSection = "theory" | "tests" | "exercises" | null;
+export type ActiveSection = "theory" | "flashcards" | "quiz" | "exercises" | null;
 
 export const courseQueryOptions = (courseId: string) =>
   queryOptions({

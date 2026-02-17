@@ -2,6 +2,8 @@ import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { getCourse } from "@/lib/courses";
 import { PageHeader } from "@/components/PageHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Layers, ListChecks } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/course/$courseId/")({
   loader: async ({ params }) => {
@@ -87,22 +89,51 @@ function CourseComponent() {
 
                 <div className="space-y-1 pl-12">
                   {topic.lessons.map((lesson, lessonIndex) => (
-                    <Link
-                      to="/course/$courseId/lesson/$lessonId"
-                      params={{ courseId: course.id, lessonId: lesson.id }}
-                      className="font-medium cursor-pointer block"
+                    <div
+                      key={lesson.id}
+                      className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
                     >
-                      <div
-                        key={lesson.id}
-                        className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                          {index + 1}.{lessonIndex + 1}
-                        </div>
-
-                        {lesson.title}
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                        {index + 1}.{lessonIndex + 1}
                       </div>
-                    </Link>
+
+                      <Link
+                        to="/course/$courseId/lesson/$lessonId"
+                        params={{ courseId: course.id, lessonId: lesson.id }}
+                        className="font-medium flex-1 truncate"
+                      >
+                        {lesson.title}
+                      </Link>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          size="icon-sm"
+                          variant="ghost"
+                          render={
+                            <Link
+                              to="/course/$courseId/lesson/$lessonId/flashcards"
+                              params={{ courseId: course.id, lessonId: lesson.id }}
+                              title="Flashcards"
+                            />
+                          }
+                        >
+                          <Layers />
+                        </Button>
+                        <Button
+                          size="icon-sm"
+                          variant="ghost"
+                          render={
+                            <Link
+                              to="/course/$courseId/lesson/$lessonId/quiz"
+                              params={{ courseId: course.id, lessonId: lesson.id }}
+                              title="Quiz"
+                            />
+                          }
+                        >
+                          <ListChecks />
+                        </Button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>

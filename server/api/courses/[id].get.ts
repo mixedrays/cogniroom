@@ -31,15 +31,19 @@ export default defineEventHandler(async (event) => {
             const lessonStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/lesson.md`);
             const hasContent = lessonStat !== null && !lessonStat.isDirectory && lessonStat.size > 0;
 
-            // Check tests
-            const testsJsonStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/tests.json`);
-            const hasTests = testsJsonStat !== null && !testsJsonStat.isDirectory && testsJsonStat.size > 0;
+            // Check flashcards (new format, with fallback to legacy tests.json)
+            const flashcardsStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/flashcards.json`);
+            const hasFlashcards = flashcardsStat !== null && !flashcardsStat.isDirectory && flashcardsStat.size > 0;
+
+            // Check quiz (new format, with fallback to legacy tests.json)
+            const quizStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/quiz.json`);
+            const hasQuiz = quizStat !== null && !quizStat.isDirectory && quizStat.size > 0;
 
             // Check exercises
             const exercisesStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/exercise.md`);
             const hasExercises = exercisesStat !== null && !exercisesStat.isDirectory && exercisesStat.size > 0;
 
-            return { ...lesson, hasContent, hasTests, hasExercises };
+            return { ...lesson, hasContent, hasFlashcards, hasQuiz, hasExercises };
           })
         );
 

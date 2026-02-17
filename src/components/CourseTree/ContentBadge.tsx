@@ -30,7 +30,7 @@ export function ContentBadge({
       to={to}
       params={params}
       className={cn(
-        "inline-flex border items-center gap-1 px-1.5 py-1 rounded text-xs transition-colors hover:border-primary/90 hover:text-primary/90",
+        "inline-flex border items-center gap-0.5 p-1 rounded text-xs transition-colors hover:border-primary/90 hover:text-primary/90",
         hasContent && "text-muted-foreground",
         !hasContent && "border-dashed text-muted-foreground/60",
         isActive && "border-muted-foreground/40",

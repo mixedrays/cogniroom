@@ -6,10 +6,11 @@ import { LessonContentActions } from "./LessonContentActions";
 import type { ContentContext } from "@/components/ContentCreationDialog";
 import type { Lesson } from "@/lib/types";
 
-type ContentType = "theory" | "tests" | "exercises";
+type ContentType = "theory" | "flashcards" | "quiz" | "exercises";
 
 function detectContentType(pathname: string): ContentType {
-  if (pathname.endsWith("/tests")) return "tests";
+  if (pathname.endsWith("/flashcards")) return "flashcards";
+  if (pathname.endsWith("/quiz")) return "quiz";
   if (pathname.endsWith("/exercises")) return "exercises";
   return "theory";
 }
@@ -18,8 +19,10 @@ function getHasContent(lesson: Lesson, contentType: ContentType): boolean {
   switch (contentType) {
     case "theory":
       return lesson.hasContent ?? false;
-    case "tests":
-      return lesson.hasTests ?? false;
+    case "flashcards":
+      return lesson.hasFlashcards ?? false;
+    case "quiz":
+      return lesson.hasQuiz ?? false;
     case "exercises":
       return lesson.hasExercises ?? false;
   }

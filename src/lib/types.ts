@@ -6,13 +6,16 @@ export interface Lesson {
   description?: string;
   content?: string;
   hasContent?: boolean;
-  hasTests?: boolean;
+  hasFlashcards?: boolean;
+  hasQuiz?: boolean;
   hasExercises?: boolean;
   // Section-specific completion tracking
   theoryCompleted?: boolean;
   theoryCompletedAt?: string;
-  testsCompleted?: boolean;
-  testsCompletedAt?: string;
+  flashcardsCompleted?: boolean;
+  flashcardsCompletedAt?: string;
+  quizCompleted?: boolean;
+  quizCompletedAt?: string;
   exercisesCompleted?: boolean;
   exercisesCompletedAt?: string;
   /** @deprecated Use theoryCompleted instead */
@@ -21,7 +24,7 @@ export interface Lesson {
   completedAt?: string;
 }
 
-export type LessonSection = "theory" | "tests" | "exercises";
+export type LessonSection = "theory" | "flashcards" | "quiz" | "exercises";
 
 // Helper to check if a lesson section is completed
 export function isLessonSectionCompleted(
@@ -31,8 +34,10 @@ export function isLessonSectionCompleted(
   switch (section) {
     case "theory":
       return lesson.theoryCompleted ?? lesson.completed ?? false;
-    case "tests":
-      return lesson.testsCompleted ?? false;
+    case "flashcards":
+      return lesson.flashcardsCompleted ?? false;
+    case "quiz":
+      return lesson.quizCompleted ?? false;
     case "exercises":
       return lesson.exercisesCompleted ?? false;
   }
@@ -41,7 +46,9 @@ export function isLessonSectionCompleted(
 // Helper to check if entire lesson is completed (all available sections)
 export function isLessonFullyCompleted(lesson: Lesson): boolean {
   const theoryDone = !lesson.hasContent || isLessonSectionCompleted(lesson, "theory");
-  const testsDone = !lesson.hasTests || isLessonSectionCompleted(lesson, "tests");
+  const testsDone =
+    (!lesson.hasFlashcards || isLessonSectionCompleted(lesson, "flashcards")) &&
+    (!lesson.hasQuiz || isLessonSectionCompleted(lesson, "quiz"));
   const exercisesDone = !lesson.hasExercises || isLessonSectionCompleted(lesson, "exercises");
   return theoryDone && testsDone && exercisesDone;
 }

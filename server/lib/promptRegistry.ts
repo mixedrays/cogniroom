@@ -112,6 +112,70 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
     ].join("\n"),
   },
 
+  // ── Flashcards generation ──────────────────────────────────────
+  {
+    id: "flashcards-generation",
+    label: "Flashcards Generation",
+    description: "Prompt used when generating flashcards for a lesson.",
+    category: "Tests",
+    variables: [
+      "courseTitle",
+      "topicTitle",
+      "topicDescription",
+      "lessonTitle",
+      "lessonDescription",
+      "additionalInstructions",
+    ],
+    defaultContent: [
+      "You generate flashcards for lessons.",
+      "",
+      "Course: {{courseTitle}}",
+      "Topic: {{topicTitle}} - {{topicDescription}}",
+      "Lesson: {{lessonTitle}} - {{lessonDescription}}",
+      "",
+      "Generate flashcards for this lesson.",
+      "",
+      "Guidelines:",
+      "- Generate at least 8 flashcards covering the key concepts",
+      "- Keep questions concise and focused on a single concept",
+      "- Keep answers short but accurate (1-3 sentences)",
+      "- Include a mix of definition, concept, and application questions",
+      "{{additionalInstructions}}",
+    ].join("\n"),
+  },
+
+  // ── Quiz generation ────────────────────────────────────────────
+  {
+    id: "quiz-generation",
+    label: "Quiz Generation",
+    description: "Prompt used when generating multiple-choice quiz questions for a lesson.",
+    category: "Tests",
+    variables: [
+      "courseTitle",
+      "topicTitle",
+      "topicDescription",
+      "lessonTitle",
+      "lessonDescription",
+      "additionalInstructions",
+    ],
+    defaultContent: [
+      "You generate multiple-choice quiz questions for lessons.",
+      "",
+      "Course: {{courseTitle}}",
+      "Topic: {{topicTitle}} - {{topicDescription}}",
+      "Lesson: {{lessonTitle}} - {{lessonDescription}}",
+      "",
+      "Generate multiple-choice quiz questions for this lesson.",
+      "",
+      "Guidelines:",
+      "- Generate at least 5 quiz questions",
+      "- Each question must have exactly 4 options. The answer must be one of the options",
+      "- Include a mix of easy, medium, and hard difficulty questions",
+      "- Make incorrect options plausible but clearly wrong to someone who studied the material",
+      "{{additionalInstructions}}",
+    ].join("\n"),
+  },
+
   // ── Exercises generation ───────────────────────────────────────
   {
     id: "exercises-generation",

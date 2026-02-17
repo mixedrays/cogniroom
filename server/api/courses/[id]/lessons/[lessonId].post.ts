@@ -1,7 +1,7 @@
 import { defineEventHandler, readBody, createError, getRouterParam } from "h3";
 import { storage, storageApi } from "@root/modules/storage";
 
-type LessonSection = "theory" | "tests" | "exercises";
+type LessonSection = "theory" | "flashcards" | "quiz" | "exercises";
 
 interface UpdateLessonBody {
   completed?: boolean;

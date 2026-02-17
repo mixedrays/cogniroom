@@ -1,5 +1,5 @@
 import { Link, useParams, useLocation } from "@tanstack/react-router";
-import { BookOpen, ClipboardList, Code } from "lucide-react";
+import { BookOpen, Layers, ListChecks, Code } from "lucide-react";
 import type { Lesson } from "@/lib/types";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -33,8 +33,10 @@ export function LessonItem({
   let activeSection: ActiveSection = null;
   if (isActive) {
     const path = location.pathname;
-    if (path.endsWith("/tests")) {
-      activeSection = "tests";
+    if (path.endsWith("/flashcards")) {
+      activeSection = "flashcards";
+    } else if (path.endsWith("/quiz")) {
+      activeSection = "quiz";
     } else if (path.endsWith("/exercises")) {
       activeSection = "exercises";
     } else {
@@ -78,13 +80,24 @@ export function LessonItem({
           />
 
           <ContentBadge
-            hasContent={lesson.hasTests ?? false}
+            hasContent={lesson.hasFlashcards ?? false}
             isActive={isActive}
-            isActiveSection={activeSection === "tests"}
-            completed={lesson.hasTests && (lesson.testsCompleted ?? false)}
-            icon={<ClipboardList />}
-            label="Tests"
-            to="/course/$courseId/lesson/$lessonId/tests"
+            isActiveSection={activeSection === "flashcards"}
+            completed={lesson.hasFlashcards && (lesson.flashcardsCompleted ?? false)}
+            icon={<Layers />}
+            label="Flashcards"
+            to="/course/$courseId/lesson/$lessonId/flashcards"
+            params={{ courseId, lessonId: lesson.id }}
+          />
+
+          <ContentBadge
+            hasContent={lesson.hasQuiz ?? false}
+            isActive={isActive}
+            isActiveSection={activeSection === "quiz"}
+            completed={lesson.hasQuiz && (lesson.quizCompleted ?? false)}
+            icon={<ListChecks />}
+            label="Quiz"
+            to="/course/$courseId/lesson/$lessonId/quiz"
             params={{ courseId, lessonId: lesson.id }}
           />
 

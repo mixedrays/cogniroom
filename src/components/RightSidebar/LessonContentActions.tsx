@@ -22,14 +22,16 @@ import {
 } from "@/components/ContentCreationDialog";
 import {
   deleteLessonContent,
-  deleteLessonTests,
+  deleteLessonFlashcards,
+  deleteLessonQuiz,
   deleteLessonExercises,
   generateLesson,
-  generateLessonTests,
+  generateLessonFlashcards,
+  generateLessonQuiz,
   generateLessonExercises,
 } from "@/lib/courses";
 
-type ContentType = "theory" | "tests" | "exercises";
+type ContentType = "theory" | "flashcards" | "quiz" | "exercises";
 
 interface LessonContentActionsProps {
   courseId: string;
@@ -41,7 +43,15 @@ interface LessonContentActionsProps {
 
 const CONTENT_LABELS: Record<ContentType, string> = {
   theory: "theory content",
-  tests: "tests",
+  flashcards: "flashcards",
+  quiz: "quiz",
+  exercises: "exercises",
+};
+
+const GENERATION_TYPE_MAP: Record<ContentType, GenerationType> = {
+  theory: "theory",
+  flashcards: "flashcards",
+  quiz: "quiz",
   exercises: "exercises",
 };
 
@@ -76,9 +86,11 @@ export function LessonContentActions({
       const deleteFn =
         contentType === "theory"
           ? deleteLessonContent
-          : contentType === "tests"
-            ? deleteLessonTests
-            : deleteLessonExercises;
+          : contentType === "flashcards"
+            ? deleteLessonFlashcards
+            : contentType === "quiz"
+              ? deleteLessonQuiz
+              : deleteLessonExercises;
 
       const result = await deleteFn(courseId, lessonId);
       if (result.success) {
@@ -101,9 +113,11 @@ export function LessonContentActions({
         const generateFn =
           contentType === "theory"
             ? generateLesson
-            : contentType === "tests"
-              ? generateLessonTests
-              : generateLessonExercises;
+            : contentType === "flashcards"
+              ? generateLessonFlashcards
+              : contentType === "quiz"
+                ? generateLessonQuiz
+                : generateLessonExercises;
 
         const result = await generateFn(
           courseId,
@@ -131,7 +145,7 @@ export function LessonContentActions({
   }
 
   const label = CONTENT_LABELS[contentType];
-  const generationType: GenerationType = contentType;
+  const generationType: GenerationType = GENERATION_TYPE_MAP[contentType];
 
   return (
     <div className="space-y-3">

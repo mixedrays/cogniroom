@@ -15,7 +15,8 @@ import { Route as CourseCourseIdRouteImport } from './routes/course.$courseId'
 import { Route as CourseCourseIdIndexRouteImport } from './routes/course.$courseId.index'
 import { Route as CourseCourseIdLessonLessonIdRouteImport } from './routes/course.$courseId.lesson.$lessonId'
 import { Route as CourseCourseIdLessonLessonIdIndexRouteImport } from './routes/course.$courseId.lesson.$lessonId.index'
-import { Route as CourseCourseIdLessonLessonIdTestsRouteImport } from './routes/course.$courseId.lesson.$lessonId.tests'
+import { Route as CourseCourseIdLessonLessonIdQuizRouteImport } from './routes/course.$courseId.lesson.$lessonId.quiz'
+import { Route as CourseCourseIdLessonLessonIdFlashcardsRouteImport } from './routes/course.$courseId.lesson.$lessonId.flashcards'
 import { Route as CourseCourseIdLessonLessonIdExercisesRouteImport } from './routes/course.$courseId.lesson.$lessonId.exercises'
 
 const SettingsRoute = SettingsRouteImport.update({
@@ -50,10 +51,16 @@ const CourseCourseIdLessonLessonIdIndexRoute =
     path: '/',
     getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
   } as any)
-const CourseCourseIdLessonLessonIdTestsRoute =
-  CourseCourseIdLessonLessonIdTestsRouteImport.update({
-    id: '/tests',
-    path: '/tests',
+const CourseCourseIdLessonLessonIdQuizRoute =
+  CourseCourseIdLessonLessonIdQuizRouteImport.update({
+    id: '/quiz',
+    path: '/quiz',
+    getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
+  } as any)
+const CourseCourseIdLessonLessonIdFlashcardsRoute =
+  CourseCourseIdLessonLessonIdFlashcardsRouteImport.update({
+    id: '/flashcards',
+    path: '/flashcards',
     getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
   } as any)
 const CourseCourseIdLessonLessonIdExercisesRoute =
@@ -70,7 +77,8 @@ export interface FileRoutesByFullPath {
   '/course/$courseId/': typeof CourseCourseIdIndexRoute
   '/course/$courseId/lesson/$lessonId': typeof CourseCourseIdLessonLessonIdRouteWithChildren
   '/course/$courseId/lesson/$lessonId/exercises': typeof CourseCourseIdLessonLessonIdExercisesRoute
-  '/course/$courseId/lesson/$lessonId/tests': typeof CourseCourseIdLessonLessonIdTestsRoute
+  '/course/$courseId/lesson/$lessonId/flashcards': typeof CourseCourseIdLessonLessonIdFlashcardsRoute
+  '/course/$courseId/lesson/$lessonId/quiz': typeof CourseCourseIdLessonLessonIdQuizRoute
   '/course/$courseId/lesson/$lessonId/': typeof CourseCourseIdLessonLessonIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -78,7 +86,8 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/course/$courseId': typeof CourseCourseIdIndexRoute
   '/course/$courseId/lesson/$lessonId/exercises': typeof CourseCourseIdLessonLessonIdExercisesRoute
-  '/course/$courseId/lesson/$lessonId/tests': typeof CourseCourseIdLessonLessonIdTestsRoute
+  '/course/$courseId/lesson/$lessonId/flashcards': typeof CourseCourseIdLessonLessonIdFlashcardsRoute
+  '/course/$courseId/lesson/$lessonId/quiz': typeof CourseCourseIdLessonLessonIdQuizRoute
   '/course/$courseId/lesson/$lessonId': typeof CourseCourseIdLessonLessonIdIndexRoute
 }
 export interface FileRoutesById {
@@ -89,7 +98,8 @@ export interface FileRoutesById {
   '/course/$courseId/': typeof CourseCourseIdIndexRoute
   '/course/$courseId/lesson/$lessonId': typeof CourseCourseIdLessonLessonIdRouteWithChildren
   '/course/$courseId/lesson/$lessonId/exercises': typeof CourseCourseIdLessonLessonIdExercisesRoute
-  '/course/$courseId/lesson/$lessonId/tests': typeof CourseCourseIdLessonLessonIdTestsRoute
+  '/course/$courseId/lesson/$lessonId/flashcards': typeof CourseCourseIdLessonLessonIdFlashcardsRoute
+  '/course/$courseId/lesson/$lessonId/quiz': typeof CourseCourseIdLessonLessonIdQuizRoute
   '/course/$courseId/lesson/$lessonId/': typeof CourseCourseIdLessonLessonIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -101,7 +111,8 @@ export interface FileRouteTypes {
     | '/course/$courseId/'
     | '/course/$courseId/lesson/$lessonId'
     | '/course/$courseId/lesson/$lessonId/exercises'
-    | '/course/$courseId/lesson/$lessonId/tests'
+    | '/course/$courseId/lesson/$lessonId/flashcards'
+    | '/course/$courseId/lesson/$lessonId/quiz'
     | '/course/$courseId/lesson/$lessonId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -109,7 +120,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/course/$courseId'
     | '/course/$courseId/lesson/$lessonId/exercises'
-    | '/course/$courseId/lesson/$lessonId/tests'
+    | '/course/$courseId/lesson/$lessonId/flashcards'
+    | '/course/$courseId/lesson/$lessonId/quiz'
     | '/course/$courseId/lesson/$lessonId'
   id:
     | '__root__'
@@ -119,7 +131,8 @@ export interface FileRouteTypes {
     | '/course/$courseId/'
     | '/course/$courseId/lesson/$lessonId'
     | '/course/$courseId/lesson/$lessonId/exercises'
-    | '/course/$courseId/lesson/$lessonId/tests'
+    | '/course/$courseId/lesson/$lessonId/flashcards'
+    | '/course/$courseId/lesson/$lessonId/quiz'
     | '/course/$courseId/lesson/$lessonId/'
   fileRoutesById: FileRoutesById
 }
@@ -173,11 +186,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CourseCourseIdLessonLessonIdIndexRouteImport
       parentRoute: typeof CourseCourseIdLessonLessonIdRoute
     }
-    '/course/$courseId/lesson/$lessonId/tests': {
-      id: '/course/$courseId/lesson/$lessonId/tests'
-      path: '/tests'
-      fullPath: '/course/$courseId/lesson/$lessonId/tests'
-      preLoaderRoute: typeof CourseCourseIdLessonLessonIdTestsRouteImport
+    '/course/$courseId/lesson/$lessonId/quiz': {
+      id: '/course/$courseId/lesson/$lessonId/quiz'
+      path: '/quiz'
+      fullPath: '/course/$courseId/lesson/$lessonId/quiz'
+      preLoaderRoute: typeof CourseCourseIdLessonLessonIdQuizRouteImport
+      parentRoute: typeof CourseCourseIdLessonLessonIdRoute
+    }
+    '/course/$courseId/lesson/$lessonId/flashcards': {
+      id: '/course/$courseId/lesson/$lessonId/flashcards'
+      path: '/flashcards'
+      fullPath: '/course/$courseId/lesson/$lessonId/flashcards'
+      preLoaderRoute: typeof CourseCourseIdLessonLessonIdFlashcardsRouteImport
       parentRoute: typeof CourseCourseIdLessonLessonIdRoute
     }
     '/course/$courseId/lesson/$lessonId/exercises': {
@@ -192,7 +212,8 @@ declare module '@tanstack/react-router' {
 
 interface CourseCourseIdLessonLessonIdRouteChildren {
   CourseCourseIdLessonLessonIdExercisesRoute: typeof CourseCourseIdLessonLessonIdExercisesRoute
-  CourseCourseIdLessonLessonIdTestsRoute: typeof CourseCourseIdLessonLessonIdTestsRoute
+  CourseCourseIdLessonLessonIdFlashcardsRoute: typeof CourseCourseIdLessonLessonIdFlashcardsRoute
+  CourseCourseIdLessonLessonIdQuizRoute: typeof CourseCourseIdLessonLessonIdQuizRoute
   CourseCourseIdLessonLessonIdIndexRoute: typeof CourseCourseIdLessonLessonIdIndexRoute
 }
 
@@ -200,8 +221,10 @@ const CourseCourseIdLessonLessonIdRouteChildren: CourseCourseIdLessonLessonIdRou
   {
     CourseCourseIdLessonLessonIdExercisesRoute:
       CourseCourseIdLessonLessonIdExercisesRoute,
-    CourseCourseIdLessonLessonIdTestsRoute:
-      CourseCourseIdLessonLessonIdTestsRoute,
+    CourseCourseIdLessonLessonIdFlashcardsRoute:
+      CourseCourseIdLessonLessonIdFlashcardsRoute,
+    CourseCourseIdLessonLessonIdQuizRoute:
+      CourseCourseIdLessonLessonIdQuizRoute,
     CourseCourseIdLessonLessonIdIndexRoute:
       CourseCourseIdLessonLessonIdIndexRoute,
   }
