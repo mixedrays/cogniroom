@@ -15,9 +15,6 @@ import {
 } from "@/lib/courses";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { PageHeader } from "@/components/PageHeader";
-
 import { Flashcards } from "@/modules/flashcards/components/Flashcards";
 import { Quiz } from "@/modules/quiz";
 import { useOS } from "@/hooks/use-os";
@@ -26,6 +23,11 @@ import {
   ContentCreationDialog,
   type ContentGenerationData,
 } from "@/components/ContentCreationDialog";
+import {
+  LessonPageShell,
+  LessonPageHeader,
+  LessonEmptyState,
+} from "@/components/LessonPage";
 
 export const Route = createFileRoute(
   "/course/$courseId/lesson/$lessonId/tests"
@@ -251,66 +253,19 @@ function LessonTestsComponent() {
   };
 
   return (
-    <div className="relative animate-in fade-in duration-500 h-full flex flex-col overflow-auto">
-      <PageHeader>
-        <Breadcrumbs
-          className="flex items-center"
-          items={[
-            { title: "Home", link: "/" },
-            {
-              title: course.title,
-              link: {
-                to: "/course/$courseId",
-                params: { courseId },
-              },
-            },
-            {
-              title: topicInfo?.title ?? "Lesson",
-            },
-            [
-              {
-                title: "Theory",
-                link: {
-                  to: "/course/$courseId/lesson/$lessonId",
-                  params: { courseId, lessonId },
-                },
-              },
-              {
-                title: "Tests",
-                link: {
-                  to: "/course/$courseId/lesson/$lessonId/tests",
-                  params: { courseId, lessonId },
-                },
-                current: true,
-              },
-              {
-                title: "Exercises",
-                link: {
-                  to: "/course/$courseId/lesson/$lessonId/exercises",
-                  params: { courseId, lessonId },
-                },
-              },
-            ],
-          ]}
-        />
-
-        <div className="flex items-center gap-2">
-          {completionError && (
-            <p className="text-sm text-destructive font-medium">
-              {completionError}
-            </p>
-          )}
-          {hasContent && (
-            <Button
-              onClick={handleToggleComplete}
-              disabled={isCompleting}
-              variant={isCompleted ? "secondary" : "default"}
-            >
-              {isCompleted ? "Mark Incomplete" : "Mark Complete"}
-            </Button>
-          )}
-        </div>
-      </PageHeader>
+    <LessonPageShell>
+      <LessonPageHeader
+        courseId={courseId}
+        lessonId={lessonId}
+        courseTitle={course.title}
+        topicTitle={topicInfo?.title}
+        activeTab="tests"
+        showMarkComplete={hasContent}
+        isCompleted={isCompleted}
+        isCompleting={isCompleting}
+        completionError={completionError}
+        onToggleComplete={handleToggleComplete}
+      />
 
       {hasContent ? (
         <Tabs
@@ -365,20 +320,17 @@ function LessonTestsComponent() {
           )}
         </Tabs>
       ) : (
-        <div className="flex flex-col items-center justify-center h-full min-h-[50vh] gap-6 p-6">
-          <div className="text-center space-y-2 max-w-md">
-            <h2 className="text-2xl font-bold tracking-tight">
-              {lessonInfo.title}
-            </h2>
-            <p className="text-muted-foreground">
-              {lessonInfo.description ||
-                "No tests available for this lesson yet."}
-            </p>
-            {parseError && (
+        <LessonEmptyState
+          title={lessonInfo.title}
+          description={
+            lessonInfo.description || "No tests available for this lesson yet."
+          }
+          extra={
+            parseError ? (
               <p className="text-sm text-destructive">{parseError}</p>
-            )}
-          </div>
-
+            ) : undefined
+          }
+        >
           <ContentCreationDialog
             mode="generate"
             generationType="tests"
@@ -401,8 +353,8 @@ function LessonTestsComponent() {
               </Button>
             }
           />
-        </div>
+        </LessonEmptyState>
       )}
-    </div>
+    </LessonPageShell>
   );
 }
