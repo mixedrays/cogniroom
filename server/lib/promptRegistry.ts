@@ -124,6 +124,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "topicDescription",
       "lessonTitle",
       "lessonDescription",
+      "lessonContent",
       "additionalInstructions",
     ],
     defaultContent: [
@@ -131,7 +132,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "",
       "Course: {{courseTitle}}",
       "Topic: {{topicTitle}} - {{topicDescription}}",
-      "Lesson: {{lessonTitle}} - {{lessonDescription}}",
+      "Lesson: {{lessonTitle}} - {{lessonDescription}}{{lessonContent}}",
       "",
       "Generate flashcards for this lesson.",
       "",
@@ -156,6 +157,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "topicDescription",
       "lessonTitle",
       "lessonDescription",
+      "lessonContent",
       "additionalInstructions",
     ],
     defaultContent: [
@@ -163,7 +165,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "",
       "Course: {{courseTitle}}",
       "Topic: {{topicTitle}} - {{topicDescription}}",
-      "Lesson: {{lessonTitle}} - {{lessonDescription}}",
+      "Lesson: {{lessonTitle}} - {{lessonDescription}}{{lessonContent}}",
       "",
       "Generate multiple-choice quiz questions for this lesson.",
       "",

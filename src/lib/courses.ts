@@ -152,7 +152,8 @@ export async function generateLessonFlashcards(
   courseId: string,
   lessonId: string,
   additionalInstructions?: string,
-  model?: string
+  model?: string,
+  includeContent?: boolean
 ): Promise<{ success: boolean; content?: TestsContent; error?: string }> {
   try {
     const response = await fetch(
@@ -160,7 +161,7 @@ export async function generateLessonFlashcards(
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ additionalInstructions, model }),
+        body: JSON.stringify({ additionalInstructions, model, includeContent }),
       }
     );
     return await response.json();
@@ -190,7 +191,8 @@ export async function generateLessonQuiz(
   courseId: string,
   lessonId: string,
   additionalInstructions?: string,
-  model?: string
+  model?: string,
+  includeContent?: boolean
 ): Promise<{ success: boolean; content?: TestsContent; error?: string }> {
   try {
     const response = await fetch(
@@ -198,7 +200,7 @@ export async function generateLessonQuiz(
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ additionalInstructions, model }),
+        body: JSON.stringify({ additionalInstructions, model, includeContent }),
       }
     );
     return await response.json();

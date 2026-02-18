@@ -8,6 +8,7 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 import {
   AVAILABLE_MODELS,
@@ -111,6 +112,7 @@ export interface ContentGenerationData {
   type: GenerationType;
   model: string;
   instructions: string;
+  includeContent: boolean;
 }
 
 /**
@@ -708,11 +710,15 @@ function GenerateModeDialog({
 }: GenerateModeProps) {
   const { settings } = useSettings();
 
+  const showIncludeContentToggle =
+    generationType === "flashcards" || generationType === "quiz";
+
   // Form state
   const [model, setModel] = useState<string>(() =>
     getValidModel(settings.llm.defaultModel)
   );
   const [instructions, setInstructions] = useState("");
+  const [includeContent, setIncludeContent] = useState(true);
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -753,6 +759,7 @@ function GenerateModeDialog({
   const resetForm = useCallback(() => {
     setModel(getValidModel(settings.llm.defaultModel));
     setInstructions("");
+    setIncludeContent(true);
     setError(null);
     enhancement.reset();
   }, [settings.llm.defaultModel, enhancement]);
@@ -806,6 +813,7 @@ function GenerateModeDialog({
         type: generationType,
         model,
         instructions: instructions.trim(),
+        includeContent,
       };
       await onGenerate(data);
       // Note: We don't reset form here - the parent handles closing the dialog on success
@@ -835,15 +843,20 @@ function GenerateModeDialog({
     const additionalInstructions = instructions.trim()
       ? `\nAdditional Instructions from user: ${instructions.trim()}`
       : "";
+    const lessonContent =
+      showIncludeContentToggle && includeContent
+        ? "\n\nLesson Theory Content:\n---\n[lesson theory content will be included if available]\n---"
+        : "";
     return {
       courseTitle: contentContext?.courseTitle ?? "",
       topicTitle: contentContext?.topicTitle ?? "",
       topicDescription: contentContext?.topicDescription ?? "",
       lessonTitle: contentContext?.lessonTitle ?? "",
       lessonDescription: contentContext?.lessonDescription ?? "",
+      lessonContent,
       additionalInstructions,
     };
-  }, [contentContext, instructions]);
+  }, [contentContext, instructions, showIncludeContentToggle, includeContent]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -885,6 +898,20 @@ function GenerateModeDialog({
               </SelectContent>
             </Select>
           </div>
+
+          {showIncludeContentToggle && (
+            <div className="flex items-center justify-between">
+              <Label htmlFor="include-content" className="cursor-pointer">
+                Include lesson theory content
+              </Label>
+              <Switch
+                id="include-content"
+                checked={includeContent}
+                onCheckedChange={setIncludeContent}
+                disabled={isLoading}
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
