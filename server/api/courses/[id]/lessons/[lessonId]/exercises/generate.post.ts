@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
     const body = await readBody<{
       additionalInstructions?: string;
       model?: string;
+      includeContent?: boolean;
     }>(event);
     const model = (body?.model ?? DEFAULT_MODEL).trim() as AvailableModelsId;
 
@@ -57,12 +58,26 @@ export default defineEventHandler(async (event) => {
       ? `\nAdditional Instructions from user: ${body.additionalInstructions.trim()}`
       : "";
 
+    let lessonContent = "";
+    if (body?.includeContent !== false) {
+      const lessonResponse = await storageApi.get<string>(
+        `courses/${courseId}/lessons/${lessonId}/lesson.md`
+      );
+      if (lessonResponse.ok) {
+        const text = await lessonResponse.text();
+        if (text?.trim()) {
+          lessonContent = `\n\nLesson Theory Content:\n---\n${text.trim()}\n---`;
+        }
+      }
+    }
+
     const prompt = await getRenderedPrompt("exercises-generation", {
       courseTitle: course.title,
       topicTitle: targetTopic.title,
       topicDescription: targetTopic.description,
       lessonTitle: targetLesson.title,
       lessonDescription: targetLesson.description,
+      lessonContent,
       additionalInstructions,
     });
 

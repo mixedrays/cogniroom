@@ -96,7 +96,8 @@ function LessonExercisesComponent() {
           courseId,
           lessonId,
           data.instructions,
-          data.model
+          data.model,
+          data.includeContent
         );
         if (result.success) {
           setIsDialogOpen(false);

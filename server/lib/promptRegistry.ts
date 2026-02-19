@@ -190,6 +190,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "topicDescription",
       "lessonTitle",
       "lessonDescription",
+      "lessonContent",
       "additionalInstructions",
     ],
     defaultContent: [
@@ -198,7 +199,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "",
       "Course: {{courseTitle}}",
       "Topic: {{topicTitle}} - {{topicDescription}}",
-      "Lesson: {{lessonTitle}} - {{lessonDescription}}",
+      "Lesson: {{lessonTitle}} - {{lessonDescription}}{{lessonContent}}",
       "",
       "Generate practical exercises for this lesson. For each exercise, include:",
       "- A clear objective stating what the learner will practice",

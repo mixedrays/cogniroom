@@ -711,7 +711,9 @@ function GenerateModeDialog({
   const { settings } = useSettings();
 
   const showIncludeContentToggle =
-    generationType === "flashcards" || generationType === "quiz";
+    generationType === "flashcards" ||
+    generationType === "quiz" ||
+    generationType === "exercises";
 
   // Form state
   const [model, setModel] = useState<string>(() =>

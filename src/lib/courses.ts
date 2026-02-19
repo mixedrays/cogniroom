@@ -398,7 +398,8 @@ export async function generateLessonExercises(
   courseId: string,
   lessonId: string,
   additionalInstructions?: string,
-  model?: string
+  model?: string,
+  includeContent?: boolean
 ): Promise<{ success: boolean; content?: string; error?: string }> {
   try {
     const response = await fetch(
@@ -411,6 +412,7 @@ export async function generateLessonExercises(
         body: JSON.stringify({
           additionalInstructions,
           model,
+          includeContent,
         }),
       }
     );
