@@ -10,7 +10,7 @@ const variantClasses = {
   lesson:
     "prose prose-slate dark:prose-invert max-w-none prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-p:leading-relaxed",
   quiz: "prose dark:prose-invert text-lg",
-  flashcard: "prose dark:prose-invert prose-sm",
+  flashcard: "prose dark:prose-invert text-lg",
   default: "prose dark:prose-invert max-w-none",
 } as const;
 
