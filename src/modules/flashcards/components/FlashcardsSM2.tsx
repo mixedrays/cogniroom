@@ -37,7 +37,7 @@ const useFlashcardsSM2Value = ({
   reviewData: ReviewData | null;
   onSave: (data: ReviewData) => Promise<void>;
 }) => {
-  const [forceAll, setForceAll] = useState(false);
+  const [showAllCards, setShowAllCards] = useState(false);
   const [ratingColors, setRatingColors] = useState<(string | undefined)[]>([]);
 
   const flashcards = useFlashCards<Flashcard>(cards);
@@ -45,7 +45,7 @@ const useFlashcardsSM2Value = ({
     flashcards.cardsToDisplay,
     reviewData,
     onSave,
-    forceAll
+    showAllCards
   );
 
   const slidesApi = useSlidesApi({
@@ -90,15 +90,19 @@ const useFlashcardsSM2Value = ({
 
   return {
     ...sm2,
-    ...flashcards,
     rateCard,
     resetSession,
+    flipCards: flashcards.flipCards,
+    handleToggleFlipCards: flashcards.handleToggleFlipCards,
+    areCardsShuffled: flashcards.areCardsShuffled,
     handleToggleShuffle,
     ratingColors,
+    flippedCards: flashcards.flippedCards,
+    toggleCardFlip: flashcards.toggleCardFlip,
     isAnswerVisible,
     slidesApi,
-    forceAll,
-    setForceAll,
+    showAllCards,
+    setShowAllCards,
   };
 };
 
@@ -140,7 +144,7 @@ const FlashcardsSM2Container = ({
         <p className="text-muted-foreground text-sm">
           All cards are scheduled for a future session. Check back later.
         </p>
-        <Button variant="outline" onClick={() => value.setForceAll(true)}>
+        <Button variant="outline" onClick={() => value.setShowAllCards(true)}>
           Review anyway
         </Button>
       </div>

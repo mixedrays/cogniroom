@@ -53,7 +53,7 @@ export function useFlashcardsSM2(
   cards: Flashcard[],
   initialReviewData: ReviewData | null,
   onSave: (data: ReviewData) => Promise<void>,
-  forceAll = false
+  showAllCards = false
 ) {
   const now = useMemo(() => new Date().toISOString(), []);
 
@@ -63,7 +63,7 @@ export function useFlashcardsSM2(
       entriesMap[entry.itemId] = entry;
     }
 
-    if (forceAll) {
+    if (showAllCards) {
       return {
         sessionCards: cards,
         initialEntriesMap: entriesMap,
@@ -96,7 +96,7 @@ export function useFlashcardsSM2(
       dueCount: dueCards.length,
       newCount: newCards.length,
     };
-  }, [cards, initialReviewData, now, forceAll]);
+  }, [cards, initialReviewData, now, showAllCards]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [entriesMap, setEntriesMap] =
