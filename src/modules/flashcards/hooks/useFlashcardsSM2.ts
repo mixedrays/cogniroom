@@ -137,6 +137,7 @@ export function useFlashcardsSM2(
   return {
     sessionCards,
     currentIndex,
+    setCurrentIndex,
     currentCard,
     dueCount,
     newCount,

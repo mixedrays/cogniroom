@@ -11,6 +11,7 @@ import { Slider as ProgressSlider } from "@/components/Slider";
 import { cn } from "@/lib/utils";
 import type { Flashcard, ReviewData } from "@/lib/types";
 import { useFlashcardsSM2, type QualityRating } from "../hooks/useFlashcardsSM2";
+import { useSlidesApi } from "../hooks/useSlidesApi";
 import StudyFlashCard from "./Flashcard";
 import SM2QualityControls from "./SM2QualityControls";
 
@@ -40,35 +41,40 @@ const useFlashcardsSM2Value = ({
   const [shuffledCards, setShuffledCards] = useState(cards);
   const [flipCards, setFlipCards] = useState(false);
   const [ratingColors, setRatingColors] = useState<(string | undefined)[]>([]);
+  const [flippedSlides, setFlippedSlides] = useState<Set<number>>(new Set());
 
   const sm2 = useFlashcardsSM2(shuffledCards, reviewData, onSave, forceAll);
-  const [isFlipped, setIsFlipped] = useState(false);
+
+  const slidesApi = useSlidesApi({
+    slidesCount: sm2.sessionCards.length,
+    currentIndex: sm2.currentIndex,
+    onIndexChange: sm2.setCurrentIndex,
+  });
 
   useEffect(() => {
     if (!isShuffled) setShuffledCards(cards);
   }, [cards, isShuffled]);
 
-  useEffect(() => {
-    setIsFlipped(flipCards);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sm2.currentIndex]);
-
-  const flip = useCallback(() => setIsFlipped((f) => !f), []);
-
-  const handleToggleFlipCards = useCallback(() => {
-    setFlipCards((f) => {
-      setIsFlipped(!f);
-      return !f;
+  const flipSlide = useCallback((index: number) => {
+    setFlippedSlides((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
     });
   }, []);
+
+  const handleToggleFlipCards = useCallback(() => setFlipCards((f) => !f), []);
 
   const handleToggleShuffle = useCallback(() => {
     const next = !isShuffled;
     setIsShuffled(next);
     setShuffledCards(next ? shuffleArray(cards) : cards);
     setRatingColors([]);
+    setFlippedSlides(new Set());
     sm2.resetSession();
-  }, [cards, isShuffled, sm2.resetSession]);
+    slidesApi.scrollToSlide(0);
+  }, [cards, isShuffled, sm2.resetSession, slidesApi.scrollToSlide]);
 
   const rateCard = useCallback(
     async (q: QualityRating) => {
@@ -79,26 +85,34 @@ const useFlashcardsSM2Value = ({
         return next;
       });
       await sm2.rateCard(q);
+      slidesApi.scrollToSlide(index + 1);
     },
-    [sm2.currentIndex, sm2.rateCard]
+    [sm2.currentIndex, sm2.rateCard, slidesApi.scrollToSlide]
   );
 
   const resetSession = useCallback(() => {
     sm2.resetSession();
     setRatingColors([]);
-  }, [sm2.resetSession]);
+    setFlippedSlides(new Set());
+    slidesApi.scrollToSlide(0);
+  }, [sm2.resetSession, slidesApi.scrollToSlide]);
+
+  const isCurrentFlipped = flippedSlides.has(sm2.currentIndex);
+  const isAnswerVisible = flipCards ? !isCurrentFlipped : isCurrentFlipped;
 
   return {
     ...sm2,
     rateCard,
     resetSession,
-    isFlipped,
-    flip,
     flipCards,
     handleToggleFlipCards,
     isShuffled,
     handleToggleShuffle,
     ratingColors,
+    flippedSlides,
+    flipSlide,
+    isAnswerVisible,
+    slidesApi,
     forceAll,
     setForceAll,
   };
@@ -178,6 +192,7 @@ const FlashcardsSM2Topbar = () => {
     isShuffled,
     handleToggleShuffle,
     ratingColors,
+    slidesApi,
   } = useSM2Context();
 
   return (
@@ -236,6 +251,7 @@ const FlashcardsSM2Topbar = () => {
         className="mx-4"
         max={sessionCards.length}
         value={currentIndex}
+        onChange={slidesApi.scrollToSlide}
         stepClasses={ratingColors}
       />
     </div>
@@ -247,35 +263,50 @@ interface FlashcardsSM2CardProps {
 }
 
 const FlashcardsSM2Card = ({ className }: FlashcardsSM2CardProps) => {
-  const { currentCard, isFlipped, flip, flipCards } = useSM2Context();
+  const { sessionCards, flipCards, flippedSlides, flipSlide, slidesApi } = useSM2Context();
 
   return (
     <div
+      ref={slidesApi.scrollContainerRef}
       className={cn(
-        "flex-1 flex items-center justify-center px-4 pb-6 pt-4 overflow-hidden cursor-pointer",
+        "grow snap-y snap-mandatory overflow-y-auto scroll-smooth no-scrollbar",
         className
       )}
-      onClick={flip}
     >
-      {currentCard && (
-        <StudyFlashCard
-          question={currentCard.question}
-          answer={currentCard.answer}
-          isFlipped={isFlipped}
-          className="h-full w-full sm:h-auto"
-          isFlippedByDefault={flipCards}
-        />
-      )}
+      {sessionCards.map((card, index) => (
+        <div
+          key={card.id}
+          ref={slidesApi.getSlideRef(index)}
+          className="flex h-full w-full snap-start snap-always items-center justify-center px-4 pb-6 pt-4 cursor-pointer"
+          onClick={() => flipSlide(index)}
+        >
+          <StudyFlashCard
+            question={card.question}
+            answer={card.answer}
+            isFlipped={flippedSlides.has(index)}
+            className="h-full w-full sm:h-auto"
+            isFlippedByDefault={flipCards}
+          />
+        </div>
+      ))}
     </div>
   );
 };
 
 const FlashcardsSM2Controls = () => {
-  const { currentCard, isFlipped, flip, sessionComplete, isSaving, rateCard } = useSM2Context();
+  const {
+    currentIndex,
+    currentCard,
+    isAnswerVisible,
+    flipSlide,
+    sessionComplete,
+    isSaving,
+    rateCard,
+  } = useSM2Context();
 
   return (
     <div className="p-4 flex justify-center">
-      {isFlipped ? (
+      {isAnswerVisible ? (
         <SM2QualityControls
           currentCard={currentCard}
           sessionComplete={sessionComplete}
@@ -283,7 +314,7 @@ const FlashcardsSM2Controls = () => {
           onRate={rateCard}
         />
       ) : (
-        <Button variant="outline" onClick={flip}>
+        <Button variant="outline" onClick={() => flipSlide(currentIndex)}>
           Show Answer{" "}
           <span className="ml-1 text-xs text-muted-foreground">(Space)</span>
         </Button>
@@ -293,18 +324,18 @@ const FlashcardsSM2Controls = () => {
 };
 
 const FlashcardsSM2KeyboardShortcuts = () => {
-  const { flip } = useSM2Context();
+  const { currentIndex, flipSlide } = useSM2Context();
 
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === " ") {
         e.preventDefault();
-        flip();
+        flipSlide(currentIndex);
       }
     };
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [flip]);
+  }, [currentIndex, flipSlide]);
 
   return null;
 };
