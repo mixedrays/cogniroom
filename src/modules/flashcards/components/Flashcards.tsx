@@ -105,13 +105,6 @@ const useFlashcardsKCValue = ({
   };
 };
 
-// Flashcards context value for SM-2 strategy
-const useFlashcardsSM2Value = () => {
-  // todo: integrate sm-2 hook here same way as known cards hook implemented
-  return {};
-};
-
-// Flashcards study strategy switch
 const useFlashcardsValue = useFlashcardsKCValue;
 
 export type FlashcardsContextValue = ReturnType<typeof useFlashcardsValue>;

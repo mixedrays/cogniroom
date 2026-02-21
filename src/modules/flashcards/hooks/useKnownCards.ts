@@ -109,14 +109,6 @@ export function useKnownCards<TCard extends CardLike>() {
 
   const canFinishStudy = Object.keys(state.knownCards).length > 0;
 
-  const getIsCardKnown = useCallback(
-    (cardId: string | undefined) =>
-      cardId !== undefined
-        ? state.knownCards[cardId]?.status === true
-        : undefined,
-    [state.knownCards]
-  );
-
   const getIsCardKnownStatus = useCallback(
     (cardId: string | undefined) =>
       cardId !== undefined ? state.knownCards[cardId]?.status : undefined,

@@ -1,4 +1,6 @@
 export { default as StudyFlashCard } from "./components/Flashcard";
+export { FlashcardsSM2 } from "./components/FlashcardsSM2";
+export { FlashcardsKnownCards } from "./components/FlashcardsKnownCards";
 export * from "./components/Flashcard";
 export * from "./components/Flashcards";
 export { default as SM2QualityControls } from "./components/SM2QualityControls";

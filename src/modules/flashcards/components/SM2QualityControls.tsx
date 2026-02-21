@@ -7,10 +7,9 @@ const ratings: {
   q: QualityRating;
   variant: "default" | "secondary" | "outline";
 }[] = [
-  { label: "Didn't know", q: 1, variant: "outline" },
-  { label: "Knew after hint", q: 3, variant: "secondary" },
-  { label: "Knew after hesitation", q: 4, variant: "secondary" },
-  { label: "Knew immediately", q: 5, variant: "default" },
+  { label: "Hard", q: 1, variant: "outline" },
+  { label: "Good", q: 3, variant: "secondary" },
+  { label: "Easy", q: 5, variant: "default" },
 ];
 
 interface SM2QualityControlsProps {
@@ -34,7 +33,6 @@ export default function SM2QualityControls({
         <Button
           key={q}
           variant={variant}
-          size="sm"
           disabled={isSaving}
           onClick={() => void onRate(q)}
         >
