@@ -2,17 +2,17 @@ import { useCallback, useMemo, useReducer } from "react";
 import type { QuizQuestion } from "@/lib/types";
 
 interface QuizAnswersState {
-  selectedAnswers: Record<string, string>;
+  selections: Record<string, string[]>;
   checkedQuestions: Record<string, boolean>;
 }
 
 type QuizAnswersAction =
-  | { type: "SELECT_ANSWER"; questionId: string; option: string }
-  | { type: "CHECK_ANSWER"; questionId: string }
+  | { type: "SELECT_SINGLE"; questionId: string; option: string }
+  | { type: "TOGGLE_MULTI"; questionId: string; option: string }
   | { type: "RESET" };
 
 const initialState: QuizAnswersState = {
-  selectedAnswers: {},
+  selections: {},
   checkedQuestions: {},
 };
 
@@ -21,26 +21,23 @@ function quizAnswersReducer(
   action: QuizAnswersAction
 ): QuizAnswersState {
   switch (action.type) {
-    case "SELECT_ANSWER": {
-      if (state.checkedQuestions[action.questionId]) {
-        return state;
-      }
+    case "SELECT_SINGLE": {
+      if (state.checkedQuestions[action.questionId]) return state;
       return {
-        ...state,
-        selectedAnswers: {
-          ...state.selectedAnswers,
-          [action.questionId]: action.option,
-        },
+        selections: { ...state.selections, [action.questionId]: [action.option] },
+        checkedQuestions: { ...state.checkedQuestions, [action.questionId]: true },
       };
     }
-    case "CHECK_ANSWER":
+    case "TOGGLE_MULTI": {
+      const current = state.selections[action.questionId] ?? [];
+      const updated = current.includes(action.option)
+        ? current.filter((o) => o !== action.option)
+        : [...current, action.option];
       return {
-        ...state,
-        checkedQuestions: {
-          ...state.checkedQuestions,
-          [action.questionId]: true,
-        },
+        selections: { ...state.selections, [action.questionId]: updated },
+        checkedQuestions: { ...state.checkedQuestions, [action.questionId]: true },
       };
+    }
     case "RESET":
       return initialState;
     default:
@@ -48,40 +45,47 @@ function quizAnswersReducer(
   }
 }
 
+function isQuestionCorrect(q: QuizQuestion, selected: string[]): boolean {
+  if (q.type === "true-false") {
+    return selected[0] === String(q.answer);
+  }
+  const correctTexts = q.options
+    .filter((o) => o.isCorrect)
+    .map((o) => o.text)
+    .sort();
+  const selectedSorted = [...selected].sort();
+  return (
+    correctTexts.length === selectedSorted.length &&
+    correctTexts.every((v, i) => v === selectedSorted[i])
+  );
+}
+
 export function useQuizAnswers() {
   const [state, dispatch] = useReducer(quizAnswersReducer, initialState);
 
-  const selectAnswer = useCallback(
-    (questionId: string, option: string) => {
-      dispatch({ type: "SELECT_ANSWER", questionId, option });
-    },
-    []
-  );
+  const selectSingle = useCallback((questionId: string, option: string) => {
+    dispatch({ type: "SELECT_SINGLE", questionId, option });
+  }, []);
 
-  const checkAnswer = useCallback((questionId: string) => {
-    dispatch({ type: "CHECK_ANSWER", questionId });
+  const toggleMulti = useCallback((questionId: string, option: string) => {
+    dispatch({ type: "TOGGLE_MULTI", questionId, option });
   }, []);
 
   const isChecked = useCallback(
-    (questionId: string): boolean => {
-      return !!state.checkedQuestions[questionId];
-    },
+    (questionId: string): boolean => !!state.checkedQuestions[questionId],
     [state.checkedQuestions]
   );
 
-  const getSelectedAnswer = useCallback(
-    (questionId: string): string | undefined => {
-      return state.selectedAnswers[questionId];
-    },
-    [state.selectedAnswers]
+  const isOptionSelected = useCallback(
+    (questionId: string, optionText: string): boolean =>
+      state.selections[questionId]?.includes(optionText) ?? false,
+    [state.selections]
   );
 
-  const isAnswerCorrect = useCallback(
-    (questionId: string, correctAnswer: string): boolean | undefined => {
-      if (!state.checkedQuestions[questionId]) return undefined;
-      return state.selectedAnswers[questionId] === correctAnswer;
-    },
-    [state.checkedQuestions, state.selectedAnswers]
+  const hasSelection = useCallback(
+    (questionId: string): boolean =>
+      (state.selections[questionId]?.length ?? 0) > 0,
+    [state.selections]
   );
 
   const getScore = useCallback(
@@ -91,63 +95,55 @@ export function useQuizAnswers() {
       for (const q of questions) {
         if (state.checkedQuestions[q.id]) {
           checked++;
-          if (state.selectedAnswers[q.id] === q.answer) {
+          if (isQuestionCorrect(q, state.selections[q.id] ?? [])) {
             correct++;
           }
         }
       }
       return { correct, total: questions.length, checked };
     },
-    [state.checkedQuestions, state.selectedAnswers]
+    [state.checkedQuestions, state.selections]
   );
 
   const getStatuses = useCallback(
-    (questions: QuizQuestion[]): Array<boolean | undefined> => {
-      return questions.map((q) => {
+    (questions: QuizQuestion[]): Array<string | undefined> =>
+      questions.map((q) => {
         if (!state.checkedQuestions[q.id]) return undefined;
-        return state.selectedAnswers[q.id] === q.answer;
-      });
-    },
-    [state.checkedQuestions, state.selectedAnswers]
+        return isQuestionCorrect(q, state.selections[q.id] ?? [])
+          ? "bg-green-500!"
+          : "bg-red-500!";
+      }),
+    [state.checkedQuestions, state.selections]
   );
 
   const resetAnswers = useCallback(() => {
     dispatch({ type: "RESET" });
   }, []);
 
-  const hasSelection = useCallback(
-    (questionId: string): boolean => {
-      return questionId in state.selectedAnswers;
-    },
-    [state.selectedAnswers]
-  );
-
   return useMemo(
     () => ({
-      selectedAnswers: state.selectedAnswers,
+      selections: state.selections,
       checkedQuestions: state.checkedQuestions,
-      selectAnswer,
-      checkAnswer,
+      selectSingle,
+      toggleMulti,
       isChecked,
-      getSelectedAnswer,
-      isAnswerCorrect,
+      isOptionSelected,
+      hasSelection,
       getScore,
       getStatuses,
       resetAnswers,
-      hasSelection,
     }),
     [
-      state.selectedAnswers,
+      state.selections,
       state.checkedQuestions,
-      selectAnswer,
-      checkAnswer,
+      selectSingle,
+      toggleMulti,
       isChecked,
-      getSelectedAnswer,
-      isAnswerCorrect,
+      isOptionSelected,
+      hasSelection,
       getScore,
       getStatuses,
       resetAnswers,
-      hasSelection,
     ]
   );
 }

@@ -33,7 +33,7 @@ export const knownCardsInitialState: KnownCardsState = {
 
 export function knownCardsReducer(
   state: KnownCardsState,
-  action: KnownCardsAction,
+  action: KnownCardsAction
 ): KnownCardsState {
   switch (action.type) {
     case "TOGGLE_KNOWN_CARD": {
@@ -79,7 +79,7 @@ export function knownCardsReducer(
 export function useKnownCards<TCard extends CardLike>() {
   const [state, dispatch] = useReducer(
     knownCardsReducer,
-    knownCardsInitialState,
+    knownCardsInitialState
   );
 
   const toggleKnownCard = useCallback(
@@ -88,7 +88,7 @@ export function useKnownCards<TCard extends CardLike>() {
       const { id, knownCount } = card;
       dispatch({ type: "TOGGLE_KNOWN_CARD", id, status, knownCount });
     },
-    [],
+    []
   );
 
   const toggleTrackProgress = useCallback((trackProgress: boolean) => {
@@ -114,21 +114,24 @@ export function useKnownCards<TCard extends CardLike>() {
       cardId !== undefined
         ? state.knownCards[cardId]?.status === true
         : undefined,
-    [state.knownCards],
+    [state.knownCards]
   );
 
-  const getIsCardUnknown = useCallback(
+  const getIsCardKnownStatus = useCallback(
     (cardId: string | undefined) =>
-      cardId !== undefined
-        ? state.knownCards[cardId]?.status === false
-        : undefined,
-    [state.knownCards],
+      cardId !== undefined ? state.knownCards[cardId]?.status : undefined,
+    [state.knownCards]
   );
 
   const getStatuses = useCallback(
-    (cards: TCard[]) =>
-      cards.map((card) => state.knownCards[card.id]?.status),
-    [state.knownCards],
+    (cards: TCard[]): (string | undefined)[] =>
+      cards.map((card) => {
+        const status = state.knownCards[card.id]?.status;
+        if (status === true) return "bg-green-500!";
+        if (status === false) return "bg-red-500!";
+        return undefined;
+      }),
+    [state.knownCards]
   );
 
   const handleToggleKnownCard = useCallback(
@@ -139,7 +142,7 @@ export function useKnownCards<TCard extends CardLike>() {
       options?: {
         canAutoScrollNext?: boolean;
         onAutoScrollNext?: () => void;
-      },
+      }
     ) => {
       toggleKnownCard(card, status);
 
@@ -154,13 +157,13 @@ export function useKnownCards<TCard extends CardLike>() {
         setTimeout(() => options?.onAutoScrollNext?.(), 250);
       }
     },
-    [state.autoScroll, state.knownCards, toggleKnownCard],
+    [state.autoScroll, state.knownCards, toggleKnownCard]
   );
 
   const cardFilter = useMemo(
     () => (card: TCard) =>
       state.hideKnownCards ? (card.knownCount ?? 0) < 3 : true,
-    [state.hideKnownCards],
+    [state.hideKnownCards]
   );
 
   return {
@@ -172,8 +175,7 @@ export function useKnownCards<TCard extends CardLike>() {
     toggleAutoScroll,
     toggleHideKnownCards,
     resetKnownCardsState,
-    getIsCardKnown,
-    getIsCardUnknown,
+    getIsCardKnownStatus,
     getStatuses,
     handleToggleKnownCard,
   };

@@ -3,7 +3,6 @@ import {
   Undo as IconReset,
   ArrowUp as IconPrev,
   ArrowDown as IconNext,
-  Check as IconCheck,
 } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
@@ -122,7 +121,7 @@ const QuizTopbar = () => {
         max={questionsCount}
         value={currentIndex}
         onChange={slidesApi.scrollToSlide}
-        stepsStatuses={statuses}
+        stepClasses={statuses}
       />
     </div>
   );
@@ -132,8 +131,9 @@ const QuizQuestionView = () => {
   const {
     questions,
     getShuffledOptions,
-    selectAnswer,
-    getSelectedAnswer,
+    selectSingle,
+    toggleMulti,
+    isOptionSelected,
     isChecked,
     slidesApi,
   } = useQuizContext();
@@ -144,9 +144,28 @@ const QuizQuestionView = () => {
       className="grow snap-y snap-mandatory overflow-y-auto scroll-smooth"
     >
       {questions.map((q, index) => {
-        const options = getShuffledOptions(q.id);
-        const selected = getSelectedAnswer(q.id);
         const checked = isChecked(q.id);
+
+        let inputType: "radio" | "checkbox" = "radio";
+        let optionsToRender: { text: string; isCorrect: boolean }[] = [];
+        let handleSelect: (optionText: string) => void;
+
+        if (q.type === "true-false") {
+          inputType = "radio";
+          optionsToRender = [
+            { text: "True", isCorrect: q.answer === true },
+            { text: "False", isCorrect: q.answer === false },
+          ];
+          handleSelect = (optionText) => selectSingle(q.id, optionText);
+        } else {
+          const correctCount = q.options.filter((o) => o.isCorrect).length;
+          inputType = correctCount > 1 ? "checkbox" : "radio";
+          optionsToRender = getShuffledOptions(q.id);
+          handleSelect =
+            inputType === "radio"
+              ? (optionText) => selectSingle(q.id, optionText)
+              : (optionText) => toggleMulti(q.id, optionText);
+        }
 
         return (
           <div
@@ -157,17 +176,22 @@ const QuizQuestionView = () => {
             <div className="w-full max-w-2xl space-y-6 m-auto">
               <Markdown content={q.question} variant="quiz" />
               <div className="space-y-2">
-                {options.map((option) => (
+                {optionsToRender.map((option) => (
                   <QuizOption
-                    key={option}
+                    key={option.text}
                     option={option}
-                    isSelected={selected === option}
+                    isSelected={isOptionSelected(q.id, option.text)}
                     isChecked={checked}
-                    isCorrectOption={option === q.answer}
-                    onClick={() => selectAnswer(q.id, option)}
+                    inputType={inputType}
+                    onClick={() => handleSelect(option.text)}
                   />
                 ))}
               </div>
+              {checked && q.explanation && (
+                <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">
+                  {q.explanation}
+                </div>
+              )}
             </div>
           </div>
         );
@@ -177,17 +201,7 @@ const QuizQuestionView = () => {
 };
 
 const QuizControls = () => {
-  const {
-    currentQuestion,
-    checkAnswer,
-    hasSelection,
-    isChecked,
-    slidesApi,
-  } = useQuizContext();
-
-  const questionId = currentQuestion?.id;
-  const canCheck =
-    questionId != null && hasSelection(questionId) && !isChecked(questionId);
+  const { slidesApi } = useQuizContext();
 
   return (
     <div className="flex w-full items-center justify-between gap-1 p-4">
@@ -207,26 +221,6 @@ const QuizControls = () => {
             disabled={slidesApi.isFirstSlide}
           >
             <IconPrev />
-          </Button>
-        </span>
-      </Tooltip>
-
-      <Tooltip
-        content={
-          <>
-            Check answer{" "}
-            <span className="text-muted-foreground text-xs">(Enter)</span>
-          </>
-        }
-      >
-        <span>
-          <Button
-            variant="default"
-            disabled={!canCheck}
-            onClick={() => questionId && checkAnswer(questionId)}
-          >
-            <IconCheck className="mr-1 size-4" />
-            Check
           </Button>
         </span>
       </Tooltip>
@@ -258,9 +252,8 @@ const QuizKeyboardShortcuts = () => {
   const {
     currentQuestion,
     getShuffledOptions,
-    selectAnswer,
-    checkAnswer,
-    hasSelection,
+    selectSingle,
+    toggleMulti,
     isChecked,
     slidesApi,
   } = useQuizContext();
@@ -277,21 +270,20 @@ const QuizKeyboardShortcuts = () => {
         slidesApi.scrollToPrev();
       }
 
-      if (currentQuestion) {
+      if (currentQuestion?.type === "choice") {
         const qId = currentQuestion.id;
         const options = getShuffledOptions(qId);
+        const isMulti = currentQuestion.options.filter((o) => o.isCorrect).length > 1;
 
-        // Number keys 1-4 to select options
         const num = parseInt(e.key);
         if (num >= 1 && num <= options.length && !isChecked(qId)) {
           e.preventDefault();
-          selectAnswer(qId, options[num - 1]);
-        }
-
-        // Enter to check
-        if (e.key === "Enter" && hasSelection(qId) && !isChecked(qId)) {
-          e.preventDefault();
-          checkAnswer(qId);
+          const optionText = options[num - 1].text;
+          if (isMulti) {
+            toggleMulti(qId, optionText);
+          } else {
+            selectSingle(qId, optionText);
+          }
         }
       }
     };
@@ -301,9 +293,8 @@ const QuizKeyboardShortcuts = () => {
   }, [
     currentQuestion,
     getShuffledOptions,
-    selectAnswer,
-    checkAnswer,
-    hasSelection,
+    selectSingle,
+    toggleMulti,
     isChecked,
     slidesApi,
   ]);

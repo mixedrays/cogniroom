@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useReducer } from "react";
-import type { QuizQuestion } from "@/lib/types";
+import type { QuizQuestion, ChoiceQuizQuestion } from "@/lib/types";
+
+type ShuffledOption = { text: string; isCorrect: boolean };
 
 function shuffleArray<T>(arr: T[]): T[] {
   const shuffled = [...arr];
@@ -12,17 +14,19 @@ function shuffleArray<T>(arr: T[]): T[] {
 
 function buildShuffledOptionsMap(
   questions: QuizQuestion[]
-): Record<string, string[]> {
-  const map: Record<string, string[]> = {};
+): Record<string, ShuffledOption[]> {
+  const map: Record<string, ShuffledOption[]> = {};
   for (const q of questions) {
-    map[q.id] = shuffleArray(q.options);
+    if (q.type === "choice") {
+      map[q.id] = shuffleArray((q as ChoiceQuizQuestion).options);
+    }
   }
   return map;
 }
 
 interface QuizState {
   currentIndex: number;
-  shuffledOptionsMap: Record<string, string[]>;
+  shuffledOptionsMap: Record<string, ShuffledOption[]>;
 }
 
 type QuizAction =
@@ -53,9 +57,7 @@ export function useQuiz(questions: QuizQuestion[]) {
   const questionsCount = questions.length;
 
   const getShuffledOptions = useCallback(
-    (id: string): string[] => {
-      return state.shuffledOptionsMap[id] ?? [];
-    },
+    (id: string): ShuffledOption[] => state.shuffledOptionsMap[id] ?? [],
     [state.shuffledOptionsMap]
   );
 

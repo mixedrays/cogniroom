@@ -15,6 +15,8 @@ const FlashcardsDraftSchema = z.object({
     z.object({
       question: z.string(),
       answer: z.string(),
+      hint: z.string().nullable(),
+      difficulty: z.enum(["easy", "medium", "hard"]),
     })
   ),
 });
@@ -110,11 +112,13 @@ export default defineEventHandler(async (event) => {
     const draft = result.output as z.infer<typeof FlashcardsDraftSchema>;
 
     const content = {
-      version: 1,
+      version: 2,
       flashcards: draft.flashcards.map((card) => ({
         id: randomUUID(),
         question: card.question,
         answer: card.answer,
+        hint: card.hint ?? undefined,
+        difficulty: card.difficulty,
       })),
     };
 

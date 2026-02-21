@@ -14,16 +14,16 @@ export default defineEventHandler(async (event) => {
     }
 
     const response = await storage<any>(
-      `courses/${courseId}/lessons/${lessonId}/flashcards.json`
+      `courses/${courseId}/lessons/${lessonId}/reviews.json`
     );
+
     if (response.ok) {
-      const parsed = await response.json();
-      return { content: parsed };
+      return await response.json();
     }
 
     throw createError({
       statusCode: 404,
-      statusMessage: "Flashcards not found",
+      statusMessage: "Reviews not found",
     });
   } catch (error: any) {
     if (error.statusCode) {
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
     }
     throw createError({
       statusCode: 500,
-      statusMessage: "Failed to load flashcards",
+      statusMessage: "Failed to load reviews",
     });
   }
 });

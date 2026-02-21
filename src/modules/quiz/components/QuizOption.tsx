@@ -2,10 +2,10 @@ import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface QuizOptionProps {
-  option: string;
+  option: { text: string; isCorrect: boolean };
   isSelected: boolean;
   isChecked: boolean;
-  isCorrectOption: boolean;
+  inputType: "radio" | "checkbox";
   onClick: () => void;
 }
 
@@ -13,11 +13,12 @@ export function QuizOption({
   option,
   isSelected,
   isChecked,
-  isCorrectOption,
+  inputType,
   onClick,
 }: QuizOptionProps) {
-  const showCorrect = isChecked && isCorrectOption;
-  const showIncorrect = isChecked && isSelected && !isCorrectOption;
+  const showCorrect = isChecked && option.isCorrect;
+  const showIncorrect = isChecked && isSelected && !option.isCorrect;
+  const indicatorShape = inputType === "checkbox" ? "rounded-sm" : "rounded-full";
 
   return (
     <button
@@ -35,7 +36,8 @@ export function QuizOption({
     >
       <div
         className={cn(
-          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
+          "flex h-5 w-5 shrink-0 items-center justify-center border",
+          indicatorShape,
           !isChecked && !isSelected && "border-muted-foreground/40",
           !isChecked && isSelected && "border-primary bg-primary",
           showCorrect && "border-green-500 bg-green-500",
@@ -44,7 +46,7 @@ export function QuizOption({
         )}
       >
         {!isChecked && isSelected && (
-          <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+          <div className={cn("h-2 w-2 bg-primary-foreground", indicatorShape)} />
         )}
         {showCorrect && <Check className="h-3 w-3 text-white" />}
         {showIncorrect && <X className="h-3 w-3 text-white" />}
@@ -53,7 +55,7 @@ export function QuizOption({
         showCorrect && "text-green-700 dark:text-green-400",
         showIncorrect && "text-red-700 dark:text-red-400"
       )}>
-        {option}
+        {option.text}
       </span>
     </button>
   );

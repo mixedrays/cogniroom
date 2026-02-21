@@ -94,21 +94,52 @@ export interface Flashcard {
   id: string;
   question: string;
   answer: string;
-  knownCount?: number;
+  hint?: string;
+  difficulty: "easy" | "medium" | "hard";
 }
 
-export interface QuizQuestion {
+export interface ChoiceQuizQuestion {
+  type: "choice";
   id: string;
   question: string;
-  answer: string;
-  options: string[];
+  options: { text: string; isCorrect: boolean }[];
+  explanation?: string;
+  difficulty: "easy" | "medium" | "hard";
 }
 
-export interface TestsContent {
-  version: number;
+export interface TrueFalseQuizQuestion {
+  type: "true-false";
+  id: string;
+  question: string;
+  answer: boolean;
+  explanation?: string;
+  difficulty: "easy" | "medium" | "hard";
+}
+
+export type QuizQuestion = ChoiceQuizQuestion | TrueFalseQuizQuestion;
+
+export interface FlashcardsContent {
+  version: 2;
   flashcards: Flashcard[];
-  quizQuestions?: QuizQuestion[];
-  legacyMarkdown?: string;
+}
+
+export interface QuizContent {
+  version: 2;
+  quizQuestions: QuizQuestion[];
+}
+
+export interface ReviewEntry {
+  itemId: string;
+  repetitions: number;
+  easeFactor: number;
+  interval: number;
+  lastReviewedAt: string;
+  nextReviewAt: string;
+}
+
+export interface ReviewData {
+  lessonId: string;
+  entries: ReviewEntry[];
 }
 
 // Helper to generate unique IDs

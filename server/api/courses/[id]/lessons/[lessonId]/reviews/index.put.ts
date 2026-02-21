@@ -1,5 +1,5 @@
-import { defineEventHandler, getRouterParam, createError } from "h3";
-import { storage } from "@root/modules/storage";
+import { defineEventHandler, getRouterParam, readBody, createError } from "h3";
+import { storageApi } from "@root/modules/storage";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -13,25 +13,21 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const response = await storage<any>(
-      `courses/${courseId}/lessons/${lessonId}/quiz.json`
-    );
-    if (response.ok) {
-      const parsed = await response.json();
-      return { content: parsed };
-    }
+    const body = await readBody(event) as object;
 
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Quiz not found",
-    });
+    await storageApi.put(
+      `courses/${courseId}/lessons/${lessonId}/reviews.json`,
+      body
+    );
+
+    return { success: true };
   } catch (error: any) {
     if (error.statusCode) {
       throw error;
     }
     throw createError({
       statusCode: 500,
-      statusMessage: "Failed to load quiz",
+      statusMessage: "Failed to save reviews",
     });
   }
 });

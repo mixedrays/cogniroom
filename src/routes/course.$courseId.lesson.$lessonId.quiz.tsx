@@ -81,23 +81,12 @@ const parseQuizQuestions = (
   input: { version: number; quizQuestions: QuizQuestion[] } | null
 ): QuizQuestion[] => {
   if (!input || !Array.isArray(input.quizQuestions)) return [];
-  return input.quizQuestions
-    .filter(
-      (q): q is QuizQuestion =>
-        typeof q?.question === "string" &&
-        typeof q?.answer === "string" &&
-        Array.isArray(q?.options) &&
-        q.options.length > 0
-    )
-    .map((q, index) => ({
-      id:
-        typeof q.id === "string" && q.id.trim().length > 0
-          ? q.id.trim()
-          : `quiz-${index + 1}`,
-      question: q.question.trim(),
-      answer: q.answer.trim(),
-      options: q.options.map((o: string) => String(o).trim()),
-    }));
+  return input.quizQuestions.filter((q): q is QuizQuestion => {
+    if (!q?.id || typeof q.question !== "string") return false;
+    if (q.type === "choice") return Array.isArray(q.options) && q.options.length > 0;
+    if (q.type === "true-false") return typeof q.answer === "boolean";
+    return false;
+  });
 };
 
 function LessonQuizComponent() {

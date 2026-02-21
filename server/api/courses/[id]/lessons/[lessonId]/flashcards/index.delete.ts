@@ -39,6 +39,9 @@ export default defineEventHandler(async (event) => {
       await storageApi.put(coursePath, course);
     }
 
+    // Best-effort cleanup of orphaned review data
+    await storageApi.delete(`courses/${courseId}/lessons/${lessonId}/reviews.json`);
+
     return { success: true };
   } catch (error: any) {
     console.error("Error deleting flashcards:", error);

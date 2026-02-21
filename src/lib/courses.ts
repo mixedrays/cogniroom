@@ -1,4 +1,4 @@
-import type { Course, CourseMetadata, TestsContent, LessonSection } from "./types";
+import type { Course, CourseMetadata, FlashcardsContent, QuizContent, ReviewData, LessonSection } from "./types";
 
 export type CourseSkillLevel = "beginner" | "intermediate" | "advanced";
 
@@ -154,7 +154,7 @@ export async function generateLessonFlashcards(
   additionalInstructions?: string,
   model?: string,
   includeContent?: boolean
-): Promise<{ success: boolean; content?: TestsContent; error?: string }> {
+): Promise<{ success: boolean; content?: FlashcardsContent; error?: string }> {
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards/generate`,
@@ -193,7 +193,7 @@ export async function generateLessonQuiz(
   additionalInstructions?: string,
   model?: string,
   includeContent?: boolean
-): Promise<{ success: boolean; content?: TestsContent; error?: string }> {
+): Promise<{ success: boolean; content?: QuizContent; error?: string }> {
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz/generate`,
@@ -283,7 +283,7 @@ export async function getLesson(
 export async function getLessonFlashcards(
   courseId: string,
   lessonId: string
-): Promise<{ content: { version: number; flashcards: import("./types").Flashcard[] } } | null> {
+): Promise<{ content: FlashcardsContent } | null> {
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards`
@@ -302,7 +302,7 @@ export async function getLessonFlashcards(
 export async function getLessonQuiz(
   courseId: string,
   lessonId: string
-): Promise<{ content: { version: number; quizQuestions: import("./types").QuizQuestion[] } } | null> {
+): Promise<{ content: QuizContent } | null> {
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz`
@@ -315,6 +315,46 @@ export async function getLessonQuiz(
   } catch (e) {
     console.error(`Error getting quiz ${lessonId}:`, e);
     return null;
+  }
+}
+
+export async function getFlashcardsReviews(
+  courseId: string,
+  lessonId: string
+): Promise<ReviewData | null> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/reviews`
+    );
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      throw new Error(response.statusText);
+    }
+    return await response.json();
+  } catch (e) {
+    console.error(`Error getting reviews ${lessonId}:`, e);
+    return null;
+  }
+}
+
+export async function saveFlashcardsReviews(
+  courseId: string,
+  lessonId: string,
+  data: ReviewData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/reviews`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }
+    );
+    return await response.json();
+  } catch (e) {
+    console.error("Error saving reviews:", e);
+    return { success: false, error: String(e) };
   }
 }
 
@@ -371,7 +411,7 @@ export async function generateLessonTests(
   lessonId: string,
   additionalInstructions?: string,
   model?: string
-): Promise<{ success: boolean; content?: TestsContent; error?: string }> {
+): Promise<{ success: boolean; content?: unknown; error?: string }> {
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/tests/generate`,

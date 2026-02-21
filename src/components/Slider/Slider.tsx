@@ -9,7 +9,7 @@ interface Slider {
   value: number;
   className?: string;
   onChange?: (index: number) => void;
-  stepsStatuses?: (boolean | undefined)[];
+  stepClasses?: (string | undefined)[];
   tooltipLabel?: string;
 }
 
@@ -38,7 +38,7 @@ const Slider: React.FC<Slider> = ({
   max,
   value = 0,
   className,
-  stepsStatuses,
+  stepClasses,
   onChange,
   tooltipLabel,
 }) => {
@@ -51,7 +51,7 @@ const Slider: React.FC<Slider> = ({
       />
 
       {Array.from({ length: max }).map((_, index) => {
-        const status = stepsStatuses?.[index];
+        const stepClass = stepClasses?.[index];
         const isCurrent = index === value;
         const tooltipContent = tooltipLabel
           ? `${tooltipLabel} ${index + 1}`
@@ -69,11 +69,10 @@ const Slider: React.FC<Slider> = ({
             >
               <div
                 className={cn(
-                  "absolute top-1/2 left-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all",
+                  "absolute top-1/2 left-1/2 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all",
                   index >= value ? "bg-primary" : "bg-secondary",
-                  status !== undefined && "border-background h-3 w-3 border-2",
-                  status === true && "bg-green-500!",
-                  status === false && "bg-red-500!",
+                  stepClass !== undefined && "border-background size-3 border-2",
+                  stepClass,
                   "border-background group-hover/point:bg-primary group-hover/point:h-5 group-hover/point:w-2 group-hover/point:border-2",
                   isCurrent && "border-background h-4 w-2 border-2"
                 )}

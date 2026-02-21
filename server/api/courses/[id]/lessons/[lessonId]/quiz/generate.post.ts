@@ -10,12 +10,19 @@ import {
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { storage, storageApi } from "@root/modules/storage";
 
+// Flat schema required because OpenAI structured outputs do not support oneOf/discriminatedUnion.
+// Fields that belong only to one type are nullable; type is reconstructed after parsing.
 const QuizDraftSchema = z.object({
   quizQuestions: z.array(
     z.object({
+      type: z.enum(["choice", "true-false"]),
       question: z.string(),
-      options: z.array(z.string()),
-      answer: z.string(),
+      options: z
+        .array(z.object({ text: z.string(), isCorrect: z.boolean() }))
+        .nullable(),
+      answer: z.boolean().nullable(),
+      explanation: z.string().nullable(),
+      difficulty: z.enum(["easy", "medium", "hard"]),
     })
   ),
 });
@@ -110,15 +117,25 @@ export default defineEventHandler(async (event) => {
 
     const draft = result.output as z.infer<typeof QuizDraftSchema>;
 
-    const content = {
-      version: 1,
-      quizQuestions: draft.quizQuestions.map((q) => ({
-        id: randomUUID(),
-        question: q.question,
-        options: q.options,
-        answer: q.answer,
-      })),
-    };
+    const quizQuestions = draft.quizQuestions
+      .map((q) => {
+        const base = {
+          id: randomUUID(),
+          question: q.question,
+          difficulty: q.difficulty,
+          ...(q.explanation ? { explanation: q.explanation } : {}),
+        };
+        if (q.type === "choice" && Array.isArray(q.options) && q.options.length > 0) {
+          return { ...base, type: "choice" as const, options: q.options };
+        }
+        if (q.type === "true-false" && q.answer !== null) {
+          return { ...base, type: "true-false" as const, answer: q.answer };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    const content = { version: 2, quizQuestions };
 
     await storageApi.post(
       `courses/${courseId}/lessons/${lessonId}/quiz.json`,

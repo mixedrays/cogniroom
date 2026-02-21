@@ -20,7 +20,6 @@ import { Switch } from "@/components/ui/switch";
 import { AlertDialog } from "@/components/AlertDialog";
 import { Slider as ProgressSlider } from "@/components/Slider";
 import { cn } from "@/lib/utils";
-import type { StudyAction } from "../hooks/useFlashCards";
 import { useFlashCards } from "../hooks/useFlashCards";
 import { useKnownCards } from "../hooks/useKnownCards";
 import { useSlidesApi } from "../hooks/useSlidesApi";
@@ -31,82 +30,28 @@ export type FlashcardData = {
   id: string;
   question: string;
   answer: string;
+  hint?: string;
+  difficulty?: "easy" | "medium" | "hard";
   knownCount?: number;
 };
 
-export type FlashcardsContextValue = {
-  flippedCards: number[];
-  knownCards: Record<string, { status: boolean; knownCount: number }>;
-  currentIndex: number;
-  trackProgress: boolean;
-  autoScroll: boolean;
-  shuffledCards: number[] | undefined;
-  flipCards: boolean;
-  hideKnownCards: boolean;
-  areCardsShuffled: boolean;
-  cardsToDisplay: FlashcardData[];
-  currentCard: FlashcardData | undefined;
-  currentCardId: string | undefined;
-  isCardKnown: boolean | undefined;
-  isCardUnknown: boolean | undefined;
-  cardsCount: number;
-  canFinishStudy: boolean;
-  statuses: Array<boolean | undefined>;
-  canResetStudyState: boolean;
-  dispatch: React.Dispatch<StudyAction>;
-  toggleCardFlip: (index: number) => void;
-  setCurrentIndex: (index: number) => void;
-  toggleKnownCard: (card: FlashcardData | undefined, status: boolean) => void;
-  resetStudyState: () => void;
-  toggleTrackProgress: (trackProgress: boolean) => void;
-  toggleAutoScroll: (autoScroll: boolean) => void;
-  toggleShuffleCards: (length: number | undefined) => void;
-  toggleFlipCards: (flipCards: boolean) => void;
-  toggleHideKnownCards: (hideKnownCards: boolean) => void;
-  handleFlipCard: () => void;
-  handleToggleFlipCards: () => void;
-  handleToggleShuffleCards: () => void;
-  handleToggleKnownCard: (
-    card: FlashcardData | undefined,
-    cardId: string | undefined,
-    status: boolean,
-    options?: {
-      canAutoScrollNext?: boolean;
-      onAutoScrollNext?: () => void;
-    }
-  ) => void;
-  slidesApi: ReturnType<typeof useSlidesApi>;
-  resetStudy: () => void;
-  finishStudy: () => Promise<void>;
-  toggleKnownCardWithAutoScroll: (status: boolean) => void;
-  onFinish?: (k: FlashcardsContextValue["knownCards"]) => Promise<void>;
-};
+type KnownCardsMap = ReturnType<
+  typeof useKnownCards<FlashcardData>
+>["knownCards"];
 
-const FlashcardsContext = createContext<FlashcardsContextValue | null>(null);
-
-export const useFlashcardsContext = (): FlashcardsContextValue => {
-  const context = useContext(FlashcardsContext);
-  if (!context) {
-    throw new Error(
-      "useFlashcardsContext must be used within Flashcards.Provider"
-    );
-  }
-  return context;
-};
+export type FlashcardsOnFinish = (k: KnownCardsMap) => Promise<void>;
 
 interface FlashcardsProviderProps {
   cards: FlashcardData[];
-  onFinish?: (k: FlashcardsContextValue["knownCards"]) => Promise<void>;
-  slidesThreshold?: number;
+  onFinish?: FlashcardsOnFinish;
   children: React.ReactNode;
 }
 
-const FlashcardsProvider = ({
+// Flashcards context value for Known Cards strategy
+const useFlashcardsKCValue = ({
   cards,
   onFinish,
-  slidesThreshold,
-  children,
-}: FlashcardsProviderProps) => {
+}: Pick<FlashcardsProviderProps, "cards" | "onFinish">) => {
   const knownCardsHook = useKnownCards<FlashcardData>();
   const flashcards = useFlashCards<FlashcardData>(cards, {
     cardFilter: knownCardsHook.cardFilter,
@@ -116,13 +61,8 @@ const FlashcardsProvider = ({
     slidesCount: flashcards.cardsToDisplay.length,
     currentIndex: flashcards.currentIndex,
     onIndexChange: flashcards.setCurrentIndex,
-    threshold: slidesThreshold,
   });
 
-  const isCardKnown = knownCardsHook.getIsCardKnown(flashcards.currentCardId);
-  const isCardUnknown = knownCardsHook.getIsCardUnknown(
-    flashcards.currentCardId
-  );
   const statuses = knownCardsHook.getStatuses(flashcards.cardsToDisplay);
   const canResetStudyState =
     flashcards.canResetStudyState ||
@@ -151,23 +91,55 @@ const FlashcardsProvider = ({
     );
   };
 
+  return {
+    ...flashcards,
+    ...knownCardsHook,
+    statuses,
+    canResetStudyState,
+    canFinishStudy: knownCardsHook.canFinishStudy,
+    slidesApi,
+    resetStudy,
+    finishStudy,
+    onFinish,
+    toggleKnownCardWithAutoScroll,
+  };
+};
+
+// Flashcards context value for SM-2 strategy
+const useFlashcardsSM2Value = () => {
+  // todo: integrate sm-2 hook here same way as known cards hook implemented
+  return {};
+};
+
+// Flashcards study strategy switch
+const useFlashcardsValue = useFlashcardsKCValue;
+
+export type FlashcardsContextValue = ReturnType<typeof useFlashcardsValue>;
+
+const FlashcardsContext = createContext<FlashcardsContextValue | null>(null);
+
+export const useFlashcardsContext = (): FlashcardsContextValue => {
+  const context = useContext(FlashcardsContext);
+  if (!context) {
+    throw new Error(
+      "useFlashcardsContext must be used within Flashcards.Provider"
+    );
+  }
+  return context;
+};
+
+const FlashcardsProvider = ({
+  cards,
+  onFinish,
+  children,
+}: FlashcardsProviderProps) => {
+  const value = useFlashcardsValue({
+    cards,
+    onFinish,
+  });
+
   return (
-    <FlashcardsContext.Provider
-      value={{
-        ...flashcards,
-        ...knownCardsHook,
-        isCardKnown,
-        isCardUnknown,
-        statuses,
-        canResetStudyState,
-        canFinishStudy: knownCardsHook.canFinishStudy,
-        slidesApi,
-        resetStudy,
-        finishStudy,
-        onFinish,
-        toggleKnownCardWithAutoScroll,
-      }}
-    >
+    <FlashcardsContext.Provider value={value}>
       {children}
     </FlashcardsContext.Provider>
   );
@@ -236,7 +208,7 @@ const FlashcardsKeyboardShortcuts = ({}) => {
 interface FlashcardsContainerProps {
   className?: string;
   children: React.ReactNode;
-  onFinish?: (k: FlashcardsContextValue["knownCards"]) => Promise<void>;
+  onFinish?: FlashcardsOnFinish;
   cards: FlashcardData[];
 }
 
@@ -331,7 +303,7 @@ const FlashcardsTopbar = ({ onReset }: FlashcardsTopbarProps) => {
           >
             <IconShuffle className={cn(areCardsShuffled && "text-primary")} />
             {areCardsShuffled && (
-              <span className="bg-primary absolute top-[75%] left-1/2 h-[3px] w-[3px] -translate-x-1/2 rounded-full" />
+              <span className="bg-primary absolute top-[80%] left-1/2 size-0.75 -translate-x-1/2 rounded-full" />
             )}
           </Button>
         </Tooltip>
@@ -391,7 +363,7 @@ const FlashcardsTopbar = ({ onReset }: FlashcardsTopbarProps) => {
         max={cardsCount}
         value={currentIndex}
         onChange={slidesApi.scrollToSlide}
-        stepsStatuses={trackProgress ? statuses : undefined}
+        stepClasses={trackProgress ? statuses : undefined}
       />
     </div>
   );
@@ -412,33 +384,31 @@ const FlashcardsSlider = ({ className }: FlashcardsSliderProps) => {
   } = useFlashcardsContext();
 
   return (
-    <>
-      <div
-        ref={slidesApi.scrollContainerRef}
-        className={cn(
-          "grow snap-y snap-mandatory overflow-y-auto scroll-smooth",
-          className
-        )}
-      >
-        {cardsToDisplay.map((card, index) => (
-          <div
-            key={card.id}
-            ref={slidesApi.getSlideRef(index)}
-            className="flex h-full w-full snap-start snap-always items-center justify-center px-4 pb-6 pt-4"
-            onClick={handleFlipCard}
-          >
-            <StudyFlashCard
-              question={card.question}
-              answer={card.answer}
-              knownCount={knownCards[card.id]?.knownCount ?? card.knownCount}
-              isFlipped={flippedCards.includes(index)}
-              className="h-full w-full sm:h-auto"
-              isFlippedByDefault={flipCards}
-            />
-          </div>
-        ))}
-      </div>
-    </>
+    <div
+      ref={slidesApi.scrollContainerRef}
+      className={cn(
+        "grow snap-y snap-mandatory overflow-y-auto scroll-smooth no-scrollbar",
+        className
+      )}
+    >
+      {cardsToDisplay.map((card, index) => (
+        <div
+          key={card.id}
+          ref={slidesApi.getSlideRef(index)}
+          className="flex h-full w-full snap-start snap-always items-center justify-center px-4 pb-6 pt-4"
+          onClick={handleFlipCard}
+        >
+          <StudyFlashCard
+            question={card.question}
+            answer={card.answer}
+            knownCount={knownCards[card.id]?.knownCount ?? card.knownCount}
+            isFlipped={flippedCards.includes(index)}
+            className="h-full w-full sm:h-auto"
+            isFlippedByDefault={flipCards}
+          />
+        </div>
+      ))}
+    </div>
   );
 };
 

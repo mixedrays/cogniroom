@@ -22,18 +22,20 @@ const KnownCardControls = ({
 }: KnownCardControlsProps) => {
   const {
     trackProgress,
-    isCardKnown,
-    isCardUnknown,
     canFinishStudy,
     onFinish,
     toggleKnownCardWithAutoScroll,
     slidesApi,
+    currentCardId,
+    getIsCardKnownStatus,
     finishStudy,
   } = useFlashcardsContext();
 
   if (!trackProgress) return null;
 
   const showFinish = Boolean(onFinish);
+  const isCardKnown = getIsCardKnownStatus(currentCardId) === true;
+  const isCardUnknown = getIsCardKnownStatus(currentCardId) === false;
 
   return (
     <>
@@ -41,9 +43,7 @@ const KnownCardControls = ({
         content={
           <>
             I don&apos;t know this card{" "}
-            <span className="text-muted-foreground text-xs">
-              (Arrow Left)
-            </span>
+            <span className="text-muted-foreground text-xs">(Arrow Left)</span>
           </>
         }
       >
@@ -91,9 +91,7 @@ const KnownCardControls = ({
         content={
           <>
             I know this card{" "}
-            <span className="text-muted-foreground text-xs">
-              (Arrow Right)
-            </span>
+            <span className="text-muted-foreground text-xs">(Arrow Right)</span>
           </>
         }
       >
