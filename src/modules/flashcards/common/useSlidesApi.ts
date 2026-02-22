@@ -11,7 +11,7 @@ interface UseSlidesApiOptions {
   threshold?: number;
 }
 
-interface SlidesApi {
+export interface SlidesApi {
   /** Ref to attach to the scroll container */
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   /** Function to get ref callback for each slide */

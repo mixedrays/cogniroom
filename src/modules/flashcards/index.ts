@@ -1,11 +1,13 @@
-export { default as StudyFlashCard } from "./components/Flashcard";
-export { FlashcardsSM2 } from "./components/FlashcardsSM2";
-export { FlashcardsKnownCards } from "./components/FlashcardsKnownCards";
-export * from "./components/Flashcard";
-export * from "./components/Flashcards";
-export { default as SM2QualityControls } from "./components/SM2QualityControls";
-export { default as SM2SessionTopbar } from "./components/SM2SessionTopbar";
-export * from "./hooks/useFlashCards";
-export * from "./hooks/useKnownCards";
-export * from "./hooks/useSlidesApi";
-export * from "./hooks/useFlashcardsSM2";
+export { default as StudyFlashCard } from "./common/Flashcard";
+export * from "./common/Flashcard";
+export * from "./common/useFlashCards";
+export * from "./common/useSlidesApi";
+export * from "./common/context";
+
+export { KnownCardsUI } from "./strategies/KnownCards/KnownCardsUI";
+export * from "./strategies/KnownCards/context";
+export * from "./strategies/KnownCards/useKnownCards";
+
+export { SM2UI } from "./strategies/SM2/SM2UI";
+export * from "./strategies/SM2/context";
+export * from "./strategies/SM2/useFlashcardsSM2";

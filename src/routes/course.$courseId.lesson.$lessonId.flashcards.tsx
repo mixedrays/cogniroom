@@ -17,7 +17,7 @@ import {
   saveFlashcardsReviews,
 } from "@/lib/courses";
 import { Button } from "@/components/ui/button";
-import { FlashcardsSM2 } from "@/modules/flashcards/components/FlashcardsSM2";
+import { SM2UI } from "@/modules/flashcards/strategies/SM2/SM2UI";
 import type { Flashcard, ReviewData } from "@/lib/types";
 import {
   ContentCreationDialog,
@@ -269,17 +269,12 @@ function LessonFlashcardsComponent() {
       {hasCards ? (
         <div className="flex-1 min-h-0">
           <div className="max-w-4xl w-full mx-auto min-h-0 p-4 h-full">
-            <FlashcardsSM2.Container
+            <SM2UI
               cards={cards}
               reviewData={reviewData}
               onSave={handleSave}
               className="m-auto h-full"
-            >
-              <FlashcardsSM2.KeyboardShortcuts />
-              <FlashcardsSM2.Topbar />
-              <FlashcardsSM2.Card />
-              <FlashcardsSM2.Controls />
-            </FlashcardsSM2.Container>
+            />
           </div>
         </div>
       ) : (

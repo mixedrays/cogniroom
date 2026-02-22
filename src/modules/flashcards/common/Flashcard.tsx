@@ -49,6 +49,7 @@ interface FlashcardProps {
   isFlipped: boolean;
   className?: string;
   isFlippedByDefault?: boolean;
+  onClick?: () => void;
 }
 
 const Flashcard = ({
@@ -58,9 +59,10 @@ const Flashcard = ({
   knownCount,
   className,
   isFlippedByDefault = false,
+  onClick,
 }: FlashcardProps) => {
   return (
-    <div className={cn("perspective-[4000px]", className)}>
+    <div className={cn("perspective-[4000px]", className)} onClick={onClick}>
       <div
         className={cn(
           "aspect-3/2 h-full w-full",

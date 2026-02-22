@@ -7,29 +7,30 @@ import {
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useFlashcardsContext } from "./Flashcards";
+import { useSharedContext } from "../../common/context";
+import { useKnownCardsContext } from "./context";
 
-interface KnownCardControlsProps {
+interface ControlsProps {
   isFinishing?: boolean;
   isRecordingSession?: boolean;
   finishShortcutLabel?: string;
 }
 
-const KnownCardControls = ({
+export function Controls({
   isFinishing = false,
   isRecordingSession = false,
   finishShortcutLabel,
-}: KnownCardControlsProps) => {
+}: ControlsProps) {
+  const { slidesApi } = useSharedContext();
   const {
     trackProgress,
     canFinishStudy,
     onFinish,
     toggleKnownCardWithAutoScroll,
-    slidesApi,
     currentCardId,
     getIsCardKnownStatus,
     finishStudy,
-  } = useFlashcardsContext();
+  } = useKnownCardsContext();
 
   if (!trackProgress) return null;
 
@@ -106,6 +107,4 @@ const KnownCardControls = ({
       </Tooltip>
     </>
   );
-};
-
-export default KnownCardControls;
+}

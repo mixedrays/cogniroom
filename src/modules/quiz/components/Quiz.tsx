@@ -10,7 +10,7 @@ import { AlertDialog } from "@/components/AlertDialog";
 import { Slider as ProgressSlider } from "@/components/Slider";
 import { cn } from "@/lib/utils";
 import type { QuizQuestion } from "@/lib/types";
-import { useSlidesApi } from "@/modules/flashcards/hooks/useSlidesApi";
+import { useSlidesApi } from "@/modules/flashcards/common/useSlidesApi";
 import { useQuiz } from "../hooks/useQuiz";
 import { useQuizAnswers } from "../hooks/useQuizAnswers";
 import { QuizOption } from "./QuizOption";
