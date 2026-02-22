@@ -57,10 +57,9 @@ const useFlashcardsSM2Value = ({
   const handleToggleShuffle = useCallback(() => {
     flashcards.handleToggleShuffleCards();
     setRatingColors([]);
-    flashcards.resetStudyState();
     sm2.resetSession();
     slidesApi.scrollToSlide(0);
-  }, [flashcards.areCardsShuffled, sm2.resetSession, slidesApi.scrollToSlide]);
+  }, [flashcards.handleToggleShuffleCards, sm2.resetSession, slidesApi.scrollToSlide]);
 
   const rateCard = useCallback(
     async (q: QualityRating) => {

@@ -48,7 +48,7 @@ export function studyReducer(
         length === undefined
           ? undefined
           : Array.from({ length }, (_, i) => i).sort(() => Math.random() - 0.5);
-      return { ...state, shuffledCards };
+      return { ...state, shuffledCards, flippedCards: [] };
     }
     case "TOGGLE_FLIP_CARDS": {
       const { flipCards } = action;
