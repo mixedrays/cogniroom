@@ -6,16 +6,24 @@ import {
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useSharedContext } from "./context";
 
 interface BottomBarProps {
+  onScrollToPrev: () => void;
+  onScrollToNext: () => void;
+  isFirstSlide: boolean;
+  isLastSlide: boolean;
   children?: React.ReactNode;
   className?: string;
 }
 
-export function BottomBar({ children, className }: BottomBarProps) {
-  const { slidesApi } = useSharedContext();
-
+export function BottomBar({
+  onScrollToPrev,
+  onScrollToNext,
+  isFirstSlide,
+  isLastSlide,
+  children,
+  className,
+}: BottomBarProps) {
   return (
     <div
       className={cn(
@@ -35,8 +43,8 @@ export function BottomBar({ children, className }: BottomBarProps) {
           <Button
             variant="secondary"
             size="icon-lg"
-            onClick={slidesApi.scrollToPrev}
-            disabled={slidesApi.isFirstSlide}
+            onClick={onScrollToPrev}
+            disabled={isFirstSlide}
           >
             <IconPrev />
           </Button>
@@ -57,8 +65,8 @@ export function BottomBar({ children, className }: BottomBarProps) {
           <Button
             variant="secondary"
             size="icon-lg"
-            onClick={slidesApi.scrollToNext}
-            disabled={slidesApi.isLastSlide}
+            onClick={onScrollToNext}
+            disabled={isLastSlide}
           >
             <IconNext />
           </Button>

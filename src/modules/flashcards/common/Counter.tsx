@@ -1,10 +1,20 @@
-import { useSharedContext } from "./context";
+import { cn } from "@/lib/utils";
 
-export function Counter() {
-  const { currentIndex, totalCards } = useSharedContext();
+interface CounterProps {
+  currentIndex: number;
+  totalCards: number;
+  className?: string;
+}
+
+export function Counter({ currentIndex, totalCards, className }: CounterProps) {
   return (
-    <p className="text-muted-foreground absolute top-1/2 left-1/2 m-auto block -translate-x-1/2 -translate-y-1/2 font-sans text-sm leading-normal font-light tracking-normal antialiased">
+    <div
+      className={cn(
+        "text-muted-foreground m-auto font-sans text-sm leading-normal font-light tracking-normal antialiased",
+        className
+      )}
+    >
       {currentIndex + 1} / {totalCards}
-    </p>
+    </div>
   );
 }

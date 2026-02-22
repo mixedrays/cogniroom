@@ -2,10 +2,13 @@ import { Undo as IconReset } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
 import { AlertDialog } from "@/components/AlertDialog";
-import { useSharedContext } from "./context";
 
-export function ResetButton() {
-  const { canReset, onReset } = useSharedContext();
+interface ResetButtonProps {
+  canReset: boolean;
+  onReset: () => void;
+}
+
+export function ResetButton({ canReset, onReset }: ResetButtonProps) {
   return (
     <Tooltip content="Reset study session">
       <span>

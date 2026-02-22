@@ -7,21 +7,21 @@ import {
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useSharedContext } from "../../common/context";
 import { useKnownCardsContext } from "./context";
 
 interface ControlsProps {
+  isLastSlide: boolean;
   isFinishing?: boolean;
   isRecordingSession?: boolean;
   finishShortcutLabel?: string;
 }
 
 export function Controls({
+  isLastSlide,
   isFinishing = false,
   isRecordingSession = false,
   finishShortcutLabel,
 }: ControlsProps) {
-  const { slidesApi } = useSharedContext();
   const {
     trackProgress,
     canFinishStudy,
@@ -73,7 +73,7 @@ export function Controls({
         >
           <Button
             size="lg"
-            variant={slidesApi.isLastSlide ? "default" : "secondary"}
+            variant={isLastSlide ? "default" : "secondary"}
             className="m-auto"
             onClick={finishStudy}
             disabled={isFinishing || isRecordingSession || !canFinishStudy}

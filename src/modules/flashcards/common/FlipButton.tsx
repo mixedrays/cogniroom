@@ -2,17 +2,20 @@ import { RotateCcw as IconFlip } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useSharedContext } from "./context";
 
-export function FlipButton() {
-  const { flipCards, handleToggleFlipCards } = useSharedContext();
+interface FlipButtonProps {
+  flipCards: boolean;
+  onToggle: () => void;
+}
+
+export function FlipButton({ flipCards, onToggle }: FlipButtonProps) {
   return (
     <Tooltip content="Flip all cards">
       <Button
         className="relative ml-auto"
         variant="ghost"
         size="icon"
-        onClick={handleToggleFlipCards}
+        onClick={onToggle}
       >
         <IconFlip className={cn(flipCards && "text-primary")} />
         {flipCards && (

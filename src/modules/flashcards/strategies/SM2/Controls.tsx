@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { useSharedContext } from "../../common/context";
 import { useSM2Context } from "./context";
 import type { QualityRating } from "./useFlashcardsSM2";
 
@@ -13,8 +12,12 @@ const ratings: {
   { label: "Easy", q: 5, variant: "default" },
 ];
 
-export function Controls() {
-  const { currentIndex, onFlipCard } = useSharedContext();
+interface ControlsProps {
+  currentIndex: number;
+  onFlipCard: (index: number) => void;
+}
+
+export function Controls({ currentIndex, onFlipCard }: ControlsProps) {
   const { currentCard, isAnswerVisible, sessionComplete, isSaving, rateCard } =
     useSM2Context();
 

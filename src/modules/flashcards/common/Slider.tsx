@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
+import type { SlidesApi } from "./useSlidesApi";
 import Flashcard from "./Flashcard";
-import { useSharedContext } from "./context";
 
 export interface SliderCard {
   id: string;
@@ -11,12 +11,21 @@ export interface SliderCard {
 
 interface SliderProps {
   cards: SliderCard[];
+  flipCards: boolean;
+  flippedCards: number[];
+  onFlipCard: (index: number) => void;
+  slidesApi: SlidesApi;
   className?: string;
 }
 
-export function Slider({ cards, className }: SliderProps) {
-  const { flipCards, flippedCards, onFlipCard, slidesApi } = useSharedContext();
-
+export function Slider({
+  cards,
+  flipCards,
+  flippedCards,
+  onFlipCard,
+  slidesApi,
+  className,
+}: SliderProps) {
   return (
     <div
       ref={slidesApi.scrollContainerRef}

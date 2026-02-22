@@ -8,37 +8,72 @@ import { FlipButton } from "../../common/FlipButton";
 import { ShuffleButton } from "../../common/ShuffleButton";
 import { ProgressBar } from "../../common/ProgressBar";
 import { Slider } from "../../common/Slider";
+import { useSharedContext } from "../../common/context";
 import { SM2Provider, useSM2Context } from "./context";
 import { Controls } from "./Controls";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 
 function SM2Topbar() {
   const { ratingColors } = useSM2Context();
+  const {
+    currentIndex,
+    totalCards,
+    flipCards,
+    areCardsShuffled,
+    canReset,
+    onReset,
+    handleToggleFlipCards,
+    handleToggleShuffleCards,
+    slidesApi,
+  } = useSharedContext();
+
   return (
     <div>
-      <Topbar>
-        <ResetButton />
-        <Counter />
-        <FlipButton />
-        <ShuffleButton />
+      <Topbar className="relative">
+        <ResetButton canReset={canReset} onReset={onReset} />
+        <Counter
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+          currentIndex={currentIndex}
+          totalCards={totalCards}
+        />
+        <FlipButton flipCards={flipCards} onToggle={handleToggleFlipCards} />
+        <ShuffleButton
+          areCardsShuffled={areCardsShuffled}
+          onToggle={handleToggleShuffleCards}
+        />
       </Topbar>
-      <ProgressBar stepClasses={ratingColors} />
+      <ProgressBar
+        currentIndex={currentIndex}
+        totalCards={totalCards}
+        onScrollToSlide={slidesApi.scrollToSlide}
+        stepClasses={ratingColors}
+      />
     </div>
   );
 }
 
 function SM2Slider() {
   const { sessionCards } = useSM2Context();
-  return <Slider cards={sessionCards} />;
+  const { flipCards, flippedCards, onFlipCard, slidesApi } = useSharedContext();
+  return (
+    <Slider
+      cards={sessionCards}
+      flipCards={flipCards}
+      flippedCards={flippedCards}
+      onFlipCard={onFlipCard}
+      slidesApi={slidesApi}
+    />
+  );
 }
 
 function SM2Layout({ className }: { className?: string }) {
+  const { currentIndex, onFlipCard } = useSharedContext();
   return (
     <div className={cn("flex flex-col h-full", className)}>
       <KeyboardShortcuts />
       <SM2Topbar />
       <SM2Slider />
-      <Controls />
+      <Controls currentIndex={currentIndex} onFlipCard={onFlipCard} />
     </div>
   );
 }
