@@ -8,6 +8,7 @@ import { FlipButton } from "../../common/FlipButton";
 import { ShuffleButton } from "../../common/ShuffleButton";
 import { ProgressBar } from "../../common/ProgressBar";
 import { Slider } from "../../common/Slider";
+import { BottomBar } from "../../common/BottomBar";
 import { useSharedContext } from "../../common/context";
 import { SM2Provider, useSM2Context } from "./context";
 import { Controls } from "./Controls";
@@ -67,13 +68,20 @@ function SM2Slider() {
 }
 
 function SM2Layout({ className }: { className?: string }) {
-  const { currentIndex, onFlipCard } = useSharedContext();
+  const { slidesApi } = useSharedContext();
   return (
     <div className={cn("flex flex-col h-full", className)}>
       <KeyboardShortcuts />
       <SM2Topbar />
       <SM2Slider />
-      <Controls currentIndex={currentIndex} onFlipCard={onFlipCard} />
+      <BottomBar
+        onScrollToPrev={slidesApi.scrollToPrev}
+        onScrollToNext={slidesApi.scrollToNext}
+        isFirstSlide={slidesApi.isFirstSlide}
+        isLastSlide={slidesApi.isLastSlide}
+      >
+        <Controls />
+      </BottomBar>
     </div>
   );
 }
