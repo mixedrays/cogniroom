@@ -38,3 +38,6 @@ temp/
 .settings/
 
 data/
+
+# E2E test artifacts
+artifacts/
