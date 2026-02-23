@@ -207,6 +207,7 @@ export default function CourseList() {
                                 <div className="flex items-center justify-between gap-2">
                                   <Button
                                     variant="secondary"
+                                    nativeButton={false}
                                     render={
                                       <Link
                                         to="/course/$courseId"

@@ -1,4 +1,4 @@
-import { Link, useParams, useLocation } from "@tanstack/react-router";
+import { useParams, useLocation, useNavigate } from "@tanstack/react-router";
 import { BookOpen, Layers, ListChecks, Code } from "lucide-react";
 import type { Lesson } from "@/lib/types";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
@@ -24,6 +24,7 @@ export function LessonItem({
     lessonId?: string;
   };
   const location = useLocation();
+  const navigate = useNavigate();
 
   if (!courseId) return null;
 
@@ -51,12 +52,14 @@ export function LessonItem({
           "group/lesson flex-col items-start gap-1.5 h-auto py-2 transition-colors",
           isActive && "bg-primary/15!"
         )}
-        render={
-          <Link
-            to="/course/$courseId/lesson/$lessonId"
-            params={{ courseId, lessonId: lesson.id }}
-          />
-        }
+        onClick={() => {
+          // Navigate to the lesson's main page (theory) when the button is clicked using router navigation
+          // This will ensure that the URL updates correctly and the active state is managed by the router
+          navigate({
+            to: "/course/$courseId/lesson/$lessonId",
+            params: { courseId, lessonId: lesson.id },
+          });
+        }}
       >
         <div className="flex items-center gap-2 w-full min-w-0">
           <span className="text-sm truncate flex-1">
@@ -83,7 +86,9 @@ export function LessonItem({
             hasContent={lesson.hasFlashcards ?? false}
             isActive={isActive}
             isActiveSection={activeSection === "flashcards"}
-            completed={lesson.hasFlashcards && (lesson.flashcardsCompleted ?? false)}
+            completed={
+              lesson.hasFlashcards && (lesson.flashcardsCompleted ?? false)
+            }
             icon={<Layers />}
             label="Flashcards"
             to="/course/$courseId/lesson/$lessonId/flashcards"

@@ -210,10 +210,10 @@ export function AgentCreationDialog({
       {trigger ? (
         <DialogTrigger render={trigger} />
       ) : (
-        <Button render={DialogTrigger}>
+        <DialogTrigger render={<Button />}>
           <Plus className="w-4 h-4" />
           <span>Create Agent</span>
-        </Button>
+        </DialogTrigger>
       )}
 
       <DialogContent className="sm:max-w-lg">

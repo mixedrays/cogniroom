@@ -2,7 +2,7 @@ import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { getCourse } from "@/lib/courses";
 import { PageHeader } from "@/components/PageHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { Layers, ListChecks } from "lucide-react";
+import { Code, Layers, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/course/$courseId/")({
@@ -109,10 +109,14 @@ function CourseComponent() {
                         <Button
                           size="icon-sm"
                           variant="ghost"
+                          nativeButton={false}
                           render={
                             <Link
                               to="/course/$courseId/lesson/$lessonId/flashcards"
-                              params={{ courseId: course.id, lessonId: lesson.id }}
+                              params={{
+                                courseId: course.id,
+                                lessonId: lesson.id,
+                              }}
                               title="Flashcards"
                             />
                           }
@@ -122,15 +126,36 @@ function CourseComponent() {
                         <Button
                           size="icon-sm"
                           variant="ghost"
+                          nativeButton={false}
                           render={
                             <Link
                               to="/course/$courseId/lesson/$lessonId/quiz"
-                              params={{ courseId: course.id, lessonId: lesson.id }}
+                              params={{
+                                courseId: course.id,
+                                lessonId: lesson.id,
+                              }}
                               title="Quiz"
                             />
                           }
                         >
                           <ListChecks />
+                        </Button>
+                        <Button
+                          size="icon-sm"
+                          variant="ghost"
+                          nativeButton={false}
+                          render={
+                            <Link
+                              to="/course/$courseId/lesson/$lessonId/exercises"
+                              params={{
+                                courseId: course.id,
+                                lessonId: lesson.id,
+                              }}
+                              title="Exercises"
+                            />
+                          }
+                        >
+                          <Code />
                         </Button>
                       </div>
                     </div>

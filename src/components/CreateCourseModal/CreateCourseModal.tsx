@@ -273,10 +273,10 @@ export default function CreateCourseModal({
 
   return (
     <Dialog>
-      <Button render={DialogTrigger} className="w-full">
+      <DialogTrigger render={<Button className="w-full" />}>
         <Plus />
         <span>Create Course</span>
-      </Button>
+      </DialogTrigger>
 
       <DialogContent className="sm:max-w-125">
         <DialogHeader>

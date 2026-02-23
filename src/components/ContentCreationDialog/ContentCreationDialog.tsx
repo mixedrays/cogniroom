@@ -548,10 +548,10 @@ function CreateModeDialog({
       {trigger ? (
         <DialogTrigger render={trigger} />
       ) : (
-        <Button render={DialogTrigger}>
+        <DialogTrigger render={<Button />}>
           <Plus className="w-4 h-4" />
           <span>Create Content</span>
-        </Button>
+        </DialogTrigger>
       )}
 
       <DialogContent className="sm:max-w-md">
@@ -865,10 +865,10 @@ function GenerateModeDialog({
       {trigger ? (
         <DialogTrigger render={trigger} />
       ) : (
-        <Button render={DialogTrigger} size="lg" className="gap-2">
+        <DialogTrigger render={<Button size="lg" className="gap-2" />}>
           <Plus className="w-4 h-4" />
           Create {config.label}
-        </Button>
+        </DialogTrigger>
       )}
 
       <DialogContent className="sm:max-w-125">

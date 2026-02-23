@@ -31,7 +31,7 @@ export default function CourseTree() {
     return (
       <div className="flex flex-col h-full items-center justify-center p-4">
         <p className="text-muted-foreground text-sm">Course not found</p>
-        <Button variant="link" render={<Link to="/">Go back</Link>}>
+        <Button variant="link" nativeButton={false} render={<Link to="/">Go back</Link>}>
           Return home
         </Button>
       </div>

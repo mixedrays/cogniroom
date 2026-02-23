@@ -176,12 +176,15 @@ export function LessonContentActions({
       />
 
       <AlertDialog>
-        <Button
-          render={<AlertDialogTrigger />}
-          variant="outline"
-          size="sm"
-          className="w-full justify-start gap-2 text-destructive hover:text-destructive"
-          disabled={isDeleting || isRegenerating}
+        <AlertDialogTrigger
+          render={
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start gap-2 text-destructive hover:text-destructive"
+              disabled={isDeleting || isRegenerating}
+            />
+          }
         >
           {isDeleting ? (
             <Loader2 className="size-4 animate-spin" />
@@ -189,7 +192,7 @@ export function LessonContentActions({
             <Trash2 className="size-4" />
           )}
           Delete {label}
-        </Button>
+        </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {label}?</AlertDialogTitle>

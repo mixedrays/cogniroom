@@ -16,6 +16,7 @@ export function CourseHeader({ stats }: CourseHeaderProps) {
       <SidebarHeader className="border-b border-sidebar-border">
         <Button
           variant="ghost"
+          nativeButton={false}
           className="shrink-0 w-full justify-start"
           render={
             <Link to="/">

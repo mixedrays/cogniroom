@@ -1,3 +1,4 @@
+import { Fragment, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronDownIcon } from "lucide-react";
 import {
@@ -27,6 +28,7 @@ export type BreadcrumbItemConfig = {
   title: string;
   link?: BreadcrumbLinkTarget;
   current?: boolean;
+  icon?: ReactNode;
 };
 
 export type BreadcrumbsProps = {
@@ -85,8 +87,9 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
             : null;
 
           return (
-            <BreadcrumbItem key={`breadcrumb-${index}`} className="min-w-0">
+            <Fragment key={`breadcrumb-${index}`}>
               {index > 0 && <BreadcrumbSeparator />}
+              <BreadcrumbItem className="min-w-0">
               {isDropdown ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center gap-1 min-w-0">
@@ -105,21 +108,24 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
                           typeof dropdownItem.link === "string" ? (
                             <Link
                               to={dropdownItem.link}
-                              className="flex w-full items-center"
+                              className="flex w-full items-center gap-2"
                             >
+                              {dropdownItem.icon}
                               {dropdownItem.title}
                             </Link>
                           ) : (
                             <Link
                               to={dropdownItem.link.to}
                               params={dropdownItem.link.params}
-                              className="flex w-full items-center"
+                              className="flex w-full items-center gap-2"
                             >
+                              {dropdownItem.icon}
                               {dropdownItem.title}
                             </Link>
                           )
                         ) : (
-                          <span className="flex w-full items-center">
+                          <span className="flex w-full items-center gap-2">
+                            {dropdownItem.icon}
                             {dropdownItem.title}
                           </span>
                         )}
@@ -130,7 +136,8 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
               ) : (
                 renderBreadcrumbLink(item as BreadcrumbItemConfig, isLast)
               )}
-            </BreadcrumbItem>
+              </BreadcrumbItem>
+            </Fragment>
           );
         })}
       </BreadcrumbList>

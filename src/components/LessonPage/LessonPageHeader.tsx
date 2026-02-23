@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { BookOpen, Layers, ListChecks, Code } from "lucide-react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ export function LessonPageHeader({
           [
             {
               title: "Theory",
+              icon: <BookOpen className="size-4" />,
               link: {
                 to: "/course/$courseId/lesson/$lessonId",
                 params: { courseId, lessonId },
@@ -57,6 +59,7 @@ export function LessonPageHeader({
             },
             {
               title: "Flashcards",
+              icon: <Layers className="size-4" />,
               link: {
                 to: "/course/$courseId/lesson/$lessonId/flashcards",
                 params: { courseId, lessonId },
@@ -65,6 +68,7 @@ export function LessonPageHeader({
             },
             {
               title: "Quiz",
+              icon: <ListChecks className="size-4" />,
               link: {
                 to: "/course/$courseId/lesson/$lessonId/quiz",
                 params: { courseId, lessonId },
@@ -73,6 +77,7 @@ export function LessonPageHeader({
             },
             {
               title: "Exercises",
+              icon: <Code className="size-4" />,
               link: {
                 to: "/course/$courseId/lesson/$lessonId/exercises",
                 params: { courseId, lessonId },
