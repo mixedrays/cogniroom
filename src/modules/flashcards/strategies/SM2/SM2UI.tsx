@@ -13,6 +13,7 @@ import { useSharedContext } from "../../common/context";
 import { SM2Provider, useSM2Context } from "./context";
 import { Controls } from "./Controls";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
+import { SessionComplete } from "./SessionComplete";
 
 function SM2Topbar() {
   const { ratingColors } = useSM2Context();
@@ -102,7 +103,7 @@ export function SM2UI({ cards, reviewData, onSave, className }: SM2UIProps) {
 }
 
 function SM2UIContent({ className }: { className?: string }) {
-  const { sessionCards, sessionComplete, resetSession, setShowAllCards } =
+  const { sessionCards, sessionComplete, sessionStats, resetSession, setShowAllCards } =
     useSM2Context();
 
   if (sessionCards.length === 0) {
@@ -120,17 +121,7 @@ function SM2UIContent({ className }: { className?: string }) {
   }
 
   if (sessionComplete) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-4">
-        <p className="text-xl font-semibold">Session complete!</p>
-        <p className="text-muted-foreground text-sm">
-          All {sessionCards.length} cards reviewed.
-        </p>
-        <Button variant="outline" onClick={resetSession}>
-          Review again
-        </Button>
-      </div>
-    );
+    return <SessionComplete stats={sessionStats} onReset={resetSession} />;
   }
 
   return <SM2Layout className={className} />;

@@ -1,7 +1,44 @@
-import { useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback, useReducer } from "react";
 import type { Flashcard, ReviewEntry, ReviewData } from "@/lib/types";
 
 export type QualityRating = 0 | 1 | 2 | 3 | 4 | 5;
+
+type SM2State = {
+  currentIndex: number;
+  entriesMap: Record<string, ReviewEntry>;
+  isSaving: boolean;
+};
+
+type SM2Action =
+  | { type: "SET_CURRENT_INDEX"; value: number | ((prev: number) => number) }
+  | { type: "RATE_CARD_START"; entriesMap: Record<string, ReviewEntry> }
+  | { type: "RATE_CARD_FINISH" }
+  | { type: "RESET_SESSION" };
+
+function sm2Reducer(state: SM2State, action: SM2Action): SM2State {
+  switch (action.type) {
+    case "SET_CURRENT_INDEX": {
+      const nextIndex =
+        typeof action.value === "function"
+          ? action.value(state.currentIndex)
+          : action.value;
+      return { ...state, currentIndex: nextIndex };
+    }
+    case "RATE_CARD_START":
+      return {
+        ...state,
+        entriesMap: action.entriesMap,
+        currentIndex: state.currentIndex + 1,
+        isSaving: true,
+      };
+    case "RATE_CARD_FINISH":
+      return { ...state, isSaving: false };
+    case "RESET_SESSION":
+      return { ...state, currentIndex: 0 };
+    default:
+      return state;
+  }
+}
 
 export function applySM2(
   entry: ReviewEntry | undefined,
@@ -98,24 +135,37 @@ export function useFlashcardsSM2(
     };
   }, [cards, initialReviewData, now, showAllCards]);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [entriesMap, setEntriesMap] =
-    useState<Record<string, ReviewEntry>>(initialEntriesMap);
-  const [isSaving, setIsSaving] = useState(false);
+  const [state, dispatch] = useReducer(sm2Reducer, {
+    currentIndex: 0,
+    entriesMap: initialEntriesMap,
+    isSaving: false,
+  });
 
-  const sessionComplete = currentIndex >= sessionCards.length;
-  const currentCard = sessionCards[currentIndex];
+  const sessionComplete = state.currentIndex >= sessionCards.length;
+  const currentCard = sessionCards[state.currentIndex];
+
+  const setCurrentIndex = useCallback(
+    (value: number | ((prev: number) => number)) => {
+      dispatch({ type: "SET_CURRENT_INDEX", value });
+    },
+    []
+  );
 
   const rateCard = useCallback(
     async (q: QualityRating) => {
-      if (!currentCard || isSaving) return;
+      if (!currentCard || state.isSaving) return;
 
-      const newEntry = applySM2(entriesMap[currentCard.id], q, currentCard.id);
-      const newEntriesMap = { ...entriesMap, [currentCard.id]: newEntry };
+      const newEntry = applySM2(
+        state.entriesMap[currentCard.id],
+        q,
+        currentCard.id
+      );
+      const newEntriesMap = {
+        ...state.entriesMap,
+        [currentCard.id]: newEntry,
+      };
 
-      setEntriesMap(newEntriesMap);
-      setCurrentIndex((i) => i + 1);
-      setIsSaving(true);
+      dispatch({ type: "RATE_CARD_START", entriesMap: newEntriesMap });
 
       try {
         const reviewData: ReviewData = {
@@ -124,25 +174,25 @@ export function useFlashcardsSM2(
         };
         await onSave(reviewData);
       } finally {
-        setIsSaving(false);
+        dispatch({ type: "RATE_CARD_FINISH" });
       }
     },
-    [currentCard, entriesMap, isSaving, initialReviewData?.lessonId, onSave]
+    [currentCard, state.entriesMap, state.isSaving, initialReviewData?.lessonId, onSave]
   );
 
   const resetSession = useCallback(() => {
-    setCurrentIndex(0);
+    dispatch({ type: "RESET_SESSION" });
   }, []);
 
   return {
     sessionCards,
-    currentIndex,
+    currentIndex: state.currentIndex,
     setCurrentIndex,
     currentCard,
     dueCount,
     newCount,
     sessionComplete,
-    isSaving,
+    isSaving: state.isSaving,
     rateCard,
     resetSession,
   };

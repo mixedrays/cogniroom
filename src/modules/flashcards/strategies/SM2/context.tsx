@@ -11,6 +11,11 @@ import { useFlashcardsSM2, type QualityRating } from "./useFlashcardsSM2";
 const getRatingColor = (q: QualityRating): string =>
   q >= 4 ? "bg-green-500!" : q >= 3 ? "bg-yellow-500!" : "bg-red-500!";
 
+type SessionRatingKey = "hard" | "good" | "easy";
+
+const toRatingKey = (q: QualityRating): SessionRatingKey =>
+  q === 1 ? "hard" : q === 3 ? "good" : "easy";
+
 const useSM2Value = ({
   cards,
   reviewData,
@@ -22,6 +27,7 @@ const useSM2Value = ({
 }) => {
   const [showAllCards, setShowAllCards] = useState(false);
   const [ratingColors, setRatingColors] = useState<(string | undefined)[]>([]);
+  const [sessionRatingsByCard, setSessionRatingsByCard] = useState<Record<string, SessionRatingKey>>({});
 
   const flashcards = useFlashCards<Flashcard>(cards);
   const sm2 = useFlashcardsSM2(
@@ -40,6 +46,7 @@ const useSM2Value = ({
   const handleToggleShuffleCards = useCallback(() => {
     flashcards.handleToggleShuffleCards();
     setRatingColors([]);
+    setSessionRatingsByCard({});
     sm2.resetSession();
     slidesApi.scrollToSlide(0);
   }, [flashcards.handleToggleShuffleCards, sm2.resetSession, slidesApi.scrollToSlide]);
@@ -47,6 +54,10 @@ const useSM2Value = ({
   const rateCard = useCallback(
     async (q: QualityRating) => {
       const index = sm2.currentIndex;
+      const cardId = sm2.currentCard?.id;
+      if (cardId) {
+        setSessionRatingsByCard((prev) => ({ ...prev, [cardId]: toRatingKey(q) }));
+      }
       setRatingColors((prev) => {
         const next = [...prev];
         next[index] = getRatingColor(q);
@@ -55,15 +66,24 @@ const useSM2Value = ({
       await sm2.rateCard(q);
       slidesApi.scrollToSlide(index + 1);
     },
-    [sm2.currentIndex, sm2.rateCard, slidesApi.scrollToSlide]
+    [sm2.currentIndex, sm2.currentCard, sm2.rateCard, slidesApi.scrollToSlide]
   );
 
   const resetSession = useCallback(() => {
     sm2.resetSession();
     setRatingColors([]);
+    setSessionRatingsByCard({});
     flashcards.resetStudyState();
     slidesApi.scrollToSlide(0);
   }, [sm2.resetSession, flashcards.resetStudyState, slidesApi.scrollToSlide]);
+
+  const ratingValues = Object.values(sessionRatingsByCard);
+  const sessionStats = {
+    hard: ratingValues.filter((r) => r === "hard").length,
+    good: ratingValues.filter((r) => r === "good").length,
+    easy: ratingValues.filter((r) => r === "easy").length,
+    unanswered: Math.max(0, sm2.sessionCards.length - ratingValues.length),
+  };
 
   const isCurrentFlipped = flashcards.flippedCards.includes(sm2.currentIndex);
   const isAnswerVisible = flashcards.flipCards ? !isCurrentFlipped : isCurrentFlipped;
@@ -89,6 +109,7 @@ const useSM2Value = ({
     resetSession,
     ratingColors,
     isAnswerVisible,
+    sessionStats,
     showAllCards,
     setShowAllCards,
     slidesApi,

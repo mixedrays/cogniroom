@@ -32,8 +32,8 @@ describe("useKnownCards", () => {
     expect(result.current.knownCards.a?.status).toBe(true);
     expect(result.current.knownCards.a?.knownCount).toBe(1);
     expect(result.current.canFinishStudy).toBe(true);
-    expect(result.current.getIsCardKnown("a")).toBe(true);
-    expect(result.current.getIsCardUnknown("a")).toBe(false);
+    expect(result.current.getIsCardKnownStatus("a")).toBe(true);
+    expect(result.current.getIsCardKnownStatus("b")).toBeUndefined();
   });
 
   it("untoggling same status removes the card entry", () => {
@@ -116,6 +116,6 @@ describe("useKnownCards", () => {
     });
 
     const statuses = result.current.getStatuses(cards);
-    expect(statuses).toEqual([true, false, undefined]);
+    expect(statuses).toEqual(["bg-green-500!", "bg-red-500!", undefined]);
   });
 });
