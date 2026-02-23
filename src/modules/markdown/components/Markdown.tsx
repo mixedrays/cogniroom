@@ -1,5 +1,5 @@
-import { type ReactNode, type ComponentProps } from "react";
-import { MarkdownHooks } from "react-markdown";
+import { type ReactNode } from "react";
+import { type Components, MarkdownHooks } from "react-markdown";
 import { cn } from "@/lib/utils";
 import { remarkPlugins, rehypePlugins, remarkRehypeOptions } from "../lib/plugins";
 import { CodeBlock } from "./CodeBlock";
@@ -23,19 +23,8 @@ interface MarkdownProps {
   fallback?: ReactNode;
 }
 
-function Code(props: ComponentProps<"code">) {
-  const { children, className, ...rest } = props;
-  const isMermaid = className?.includes("language-mermaid");
-
-  if (isMermaid && typeof children === "string") {
-    return <MermaidDiagram chart={children} />;
-  }
-
-  return (
-    <code className={className} {...rest}>
-      {children}
-    </code>
-  );
+function MermaidBlock(props: Record<string, unknown>) {
+  return <MermaidDiagram chart={props.chart as string} />;
 }
 
 export function Markdown({
@@ -50,7 +39,7 @@ export function Markdown({
         remarkPlugins={remarkPlugins}
         rehypePlugins={rehypePlugins}
         remarkRehypeOptions={remarkRehypeOptions}
-        components={{ pre: CodeBlock, code: Code }}
+        components={{ pre: CodeBlock, "mermaid-diagram": MermaidBlock } as Components}
         fallback={fallback}
       >
         {content}
