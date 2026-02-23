@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Skills Learning Platform - A platform for creating, managing, and tracking skill learning roadmaps. Users can generate roadmaps via LLM, import them (e.g., from roadmap.sh), or extract from external sources (video URLs, documentation pages), then generate lessons, tests, exercises content and track learning progress.
+CogniRoom - A platform for creating, managing, and tracking skill learning roadmaps. Users can generate roadmaps via LLM, import them (e.g., from roadmap.sh), or extract from external sources (video URLs, documentation pages), then generate lessons, tests, exercises content and track learning progress.
 
 ## Technology Stack
 
@@ -25,6 +25,7 @@ Skills Learning Platform - A platform for creating, managing, and tracking skill
 - Ensure to handle API responses and errors appropriately when using fetch calls.
 - Do not hardcode any API keys or sensitive information in the codebase. Use environment variables instead.
 - Do not add comments to the code unless necessary for clarity. The code should be self-explanatory and follow best practices for readability.
+- After making changes, run `npm run validate` to run all checks (typecheck, lint, unit tests, e2e tests).
 
 ## Tailwind CSS Guidelines
 
@@ -54,24 +55,15 @@ Skills Learning Platform - A platform for creating, managing, and tracking skill
 
 ## Development Commands
 
-Run and validate tests
-
-`npm run test`
-
-Run development server
-
-`npm run dev`
-
-## Testing Requirements
-
-All testing must use browser automation tools (puppeteer-based):
-
-- `puppeteer_navigate` - Start browser and go to URL
-- `puppeteer_screenshot` - Capture screenshots
-- `puppeteer_click` - Click elements
-- `puppeteer_fill` - Fill form inputs
-
-Test like a human user with mouse and keyboard. Take screenshots at each step. Never bypass UI with JavaScript evaluation.
+| Command              | Description                        |
+| -------------------- | ---------------------------------- |
+| `npm run dev`        | Start development server           |
+| `npm run test`       | Run unit tests (vitest)            |
+| `npm run test:e2e`   | Run e2e tests (puppeteer)          |
+| `npm run typecheck`  | Check TypeScript types (no emit)   |
+| `npm run lint`       | Run ESLint on `src/`               |
+| `npm run format`     | Format code with Prettier          |
+| `npm run validate`   | Run all checks (typecheck, lint, test, test:e2e) |
 
 ## Layout and Design
 
