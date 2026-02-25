@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Wand2 } from "lucide-react";
 import {
   getLessonQuiz,
   getCourse,
@@ -26,6 +26,7 @@ import {
   LessonPageHeader,
   LessonEmptyState,
 } from "@/components/LessonPage";
+import { WizardDialog } from "@/modules/wizard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -100,6 +101,7 @@ function LessonQuizComponent() {
   const queryClient = useQueryClient();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
@@ -115,6 +117,28 @@ function LessonQuizComponent() {
 
   const questions = useMemo(() => parseQuizQuestions(content), [content]);
   const hasQuestions = questions.length > 0;
+
+  const handleWizardGenerate = useCallback(
+    async (prompt: string) => {
+      setIsGenerating(true);
+      setError(null);
+      try {
+        const result = await generateLessonQuiz(courseId, lessonId, prompt);
+        if (result.success) {
+          setWizardOpen(false);
+          await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+          router.invalidate();
+        } else {
+          setError(result.error || "Failed to generate quiz");
+        }
+      } catch (e) {
+        setError(String(e));
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    [courseId, lessonId, queryClient, router]
+  );
 
   const handleGenerate = useCallback(
     async (data: ContentGenerationData) => {
@@ -287,8 +311,29 @@ function LessonQuizComponent() {
               </Button>
             }
           />
+          <Button
+            size="lg"
+            variant="outline"
+            className="gap-2"
+            onClick={() => setWizardOpen(true)}
+          >
+            <Wand2 className="size-4" />
+            AI Wizard
+          </Button>
         </LessonEmptyState>
       )}
+      <WizardDialog
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        context={{
+          contentType: "quiz",
+          courseId,
+          lessonId,
+          topic: topicInfo?.title,
+          lessonTitle: lessonInfo.title,
+        }}
+        onGenerate={handleWizardGenerate}
+      />
     </LessonPageShell>
   );
 }

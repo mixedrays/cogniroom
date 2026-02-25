@@ -11,7 +11,7 @@ import {
 } from "@tanstack/react-query";
 import { Suspense, useEffect, useState, useCallback } from "react";
 import { Markdown } from "@/modules/markdown";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Wand2 } from "lucide-react";
 import {
   getLesson,
   getCourse,
@@ -23,6 +23,7 @@ import {
   ContentCreationDialog,
   type ContentGenerationData,
 } from "@/components/ContentCreationDialog";
+import { WizardDialog } from "@/modules/wizard";
 import {
   LessonPageShell,
   LessonPageHeader,
@@ -99,6 +100,7 @@ function LessonComponent() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [completionError, setCompletionError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(
@@ -108,6 +110,37 @@ function LessonComponent() {
   useEffect(() => {
     setIsCompleted(lessonInfo.theoryCompleted ?? lessonInfo.completed ?? false);
   }, [lessonInfo.theoryCompleted, lessonInfo.completed]);
+
+  const handleWizardGenerate = useCallback(
+    async (prompt: string) => {
+      setIsGenerating(true);
+      setError(null);
+      try {
+        const result = await generateLesson(courseId, lessonId, prompt);
+        if (result.success) {
+          setWizardOpen(false);
+          await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+          if (result.content) {
+            queryClient.setQueryData(
+              lessonQueryOptions(courseId, lessonId).queryKey,
+              { content: result.content }
+            );
+          } else {
+            await queryClient.invalidateQueries({
+              queryKey: lessonQueryOptions(courseId, lessonId).queryKey,
+            });
+          }
+        } else {
+          setError(result.error || "Failed to generate lesson content");
+        }
+      } catch (e) {
+        setError(String(e));
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    [courseId, lessonId, queryClient]
+  );
 
   const handleGenerate = useCallback(
     async (data: ContentGenerationData) => {
@@ -238,9 +271,30 @@ function LessonComponent() {
                 </Button>
               }
             />
+            <Button
+              size="lg"
+              variant="outline"
+              className="gap-2"
+              onClick={() => setWizardOpen(true)}
+            >
+              <Wand2 className="size-4" />
+              AI Wizard
+            </Button>
           </LessonEmptyState>
         )}
       </Suspense>
+      <WizardDialog
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        context={{
+          contentType: "lesson",
+          courseId,
+          lessonId,
+          topic: topicInfo?.title,
+          lessonTitle: lessonInfo.title,
+        }}
+        onGenerate={handleWizardGenerate}
+      />
     </LessonPageShell>
   );
 }

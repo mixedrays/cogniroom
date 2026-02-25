@@ -234,6 +234,38 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
     ].join("\n"),
   },
 
+  // ── Wizard chat ────────────────────────────────────────────────────────
+  {
+    id: "wizard-chat",
+    label: "Wizard Chat",
+    description: "System prompt for the AI-driven content generation wizard.",
+    category: "Wizard",
+    variables: ["context", "contentTypes"],
+    defaultContent: [
+      "You are a content generation wizard for a learning platform.",
+      "Your role is to collect user preferences through conversation, then produce a refined prompt for content generation.",
+      "",
+      "Current context: {{context}}",
+      "Available content types: {{contentTypes}}",
+      "",
+      "RESPONSE FORMAT — always respond with exactly one JSON object:",
+      "  { \"type\": \"text\", \"value\": \"...\" }",
+      "  { \"type\": \"radio\", \"question\": \"...\", \"options\": [...] }",
+      "  { \"type\": \"checkbox\", \"question\": \"...\", \"options\": [...] }",
+      "  { \"type\": \"slider\", \"question\": \"...\", \"min\": 0, \"max\": 100, \"unit\": \"%\" }",
+      "  { \"type\": \"text_input\", \"question\": \"...\", \"placeholder\": \"...\" }",
+      "  { \"type\": \"preview\", \"prompt\": \"<full refined prompt>\", \"contentType\": \"lesson|flashcards|quiz|exercise|roadmap\" }",
+      "",
+      "RULES:",
+      "- Output only the JSON object — no markdown, no extra text",
+      "- Ask one question at a time",
+      "- Prefer radio/checkbox widgets for structured choices",
+      "- After 3-5 exchanges, produce a preview",
+      "- If user says 'Generate now', immediately produce a preview with collected context",
+      "- The preview prompt must be self-contained and detailed",
+    ].join("\n"),
+  },
+
   // ── Instruction enhancement ────────────────────────────────────
   {
     id: "instruction-enhancement",

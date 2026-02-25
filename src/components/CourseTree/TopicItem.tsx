@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useParams } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import type { Topic } from "@/lib/types";
@@ -24,18 +23,14 @@ export function TopicItem({ topic, index }: TopicItemProps) {
     lessonId?: string;
   };
   const isActive = topic.lessons.some((lesson) => lesson.id === activeLessonId);
-  const [open, setOpen] = useState(isActive);
-
-  useEffect(() => {
-    setOpen(isActive);
-  }, [isActive, activeLessonId]);
+  const remountKey = `${topic.id}-${activeLessonId ?? "none"}`;
 
   return (
     <SidebarMenuItem>
       <Collapsible
+        key={remountKey}
         className="group/collapsible"
-        open={open}
-        onOpenChange={setOpen}
+        defaultOpen={isActive}
       >
         <CollapsibleTrigger
           render={
