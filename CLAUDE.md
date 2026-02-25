@@ -31,6 +31,25 @@ CogniRoom - A platform for creating, managing, and tracking skill learning roadm
 
 - Use Tailwind utility classes for styling. Avoid custom CSS unless necessary.
 - Use size class for square elements (e.g., `w-4 h-4` can be replaced with `size-4`).
+- Use tailwind's class name utility functions (e.g., `cn()`) for conditional classes instead of inline styles or string literals.
+Example:
+```tsx
+// Good:
+<div className={cn("base-class", isActive && "active-class")} />
+
+// Bad:
+<div className={`base-class ${isActive ? "active-class" : ""}`} />
+```
+- Use inline conditional classes with `cn()` instead of object.
+Example:
+```tsx
+// Good:
+<div className={cn("base-class", isActive && "active-class", !isActive && "inactive-class")} />
+// Bad:
+<div className={cn("base-class", { "active-class": isActive, "inactive-class": !isActive })} />
+``` 
+
+
 
 ## ShadCn UI Guidelines
 
