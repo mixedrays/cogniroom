@@ -16,11 +16,12 @@ import type {
 import { DEFAULT_SETTINGS } from "../lib/settingsTypes";
 import { getSettings, saveSettings as apiSaveSettings } from "../lib/settings";
 import {
-  applyThemeColors,
+  CSS_THEMES,
+  applyCssTheme,
   applyRadius,
   applyDarkMode,
   getSystemPreference,
-} from "../lib/themeColors";
+} from "@/modules/color-themes";
 
 const SETTINGS_CACHE_KEY = "settings-cache";
 
@@ -113,8 +114,8 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       // Apply dark mode class first
       applyDarkMode(actualMode === "dark");
 
-      // Apply color theme
-      applyThemeColors(settingsToApply.appearance.colorTheme, actualMode);
+      // Apply CSS preset theme
+      applyCssTheme(settingsToApply.appearance.cssThemeId, CSS_THEMES);
 
       // Apply radius
       applyRadius(settingsToApply.appearance.radius);

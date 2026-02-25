@@ -4,6 +4,9 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 
+/* Import all color themes */
+@import "./modules/color-themes/themes/themes.css";
+
 @custom-variant dark (&:is(.dark *));
 
 body {

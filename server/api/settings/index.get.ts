@@ -5,7 +5,7 @@ import { FileSystemAdapter } from "@root/modules/storage";
 // Default settings matching the client-side defaults
 const DEFAULT_SETTINGS = {
   appearance: {
-    colorTheme: "neutral" as const,
+    cssThemeId: null as string | null,
     mode: "light" as const,
     radius: 0.625,
   },

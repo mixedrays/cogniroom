@@ -1,7 +1,7 @@
 // ShadCN-compatible color themes using OKLCh color space
 // Each theme provides light and dark mode color values
 
-import type { ColorTheme } from "./settingsTypes";
+import type { ColorTheme } from "./colorThemeTypes";
 
 interface ThemeColors {
   light: Record<string, string>;
@@ -573,7 +573,6 @@ export const THEME_COLORS: Record<ColorTheme, ThemeColors> = {
   },
 };
 
-// List of all theme names for class management
 const ALL_THEMES: ColorTheme[] = [
   "neutral",
   "slate",
@@ -598,30 +597,35 @@ const ALL_THEMES: ColorTheme[] = [
   "rose",
 ];
 
-// Apply theme colors by adding CSS class to document root
-export function applyThemeColors(
-  colorTheme: ColorTheme,
-  _mode: "light" | "dark" // mode is handled by .dark class
-): void {
+export function applyCssTheme(cssThemeId: string | null, cssThemes: { id: string; cssClass: string }[]): void {
+  const root = document.documentElement;
+  for (const theme of cssThemes) {
+    root.classList.remove(theme.cssClass);
+  }
+  if (cssThemeId) {
+    const theme = cssThemes.find((t) => t.id === cssThemeId);
+    if (theme) {
+      root.classList.add(theme.cssClass);
+    }
+  }
+}
+
+export function applyThemeColors(colorTheme: ColorTheme): void {
   const root = document.documentElement;
 
-  // Remove all existing theme classes
   for (const theme of ALL_THEMES) {
     root.classList.remove(`theme-${theme}`);
   }
 
-  // Add new theme class (neutral is default, no class needed)
   if (colorTheme !== "neutral") {
     root.classList.add(`theme-${colorTheme}`);
   }
 }
 
-// Apply radius to document root
 export function applyRadius(radius: number): void {
   document.documentElement.style.setProperty("--radius", `${radius}rem`);
 }
 
-// Apply dark mode class
 export function applyDarkMode(isDark: boolean): void {
   if (isDark) {
     document.documentElement.classList.add("dark");
@@ -630,7 +634,6 @@ export function applyDarkMode(isDark: boolean): void {
   }
 }
 
-// Get system color scheme preference
 export function getSystemPreference(): "light" | "dark" {
   if (typeof window === "undefined") return "light";
   return window.matchMedia("(prefers-color-scheme: dark)").matches

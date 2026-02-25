@@ -1,37 +1,10 @@
 // Settings Types for Theme Configuration System
 
-// Available color themes compatible with ShadCN UI
-export const COLOR_THEMES = {
-  neutral: "Neutral",
-  slate: "Slate",
-  zinc: "Zinc",
-  stone: "Stone",
-  red: "Red",
-  orange: "Orange",
-  amber: "Amber",
-  yellow: "Yellow",
-  lime: "Lime",
-  green: "Green",
-  emerald: "Emerald",
-  teal: "Teal",
-  cyan: "Cyan",
-  sky: "Sky",
-  blue: "Blue",
-  indigo: "Indigo",
-  violet: "Violet",
-  purple: "Purple",
-  fuchsia: "Fuchsia",
-  pink: "Pink",
-  rose: "Rose",
-} as const;
-
-export type ColorTheme = keyof typeof COLOR_THEMES;
-
 export type ThemeMode = "light" | "dark" | "system";
 
 // Appearance settings
 export interface AppearanceSettings {
-  colorTheme: ColorTheme;
+  cssThemeId: string | null;
   mode: ThemeMode;
   radius: number; // 0 to 1 (rem units)
 }
@@ -66,7 +39,7 @@ export interface SettingsHistory {
 // Default settings
 export const DEFAULT_SETTINGS: Settings = {
   appearance: {
-    colorTheme: "neutral",
+    cssThemeId: null,
     mode: "light",
     radius: 0.625, // Default radius in rem
   },
@@ -76,11 +49,6 @@ export const DEFAULT_SETTINGS: Settings = {
   savedAt: new Date().toISOString(),
   version: 1,
 };
-
-// Validation helpers
-export function isValidColorTheme(theme: string): theme is ColorTheme {
-  return theme in COLOR_THEMES;
-}
 
 export function isValidThemeMode(mode: string): mode is ThemeMode {
   return mode === "light" || mode === "dark" || mode === "system";
@@ -99,8 +67,8 @@ export function validateSettings(settings: unknown): settings is Settings {
   }
   const appearance = s.appearance as Record<string, unknown>;
   if (
-    typeof appearance.colorTheme !== "string" ||
-    !isValidColorTheme(appearance.colorTheme)
+    appearance.cssThemeId !== null &&
+    typeof appearance.cssThemeId !== "string"
   ) {
     return false;
   }

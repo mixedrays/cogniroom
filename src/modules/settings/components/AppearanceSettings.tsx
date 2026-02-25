@@ -8,12 +8,8 @@ import {
 } from "@/components/ui/select";
 import { SunIcon, MoonIcon, MonitorIcon } from "lucide-react";
 import { useSettings } from "../context/SettingsContext";
-import {
-  COLOR_THEMES,
-  type ColorTheme,
-  type ThemeMode,
-} from "../lib/settingsTypes";
-import { ColorThemeButton } from "./ColorThemeButton";
+import { type ThemeMode } from "../lib/settingsTypes";
+import { CssThemeSelector } from "@/modules/color-themes";
 
 const THEME_MODES: {
   value: ThemeMode;
@@ -68,22 +64,13 @@ export function AppearanceSettings() {
         </div>
       </div>
 
-      {/* Color Theme */}
+      {/* Preset Themes */}
       <div className="py-4">
-        <p className="font-medium mb-3">Color theme</p>
-        <div className="grid grid-cols-5 gap-2">
-          {Object.entries(COLOR_THEMES).map(([key, label]) => (
-            <ColorThemeButton
-              key={key}
-              colorKey={key as ColorTheme}
-              label={label}
-              isSelected={settings.appearance.colorTheme === key}
-              onSelect={() =>
-                updateAppearance({ colorTheme: key as ColorTheme })
-              }
-            />
-          ))}
-        </div>
+        <p className="font-medium mb-3">Preset theme</p>
+        <CssThemeSelector
+          selectedId={settings.appearance.cssThemeId}
+          onSelect={(id) => updateAppearance({ cssThemeId: id })}
+        />
       </div>
 
       {/* Border Radius */}

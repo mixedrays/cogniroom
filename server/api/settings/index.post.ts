@@ -8,36 +8,11 @@ const settingsAdapter = new FileSystemAdapter({
   basePath: resolve(process.cwd(), ".settings"),
 });
 
-// Valid color themes
-const VALID_COLOR_THEMES = [
-  "neutral",
-  "slate",
-  "zinc",
-  "stone",
-  "red",
-  "orange",
-  "amber",
-  "yellow",
-  "lime",
-  "green",
-  "emerald",
-  "teal",
-  "cyan",
-  "sky",
-  "blue",
-  "indigo",
-  "violet",
-  "purple",
-  "fuchsia",
-  "pink",
-  "rose",
-];
-
 const VALID_MODES = ["light", "dark", "system"];
 
 interface Settings {
   appearance: {
-    colorTheme: string;
+    cssThemeId: string | null;
     mode: string;
     radius: number;
   };
@@ -73,8 +48,8 @@ function validateSettings(settings: unknown): settings is Settings {
   }
   const appearance = s.appearance as Record<string, unknown>;
   if (
-    typeof appearance.colorTheme !== "string" ||
-    !VALID_COLOR_THEMES.includes(appearance.colorTheme)
+    appearance.cssThemeId !== null &&
+    typeof appearance.cssThemeId !== "string"
   ) {
     return false;
   }

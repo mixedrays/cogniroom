@@ -12,7 +12,7 @@ import { SidebarProvider } from "../components/ui/sidebar";
 import { SettingsProvider } from "@/modules/settings";
 import type { RouterContext } from "@/lib/routerContext";
 import appCss from "../styles.css?url";
-import themeCss from "../themes.css?url";
+import { CSS_THEMES } from "@/modules/color-themes";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
@@ -33,10 +33,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         rel: "stylesheet",
         href: appCss,
       },
-      {
-        rel: "stylesheet",
-        href: themeCss,
-      },
+      ...CSS_THEMES.map(({ url }) => ({
+        rel: "stylesheet" as const,
+        href: url,
+      })),
     ],
   }),
 
@@ -82,10 +82,10 @@ const themeInitScript = `
         if (isDark) {
           document.documentElement.classList.add('dark');
         }
-        // Apply color theme class (neutral is default, no class needed)
-        var colorTheme = appearance.colorTheme;
-        if (colorTheme && colorTheme !== 'neutral') {
-          document.documentElement.classList.add('theme-' + colorTheme);
+        // Apply CSS preset theme class
+        var cssThemeId = appearance.cssThemeId;
+        if (cssThemeId) {
+          document.documentElement.classList.add(cssThemeId);
         }
         // Apply radius
         var radius = appearance.radius;
