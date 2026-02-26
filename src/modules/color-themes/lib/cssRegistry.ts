@@ -7,13 +7,19 @@ export interface CssTheme {
   id: string;
   label: string;
   cssClass: string;
-  url: string;
+  url?: string;
   icon?: React.ComponentType;
 }
 
 // Registry of extra CSS theme files.
 // To add a new theme: drop a CSS file in themes/, import its ?url here, and add an entry.
+// The "default" theme has no cssClass and no url — it uses the :root variables from styles.css.
 export const CSS_THEMES: CssTheme[] = [
+  {
+    id: "default",
+    label: "Default",
+    cssClass: "",
+  },
   {
     id: "onelight",
     label: "One Light",

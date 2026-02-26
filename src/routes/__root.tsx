@@ -12,7 +12,7 @@ import { SidebarProvider } from "../components/ui/sidebar";
 import { SettingsProvider } from "@/modules/settings";
 import type { RouterContext } from "@/lib/routerContext";
 import appCss from "../styles.css?url";
-import { CSS_THEMES } from "@/modules/color-themes";
+import { CSS_THEMES, ThemeInitScriptElement } from "@/modules/color-themes";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
@@ -33,9 +33,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         rel: "stylesheet",
         href: appCss,
       },
-      ...CSS_THEMES.map(({ url }) => ({
+      ...CSS_THEMES.filter(({ url }) => url).map(({ url }) => ({
         rel: "stylesheet" as const,
-        href: url,
+        href: url!,
       })),
     ],
   }),
@@ -66,45 +66,13 @@ function RootComponent() {
   );
 }
 
-// Blocking script to prevent theme flash - runs before React hydrates
-const themeInitScript = `
-(function() {
-  try {
-    var cached = localStorage.getItem('settings-cache');
-    if (cached) {
-      var s = JSON.parse(cached);
-      var appearance = s.appearance;
-      if (appearance) {
-        // Apply dark mode
-        var mode = appearance.mode;
-        var isDark = mode === 'dark' ||
-          (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (isDark) {
-          document.documentElement.classList.add('dark');
-        }
-        // Apply CSS preset theme class
-        var cssThemeId = appearance.cssThemeId;
-        if (cssThemeId) {
-          document.documentElement.classList.add(cssThemeId);
-        }
-        // Apply radius
-        var radius = appearance.radius;
-        if (typeof radius === 'number') {
-          document.documentElement.style.setProperty('--radius', radius + 'rem');
-        }
-      }
-    }
-  } catch (e) {}
-})();
-`;
-
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     // suppressHydrationWarning: blocking script applies theme classes before hydration
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <ThemeInitScriptElement />
       </head>
       <body className="m-0">
         {children}

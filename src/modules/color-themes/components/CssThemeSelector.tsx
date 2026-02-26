@@ -11,7 +11,7 @@ export function CssThemeSelector({
   onSelect,
 }: CssThemeSelectorProps) {
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       {CSS_THEMES.map((cssTheme) => {
         const isSelected = selectedId === cssTheme.id;
         return (
@@ -26,9 +26,9 @@ export function CssThemeSelector({
           >
             <div className="bg-base-100 text-base-content w-full cursor-pointer font-sans">
               <div className="flex">
-                <div className="bg-sidebar w-8 border-r" />
+                <div className="bg-sidebar w-6 border-r" />
 
-                <div className="bg-background grow flex flex-col gap-2 p-2 md:gap-3 md:p-3">
+                <div className="bg-background grow flex flex-col gap-2 p-2">
                   <div className="capitalize text-foreground flex gap-1 items-center whitespace-nowrap">
                     {cssTheme.icon && (
                       // @ts-expect-error - icon is optional and can be a string, but we know it's a component here
