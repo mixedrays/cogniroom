@@ -15,6 +15,10 @@ dist-ssr
 .github/skills
 .claude/skills
 .vscode
+_bmad
+_bmad-*
+**/bmad-*.md
+**/bmad_*.md
 
 # IDE
 .idea/
