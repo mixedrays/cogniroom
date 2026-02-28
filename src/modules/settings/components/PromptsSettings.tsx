@@ -180,7 +180,7 @@ export function PromptsSettings({ defaultPromptId }: PromptsSettingsProps) {
             spellCheck={false}
           />
 
-          <div className="flex items-center gap-2 sticky bottom-0 bg-background pt-3 border-t">
+          <div className="flex items-center gap-2 sticky -bottom-4 bg-background px-4 py-3 -mx-4 -mb-4 border-t">
             <Button
               size="sm"
               onClick={handleSave}
