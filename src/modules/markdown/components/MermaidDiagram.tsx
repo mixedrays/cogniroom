@@ -5,8 +5,19 @@ interface MermaidDiagramProps {
   chart: string;
 }
 
+async function getMermaid(isDark: boolean) {
+  const mermaid = (await import("mermaid")).default;
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: "loose",
+    theme: isDark ? "dark" : "default",
+  });
+  return mermaid;
+}
+
 function MermaidDiagramInner({ chart }: MermaidDiagramProps) {
-  const id = useId();
+  const rawId = useId();
+  const id = `mermaid-${rawId.replace(/[^a-zA-Z0-9]/g, "")}`;
   const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,18 +26,9 @@ function MermaidDiagramInner({ chart }: MermaidDiagramProps) {
 
     async function render() {
       try {
-        const mermaid = (await import("mermaid")).default;
-        const isDark =
-          document.documentElement.classList.contains("dark");
-        mermaid.initialize({
-          startOnLoad: false,
-          theme: isDark ? "dark" : "default",
-          securityLevel: "loose",
-        });
-        const { svg: rendered } = await mermaid.render(
-          `mermaid-${CSS.escape(id)}`,
-          chart
-        );
+        const isDark = document.documentElement.classList.contains("dark");
+        const mermaid = await getMermaid(isDark);
+        const { svg: rendered } = await mermaid.render(id, chart.trim());
         if (!cancelled) setSvg(rendered);
       } catch (e) {
         if (!cancelled) setError(String(e));
