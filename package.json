@@ -15,7 +15,7 @@
     "validate": "npm run typecheck && npm run lint && npm run test && npm run test:e2e"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.26",
+    "@ai-sdk/openai": "^3.0.41",
     "@base-ui/react": "^1.0.0",
     "@fontsource-variable/inter": "^5.2.8",
     "@tailwindcss/typography": "^0.5.19",
@@ -27,7 +27,7 @@
     "@tanstack/react-router-ssr-query": "^1.131.7",
     "@tanstack/react-start": "^1.132.0",
     "@tanstack/router-plugin": "^1.132.0",
-    "ai": "^6.0.79",
+    "ai": "^6.0.116",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
