@@ -84,8 +84,8 @@ describe("lesson page console", () => {
     mkdirSync(lessonDir, { recursive: true });
 
     writeFileSync(
-      join(DATA_COURSE_DIR, "course.json"),
-      readFileSync(join(FIXTURE_DIR, "course.json"), "utf8")
+      join(DATA_COURSE_DIR, "course.md"),
+      readFileSync(join(FIXTURE_DIR, "course.md"), "utf8")
     );
     writeFileSync(
       join(lessonDir, "lesson.md"),

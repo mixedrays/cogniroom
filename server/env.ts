@@ -29,7 +29,7 @@ export function getCoursePath(courseId: string): string {
 }
 
 export function getCourseFilePath(courseId: string): string {
-  return join(getCoursePath(courseId), "course.json");
+  return join(getCoursePath(courseId), "course.md");
 }
 
 export function getCourseLessonsDir(courseId: string): string {

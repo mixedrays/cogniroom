@@ -1,5 +1,6 @@
 import { defineEventHandler, getRouterParam } from "h3";
-import { storage, storageApi } from "@root/modules/storage";
+import { storageApi } from "@root/modules/storage";
+import { mdToCourse, courseToMd } from "@root/modules/md-formats";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -11,22 +12,23 @@ export default defineEventHandler(async (event) => {
     }
 
     const deleteResult = await storageApi.delete(
-      `courses/${courseId}/lessons/${lessonId}/quiz.json`
+      `courses/${courseId}/lessons/${lessonId}/quiz.md`
     );
 
     if (!deleteResult.ok && deleteResult.status !== 404) {
       return { success: false, error: "Failed to delete quiz" };
     }
 
-    // Reset quiz completion flag in course.json
-    const coursePath = `courses/${courseId}/course.json`;
-    const courseResponse = await storage<any>(coursePath);
+    // Reset quiz completion flag in course.md
+    const coursePath = `courses/${courseId}/course.md`;
+    const courseResponse = await storageApi.get<string>(coursePath);
 
     if (courseResponse.ok) {
-      const course = await courseResponse.json();
+      const text = await courseResponse.text();
+      const course = mdToCourse(text);
 
       for (const topic of course.topics ?? []) {
-        const lesson = topic.lessons?.find((l: any) => l.id === lessonId);
+        const lesson = topic.lessons?.find((l) => l.id === lessonId);
         if (lesson) {
           lesson.quizCompleted = false;
           delete lesson.quizCompletedAt;
@@ -35,7 +37,7 @@ export default defineEventHandler(async (event) => {
       }
 
       course.updatedAt = new Date().toISOString();
-      await storageApi.put(coursePath, course);
+      await storageApi.put(coursePath, courseToMd(course));
     }
 
     return { success: true };

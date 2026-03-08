@@ -8,7 +8,8 @@ import {
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { storage, storageApi } from "@root/modules/storage";
+import { storageApi } from "@root/modules/storage";
+import { mdToCourse } from "@root/modules/md-formats";
 
 const TestsDraftSchema = z.object({
   flashcards: z.array(
@@ -43,8 +44,8 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const courseResponse = await storage<any>(
-      `courses/${courseId}/course.json`
+    const courseResponse = await storageApi.get<string>(
+      `courses/${courseId}/course.md`
     );
     if (!courseResponse.ok) {
       throw createError({
@@ -55,7 +56,7 @@ export default defineEventHandler(async (event) => {
             : courseResponse.statusText,
       });
     }
-    const course = await courseResponse.json();
+    const course = mdToCourse(await courseResponse.text());
 
     let targetLesson: any = null;
     let targetTopic: any = null;

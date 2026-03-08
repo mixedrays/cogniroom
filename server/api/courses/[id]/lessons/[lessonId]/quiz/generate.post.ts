@@ -8,7 +8,9 @@ import {
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { storage, storageApi } from "@root/modules/storage";
+import { storageApi } from "@root/modules/storage";
+import { quizToMd, mdToCourse } from "@root/modules/md-formats";
+import type { QuizContent } from "@root/src/lib/types";
 
 // Flat schema required because OpenAI structured outputs do not support oneOf/discriminatedUnion.
 // Fields that belong only to one type are nullable; type is reconstructed after parsing.
@@ -45,8 +47,8 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const courseResponse = await storage<any>(
-      `courses/${courseId}/course.json`
+    const courseResponse = await storageApi.get<string>(
+      `courses/${courseId}/course.md`
     );
     if (!courseResponse.ok) {
       throw createError({
@@ -57,7 +59,7 @@ export default defineEventHandler(async (event) => {
             : courseResponse.statusText,
       });
     }
-    const course = await courseResponse.json();
+    const course = mdToCourse(await courseResponse.text());
 
     let targetLesson: any = null;
     let targetTopic: any = null;
@@ -135,11 +137,11 @@ export default defineEventHandler(async (event) => {
       })
       .filter(Boolean);
 
-    const content = { version: 2, quizQuestions };
+    const content = { version: 2 as const, quizQuestions: quizQuestions as QuizContent["quizQuestions"] };
 
     await storageApi.post(
-      `courses/${courseId}/lessons/${lessonId}/quiz.json`,
-      content
+      `courses/${courseId}/lessons/${lessonId}/quiz.md`,
+      quizToMd(content)
     );
 
     return { success: true, content };

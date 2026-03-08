@@ -1,5 +1,6 @@
 import { defineEventHandler, readBody, createError, getRouterParam } from "h3";
-import { storage, storageApi } from "@root/modules/storage";
+import { storageApi } from "@root/modules/storage";
+import { mdToCourse, courseToMd } from "@root/modules/md-formats";
 
 type LessonSection = "theory" | "flashcards" | "quiz" | "exercises";
 
@@ -22,8 +23,8 @@ export default defineEventHandler(async (event) => {
     }
 
     const section: LessonSection = body?.section ?? "theory";
-    const coursePath = `courses/${courseId}/course.json`;
-    const response = await storage<any>(coursePath);
+    const coursePath = `courses/${courseId}/course.md`;
+    const response = await storageApi.get<string>(coursePath);
 
     if (!response.ok) {
       throw createError({
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const course = await response.json();
+    const course = mdToCourse(await response.text());
 
     let targetLesson: any = null;
 
@@ -86,7 +87,7 @@ export default defineEventHandler(async (event) => {
 
     course.updatedAt = now;
 
-    await storageApi.put(coursePath, course);
+    await storageApi.put(coursePath, courseToMd(course));
 
     return {
       success: true,

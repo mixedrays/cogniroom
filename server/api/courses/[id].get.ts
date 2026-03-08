@@ -1,5 +1,6 @@
 import { defineEventHandler, getRouterParam, createError } from "h3";
-import { storage, storageApi } from "@root/modules/storage";
+import { storageApi } from "@root/modules/storage";
+import { mdToCourse } from "@root/modules/md-formats";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -12,7 +13,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const response = await storage<any>(`courses/${id}/course.json`);
+    const response = await storageApi.get<string>(`courses/${id}/course.md`);
 
     if (!response.ok) {
       throw createError({
@@ -21,7 +22,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const course = await response.json();
+    const course = mdToCourse(await response.text());
 
     const topics = await Promise.all(
       (course.topics ?? []).map(async (topic: any) => {
@@ -31,12 +32,12 @@ export default defineEventHandler(async (event) => {
             const lessonStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/lesson.md`);
             const hasContent = lessonStat !== null && !lessonStat.isDirectory && lessonStat.size > 0;
 
-            // Check flashcards (new format, with fallback to legacy tests.json)
-            const flashcardsStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/flashcards.json`);
+            // Check flashcards
+            const flashcardsStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/flashcards.md`);
             const hasFlashcards = flashcardsStat !== null && !flashcardsStat.isDirectory && flashcardsStat.size > 0;
 
-            // Check quiz (new format, with fallback to legacy tests.json)
-            const quizStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/quiz.json`);
+            // Check quiz
+            const quizStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/quiz.md`);
             const hasQuiz = quizStat !== null && !quizStat.isDirectory && quizStat.size > 0;
 
             // Check exercises

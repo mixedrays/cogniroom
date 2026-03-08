@@ -1,5 +1,6 @@
 import { defineEventHandler } from "h3";
-import { storage, storageApi } from "@root/modules/storage";
+import { storageApi } from "@root/modules/storage";
+import { mdToCourse } from "@root/modules/md-formats";
 
 export default defineEventHandler(async () => {
   try {
@@ -12,9 +13,9 @@ export default defineEventHandler(async () => {
     const courses = await Promise.all(
       courseFolders.map(async (folder) => {
         try {
-          const response = await storage<any>(`courses/${folder.name}/course.json`);
+          const response = await storageApi.get<string>(`courses/${folder.name}/course.md`);
           if (!response.ok) return null;
-          const course = await response.json();
+          const course = mdToCourse(await response.text());
 
           // Calculate metadata
           const topicCount = course.topics?.length || 0;

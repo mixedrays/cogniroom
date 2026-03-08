@@ -1,5 +1,6 @@
 import { defineEventHandler, getRouterParam } from "h3";
-import { storage, storageApi } from "@root/modules/storage";
+import { storageApi } from "@root/modules/storage";
+import { mdToCourse, courseToMd } from "@root/modules/md-formats";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -16,15 +17,16 @@ export default defineEventHandler(async (event) => {
       return { success: false, error: deleteResponse.statusText };
     }
 
-    // Reset completion flags in course.json
-    const coursePath = `courses/${courseId}/course.json`;
-    const courseResponse = await storage<any>(coursePath);
+    // Reset completion flags in course.md
+    const coursePath = `courses/${courseId}/course.md`;
+    const courseResponse = await storageApi.get<string>(coursePath);
 
     if (courseResponse.ok) {
-      const course = await courseResponse.json();
+      const text = await courseResponse.text();
+      const course = mdToCourse(text);
 
       for (const topic of course.topics ?? []) {
-        const lesson = topic.lessons?.find((l: any) => l.id === lessonId);
+        const lesson = topic.lessons?.find((l) => l.id === lessonId);
         if (lesson) {
           lesson.theoryCompleted = false;
           delete lesson.theoryCompletedAt;
@@ -35,7 +37,7 @@ export default defineEventHandler(async (event) => {
       }
 
       course.updatedAt = new Date().toISOString();
-      await storageApi.put(coursePath, course);
+      await storageApi.put(coursePath, courseToMd(course));
     }
 
     return { success: true };

@@ -1,5 +1,6 @@
 import { defineEventHandler, getRouterParam, createError } from "h3";
-import { storage } from "@root/modules/storage";
+import { storageApi } from "@root/modules/storage";
+import { mdToQuiz } from "@root/modules/md-formats";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -13,12 +14,13 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const response = await storage<any>(
-      `courses/${courseId}/lessons/${lessonId}/quiz.json`
+    const response = await storageApi.get<string>(
+      `courses/${courseId}/lessons/${lessonId}/quiz.md`
     );
     if (response.ok) {
-      const parsed = await response.json();
-      return { content: parsed };
+      const text = await response.text();
+      const content = mdToQuiz(text);
+      return { content };
     }
 
     throw createError({

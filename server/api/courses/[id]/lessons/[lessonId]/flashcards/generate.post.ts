@@ -8,7 +8,8 @@ import {
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { storage, storageApi } from "@root/modules/storage";
+import { storageApi } from "@root/modules/storage";
+import { flashcardsToMd, mdToCourse } from "@root/modules/md-formats";
 
 const FlashcardsDraftSchema = z.object({
   flashcards: z.array(
@@ -39,8 +40,8 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const courseResponse = await storage<any>(
-      `courses/${courseId}/course.json`
+    const courseResponse = await storageApi.get<string>(
+      `courses/${courseId}/course.md`
     );
     if (!courseResponse.ok) {
       throw createError({
@@ -51,7 +52,7 @@ export default defineEventHandler(async (event) => {
             : courseResponse.statusText,
       });
     }
-    const course = await courseResponse.json();
+    const course = mdToCourse(await courseResponse.text());
 
     let targetLesson: any = null;
     let targetTopic: any = null;
@@ -112,7 +113,7 @@ export default defineEventHandler(async (event) => {
     const draft = result.output as z.infer<typeof FlashcardsDraftSchema>;
 
     const content = {
-      version: 2,
+      version: 2 as const,
       flashcards: draft.flashcards.map((card) => ({
         id: randomUUID(),
         question: card.question,
@@ -123,8 +124,8 @@ export default defineEventHandler(async (event) => {
     };
 
     await storageApi.post(
-      `courses/${courseId}/lessons/${lessonId}/flashcards.json`,
-      content
+      `courses/${courseId}/lessons/${lessonId}/flashcards.md`,
+      flashcardsToMd(content)
     );
 
     return { success: true, content };
