@@ -7,6 +7,9 @@ import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 
 const config = defineConfig({
+  optimizeDeps: {
+    include: ["mermaid"],
+  },
   define: {
     APP_VERSION: JSON.stringify(process.env.npm_package_version),
   },
