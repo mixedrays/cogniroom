@@ -1,6 +1,6 @@
 import { defineEventHandler, getRouterParam } from "h3";
 import { storageApi } from "@root/modules/storage";
-import { mdToCourse, courseToMd } from "@root/modules/md-formats";
+import { getFormatAdapter } from "@root/modules/content-formats";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -11,21 +11,24 @@ export default defineEventHandler(async (event) => {
       return { success: false, error: "Missing courseId or lessonId" };
     }
 
+    const flashcardsAdapter = getFormatAdapter("flashcards");
+    const courseAdapter = getFormatAdapter("course");
+
     const deleteResult = await storageApi.delete(
-      `courses/${courseId}/lessons/${lessonId}/flashcards.md`
+      `courses/${courseId}/lessons/${lessonId}/flashcards${flashcardsAdapter.extension}`
     );
 
     if (!deleteResult.ok && deleteResult.status !== 404) {
       return { success: false, error: "Failed to delete flashcards" };
     }
 
-    // Reset flashcards completion flag in course.md
-    const coursePath = `courses/${courseId}/course.md`;
+    // Reset flashcards completion flag in course file
+    const coursePath = `courses/${courseId}/course${courseAdapter.extension}`;
     const courseResponse = await storageApi.get<string>(coursePath);
 
     if (courseResponse.ok) {
       const text = await courseResponse.text();
-      const course = mdToCourse(text);
+      const course = courseAdapter.deserialize(text);
 
       for (const topic of course.topics ?? []) {
         const lesson = topic.lessons?.find((l) => l.id === lessonId);
@@ -37,7 +40,7 @@ export default defineEventHandler(async (event) => {
       }
 
       course.updatedAt = new Date().toISOString();
-      await storageApi.put(coursePath, courseToMd(course));
+      await storageApi.put(coursePath, courseAdapter.serialize(course));
     }
 
     // Best-effort cleanup of orphaned review data

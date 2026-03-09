@@ -1,6 +1,6 @@
 import { defineEventHandler, getRouterParam, createError } from "h3";
 import { storageApi } from "@root/modules/storage";
-import { mdToQuiz } from "@root/modules/md-formats";
+import { getFormatAdapter } from "@root/modules/content-formats";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -14,12 +14,13 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    const quizAdapter = getFormatAdapter("quiz");
     const response = await storageApi.get<string>(
-      `courses/${courseId}/lessons/${lessonId}/quiz.md`
+      `courses/${courseId}/lessons/${lessonId}/quiz${quizAdapter.extension}`
     );
     if (response.ok) {
       const text = await response.text();
-      const content = mdToQuiz(text);
+      const content = quizAdapter.deserialize(text);
       return { content };
     }
 

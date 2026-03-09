@@ -1,6 +1,6 @@
 import { defineEventHandler, getRouterParam } from "h3";
 import { storageApi } from "@root/modules/storage";
-import { mdToCourse, courseToMd } from "@root/modules/md-formats";
+import { getFormatAdapter } from "@root/modules/content-formats";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -17,13 +17,13 @@ export default defineEventHandler(async (event) => {
       return { success: false, error: deleteResponse.statusText };
     }
 
-    // Reset completion flags in course.md
-    const coursePath = `courses/${courseId}/course.md`;
+    const courseAdapter = getFormatAdapter("course");
+    const coursePath = `courses/${courseId}/course${courseAdapter.extension}`;
     const courseResponse = await storageApi.get<string>(coursePath);
 
     if (courseResponse.ok) {
       const text = await courseResponse.text();
-      const course = mdToCourse(text);
+      const course = courseAdapter.deserialize(text);
 
       for (const topic of course.topics ?? []) {
         const lesson = topic.lessons?.find((l) => l.id === lessonId);
@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
       }
 
       course.updatedAt = new Date().toISOString();
-      await storageApi.put(coursePath, courseToMd(course));
+      await storageApi.put(coursePath, courseAdapter.serialize(course));
     }
 
     return { success: true };

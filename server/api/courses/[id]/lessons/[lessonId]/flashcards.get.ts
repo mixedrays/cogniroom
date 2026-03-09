@@ -1,6 +1,6 @@
 import { defineEventHandler, getRouterParam, createError } from "h3";
 import { storageApi } from "@root/modules/storage";
-import { mdToFlashcards } from "@root/modules/md-formats";
+import { getFormatAdapter } from "@root/modules/content-formats";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -14,12 +14,13 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    const flashcardsAdapter = getFormatAdapter("flashcards");
     const response = await storageApi.get<string>(
-      `courses/${courseId}/lessons/${lessonId}/flashcards.md`
+      `courses/${courseId}/lessons/${lessonId}/flashcards${flashcardsAdapter.extension}`
     );
     if (response.ok) {
       const text = await response.text();
-      const content = mdToFlashcards(text);
+      const content = flashcardsAdapter.deserialize(text);
       return { content };
     }
 

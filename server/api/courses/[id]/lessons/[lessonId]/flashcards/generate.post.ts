@@ -9,7 +9,7 @@ import {
 } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { storageApi } from "@root/modules/storage";
-import { flashcardsToMd, mdToCourse } from "@root/modules/md-formats";
+import { getFormatAdapter } from "@root/modules/content-formats";
 
 const FlashcardsDraftSchema = z.object({
   flashcards: z.array(
@@ -40,8 +40,9 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    const courseAdapter = getFormatAdapter("course");
     const courseResponse = await storageApi.get<string>(
-      `courses/${courseId}/course.md`
+      `courses/${courseId}/course${courseAdapter.extension}`
     );
     if (!courseResponse.ok) {
       throw createError({
@@ -52,7 +53,7 @@ export default defineEventHandler(async (event) => {
             : courseResponse.statusText,
       });
     }
-    const course = mdToCourse(await courseResponse.text());
+    const course = courseAdapter.deserialize(await courseResponse.text());
 
     let targetLesson: any = null;
     let targetTopic: any = null;
@@ -123,9 +124,10 @@ export default defineEventHandler(async (event) => {
       })),
     };
 
+    const flashcardsAdapter = getFormatAdapter("flashcards");
     await storageApi.post(
-      `courses/${courseId}/lessons/${lessonId}/flashcards.md`,
-      flashcardsToMd(content)
+      `courses/${courseId}/lessons/${lessonId}/flashcards${flashcardsAdapter.extension}`,
+      flashcardsAdapter.serialize(content)
     );
 
     return { success: true, content };

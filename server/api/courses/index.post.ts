@@ -2,7 +2,7 @@ import { defineEventHandler, readBody } from "h3";
 import { readdirSync } from "node:fs";
 import { storageApi } from "@root/modules/storage";
 import { COURSES_DIR } from "@root/server/env";
-import { courseToMd } from "@root/modules/md-formats";
+import { getFormatAdapter } from "@root/modules/content-formats";
 
 function toSlug(title: string): string {
   return title
@@ -55,7 +55,8 @@ export default defineEventHandler(async (event) => {
 
     const course = { ...body, id, topics: updatedTopics };
 
-    const response = await storageApi.post(`courses/${id}/course.md`, courseToMd(course as any));
+    const courseAdapter = getFormatAdapter("course");
+    const response = await storageApi.post(`courses/${id}/course${courseAdapter.extension}`, courseAdapter.serialize(course as any));
 
     if (!response.ok) {
       return { success: false, error: response.statusText };

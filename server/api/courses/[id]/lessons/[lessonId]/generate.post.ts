@@ -7,7 +7,7 @@ import {
 } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { storageApi } from "@root/modules/storage";
-import { mdToCourse } from "@root/modules/md-formats";
+import { getFormatAdapter } from "@root/modules/content-formats";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -27,14 +27,15 @@ export default defineEventHandler(async (event) => {
     }
 
     // 1. Load Course
-    const courseResponse = await storageApi.get<string>(`courses/${courseId}/course.md`);
+    const courseAdapter = getFormatAdapter("course");
+    const courseResponse = await storageApi.get<string>(`courses/${courseId}/course${courseAdapter.extension}`);
     if (!courseResponse.ok) {
       throw createError({
         statusCode: courseResponse.status,
         statusMessage: courseResponse.status === 404 ? "Course not found" : courseResponse.statusText,
       });
     }
-    const course = mdToCourse(await courseResponse.text());
+    const course = courseAdapter.deserialize(await courseResponse.text());
 
     // 2. Find Lesson and Context
     let targetLesson: any = null;

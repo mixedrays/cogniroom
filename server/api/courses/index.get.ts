@@ -1,6 +1,6 @@
 import { defineEventHandler } from "h3";
 import { storageApi } from "@root/modules/storage";
-import { mdToCourse } from "@root/modules/md-formats";
+import { getFormatAdapter } from "@root/modules/content-formats";
 
 export default defineEventHandler(async () => {
   try {
@@ -13,9 +13,10 @@ export default defineEventHandler(async () => {
     const courses = await Promise.all(
       courseFolders.map(async (folder) => {
         try {
-          const response = await storageApi.get<string>(`courses/${folder.name}/course.md`);
+          const courseAdapter = getFormatAdapter("course");
+          const response = await storageApi.get<string>(`courses/${folder.name}/course${courseAdapter.extension}`);
           if (!response.ok) return null;
-          const course = mdToCourse(await response.text());
+          const course = courseAdapter.deserialize(await response.text());
 
           // Calculate metadata
           const topicCount = course.topics?.length || 0;

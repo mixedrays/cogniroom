@@ -1,6 +1,6 @@
 import { defineEventHandler, getRouterParam, createError } from "h3";
 import { storageApi } from "@root/modules/storage";
-import { mdToCourse } from "@root/modules/md-formats";
+import { getFormatAdapter } from "@root/modules/content-formats";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -13,7 +13,11 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const response = await storageApi.get<string>(`courses/${id}/course.md`);
+    const courseAdapter = getFormatAdapter("course");
+    const flashcardsAdapter = getFormatAdapter("flashcards");
+    const quizAdapter = getFormatAdapter("quiz");
+
+    const response = await storageApi.get<string>(`courses/${id}/course${courseAdapter.extension}`);
 
     if (!response.ok) {
       throw createError({
@@ -22,7 +26,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const course = mdToCourse(await response.text());
+    const course = courseAdapter.deserialize(await response.text());
 
     const topics = await Promise.all(
       (course.topics ?? []).map(async (topic: any) => {
@@ -33,11 +37,11 @@ export default defineEventHandler(async (event) => {
             const hasContent = lessonStat !== null && !lessonStat.isDirectory && lessonStat.size > 0;
 
             // Check flashcards
-            const flashcardsStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/flashcards.md`);
+            const flashcardsStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/flashcards${flashcardsAdapter.extension}`);
             const hasFlashcards = flashcardsStat !== null && !flashcardsStat.isDirectory && flashcardsStat.size > 0;
 
             // Check quiz
-            const quizStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/quiz.md`);
+            const quizStat = await storageApi.stat(`courses/${id}/lessons/${lesson.id}/quiz${quizAdapter.extension}`);
             const hasQuiz = quizStat !== null && !quizStat.isDirectory && quizStat.size > 0;
 
             // Check exercises
