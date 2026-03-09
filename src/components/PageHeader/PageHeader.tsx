@@ -18,14 +18,14 @@ export function PageHeader({ children }: PageHeaderProps) {
         <span className="sr-only">Toggle Left Sidebar</span>
       </Button>
 
-      <Separator orientation="vertical" />
+      <Separator orientation="vertical" className="h-4 relative top-1/2 -translate-y-1/2" />
 
       {/* Page content (breadcrumbs, actions, etc.) */}
       <div className="flex-1 gap-2 px-2 flex items-center justify-between min-w-0">
         {children}
       </div>
 
-      <Separator orientation="vertical" />
+      <Separator orientation="vertical" className="h-4 relative top-1/2 -translate-y-1/2" />
 
       {/* Right sidebar toggle */}
       <Button

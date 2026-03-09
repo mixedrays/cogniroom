@@ -129,14 +129,18 @@ export default defineEventHandler(async (event) => {
     );
 
     return { success: true, content };
-  } catch (error: any) {
-    if (error.statusCode) {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "statusCode" in error) {
       throw error;
     }
     console.error("Error generating flashcards:", error);
     throw createError({
       statusCode: 500,
-      statusMessage: `Failed to generate flashcards: ${error.message}`,
+      statusMessage: `Failed to generate flashcards: ${
+        error && typeof error === "object" && "message" in error
+          ? error.message
+          : "Unknown error"
+      }`,
     });
   }
 });
