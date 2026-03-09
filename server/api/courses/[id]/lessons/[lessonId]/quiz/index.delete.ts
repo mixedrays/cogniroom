@@ -1,6 +1,7 @@
 import { defineEventHandler, getRouterParam } from "h3";
 import { storageApi } from "@root/modules/storage";
 import { getFormatAdapter } from "@root/modules/content-formats";
+import { storagePaths } from "@root/server/lib/storagePaths";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -11,19 +12,16 @@ export default defineEventHandler(async (event) => {
       return { success: false, error: "Missing courseId or lessonId" };
     }
 
-    const quizAdapter = getFormatAdapter("quiz");
     const courseAdapter = getFormatAdapter("course");
 
-    const deleteResult = await storageApi.delete(
-      `courses/${courseId}/lessons/${lessonId}/quiz${quizAdapter.extension}`
-    );
+    const deleteResult = await storageApi.delete(storagePaths.quiz(courseId, lessonId));
 
     if (!deleteResult.ok && deleteResult.status !== 404) {
       return { success: false, error: "Failed to delete quiz" };
     }
 
     // Reset quiz completion flag in course file
-    const coursePath = `courses/${courseId}/course${courseAdapter.extension}`;
+    const coursePath = storagePaths.course(courseId);
     const courseResponse = await storageApi.get<string>(coursePath);
 
     if (courseResponse.ok) {

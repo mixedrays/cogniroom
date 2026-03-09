@@ -8,6 +8,7 @@ import {
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { storageApi } from "@root/modules/storage";
 import { getFormatAdapter } from "@root/modules/content-formats";
+import { storagePaths } from "@root/server/lib/storagePaths";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -28,7 +29,7 @@ export default defineEventHandler(async (event) => {
 
     // 1. Load Course
     const courseAdapter = getFormatAdapter("course");
-    const courseResponse = await storageApi.get<string>(`courses/${courseId}/course${courseAdapter.extension}`);
+    const courseResponse = await storageApi.get<string>(storagePaths.course(courseId));
     if (!courseResponse.ok) {
       throw createError({
         statusCode: courseResponse.status,
@@ -79,7 +80,7 @@ export default defineEventHandler(async (event) => {
     const content = result.text;
 
     // 4. Save Content (auto-creates parent directories)
-    await storageApi.post(`courses/${courseId}/lessons/${lessonId}/lesson.md`, content);
+    await storageApi.post(storagePaths.lesson(courseId, lessonId), content);
 
     return { success: true, content };
   } catch (error: any) {

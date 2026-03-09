@@ -1,6 +1,7 @@
 import { defineEventHandler, getRouterParam } from "h3";
 import { storageApi } from "@root/modules/storage";
 import { getFormatAdapter } from "@root/modules/content-formats";
+import { storagePaths } from "@root/server/lib/storagePaths";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -12,13 +13,13 @@ export default defineEventHandler(async (event) => {
     }
 
     // Delete the lesson content file
-    const deleteResponse = await storageApi.delete(`courses/${courseId}/lessons/${lessonId}/lesson.md`);
+    const deleteResponse = await storageApi.delete(storagePaths.lesson(courseId, lessonId));
     if (!deleteResponse.ok && deleteResponse.status !== 404) {
       return { success: false, error: deleteResponse.statusText };
     }
 
     const courseAdapter = getFormatAdapter("course");
-    const coursePath = `courses/${courseId}/course${courseAdapter.extension}`;
+    const coursePath = storagePaths.course(courseId);
     const courseResponse = await storageApi.get<string>(coursePath);
 
     if (courseResponse.ok) {

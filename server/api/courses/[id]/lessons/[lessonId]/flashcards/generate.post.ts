@@ -10,6 +10,7 @@ import {
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { storageApi } from "@root/modules/storage";
 import { getFormatAdapter } from "@root/modules/content-formats";
+import { storagePaths } from "@root/server/lib/storagePaths";
 
 const FlashcardsDraftSchema = z.object({
   flashcards: z.array(
@@ -41,9 +42,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const courseAdapter = getFormatAdapter("course");
-    const courseResponse = await storageApi.get<string>(
-      `courses/${courseId}/course${courseAdapter.extension}`
-    );
+    const courseResponse = await storageApi.get<string>(storagePaths.course(courseId));
     if (!courseResponse.ok) {
       throw createError({
         statusCode: courseResponse.status,
@@ -81,7 +80,7 @@ export default defineEventHandler(async (event) => {
     let lessonContent = "";
     if (body?.includeContent !== false) {
       const lessonResponse = await storageApi.get<string>(
-        `courses/${courseId}/lessons/${lessonId}/lesson.md`
+        storagePaths.lesson(courseId, lessonId)
       );
       if (lessonResponse.ok) {
         const text = await lessonResponse.text();
@@ -125,10 +124,7 @@ export default defineEventHandler(async (event) => {
     };
 
     const flashcardsAdapter = getFormatAdapter("flashcards");
-    await storageApi.post(
-      `courses/${courseId}/lessons/${lessonId}/flashcards${flashcardsAdapter.extension}`,
-      flashcardsAdapter.serialize(content)
-    );
+    await storageApi.post(storagePaths.flashcards(courseId, lessonId), flashcardsAdapter.serialize(content));
 
     return { success: true, content };
   } catch (error: unknown) {

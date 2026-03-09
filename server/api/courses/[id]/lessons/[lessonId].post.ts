@@ -1,6 +1,7 @@
 import { defineEventHandler, readBody, createError, getRouterParam } from "h3";
 import { storageApi } from "@root/modules/storage";
 import { getFormatAdapter } from "@root/modules/content-formats";
+import { storagePaths } from "@root/server/lib/storagePaths";
 
 type LessonSection = "theory" | "flashcards" | "quiz" | "exercises";
 
@@ -24,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
     const courseAdapter = getFormatAdapter("course");
     const section: LessonSection = body?.section ?? "theory";
-    const coursePath = `courses/${courseId}/course${courseAdapter.extension}`;
+    const coursePath = storagePaths.course(courseId);
     const response = await storageApi.get<string>(coursePath);
 
     if (!response.ok) {

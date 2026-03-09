@@ -1,6 +1,7 @@
 import { defineEventHandler } from "h3";
 import { storageApi } from "@root/modules/storage";
 import { getFormatAdapter } from "@root/modules/content-formats";
+import { storagePaths } from "@root/server/lib/storagePaths";
 
 export default defineEventHandler(async () => {
   try {
@@ -14,7 +15,7 @@ export default defineEventHandler(async () => {
       courseFolders.map(async (folder) => {
         try {
           const courseAdapter = getFormatAdapter("course");
-          const response = await storageApi.get<string>(`courses/${folder.name}/course${courseAdapter.extension}`);
+          const response = await storageApi.get<string>(storagePaths.course(folder.name));
           if (!response.ok) return null;
           const course = courseAdapter.deserialize(await response.text());
 

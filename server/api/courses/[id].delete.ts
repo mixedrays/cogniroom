@@ -1,5 +1,6 @@
 import { defineEventHandler, getRouterParam } from "h3";
 import { storageApi } from "@root/modules/storage";
+import { storagePaths } from "@root/server/lib/storagePaths";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -10,7 +11,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Delete the entire course folder (includes lessons, tests, exercises)
-    const response = await storageApi.delete(`courses/${id}`, true);
+    const response = await storageApi.delete(storagePaths.courseDir(id), true);
 
     if (!response.ok && response.status !== 404) {
       return { success: false, error: response.statusText };

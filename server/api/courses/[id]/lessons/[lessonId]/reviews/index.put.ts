@@ -1,5 +1,6 @@
 import { defineEventHandler, getRouterParam, readBody, createError } from "h3";
 import { storageApi } from "@root/modules/storage";
+import { storagePaths } from "@root/server/lib/storagePaths";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -16,7 +17,7 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event) as object;
 
     await storageApi.put(
-      `courses/${courseId}/lessons/${lessonId}/reviews.json`,
+      storagePaths.reviews(courseId, lessonId),
       body
     );
 

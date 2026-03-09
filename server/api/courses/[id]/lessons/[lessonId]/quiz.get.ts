@@ -1,6 +1,7 @@
 import { defineEventHandler, getRouterParam, createError } from "h3";
 import { storageApi } from "@root/modules/storage";
 import { getFormatAdapter } from "@root/modules/content-formats";
+import { storagePaths } from "@root/server/lib/storagePaths";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -15,9 +16,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const quizAdapter = getFormatAdapter("quiz");
-    const response = await storageApi.get<string>(
-      `courses/${courseId}/lessons/${lessonId}/quiz${quizAdapter.extension}`
-    );
+    const response = await storageApi.get<string>(storagePaths.quiz(courseId, lessonId));
     if (response.ok) {
       const text = await response.text();
       const content = quizAdapter.deserialize(text);
