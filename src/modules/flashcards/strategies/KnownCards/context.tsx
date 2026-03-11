@@ -70,7 +70,8 @@ const useKnownCardsValue = ({
 
   const cardsToDisplay = flashcards.cardsToDisplay.map((card) => ({
     ...card,
-    knownCount: knownCardsHook.knownCards[card.id]?.knownCount ?? card.knownCount,
+    knownCount:
+      knownCardsHook.knownCards[card.id]?.knownCount ?? card.knownCount,
   }));
 
   const sharedContext: SharedFlashcardsContext = {
@@ -112,7 +113,9 @@ const KnownCardsContext = createContext<KnownCardsContextValue | null>(null);
 export function useKnownCardsContext(): KnownCardsContextValue {
   const ctx = useContext(KnownCardsContext);
   if (!ctx) {
-    throw new Error("useKnownCardsContext must be used within KnownCardsProvider");
+    throw new Error(
+      "useKnownCardsContext must be used within KnownCardsProvider"
+    );
   }
   return ctx;
 }

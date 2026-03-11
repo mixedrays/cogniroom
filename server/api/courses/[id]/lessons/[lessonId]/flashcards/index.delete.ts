@@ -14,7 +14,9 @@ export default defineEventHandler(async (event) => {
 
     const courseAdapter = getFormatAdapter("course");
 
-    const deleteResult = await storageApi.delete(storagePaths.flashcards(courseId, lessonId));
+    const deleteResult = await storageApi.delete(
+      storagePaths.flashcards(courseId, lessonId)
+    );
 
     if (!deleteResult.ok && deleteResult.status !== 404) {
       return { success: false, error: "Failed to delete flashcards" };

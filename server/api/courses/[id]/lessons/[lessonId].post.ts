@@ -31,7 +31,8 @@ export default defineEventHandler(async (event) => {
     if (!response.ok) {
       throw createError({
         statusCode: response.status,
-        statusMessage: response.status === 404 ? "Course not found" : response.statusText,
+        statusMessage:
+          response.status === 404 ? "Course not found" : response.statusText,
       });
     }
 
@@ -63,8 +64,8 @@ export default defineEventHandler(async (event) => {
     // Determine the current value (handle legacy 'completed' field for theory)
     const currentValue =
       section === "theory"
-        ? targetLesson[completedField] ?? targetLesson.completed ?? false
-        : targetLesson[completedField] ?? false;
+        ? (targetLesson[completedField] ?? targetLesson.completed ?? false)
+        : (targetLesson[completedField] ?? false);
 
     const nextCompleted =
       typeof body?.completed === "boolean" ? body.completed : !currentValue;

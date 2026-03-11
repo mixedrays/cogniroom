@@ -15,14 +15,18 @@ export interface SharedFlashcardsContext {
   onReset: () => void;
 }
 
-const SharedFlashcardsContext = createContext<SharedFlashcardsContext | null>(null);
+const SharedFlashcardsContext = createContext<SharedFlashcardsContext | null>(
+  null
+);
 
 export const SharedFlashcardsProvider = SharedFlashcardsContext.Provider;
 
 export function useSharedContext(): SharedFlashcardsContext {
   const ctx = useContext(SharedFlashcardsContext);
   if (!ctx) {
-    throw new Error("useSharedContext must be used within a flashcard strategy provider");
+    throw new Error(
+      "useSharedContext must be used within a flashcard strategy provider"
+    );
   }
   return ctx;
 }

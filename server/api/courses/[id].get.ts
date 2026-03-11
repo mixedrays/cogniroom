@@ -21,7 +21,8 @@ export default defineEventHandler(async (event) => {
     if (!response.ok) {
       throw createError({
         statusCode: response.status,
-        statusMessage: response.status === 404 ? "Course not found" : response.statusText,
+        statusMessage:
+          response.status === 404 ? "Course not found" : response.statusText,
       });
     }
 
@@ -32,22 +33,46 @@ export default defineEventHandler(async (event) => {
         const lessons = await Promise.all(
           (topic.lessons ?? []).map(async (lesson: any) => {
             // Check lesson content
-            const lessonStat = await storageApi.stat(storagePaths.lesson(id, lesson.id));
-            const hasContent = lessonStat !== null && !lessonStat.isDirectory && lessonStat.size > 0;
+            const lessonStat = await storageApi.stat(
+              storagePaths.lesson(id, lesson.id)
+            );
+            const hasContent =
+              lessonStat !== null &&
+              !lessonStat.isDirectory &&
+              lessonStat.size > 0;
 
             // Check flashcards
-            const flashcardsStat = await storageApi.stat(storagePaths.flashcards(id, lesson.id));
-            const hasFlashcards = flashcardsStat !== null && !flashcardsStat.isDirectory && flashcardsStat.size > 0;
+            const flashcardsStat = await storageApi.stat(
+              storagePaths.flashcards(id, lesson.id)
+            );
+            const hasFlashcards =
+              flashcardsStat !== null &&
+              !flashcardsStat.isDirectory &&
+              flashcardsStat.size > 0;
 
             // Check quiz
-            const quizStat = await storageApi.stat(storagePaths.quiz(id, lesson.id));
-            const hasQuiz = quizStat !== null && !quizStat.isDirectory && quizStat.size > 0;
+            const quizStat = await storageApi.stat(
+              storagePaths.quiz(id, lesson.id)
+            );
+            const hasQuiz =
+              quizStat !== null && !quizStat.isDirectory && quizStat.size > 0;
 
             // Check exercises
-            const exercisesStat = await storageApi.stat(storagePaths.exercise(id, lesson.id));
-            const hasExercises = exercisesStat !== null && !exercisesStat.isDirectory && exercisesStat.size > 0;
+            const exercisesStat = await storageApi.stat(
+              storagePaths.exercise(id, lesson.id)
+            );
+            const hasExercises =
+              exercisesStat !== null &&
+              !exercisesStat.isDirectory &&
+              exercisesStat.size > 0;
 
-            return { ...lesson, hasContent, hasFlashcards, hasQuiz, hasExercises };
+            return {
+              ...lesson,
+              hasContent,
+              hasFlashcards,
+              hasQuiz,
+              hasExercises,
+            };
           })
         );
 

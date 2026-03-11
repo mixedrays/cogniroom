@@ -9,9 +9,7 @@ interface SliderWidgetProps {
 }
 
 export function SliderWidget({ data, onAnswer, disabled }: SliderWidgetProps) {
-  const [value, setValue] = useState(
-    Math.round((data.min + data.max) / 2)
-  );
+  const [value, setValue] = useState(Math.round((data.min + data.max) / 2));
 
   const handleSubmit = () => {
     onAnswer(`${value}${data.unit}`, value);
@@ -22,11 +20,18 @@ export function SliderWidget({ data, onAnswer, disabled }: SliderWidgetProps) {
       <p className="text-sm font-medium">{data.question}</p>
       <div className="space-y-2">
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{data.min}{data.unit}</span>
-          <span className="font-medium text-foreground">
-            {value}{data.unit}
+          <span>
+            {data.min}
+            {data.unit}
           </span>
-          <span>{data.max}{data.unit}</span>
+          <span className="font-medium text-foreground">
+            {value}
+            {data.unit}
+          </span>
+          <span>
+            {data.max}
+            {data.unit}
+          </span>
         </div>
         <input
           type="range"

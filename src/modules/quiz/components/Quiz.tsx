@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   Undo as IconReset,
   ArrowUp as IconPrev,
@@ -273,7 +278,8 @@ const QuizKeyboardShortcuts = () => {
       if (currentQuestion?.type === "choice") {
         const qId = currentQuestion.id;
         const options = getShuffledOptions(qId);
-        const isMulti = currentQuestion.options.filter((o) => o.isCorrect).length > 1;
+        const isMulti =
+          currentQuestion.options.filter((o) => o.isCorrect).length > 1;
 
         const num = parseInt(e.key);
         if (num >= 1 && num <= options.length && !isChecked(qId)) {

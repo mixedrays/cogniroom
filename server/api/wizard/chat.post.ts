@@ -17,12 +17,20 @@ export default defineEventHandler(async (event) => {
 
   const context = JSON.stringify(body.context ?? {});
   const contentTypes = "lesson, flashcards, quiz, exercise, roadmap";
-  const system = await getRenderedPrompt("wizard-chat", { context, contentTypes });
+  const system = await getRenderedPrompt("wizard-chat", {
+    context,
+    contentTypes,
+  });
 
   const messages: ApiMessage[] =
     body.messages.length > 0
       ? body.messages
-      : [{ role: "user", content: "Hello, please greet me and ask your first question." }];
+      : [
+          {
+            role: "user",
+            content: "Hello, please greet me and ask your first question.",
+          },
+        ];
 
   try {
     const result = await generateText({
@@ -32,7 +40,10 @@ export default defineEventHandler(async (event) => {
     });
 
     const text = result.text.trim();
-    const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+    const cleaned = text
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/, "")
+      .trim();
 
     let message: unknown;
     try {

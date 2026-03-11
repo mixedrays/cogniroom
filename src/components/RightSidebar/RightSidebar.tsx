@@ -57,7 +57,9 @@ export default function RightSidebar() {
     }
   }
 
-  const hasContent = lessonInfo ? getHasContent(lessonInfo, contentType) : false;
+  const hasContent = lessonInfo
+    ? getHasContent(lessonInfo, contentType)
+    : false;
 
   const contentContext: ContentContext | undefined =
     course && lessonInfo

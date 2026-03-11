@@ -29,11 +29,16 @@ export default defineEventHandler(async (event) => {
 
     // 1. Load Course
     const courseAdapter = getFormatAdapter("course");
-    const courseResponse = await storageApi.get<string>(storagePaths.course(courseId));
+    const courseResponse = await storageApi.get<string>(
+      storagePaths.course(courseId)
+    );
     if (!courseResponse.ok) {
       throw createError({
         statusCode: courseResponse.status,
-        statusMessage: courseResponse.status === 404 ? "Course not found" : courseResponse.statusText,
+        statusMessage:
+          courseResponse.status === 404
+            ? "Course not found"
+            : courseResponse.statusText,
       });
     }
     const course = courseAdapter.deserialize(await courseResponse.text());

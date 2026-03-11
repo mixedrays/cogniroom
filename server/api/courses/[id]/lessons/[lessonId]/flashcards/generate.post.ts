@@ -42,7 +42,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const courseAdapter = getFormatAdapter("course");
-    const courseResponse = await storageApi.get<string>(storagePaths.course(courseId));
+    const courseResponse = await storageApi.get<string>(
+      storagePaths.course(courseId)
+    );
     if (!courseResponse.ok) {
       throw createError({
         statusCode: courseResponse.status,
@@ -124,7 +126,10 @@ export default defineEventHandler(async (event) => {
     };
 
     const flashcardsAdapter = getFormatAdapter("flashcards");
-    await storageApi.post(storagePaths.flashcards(courseId, lessonId), flashcardsAdapter.serialize(content));
+    await storageApi.post(
+      storagePaths.flashcards(courseId, lessonId),
+      flashcardsAdapter.serialize(content)
+    );
 
     return { success: true, content };
   } catch (error: unknown) {

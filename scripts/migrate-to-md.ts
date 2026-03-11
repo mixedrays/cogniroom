@@ -13,10 +13,24 @@
  *   npx tsx scripts/migrate-to-md.ts
  */
 
-import { readFileSync, writeFileSync, unlinkSync, readdirSync, existsSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  unlinkSync,
+  readdirSync,
+  existsSync,
+} from "node:fs";
 import { join, resolve } from "node:path";
-import { courseToMd, flashcardsToMd, quizToMd } from "../modules/md-formats/index.js";
-import type { Course, FlashcardsContent, QuizContent } from "../src/lib/types.js";
+import {
+  courseToMd,
+  flashcardsToMd,
+  quizToMd,
+} from "../modules/md-formats/index.js";
+import type {
+  Course,
+  FlashcardsContent,
+  QuizContent,
+} from "../src/lib/types.js";
 
 const DATA_DIR = resolve(process.cwd(), "data");
 const COURSES_DIR = join(DATA_DIR, "courses");
@@ -85,5 +99,7 @@ for (const courseId of readdirSync(COURSES_DIR)) {
   migrateCourse(courseDir, courseId);
 }
 
-console.log(`\nDone. Converted: ${converted}, Skipped: ${skipped}, Errors: ${errors}`);
+console.log(
+  `\nDone. Converted: ${converted}, Skipped: ${skipped}, Errors: ${errors}`
+);
 if (errors > 0) process.exit(1);

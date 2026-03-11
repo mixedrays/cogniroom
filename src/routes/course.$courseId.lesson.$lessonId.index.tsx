@@ -52,15 +52,16 @@ export const Route = createFileRoute("/course/$courseId/lesson/$lessonId/")({
 
     let lessonInfo = null;
     let topicInfo = null;
+    let topicIndex = 1;
 
-    for (const topic of course.topics) {
-      const l = topic.lessons?.find(
-        (x: { id: string }) => x.id === params.lessonId
-      );
-      if (l) {
-        lessonInfo = l;
-        topicInfo = topic;
-        break;
+    for (let ti = 0; ti < course.topics.length; ti++) {
+      const topic = course.topics[ti];
+      for (const lesson of topic.lessons ?? []) {
+        if (lesson.id === params.lessonId) {
+          lessonInfo = lesson;
+          topicInfo = topic;
+          topicIndex = ti + 1;
+        }
       }
     }
 
@@ -72,6 +73,7 @@ export const Route = createFileRoute("/course/$courseId/lesson/$lessonId/")({
       course,
       lessonInfo,
       topicInfo,
+      topicIndex,
       content: lessonData?.content || null,
     };
   },
@@ -83,6 +85,7 @@ function LessonComponent() {
     course,
     lessonInfo,
     topicInfo,
+    topicIndex,
     content: initialContent,
   } = useLoaderData({
     from: "/course/$courseId/lesson/$lessonId/",
@@ -119,7 +122,9 @@ function LessonComponent() {
         const result = await generateLesson(courseId, lessonId, prompt);
         if (result.success) {
           setWizardOpen(false);
-          await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+          await queryClient.invalidateQueries({
+            queryKey: ["course", courseId],
+          });
           if (result.content) {
             queryClient.setQueryData(
               lessonQueryOptions(courseId, lessonId).queryKey,
@@ -219,7 +224,8 @@ function LessonComponent() {
         courseId={courseId}
         lessonId={lessonId}
         courseTitle={course.title}
-        topicTitle={topicInfo?.title}
+        topicIndex={topicIndex}
+        topicLessons={topicInfo?.lessons ?? []}
         activeTab="theory"
         showMarkComplete={!!content}
         isCompleted={isCompleted}
@@ -246,7 +252,8 @@ function LessonComponent() {
           <LessonEmptyState
             title={lessonInfo.title}
             description={
-              lessonInfo.description || "No content available for this lesson yet."
+              lessonInfo.description ||
+              "No content available for this lesson yet."
             }
           >
             <ContentCreationDialog

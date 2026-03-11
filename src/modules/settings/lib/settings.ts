@@ -21,7 +21,11 @@ export async function getSettings(): Promise<{
     const response = await fetch(`${getBaseUrl()}/api/settings`);
     if (!response.ok) {
       console.error("Failed to get settings:", response.statusText);
-      return { success: false, settings: DEFAULT_SETTINGS, error: response.statusText };
+      return {
+        success: false,
+        settings: DEFAULT_SETTINGS,
+        error: response.statusText,
+      };
     }
     return await response.json();
   } catch (e) {

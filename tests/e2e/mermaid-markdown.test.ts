@@ -14,7 +14,12 @@ const ARTIFACTS_DIR = join(process.cwd(), "artifacts", "console");
 const FIXTURE_COURSE_ID = "e2e-mermaid-course";
 const FIXTURE_LESSON_ID = "e2e-mermaid-lesson";
 const FIXTURE_DIR = join(import.meta.dirname, "fixtures", "mermaid");
-const DATA_COURSE_DIR = join(process.cwd(), "data", "courses", FIXTURE_COURSE_ID);
+const DATA_COURSE_DIR = join(
+  process.cwd(),
+  "data",
+  "courses",
+  FIXTURE_COURSE_ID
+);
 
 const LESSON_URL = `${APP_URL}/course/${FIXTURE_COURSE_ID}/lesson/${FIXTURE_LESSON_ID}`;
 
@@ -36,7 +41,11 @@ function attachLogCollectors(page: Page): PageLogs {
   const failedRequests: FailedRequest[] = [];
 
   page.on("console", (msg: ConsoleMessage) => {
-    consoleLogs.push({ type: msg.type(), text: msg.text(), url: msg.location().url });
+    consoleLogs.push({
+      type: msg.type(),
+      text: msg.text(),
+      url: msg.location().url,
+    });
   });
 
   page.on("pageerror", (error: unknown) => {
@@ -87,14 +96,21 @@ describe("mermaid markdown rendering", () => {
 
       // Wait for all mermaid diagrams to finish async rendering
       await page.waitForFunction(
-        (count) => document.querySelectorAll("svg[id^='mermaid-']").length >= count,
+        (count) =>
+          document.querySelectorAll("svg[id^='mermaid-']").length >= count,
         { timeout: 15000 },
         MERMAID_DIAGRAM_COUNT
       );
 
       const consoleErrors = logs.consoleLogs.filter((l) => l.type === "error");
-      expect(consoleErrors, JSON.stringify(consoleErrors, null, 2)).toHaveLength(0);
-      expect(logs.pageErrors, JSON.stringify(logs.pageErrors, null, 2)).toHaveLength(0);
+      expect(
+        consoleErrors,
+        JSON.stringify(consoleErrors, null, 2)
+      ).toHaveLength(0);
+      expect(
+        logs.pageErrors,
+        JSON.stringify(logs.pageErrors, null, 2)
+      ).toHaveLength(0);
 
       // Verify each diagram rendered as an SVG
       const svgCount = await page.$$eval(
@@ -107,7 +123,10 @@ describe("mermaid markdown rendering", () => {
       const mermaidErrors = await page.$$eval("pre.text-destructive", (els) =>
         els.map((el) => el.textContent)
       );
-      expect(mermaidErrors, JSON.stringify(mermaidErrors, null, 2)).toHaveLength(0);
+      expect(
+        mermaidErrors,
+        JSON.stringify(mermaidErrors, null, 2)
+      ).toHaveLength(0);
     } finally {
       mkdirSync(ARTIFACTS_DIR, { recursive: true });
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");

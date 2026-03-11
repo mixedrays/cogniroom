@@ -15,7 +15,9 @@ export default defineEventHandler(async () => {
       courseFolders.map(async (folder) => {
         try {
           const courseAdapter = getFormatAdapter("course");
-          const response = await storageApi.get<string>(storagePaths.course(folder.name));
+          const response = await storageApi.get<string>(
+            storagePaths.course(folder.name)
+          );
           if (!response.ok) return null;
           const course = courseAdapter.deserialize(await response.text());
 

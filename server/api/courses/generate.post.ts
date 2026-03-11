@@ -62,7 +62,11 @@ export default defineEventHandler(async (event) => {
       return { success: false, error: "Missing topic" };
     }
 
-    const prompt = await getRenderedPrompt("course-generation", { topic, level, additionalInstructions });
+    const prompt = await getRenderedPrompt("course-generation", {
+      topic,
+      level,
+      additionalInstructions,
+    });
 
     const result = await generateText({
       model: getOpenAIClient(model as AvailableModelsId),

@@ -14,12 +14,17 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const response = await storage<string>(storagePaths.exercise(courseId, lessonId));
+    const response = await storage<string>(
+      storagePaths.exercise(courseId, lessonId)
+    );
 
     if (!response.ok) {
       throw createError({
         statusCode: response.status,
-        statusMessage: response.status === 404 ? "Exercises content not found" : response.statusText,
+        statusMessage:
+          response.status === 404
+            ? "Exercises content not found"
+            : response.statusText,
       });
     }
 

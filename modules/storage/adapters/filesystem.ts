@@ -3,7 +3,14 @@
  * Implements storage operations using Node.js fs/promises
  */
 
-import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type {
   FileMetadata,
@@ -68,7 +75,8 @@ export class FileSystemAdapter extends StorageAdapter {
     fullPath: string,
     request: StorageRequest
   ): Promise<StorageResponse<T>> {
-    const encoding = request.options.encoding ?? this.config.defaultEncoding ?? "utf-8";
+    const encoding =
+      request.options.encoding ?? this.config.defaultEncoding ?? "utf-8";
     const content = await readFile(fullPath, { encoding });
     const contentType = this.getContentType(fullPath);
 
@@ -78,7 +86,11 @@ export class FileSystemAdapter extends StorageAdapter {
       return this.createResponse(StorageStatus.OK, parsed, content);
     }
 
-    return this.createResponse(StorageStatus.OK, content as unknown as T, content);
+    return this.createResponse(
+      StorageStatus.OK,
+      content as unknown as T,
+      content
+    );
   }
 
   /**
@@ -107,13 +119,15 @@ export class FileSystemAdapter extends StorageAdapter {
       );
     }
 
-    const encoding = request.options.encoding ?? this.config.defaultEncoding ?? "utf-8";
+    const encoding =
+      request.options.encoding ?? this.config.defaultEncoding ?? "utf-8";
     await writeFile(fullPath, content, { encoding });
 
     // Check if file existed before (for status code)
     // POST creates new (201), PUT updates (200)
     // For simplicity, we return 201 for POST and 200 for PUT
-    const status = request.method === "POST" ? StorageStatus.CREATED : StorageStatus.OK;
+    const status =
+      request.method === "POST" ? StorageStatus.CREATED : StorageStatus.OK;
     return this.createResponse(status);
   }
 
@@ -150,7 +164,12 @@ export class FileSystemAdapter extends StorageAdapter {
    */
   async list(path: string, options: ListOptions = {}): Promise<FileMetadata[]> {
     const fullPath = this.resolvePath(path);
-    const { files = true, directories = true, recursive = false, extension } = options;
+    const {
+      files = true,
+      directories = true,
+      recursive = false,
+      extension,
+    } = options;
 
     const entries = await readdir(fullPath, { withFileTypes: true });
     const results: FileMetadata[] = [];

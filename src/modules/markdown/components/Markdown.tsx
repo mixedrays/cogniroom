@@ -1,7 +1,11 @@
 import { type ReactNode } from "react";
 import { type Components, MarkdownHooks } from "react-markdown";
 import { cn } from "@/lib/utils";
-import { remarkPlugins, rehypePlugins, remarkRehypeOptions } from "../lib/plugins";
+import {
+  remarkPlugins,
+  rehypePlugins,
+  remarkRehypeOptions,
+} from "../lib/plugins";
 import { CodeBlock } from "./CodeBlock";
 import { MermaidDiagram } from "./MermaidDiagram";
 import "../styles/markdown.css";
@@ -39,7 +43,9 @@ export function Markdown({
         remarkPlugins={remarkPlugins}
         rehypePlugins={rehypePlugins}
         remarkRehypeOptions={remarkRehypeOptions}
-        components={{ pre: CodeBlock, "mermaid-diagram": MermaidBlock } as Components}
+        components={
+          { pre: CodeBlock, "mermaid-diagram": MermaidBlock } as Components
+        }
         fallback={fallback}
       >
         {content}

@@ -62,11 +62,7 @@ export function HistorySettings() {
             View and restore previous configurations
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={loadHistory}
-        >
+        <Button variant="outline" size="sm" onClick={loadHistory}>
           <RotateCcwIcon className="size-4 mr-1.5" />
           Refresh
         </Button>
@@ -112,8 +108,10 @@ export function HistorySettings() {
                       {entry.settings.appearance.mode}
                     </span>
                     <span className="bg-muted px-1.5 py-0.5 rounded">
-                      {AVAILABLE_MODELS[entry.settings.llm.defaultModel as keyof typeof AVAILABLE_MODELS]
-                        ?.label || entry.settings.llm.defaultModel}
+                      {AVAILABLE_MODELS[
+                        entry.settings.llm
+                          .defaultModel as keyof typeof AVAILABLE_MODELS
+                      ]?.label || entry.settings.llm.defaultModel}
                     </span>
                   </div>
                 </div>

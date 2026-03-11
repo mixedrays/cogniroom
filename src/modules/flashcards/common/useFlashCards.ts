@@ -28,7 +28,7 @@ export const initialState: StudyState = {
 
 export function studyReducer(
   state: StudyState,
-  action: StudyAction,
+  action: StudyAction
 ): StudyState {
   switch (action.type) {
     case "SET_CURRENT_INDEX":
@@ -68,7 +68,7 @@ export function studyReducer(
 
 export function useFlashCards<TCard extends CardLike>(
   cards: TCard[] = [],
-  options?: { cardFilter?: (card: TCard) => boolean },
+  options?: { cardFilter?: (card: TCard) => boolean }
 ) {
   const [state, dispatch] = useReducer(studyReducer, initialState);
 

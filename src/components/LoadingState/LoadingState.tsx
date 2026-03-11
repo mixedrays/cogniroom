@@ -64,8 +64,15 @@ export function LoadingState({
   if (variant === "inline") {
     return (
       <span className={cn("inline-flex items-center gap-2", className)}>
-        <Loader2 className={cn("animate-spin text-muted-foreground", sizeClasses[size])} />
-        {message && <span className="text-sm text-muted-foreground">{message}</span>}
+        <Loader2
+          className={cn(
+            "animate-spin text-muted-foreground",
+            sizeClasses[size]
+          )}
+        />
+        {message && (
+          <span className="text-sm text-muted-foreground">{message}</span>
+        )}
       </span>
     );
   }
@@ -80,7 +87,9 @@ export function LoadingState({
       )}
       style={{ minHeight: centered ? minHeight : undefined }}
     >
-      <Loader2 className={cn("animate-spin text-muted-foreground", sizeClasses[size])} />
+      <Loader2
+        className={cn("animate-spin text-muted-foreground", sizeClasses[size])}
+      />
       {message && (
         <p className="text-sm text-muted-foreground animate-pulse">{message}</p>
       )}

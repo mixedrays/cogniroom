@@ -45,11 +45,13 @@ export function isLessonSectionCompleted(
 
 // Helper to check if entire lesson is completed (all available sections)
 export function isLessonFullyCompleted(lesson: Lesson): boolean {
-  const theoryDone = !lesson.hasContent || isLessonSectionCompleted(lesson, "theory");
+  const theoryDone =
+    !lesson.hasContent || isLessonSectionCompleted(lesson, "theory");
   const testsDone =
     (!lesson.hasFlashcards || isLessonSectionCompleted(lesson, "flashcards")) &&
     (!lesson.hasQuiz || isLessonSectionCompleted(lesson, "quiz"));
-  const exercisesDone = !lesson.hasExercises || isLessonSectionCompleted(lesson, "exercises");
+  const exercisesDone =
+    !lesson.hasExercises || isLessonSectionCompleted(lesson, "exercises");
   return theoryDone && testsDone && exercisesDone;
 }
 
@@ -154,8 +156,8 @@ export function calculateProgress(course: Course): number {
 
   for (const topic of course.topics) {
     totalLessons += topic.lessons.length;
-    completedLessons += topic.lessons.filter((l) =>
-      l.theoryCompleted ?? l.completed ?? false
+    completedLessons += topic.lessons.filter(
+      (l) => l.theoryCompleted ?? l.completed ?? false
     ).length;
   }
 
@@ -170,8 +172,8 @@ export function getCourseMetadata(course: Course): CourseMetadata {
 
   for (const topic of course.topics) {
     lessonCount += topic.lessons.length;
-    completedCount += topic.lessons.filter((l) =>
-      l.theoryCompleted ?? l.completed ?? false
+    completedCount += topic.lessons.filter(
+      (l) => l.theoryCompleted ?? l.completed ?? false
     ).length;
   }
 

@@ -16,7 +16,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const flashcardsAdapter = getFormatAdapter("flashcards");
-    const response = await storageApi.get<string>(storagePaths.flashcards(courseId, lessonId));
+    const response = await storageApi.get<string>(
+      storagePaths.flashcards(courseId, lessonId)
+    );
     if (response.ok) {
       const text = await response.text();
       const content = flashcardsAdapter.deserialize(text);

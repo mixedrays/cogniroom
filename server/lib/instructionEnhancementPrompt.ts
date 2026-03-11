@@ -10,7 +10,7 @@ export interface InstructionEnhancementContext {
   /** The original user instruction to enhance */
   userInstruction: string;
   /** The type of content being generated (e.g., 'lesson', 'exercise', 'test') */
-  contentType: 'lesson' | 'exercise' | 'test' | 'course';
+  contentType: "lesson" | "exercise" | "test" | "course";
   /** Optional course title for context */
   courseTitle?: string;
   /** Optional topic title for context */
@@ -18,13 +18,15 @@ export interface InstructionEnhancementContext {
   /** Optional lesson title for context */
   lessonTitle?: string;
   /** Target skill level */
-  skillLevel?: 'beginner' | 'intermediate' | 'advanced';
+  skillLevel?: "beginner" | "intermediate" | "advanced";
 }
 
 /**
  * Returns content-type specific guidelines for instruction enhancement
  */
-export function getContentTypeGuidelines(contentType: InstructionEnhancementContext['contentType']): string {
+export function getContentTypeGuidelines(
+  contentType: InstructionEnhancementContext["contentType"]
+): string {
   const guidelines: Record<typeof contentType, string[]> = {
     lesson: [
       "For lesson content, ensure the enhanced instruction addresses:",
@@ -67,7 +69,9 @@ export function getContentTypeGuidelines(contentType: InstructionEnhancementCont
  * Validates that a user instruction is suitable for enhancement
  * Returns null if valid, or an error message if invalid
  */
-export function validateInstructionForEnhancement(instruction: string): string | null {
+export function validateInstructionForEnhancement(
+  instruction: string
+): string | null {
   const trimmed = instruction.trim();
 
   if (!trimmed) {
@@ -90,17 +94,23 @@ export function validateInstructionForEnhancement(instruction: string): string |
  * These can be used as fallbacks or suggestions
  */
 export const ENHANCEMENT_TEMPLATES = {
-  focusOnPractical: "Focus on practical, hands-on examples. Include working code snippets that learners can run and modify. Prioritize real-world applications over theoretical concepts.",
+  focusOnPractical:
+    "Focus on practical, hands-on examples. Include working code snippets that learners can run and modify. Prioritize real-world applications over theoretical concepts.",
 
-  beginnerFriendly: "Explain concepts as if teaching someone with no prior experience. Use simple analogies, break down complex terms, and provide step-by-step explanations.",
+  beginnerFriendly:
+    "Explain concepts as if teaching someone with no prior experience. Use simple analogies, break down complex terms, and provide step-by-step explanations.",
 
-  advancedDeep: "Provide in-depth technical details. Include edge cases, performance considerations, and best practices. Assume familiarity with foundational concepts.",
+  advancedDeep:
+    "Provide in-depth technical details. Include edge cases, performance considerations, and best practices. Assume familiarity with foundational concepts.",
 
-  interactiveQuiz: "Include interactive elements like quizzes, reflection questions, or self-assessment checkpoints throughout the content.",
+  interactiveQuiz:
+    "Include interactive elements like quizzes, reflection questions, or self-assessment checkpoints throughout the content.",
 
-  projectBased: "Structure around a practical project. Each section should build toward a tangible deliverable that learners can showcase.",
+  projectBased:
+    "Structure around a practical project. Each section should build toward a tangible deliverable that learners can showcase.",
 
-  visualLearning: "Emphasize visual explanations. Include diagrams, flowcharts, or suggest visual representations for complex concepts.",
+  visualLearning:
+    "Emphasize visual explanations. Include diagrams, flowcharts, or suggest visual representations for complex concepts.",
 } as const;
 
 export type EnhancementTemplateKey = keyof typeof ENHANCEMENT_TEMPLATES;

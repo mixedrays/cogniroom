@@ -10,14 +10,18 @@ source: import
 ## E2E Fixture Topic
 
 ---
+
 id: e2e-fixture-topic
 description: Test topic
+
 ---
 
 ### E2E Fixture Lesson
 
 ---
+
 id: e2e-fixture-lesson
 description: Test lesson used by e2e console tests.
 completed: false
+
 ---

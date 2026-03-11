@@ -13,7 +13,9 @@ export default defineEventHandler(async (event) => {
     }
 
     // Delete exercises file
-    const deleteResponse = await storageApi.delete(storagePaths.exercise(courseId, lessonId));
+    const deleteResponse = await storageApi.delete(
+      storagePaths.exercise(courseId, lessonId)
+    );
     if (!deleteResponse.ok && deleteResponse.status !== 404) {
       return { success: false, error: deleteResponse.statusText };
     }

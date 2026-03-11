@@ -103,8 +103,13 @@ export function SM2UI({ cards, reviewData, onSave, className }: SM2UIProps) {
 }
 
 function SM2UIContent({ className }: { className?: string }) {
-  const { sessionCards, sessionComplete, sessionStats, resetSession, setShowAllCards } =
-    useSM2Context();
+  const {
+    sessionCards,
+    sessionComplete,
+    sessionStats,
+    resetSession,
+    setShowAllCards,
+  } = useSM2Context();
 
   if (sessionCards.length === 0) {
     return (

@@ -55,7 +55,8 @@ export abstract class StorageAdapter {
   ): StorageResponse<T> {
     const ok = status >= 200 && status < 300;
     const storedData = data;
-    const storedText = rawText ?? (data !== undefined ? JSON.stringify(data) : "");
+    const storedText =
+      rawText ?? (data !== undefined ? JSON.stringify(data) : "");
 
     return {
       ok,
@@ -102,7 +103,11 @@ export abstract class StorageAdapter {
    */
   protected getContentType(
     path: string
-  ): "application/json" | "text/markdown" | "text/plain" | "application/octet-stream" {
+  ):
+    | "application/json"
+    | "text/markdown"
+    | "text/plain"
+    | "application/octet-stream" {
     const ext = path.split(".").pop()?.toLowerCase();
     switch (ext) {
       case "json":

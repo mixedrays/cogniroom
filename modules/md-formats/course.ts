@@ -103,8 +103,7 @@ export function mdToCourse(text: string): Course {
 
   for (let i = 2; i < parts.length - 1; i += 2) {
     const body = parts[i];
-    const fm =
-      i + 1 < parts.length ? parseFrontmatter(parts[i + 1]) : {};
+    const fm = i + 1 < parts.length ? parseFrontmatter(parts[i + 1]) : {};
 
     const topicMatch = body.match(/^## (.+)$/m);
     if (topicMatch) {
@@ -142,7 +141,8 @@ export function mdToCourse(text: string): Course {
         lesson.exercisesCompleted = fm.exercisesCompleted as boolean;
       if (fm.exercisesCompletedAt)
         lesson.exercisesCompletedAt = fm.exercisesCompletedAt as string;
-      if (fm.completed !== undefined) lesson.completed = fm.completed as boolean;
+      if (fm.completed !== undefined)
+        lesson.completed = fm.completed as boolean;
       if (fm.completedAt) lesson.completedAt = fm.completedAt as string;
 
       currentTopic.lessons.push(lesson);

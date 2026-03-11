@@ -14,7 +14,9 @@ export default defineEventHandler(async (event) => {
 
     const courseAdapter = getFormatAdapter("course");
 
-    const deleteResult = await storageApi.delete(storagePaths.quiz(courseId, lessonId));
+    const deleteResult = await storageApi.delete(
+      storagePaths.quiz(courseId, lessonId)
+    );
 
     if (!deleteResult.ok && deleteResult.status !== 404) {
       return { success: false, error: "Failed to delete quiz" };

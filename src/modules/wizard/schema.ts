@@ -27,7 +27,13 @@ export const AgentMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("preview"),
     prompt: z.string(),
-    contentType: z.enum(["lesson", "flashcards", "quiz", "exercise", "roadmap"]),
+    contentType: z.enum([
+      "lesson",
+      "flashcards",
+      "quiz",
+      "exercise",
+      "roadmap",
+    ]),
   }),
 ]);
 

@@ -83,7 +83,9 @@ export function SettingsContent({
         <div className="p-4 h-full overflow-auto">
           {activeTab === "appearance" && <AppearanceSettings />}
           {activeTab === "llm" && <LLMSettings />}
-          {activeTab === "prompts" && <PromptsSettings defaultPromptId={defaultPromptId} />}
+          {activeTab === "prompts" && (
+            <PromptsSettings defaultPromptId={defaultPromptId} />
+          )}
           {activeTab === "history" && <HistorySettings />}
         </div>
       </div>

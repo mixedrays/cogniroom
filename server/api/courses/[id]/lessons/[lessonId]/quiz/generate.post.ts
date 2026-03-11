@@ -49,7 +49,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const courseAdapter = getFormatAdapter("course");
-    const courseResponse = await storageApi.get<string>(storagePaths.course(courseId));
+    const courseResponse = await storageApi.get<string>(
+      storagePaths.course(courseId)
+    );
     if (!courseResponse.ok) {
       throw createError({
         statusCode: courseResponse.status,
@@ -127,7 +129,11 @@ export default defineEventHandler(async (event) => {
           difficulty: q.difficulty,
           ...(q.explanation ? { explanation: q.explanation } : {}),
         };
-        if (q.type === "choice" && Array.isArray(q.options) && q.options.length > 0) {
+        if (
+          q.type === "choice" &&
+          Array.isArray(q.options) &&
+          q.options.length > 0
+        ) {
           return { ...base, type: "choice" as const, options: q.options };
         }
         if (q.type === "true-false" && q.answer !== null) {
@@ -137,10 +143,16 @@ export default defineEventHandler(async (event) => {
       })
       .filter(Boolean);
 
-    const content = { version: 2 as const, quizQuestions: quizQuestions as QuizContent["quizQuestions"] };
+    const content = {
+      version: 2 as const,
+      quizQuestions: quizQuestions as QuizContent["quizQuestions"],
+    };
 
     const quizAdapter = getFormatAdapter("quiz");
-    await storageApi.post(storagePaths.quiz(courseId, lessonId), quizAdapter.serialize(content));
+    await storageApi.post(
+      storagePaths.quiz(courseId, lessonId),
+      quizAdapter.serialize(content)
+    );
 
     return { success: true, content };
   } catch (error: any) {

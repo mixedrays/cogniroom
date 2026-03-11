@@ -24,8 +24,14 @@ function quizAnswersReducer(
     case "SELECT_SINGLE": {
       if (state.checkedQuestions[action.questionId]) return state;
       return {
-        selections: { ...state.selections, [action.questionId]: [action.option] },
-        checkedQuestions: { ...state.checkedQuestions, [action.questionId]: true },
+        selections: {
+          ...state.selections,
+          [action.questionId]: [action.option],
+        },
+        checkedQuestions: {
+          ...state.checkedQuestions,
+          [action.questionId]: true,
+        },
       };
     }
     case "TOGGLE_MULTI": {
@@ -35,7 +41,10 @@ function quizAnswersReducer(
         : [...current, action.option];
       return {
         selections: { ...state.selections, [action.questionId]: updated },
-        checkedQuestions: { ...state.checkedQuestions, [action.questionId]: true },
+        checkedQuestions: {
+          ...state.checkedQuestions,
+          [action.questionId]: true,
+        },
       };
     }
     case "RESET":
@@ -89,7 +98,9 @@ export function useQuizAnswers() {
   );
 
   const getScore = useCallback(
-    (questions: QuizQuestion[]): { correct: number; total: number; checked: number } => {
+    (
+      questions: QuizQuestion[]
+    ): { correct: number; total: number; checked: number } => {
       let correct = 0;
       let checked = 0;
       for (const q of questions) {

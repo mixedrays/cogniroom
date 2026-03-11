@@ -1,4 +1,11 @@
-import type { Course, CourseMetadata, FlashcardsContent, QuizContent, ReviewData, LessonSection } from "./types";
+import type {
+  Course,
+  CourseMetadata,
+  FlashcardsContent,
+  QuizContent,
+  ReviewData,
+  LessonSection,
+} from "./types";
 
 export type CourseSkillLevel = "beginner" | "intermediate" | "advanced";
 

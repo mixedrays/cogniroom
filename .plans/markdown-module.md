@@ -42,6 +42,7 @@ npm install rehype-pretty-code shiki remark-gfm remark-math rehype-katex rehype-
 ### 2. Create `src/modules/markdown/lib/plugins.ts`
 
 Centralizes all plugin config:
+
 - `remarkPlugins`: `remark-gfm`, `remark-math`, `remark-definition-list`, `remark-github-blockquote-alert`
 - `rehypePlugins`: `rehype-slug`, `rehype-autolink-headings` (behavior: "wrap"), `rehype-katex`, `rehype-pretty-code` (themes: `github-light` / `github-dark`, `defaultColor: false`, `keepBackground: false`)
 - `remarkRehypeOptions`: `defListHastHandlers` from `remark-definition-list`
@@ -92,12 +93,12 @@ Centralizes all plugin config:
 
 ### 8. Migrate consumers (4 files)
 
-| File | Change |
-|------|--------|
-| `src/routes/course.$courseId.lesson.$lessonId.index.tsx` | Replace `ReactMarkdown` + prose div with `<Markdown content={content} variant="lesson" />` |
-| `src/routes/course.$courseId.lesson.$lessonId.exercises.tsx` | Same as above, `variant="lesson"` |
-| `src/modules/quiz/components/Quiz.tsx` | Replace with `<Markdown content={q.question} variant="quiz" />` |
-| `src/modules/flashcards/components/Flashcard.tsx` | Replace with `<Markdown content={content} variant="flashcard" />` |
+| File                                                         | Change                                                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `src/routes/course.$courseId.lesson.$lessonId.index.tsx`     | Replace `ReactMarkdown` + prose div with `<Markdown content={content} variant="lesson" />` |
+| `src/routes/course.$courseId.lesson.$lessonId.exercises.tsx` | Same as above, `variant="lesson"`                                                          |
+| `src/modules/quiz/components/Quiz.tsx`                       | Replace with `<Markdown content={q.question} variant="quiz" />`                            |
+| `src/modules/flashcards/components/Flashcard.tsx`            | Replace with `<Markdown content={content} variant="flashcard" />`                          |
 
 ### 9. Adjust existing CSS in `src/styles.css`
 

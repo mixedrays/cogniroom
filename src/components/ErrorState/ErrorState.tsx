@@ -1,6 +1,12 @@
 import { AlertCircle, RefreshCw, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export type ErrorStateVariant = "card" | "inline" | "banner" | "minimal";
@@ -117,7 +123,9 @@ export function ErrorState({
             disabled={isRetrying}
             className="ml-2"
           >
-            <RefreshCw className={cn("h-3 w-3", isRetrying && "animate-spin")} />
+            <RefreshCw
+              className={cn("h-3 w-3", isRetrying && "animate-spin")}
+            />
             {retryLabel}
           </Button>
         )}
@@ -148,10 +156,13 @@ export function ErrorState({
       >
         <AlertCircle className={cn("h-5 w-5 shrink-0", styles.icon)} />
         <div className="flex-1 min-w-0">
-          {title && (
-            <p className={cn("font-medium", styles.text)}>{title}</p>
-          )}
-          <p className={cn("text-sm", title ? "text-muted-foreground" : styles.text)}>
+          {title && <p className={cn("font-medium", styles.text)}>{title}</p>}
+          <p
+            className={cn(
+              "text-sm",
+              title ? "text-muted-foreground" : styles.text
+            )}
+          >
             {message}
           </p>
         </div>
@@ -163,16 +174,14 @@ export function ErrorState({
               onClick={onRetry}
               disabled={isRetrying}
             >
-              <RefreshCw className={cn("h-4 w-4", isRetrying && "animate-spin")} />
+              <RefreshCw
+                className={cn("h-4 w-4", isRetrying && "animate-spin")}
+              />
               {retryLabel}
             </Button>
           )}
           {showDismiss && onDismiss && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={onDismiss}
-            >
+            <Button variant="ghost" size="icon-sm" onClick={onDismiss}>
               <XCircle className="h-4 w-4" />
             </Button>
           )}
@@ -187,9 +196,7 @@ export function ErrorState({
       <CardHeader>
         <div className="flex items-center gap-2">
           <AlertCircle className={cn("h-5 w-5", styles.icon)} />
-          <CardTitle className={styles.text}>
-            {title || "Error"}
-          </CardTitle>
+          <CardTitle className={styles.text}>{title || "Error"}</CardTitle>
         </div>
         <CardDescription className="text-muted-foreground">
           {message}
@@ -210,16 +217,14 @@ export function ErrorState({
                 onClick={onRetry}
                 disabled={isRetrying}
               >
-                <RefreshCw className={cn("h-4 w-4", isRetrying && "animate-spin")} />
+                <RefreshCw
+                  className={cn("h-4 w-4", isRetrying && "animate-spin")}
+                />
                 {retryLabel}
               </Button>
             )}
             {showDismiss && onDismiss && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onDismiss}
-              >
+              <Button variant="ghost" size="sm" onClick={onDismiss}>
                 Dismiss
               </Button>
             )}

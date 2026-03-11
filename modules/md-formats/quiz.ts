@@ -88,7 +88,11 @@ export function mdToQuiz(text: string): QuizContent {
     };
 
     if (fm.type === "choice" && options.length > 0) {
-      quizQuestions.push({ ...base, type: "choice", options } as ChoiceQuizQuestion);
+      quizQuestions.push({
+        ...base,
+        type: "choice",
+        options,
+      } as ChoiceQuizQuestion);
     } else if (fm.type === "true-false") {
       quizQuestions.push({
         ...base,
@@ -101,9 +105,10 @@ export function mdToQuiz(text: string): QuizContent {
   return { version: 2, quizQuestions };
 }
 
-function parseQuizBody(
-  body: string
-): { question: string; options: { text: string; isCorrect: boolean }[] } {
+function parseQuizBody(body: string): {
+  question: string;
+  options: { text: string; isCorrect: boolean }[];
+} {
   const lines = body.split("\n");
   let question = "";
   const options: { text: string; isCorrect: boolean }[] = [];

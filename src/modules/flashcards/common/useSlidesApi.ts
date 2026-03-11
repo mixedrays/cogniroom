@@ -35,7 +35,7 @@ export function useSlidesApi({
   threshold = 0.9,
 }: UseSlidesApiOptions): SlidesApi {
   const [targetCurrentIndex, setTargetCurrentIndex] = useState<number | null>(
-    null,
+    null
   );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -52,7 +52,7 @@ export function useSlidesApi({
         onIndexChange(index);
       }
     },
-    [onIndexChange],
+    [onIndexChange]
   );
 
   // Navigate to previous slide
@@ -70,7 +70,7 @@ export function useSlidesApi({
     (index: number) => (el: HTMLDivElement | null) => {
       slideRefs.current[index] = el;
     },
-    [],
+    []
   );
 
   // Track scroll position to update current index using Intersection Observer
@@ -103,7 +103,7 @@ export function useSlidesApi({
         root: container,
         rootMargin: "0px",
         threshold,
-      },
+      }
     );
 
     slideRefs.current.forEach((slide) => {

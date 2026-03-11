@@ -1,10 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import type { Flashcard, ReviewData, ReviewEntry } from "@/lib/types";
-import {
-  applySM2,
-  useFlashcardsSM2,
-} from "../useFlashcardsSM2";
+import { applySM2, useFlashcardsSM2 } from "../useFlashcardsSM2";
 
 const NOW = new Date("2026-02-23T10:00:00.000Z");
 
@@ -15,7 +12,9 @@ const cards: Flashcard[] = [
   { id: "d", question: "Q4", answer: "A4", difficulty: "easy" },
 ];
 
-const entry = (partial: Partial<ReviewEntry> & Pick<ReviewEntry, "itemId">): ReviewEntry => ({
+const entry = (
+  partial: Partial<ReviewEntry> & Pick<ReviewEntry, "itemId">
+): ReviewEntry => ({
   itemId: partial.itemId,
   repetitions: partial.repetitions ?? 0,
   easeFactor: partial.easeFactor ?? 2.5,
@@ -45,7 +44,7 @@ describe("applySM2", () => {
     expect(result.easeFactor).toBeCloseTo(2.6, 10);
     expect(result.lastReviewedAt).toBe(NOW.toISOString());
     expect(result.nextReviewAt).toBe(
-      new Date(NOW.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+      new Date(NOW.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString()
     );
   });
 
@@ -145,10 +144,14 @@ describe("useFlashcardsSM2", () => {
 
     const onSave = createOnSaveMock();
     const { result } = renderHook(() =>
-      useFlashcardsSM2(cards, reviewData, onSave),
+      useFlashcardsSM2(cards, reviewData, onSave)
     );
 
-    expect(result.current.sessionCards.map((card) => card.id)).toEqual(["b", "a", "d"]);
+    expect(result.current.sessionCards.map((card) => card.id)).toEqual([
+      "b",
+      "a",
+      "d",
+    ]);
     expect(result.current.dueCount).toBe(2);
     expect(result.current.newCount).toBe(1);
     expect(result.current.currentIndex).toBe(0);
@@ -159,15 +162,22 @@ describe("useFlashcardsSM2", () => {
   it("returns all cards when showAllCards is enabled", () => {
     const reviewData: ReviewData = {
       lessonId: "fixture-lesson",
-      entries: [entry({ itemId: "a", nextReviewAt: "2099-01-01T00:00:00.000Z" })],
+      entries: [
+        entry({ itemId: "a", nextReviewAt: "2099-01-01T00:00:00.000Z" }),
+      ],
     };
 
     const onSave = createOnSaveMock();
     const { result } = renderHook(() =>
-      useFlashcardsSM2(cards, reviewData, onSave, true),
+      useFlashcardsSM2(cards, reviewData, onSave, true)
     );
 
-    expect(result.current.sessionCards.map((card) => card.id)).toEqual(["a", "b", "c", "d"]);
+    expect(result.current.sessionCards.map((card) => card.id)).toEqual([
+      "a",
+      "b",
+      "c",
+      "d",
+    ]);
     expect(result.current.dueCount).toBe(0);
     expect(result.current.newCount).toBe(4);
   });
@@ -176,13 +186,13 @@ describe("useFlashcardsSM2", () => {
     const reviewData: ReviewData = {
       lessonId: "fixture-lesson",
       entries: cards.map((card) =>
-        entry({ itemId: card.id, nextReviewAt: "2099-01-01T00:00:00.000Z" }),
+        entry({ itemId: card.id, nextReviewAt: "2099-01-01T00:00:00.000Z" })
       ),
     };
 
     const onSave = createOnSaveMock();
     const { result } = renderHook(() =>
-      useFlashcardsSM2(cards, reviewData, onSave),
+      useFlashcardsSM2(cards, reviewData, onSave)
     );
 
     expect(result.current.sessionCards).toEqual([]);
@@ -192,9 +202,7 @@ describe("useFlashcardsSM2", () => {
 
   it("is complete with empty cards input", () => {
     const onSave = createOnSaveMock();
-    const { result } = renderHook(() =>
-      useFlashcardsSM2([], null, onSave),
-    );
+    const { result } = renderHook(() => useFlashcardsSM2([], null, onSave));
 
     expect(result.current.sessionCards).toEqual([]);
     expect(result.current.currentCard).toBeUndefined();
@@ -218,7 +226,7 @@ describe("useFlashcardsSM2", () => {
 
     const onSave = createOnSaveMock();
     const { result } = renderHook(() =>
-      useFlashcardsSM2(cards, reviewData, onSave),
+      useFlashcardsSM2(cards, reviewData, onSave)
     );
 
     await act(async () => {
@@ -229,7 +237,9 @@ describe("useFlashcardsSM2", () => {
 
     const saved = onSave.mock.calls[0][0] as ReviewData;
     expect(saved.lessonId).toBe("lesson-1");
-    const reviewedA = saved.entries.find((reviewEntry) => reviewEntry.itemId === "a");
+    const reviewedA = saved.entries.find(
+      (reviewEntry) => reviewEntry.itemId === "a"
+    );
     expect(reviewedA).toBeDefined();
     expect(reviewedA?.repetitions).toBe(2);
     expect(reviewedA?.interval).toBe(6);
@@ -255,7 +265,7 @@ describe("useFlashcardsSM2", () => {
     const onSave = createOnSaveMock();
 
     const { result } = renderHook(() =>
-      useFlashcardsSM2([cards[0], cards[1]], reviewData, onSave, true),
+      useFlashcardsSM2([cards[0], cards[1]], reviewData, onSave, true)
     );
 
     await act(async () => {
@@ -270,14 +280,18 @@ describe("useFlashcardsSM2", () => {
 
     const secondSave = onSave.mock.calls[1][0] as ReviewData;
     expect(secondSave.entries).toHaveLength(2);
-    expect(secondSave.entries.some((reviewEntry) => reviewEntry.itemId === "a")).toBe(true);
-    expect(secondSave.entries.some((reviewEntry) => reviewEntry.itemId === "b")).toBe(true);
+    expect(
+      secondSave.entries.some((reviewEntry) => reviewEntry.itemId === "a")
+    ).toBe(true);
+    expect(
+      secondSave.entries.some((reviewEntry) => reviewEntry.itemId === "b")
+    ).toBe(true);
   });
 
   it("becomes complete after rating the last session card", async () => {
     const onSave = createOnSaveMock();
     const { result } = renderHook(() =>
-      useFlashcardsSM2([cards[0]], null, onSave, true),
+      useFlashcardsSM2([cards[0]], null, onSave, true)
     );
 
     expect(result.current.sessionComplete).toBe(false);
@@ -296,7 +310,7 @@ describe("useFlashcardsSM2", () => {
     const singleCardSession: Flashcard[] = [cards[0]];
 
     const { result } = renderHook(() =>
-      useFlashcardsSM2(singleCardSession, null, onSave, true),
+      useFlashcardsSM2(singleCardSession, null, onSave, true)
     );
 
     await act(async () => {
@@ -315,11 +329,11 @@ describe("useFlashcardsSM2", () => {
       () =>
         new Promise<void>((resolve) => {
           resolveSave = resolve;
-        }),
+        })
     );
 
     const { result } = renderHook(() =>
-      useFlashcardsSM2([cards[0], cards[1]], null, onSave, true),
+      useFlashcardsSM2([cards[0], cards[1]], null, onSave, true)
     );
 
     let firstCallPromise: Promise<void> | undefined;
@@ -348,13 +362,13 @@ describe("useFlashcardsSM2", () => {
     const reviewData: ReviewData = {
       lessonId: "fixture-lesson",
       entries: cards.map((card) =>
-        entry({ itemId: card.id, nextReviewAt: "2099-01-01T00:00:00.000Z" }),
+        entry({ itemId: card.id, nextReviewAt: "2099-01-01T00:00:00.000Z" })
       ),
     };
     const onSave = createOnSaveMock();
 
     const { result } = renderHook(() =>
-      useFlashcardsSM2(cards, reviewData, onSave),
+      useFlashcardsSM2(cards, reviewData, onSave)
     );
 
     await act(async () => {
@@ -368,7 +382,7 @@ describe("useFlashcardsSM2", () => {
   it("resets session index to start", async () => {
     const onSave = createOnSaveMock();
     const { result } = renderHook(() =>
-      useFlashcardsSM2([cards[0], cards[1]], null, onSave, true),
+      useFlashcardsSM2([cards[0], cards[1]], null, onSave, true)
     );
 
     await act(async () => {
@@ -389,7 +403,7 @@ describe("useFlashcardsSM2", () => {
   it("keeps learned entries after resetSession", async () => {
     const onSave = createOnSaveMock();
     const { result } = renderHook(() =>
-      useFlashcardsSM2([cards[0]], null, onSave, true),
+      useFlashcardsSM2([cards[0]], null, onSave, true)
     );
 
     await act(async () => {

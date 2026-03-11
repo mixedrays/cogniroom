@@ -154,7 +154,8 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
   {
     id: "quiz-generation",
     label: "Quiz Generation",
-    description: "Prompt used when generating multiple-choice quiz questions for a lesson.",
+    description:
+      "Prompt used when generating multiple-choice quiz questions for a lesson.",
     category: "Tests",
     variables: [
       "courseTitle",
@@ -249,12 +250,12 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "Available content types: {{contentTypes}}",
       "",
       "RESPONSE FORMAT — always respond with exactly one JSON object:",
-      "  { \"type\": \"text\", \"value\": \"...\" }",
-      "  { \"type\": \"radio\", \"question\": \"...\", \"options\": [...] }",
-      "  { \"type\": \"checkbox\", \"question\": \"...\", \"options\": [...] }",
-      "  { \"type\": \"slider\", \"question\": \"...\", \"min\": 0, \"max\": 100, \"unit\": \"%\" }",
-      "  { \"type\": \"text_input\", \"question\": \"...\", \"placeholder\": \"...\" }",
-      "  { \"type\": \"preview\", \"prompt\": \"<full refined prompt>\", \"contentType\": \"lesson|flashcards|quiz|exercise|roadmap\" }",
+      '  { "type": "text", "value": "..." }',
+      '  { "type": "radio", "question": "...", "options": [...] }',
+      '  { "type": "checkbox", "question": "...", "options": [...] }',
+      '  { "type": "slider", "question": "...", "min": 0, "max": 100, "unit": "%" }',
+      '  { "type": "text_input", "question": "...", "placeholder": "..." }',
+      '  { "type": "preview", "prompt": "<full refined prompt>", "contentType": "lesson|flashcards|quiz|exercise|roadmap" }',
       "",
       "RULES:",
       "- Output only the JSON object — no markdown, no extra text",
@@ -270,7 +271,8 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
   {
     id: "instruction-enhancement",
     label: "Instruction Enhancement",
-    description: "Prompt for enhancing user instructions before content generation.",
+    description:
+      "Prompt for enhancing user instructions before content generation.",
     category: "Enhancement",
     variables: [
       "contentType",
@@ -303,7 +305,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "",
       "{{contentTypeGuidelines}}",
       "",
-      'Original User Instruction:',
+      "Original User Instruction:",
       '"{{userInstruction}}"',
       "",
       "Enhanced Instruction:",

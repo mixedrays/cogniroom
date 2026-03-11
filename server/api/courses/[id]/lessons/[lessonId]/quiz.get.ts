@@ -16,7 +16,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const quizAdapter = getFormatAdapter("quiz");
-    const response = await storageApi.get<string>(storagePaths.quiz(courseId, lessonId));
+    const response = await storageApi.get<string>(
+      storagePaths.quiz(courseId, lessonId)
+    );
     if (response.ok) {
       const text = await response.text();
       const content = quizAdapter.deserialize(text);

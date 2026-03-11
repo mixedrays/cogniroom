@@ -42,13 +42,16 @@ export const Route = createFileRoute(
 
     let lessonInfo = null;
     let topicInfo = null;
+    let topicIndex = 1;
 
-    for (const topic of course.topics) {
-      const l = topic.lessons?.find((x) => x.id === params.lessonId);
-      if (l) {
-        lessonInfo = l;
-        topicInfo = topic;
-        break;
+    for (let ti = 0; ti < course.topics.length; ti++) {
+      const topic = course.topics[ti];
+      for (const lesson of topic.lessons ?? []) {
+        if (lesson.id === params.lessonId) {
+          lessonInfo = lesson;
+          topicInfo = topic;
+          topicIndex = ti + 1;
+        }
       }
     }
 
@@ -60,6 +63,7 @@ export const Route = createFileRoute(
       course,
       lessonInfo,
       topicInfo,
+      topicIndex,
       content: lessonData?.content || null,
     };
   },
@@ -67,7 +71,7 @@ export const Route = createFileRoute(
 });
 
 function LessonExercisesComponent() {
-  const { course, lessonInfo, topicInfo, content } = useLoaderData({
+  const { course, lessonInfo, topicInfo, topicIndex, content } = useLoaderData({
     from: "/course/$courseId/lesson/$lessonId/exercises",
   });
   const { courseId, lessonId } = useParams({
@@ -94,10 +98,16 @@ function LessonExercisesComponent() {
       setIsGenerating(true);
       setError(null);
       try {
-        const result = await generateLessonExercises(courseId, lessonId, prompt);
+        const result = await generateLessonExercises(
+          courseId,
+          lessonId,
+          prompt
+        );
         if (result.success) {
           setWizardOpen(false);
-          await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+          await queryClient.invalidateQueries({
+            queryKey: ["course", courseId],
+          });
           router.invalidate();
         } else {
           setError(result.error || "Failed to generate exercises content");
@@ -178,7 +188,8 @@ function LessonExercisesComponent() {
         courseId={courseId}
         lessonId={lessonId}
         courseTitle={course.title}
-        topicTitle={topicInfo?.title}
+        topicIndex={topicIndex}
+        topicLessons={topicInfo?.lessons ?? []}
         activeTab="exercises"
         showMarkComplete={!!content}
         isCompleted={isCompleted}

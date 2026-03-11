@@ -71,7 +71,8 @@ const Slider: React.FC<Slider> = ({
                 className={cn(
                   "absolute top-1/2 left-1/2 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all",
                   index >= value ? "bg-primary" : "bg-secondary",
-                  stepClass !== undefined && "border-background size-3 border-2",
+                  stepClass !== undefined &&
+                    "border-background size-3 border-2",
                   stepClass,
                   "border-background group-hover/point:bg-primary group-hover/point:h-5 group-hover/point:w-2 group-hover/point:border-2",
                   isCurrent && "border-background h-4 w-2 border-2"

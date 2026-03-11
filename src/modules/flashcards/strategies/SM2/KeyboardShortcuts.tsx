@@ -8,7 +8,11 @@ export function KeyboardShortcuts() {
 
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      )
+        return;
       if (e.key === " ") {
         e.preventDefault();
         onFlipCard(currentIndex);
@@ -20,7 +24,14 @@ export function KeyboardShortcuts() {
     };
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [currentIndex, onFlipCard, rateCard, currentCard, sessionComplete, isSaving]);
+  }, [
+    currentIndex,
+    onFlipCard,
+    rateCard,
+    currentCard,
+    sessionComplete,
+    isSaving,
+  ]);
 
   return null;
 }

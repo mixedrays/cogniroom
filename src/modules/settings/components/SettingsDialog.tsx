@@ -12,13 +12,20 @@ interface SettingsDialogProps {
   defaultPromptId?: string;
 }
 
-export function SettingsDialog({ trigger, defaultTab, defaultPromptId }: SettingsDialogProps) {
+export function SettingsDialog({
+  trigger,
+  defaultTab,
+  defaultPromptId,
+}: SettingsDialogProps) {
   return (
     <Dialog>
       {trigger && <DialogTrigger render={trigger} />}
       <DialogContent className="sm:max-w-3xl h-[min(80vh,600px)] overflow-hidden p-0 gap-0">
         <DialogTitle className="sr-only">Settings</DialogTitle>
-        <SettingsContent defaultTab={defaultTab} defaultPromptId={defaultPromptId} />
+        <SettingsContent
+          defaultTab={defaultTab}
+          defaultPromptId={defaultPromptId}
+        />
       </DialogContent>
     </Dialog>
   );

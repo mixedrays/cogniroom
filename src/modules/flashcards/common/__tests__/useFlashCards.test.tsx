@@ -22,15 +22,10 @@ describe("useFlashCards", () => {
 
   it("filters cards via cardFilter option", () => {
     const cardFilter = (card: Card) => (card.knownCount ?? 0) < 3;
-    const { result } = renderHook(() =>
-      useFlashCards(cards, { cardFilter }),
-    );
+    const { result } = renderHook(() => useFlashCards(cards, { cardFilter }));
 
     expect(result.current.cardsCount).toBe(2);
-    expect(result.current.cardsToDisplay.map((c) => c.id)).toEqual([
-      "a",
-      "b",
-    ]);
+    expect(result.current.cardsToDisplay.map((c) => c.id)).toEqual(["a", "b"]);
   });
 
   it("toggles shuffle on and off", () => {

@@ -57,13 +57,16 @@ export const Route = createFileRoute(
 
     let lessonInfo = null;
     let topicInfo = null;
+    let topicIndex = 1;
 
-    for (const topic of course.topics) {
-      const l = topic.lessons?.find((x) => x.id === params.lessonId);
-      if (l) {
-        lessonInfo = l;
-        topicInfo = topic;
-        break;
+    for (let ti = 0; ti < course.topics.length; ti++) {
+      const topic = course.topics[ti];
+      for (const lesson of topic.lessons ?? []) {
+        if (lesson.id === params.lessonId) {
+          lessonInfo = lesson;
+          topicInfo = topic;
+          topicIndex = ti + 1;
+        }
       }
     }
 
@@ -75,6 +78,7 @@ export const Route = createFileRoute(
       course,
       lessonInfo,
       topicInfo,
+      topicIndex,
       content: lessonData?.content || null,
       reviewData,
     };
@@ -104,9 +108,10 @@ const parseFlashcards = (
 };
 
 function LessonFlashcardsComponent() {
-  const { course, lessonInfo, topicInfo, content, reviewData } = useLoaderData({
-    from: "/course/$courseId/lesson/$lessonId/flashcards",
-  });
+  const { course, lessonInfo, topicInfo, topicIndex, content, reviewData } =
+    useLoaderData({
+      from: "/course/$courseId/lesson/$lessonId/flashcards",
+    });
   const { courseId, lessonId } = useParams({
     from: "/course/$courseId/lesson/$lessonId/flashcards",
   });
@@ -143,10 +148,16 @@ function LessonFlashcardsComponent() {
       setIsGenerating(true);
       setError(null);
       try {
-        const result = await generateLessonFlashcards(courseId, lessonId, prompt);
+        const result = await generateLessonFlashcards(
+          courseId,
+          lessonId,
+          prompt
+        );
         if (result.success) {
           setWizardOpen(false);
-          await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+          await queryClient.invalidateQueries({
+            queryKey: ["course", courseId],
+          });
           router.invalidate();
         } else {
           setError(result.error || "Failed to generate flashcards");
@@ -245,7 +256,8 @@ function LessonFlashcardsComponent() {
         courseId={courseId}
         lessonId={lessonId}
         courseTitle={course.title}
-        topicTitle={topicInfo?.title}
+        topicIndex={topicIndex}
+        topicLessons={topicInfo?.lessons ?? []}
         activeTab="flashcards"
         showMarkComplete={hasCards}
         isCompleted={isCompleted}

@@ -4,7 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: This file is auto-generated from INSTRUCTIONS.md. Edit INSTRUCTIONS.md and run `scripts/sync-instructions.sh` to update.
 
-
 ## Project Overview
 
 CogniRoom - A platform for creating, managing, and tracking skill learning roadmaps. Users can generate roadmaps via LLM, import them (e.g., from roadmap.sh), or extract from external sources (video URLs, documentation pages), then generate lessons, tests, exercises content and track learning progress.
@@ -32,7 +31,8 @@ CogniRoom - A platform for creating, managing, and tracking skill learning roadm
 - Use Tailwind utility classes for styling. Avoid custom CSS unless necessary.
 - Use size class for square elements (e.g., `w-4 h-4` can be replaced with `size-4`).
 - Use tailwind's class name utility functions (e.g., `cn()`) for conditional classes instead of inline styles or string literals.
-Example:
+  Example:
+
 ```tsx
 // Good:
 <div className={cn("base-class", isActive && "active-class")} />
@@ -40,16 +40,16 @@ Example:
 // Bad:
 <div className={`base-class ${isActive ? "active-class" : ""}`} />
 ```
+
 - Use inline conditional classes with `cn()` instead of object.
-Example:
+  Example:
+
 ```tsx
 // Good:
 <div className={cn("base-class", isActive && "active-class", !isActive && "inactive-class")} />
 // Bad:
 <div className={cn("base-class", { "active-class": isActive, "inactive-class": !isActive })} />
-``` 
-
-
+```
 
 ## ShadCn UI Guidelines
 
@@ -74,15 +74,15 @@ Example:
 
 ## Development Commands
 
-| Command              | Description                        |
-| -------------------- | ---------------------------------- |
-| `npm run dev`        | Start development server           |
-| `npm run test`       | Run unit tests (vitest)            |
-| `npm run test:e2e`   | Run e2e tests (puppeteer)          |
-| `npm run typecheck`  | Check TypeScript types (no emit)   |
-| `npm run lint`       | Run ESLint on `src/`               |
-| `npm run format`     | Format code with Prettier          |
-| `npm run validate`   | Run all checks (typecheck, lint, test, test:e2e) |
+| Command             | Description                                      |
+| ------------------- | ------------------------------------------------ |
+| `npm run dev`       | Start development server                         |
+| `npm run test`      | Run unit tests (vitest)                          |
+| `npm run test:e2e`  | Run e2e tests (puppeteer)                        |
+| `npm run typecheck` | Check TypeScript types (no emit)                 |
+| `npm run lint`      | Run ESLint on `src/`                             |
+| `npm run format`    | Format code with Prettier                        |
+| `npm run validate`  | Run all checks (typecheck, lint, test, test:e2e) |
 
 ## Layout and Design
 
@@ -98,6 +98,7 @@ Example:
 - Fast, responsive, professional
 
 <!-- BMAD:START -->
+
 # BMAD Method — Project Instructions
 
 ## Project Configuration
@@ -107,9 +108,9 @@ Example:
 - **Communication Language**: English
 - **Document Output Language**: English
 - **User Skill Level**: intermediate
-- **Output Folder**: {project-root}/_bmad-output
-- **Planning Artifacts**: {project-root}/_bmad-output/planning-artifacts
-- **Implementation Artifacts**: {project-root}/_bmad-output/implementation-artifacts
+- **Output Folder**: {project-root}/\_bmad-output
+- **Planning Artifacts**: {project-root}/\_bmad-output/planning-artifacts
+- **Implementation Artifacts**: {project-root}/\_bmad-output/implementation-artifacts
 - **Project Knowledge**: {project-root}/docs
 
 ## BMAD Runtime Structure
@@ -138,20 +139,21 @@ Example:
 
 ## Available Agents
 
-| Agent | Persona | Title | Capabilities |
-|---|---|---|---|
-| bmad-master | BMad Master | BMad Master Executor, Knowledge Custodian, and Workflow Orchestrator | runtime resource management, workflow orchestration, task execution, knowledge custodian |
-| analyst | Mary | Business Analyst | market research, competitive analysis, requirements elicitation, domain expertise |
-| architect | Winston | Architect | distributed systems, cloud infrastructure, API design, scalable patterns |
-| dev | Amelia | Developer Agent | story execution, test-driven development, code implementation |
-| pm | John | Product Manager | PRD creation, requirements discovery, stakeholder alignment, user interviews |
-| qa | Quinn | QA Engineer | test automation, API testing, E2E testing, coverage analysis |
-| quick-flow-solo-dev | Barry | Quick Flow Solo Dev | rapid spec creation, lean implementation, minimum ceremony |
-| sm | Bob | Scrum Master | sprint planning, story preparation, agile ceremonies, backlog management |
-| tech-writer | Paige | Technical Writer | documentation, Mermaid diagrams, standards compliance, concept explanation |
-| ux-designer | Sally | UX Designer | user research, interaction design, UI patterns, experience strategy |
+| Agent               | Persona     | Title                                                                | Capabilities                                                                             |
+| ------------------- | ----------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| bmad-master         | BMad Master | BMad Master Executor, Knowledge Custodian, and Workflow Orchestrator | runtime resource management, workflow orchestration, task execution, knowledge custodian |
+| analyst             | Mary        | Business Analyst                                                     | market research, competitive analysis, requirements elicitation, domain expertise        |
+| architect           | Winston     | Architect                                                            | distributed systems, cloud infrastructure, API design, scalable patterns                 |
+| dev                 | Amelia      | Developer Agent                                                      | story execution, test-driven development, code implementation                            |
+| pm                  | John        | Product Manager                                                      | PRD creation, requirements discovery, stakeholder alignment, user interviews             |
+| qa                  | Quinn       | QA Engineer                                                          | test automation, API testing, E2E testing, coverage analysis                             |
+| quick-flow-solo-dev | Barry       | Quick Flow Solo Dev                                                  | rapid spec creation, lean implementation, minimum ceremony                               |
+| sm                  | Bob         | Scrum Master                                                         | sprint planning, story preparation, agile ceremonies, backlog management                 |
+| tech-writer         | Paige       | Technical Writer                                                     | documentation, Mermaid diagrams, standards compliance, concept explanation               |
+| ux-designer         | Sally       | UX Designer                                                          | user research, interaction design, UI patterns, experience strategy                      |
 
 ## Slash Commands
 
 Type `/bmad-` in Copilot Chat to see all available BMAD workflows and agent activators. Agents are also available in the agents dropdown.
+
 <!-- BMAD:END -->

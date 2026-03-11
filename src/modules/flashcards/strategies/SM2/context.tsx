@@ -27,7 +27,9 @@ const useSM2Value = ({
 }) => {
   const [showAllCards, setShowAllCards] = useState(false);
   const [ratingColors, setRatingColors] = useState<(string | undefined)[]>([]);
-  const [sessionRatingsByCard, setSessionRatingsByCard] = useState<Record<string, SessionRatingKey>>({});
+  const [sessionRatingsByCard, setSessionRatingsByCard] = useState<
+    Record<string, SessionRatingKey>
+  >({});
 
   const flashcards = useFlashCards<Flashcard>(cards);
   const sm2 = useFlashcardsSM2(
@@ -49,14 +51,21 @@ const useSM2Value = ({
     setSessionRatingsByCard({});
     sm2.resetSession();
     slidesApi.scrollToSlide(0);
-  }, [flashcards.handleToggleShuffleCards, sm2.resetSession, slidesApi.scrollToSlide]);
+  }, [
+    flashcards.handleToggleShuffleCards,
+    sm2.resetSession,
+    slidesApi.scrollToSlide,
+  ]);
 
   const rateCard = useCallback(
     async (q: QualityRating) => {
       const index = sm2.currentIndex;
       const cardId = sm2.currentCard?.id;
       if (cardId) {
-        setSessionRatingsByCard((prev) => ({ ...prev, [cardId]: toRatingKey(q) }));
+        setSessionRatingsByCard((prev) => ({
+          ...prev,
+          [cardId]: toRatingKey(q),
+        }));
       }
       setRatingColors((prev) => {
         const next = [...prev];
@@ -86,7 +95,9 @@ const useSM2Value = ({
   };
 
   const isCurrentFlipped = flashcards.flippedCards.includes(sm2.currentIndex);
-  const isAnswerVisible = flashcards.flipCards ? !isCurrentFlipped : isCurrentFlipped;
+  const isAnswerVisible = flashcards.flipCards
+    ? !isCurrentFlipped
+    : isCurrentFlipped;
 
   const sharedContext: SharedFlashcardsContext = {
     currentIndex: sm2.currentIndex,
@@ -119,7 +130,10 @@ const useSM2Value = ({
   };
 };
 
-export type SM2ContextValue = Omit<ReturnType<typeof useSM2Value>, "sharedContext">;
+export type SM2ContextValue = Omit<
+  ReturnType<typeof useSM2Value>,
+  "sharedContext"
+>;
 
 const SM2Context = createContext<SM2ContextValue | null>(null);
 
@@ -138,14 +152,21 @@ interface SM2ProviderProps {
   children: React.ReactNode;
 }
 
-export function SM2Provider({ cards, reviewData, onSave, children }: SM2ProviderProps) {
-  const { sharedContext, ...sm2Value } = useSM2Value({ cards, reviewData, onSave });
+export function SM2Provider({
+  cards,
+  reviewData,
+  onSave,
+  children,
+}: SM2ProviderProps) {
+  const { sharedContext, ...sm2Value } = useSM2Value({
+    cards,
+    reviewData,
+    onSave,
+  });
 
   return (
     <SharedFlashcardsProvider value={sharedContext}>
-      <SM2Context.Provider value={sm2Value}>
-        {children}
-      </SM2Context.Provider>
+      <SM2Context.Provider value={sm2Value}>{children}</SM2Context.Provider>
     </SharedFlashcardsProvider>
   );
 }

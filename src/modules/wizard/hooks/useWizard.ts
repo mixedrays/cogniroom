@@ -69,9 +69,7 @@ type ApiMessage = { role: "user" | "assistant"; content: string };
 
 function toApiMessages(messages: WizardMessage[]): ApiMessage[] {
   return messages
-    .filter(
-      (m) => !(m.role === "assistant" && m.status === "streaming")
-    )
+    .filter((m) => !(m.role === "assistant" && m.status === "streaming"))
     .map((m) => {
       if (m.role === "user") {
         return { role: "user" as const, content: m.text };
@@ -150,22 +148,39 @@ export function useWizard({
 
         if (!response.ok) {
           const err = await response.json().catch(() => ({}));
-          throw new Error(err?.statusMessage || err?.message || `Request failed (${response.status})`);
+          throw new Error(
+            err?.statusMessage ||
+              err?.message ||
+              `Request failed (${response.status})`
+          );
         }
 
         const data = await response.json();
         const parsed = AgentMessageSchema.safeParse(data.message);
         const agentMessage: AgentMessage = parsed.success
           ? parsed.data
-          : { type: "text", value: String(data.message?.value ?? "Unexpected response from AI. Please try again.") };
+          : {
+              type: "text",
+              value: String(
+                data.message?.value ??
+                  "Unexpected response from AI. Please try again."
+              ),
+            };
 
-        dispatch({ type: "COMPLETE_ASSISTANT", id: assistantId, data: agentMessage });
+        dispatch({
+          type: "COMPLETE_ASSISTANT",
+          id: assistantId,
+          data: agentMessage,
+        });
       } catch (e) {
         if ((e as Error).name === "AbortError") return;
         dispatch({
           type: "COMPLETE_ASSISTANT",
           id: assistantId,
-          data: { type: "text", value: `Error: ${(e as Error).message ?? "Something went wrong. Please try again."}` },
+          data: {
+            type: "text",
+            value: `Error: ${(e as Error).message ?? "Something went wrong. Please try again."}`,
+          },
         });
       }
     },
@@ -221,17 +236,22 @@ export function useWizard({
 
   const lastPreview = [...state.messages]
     .reverse()
-    .find((m): m is AssistantMessage =>
-      m.role === "assistant" &&
-      (m as AssistantMessage).status === "complete" &&
-      (m as AssistantMessage).data.type === "preview"
+    .find(
+      (m): m is AssistantMessage =>
+        m.role === "assistant" &&
+        (m as AssistantMessage).status === "complete" &&
+        (m as AssistantMessage).data.type === "preview"
     );
 
   const hasPreview = Boolean(lastPreview);
 
   const handleGenerate = useCallback(() => {
     const preview = lastPreview;
-    if (preview && preview.status === "complete" && preview.data.type === "preview") {
+    if (
+      preview &&
+      preview.status === "complete" &&
+      preview.data.type === "preview"
+    ) {
       dispatch({ type: "SET_GENERATING", generating: true });
       onGenerate?.(preview.data.prompt, preview.data.contentType);
     } else {

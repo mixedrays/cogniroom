@@ -1,5 +1,12 @@
-import { LoadingState, type LoadingStateVariant } from "@/components/LoadingState";
-import { ErrorState, type ErrorStateVariant, type ErrorSeverity } from "@/components/ErrorState";
+import {
+  LoadingState,
+  type LoadingStateVariant,
+} from "@/components/LoadingState";
+import {
+  ErrorState,
+  type ErrorStateVariant,
+  type ErrorSeverity,
+} from "@/components/ErrorState";
 import { cn } from "@/lib/utils";
 
 interface StateHandlerProps {

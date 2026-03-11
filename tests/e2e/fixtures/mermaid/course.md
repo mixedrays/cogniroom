@@ -10,14 +10,18 @@ source: import
 ## E2E Mermaid Topic
 
 ---
+
 id: e2e-mermaid-topic
 description: Test topic
+
 ---
 
 ### E2E Mermaid Lesson
 
 ---
+
 id: e2e-mermaid-lesson
 description: Test lesson used by mermaid e2e tests.
 completed: false
+
 ---

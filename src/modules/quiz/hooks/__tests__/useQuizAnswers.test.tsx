@@ -162,7 +162,10 @@ describe("useQuizAnswers", () => {
       result.current.selectSingle("q1", "4");
     });
 
-    const statuses = result.current.getStatuses([singleChoiceQuestion, trueFalseQuestion]);
+    const statuses = result.current.getStatuses([
+      singleChoiceQuestion,
+      trueFalseQuestion,
+    ]);
     expect(statuses[0]).toBe("bg-green-500!");
     expect(statuses[1]).toBeUndefined();
   });

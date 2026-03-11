@@ -35,7 +35,11 @@ export function LLMSettings() {
             </SelectTrigger>
             <SelectContent>
               {Object.entries(AVAILABLE_MODELS).map(([key, model]) => (
-                <SelectItem key={key} value={key} className="justify-between w-full">
+                <SelectItem
+                  key={key}
+                  value={key}
+                  className="justify-between w-full"
+                >
                   {model.label}
                   <span className="text-muted-foreground">
                     {getModelPriceLabel(model)}

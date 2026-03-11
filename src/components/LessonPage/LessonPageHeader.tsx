@@ -10,7 +10,8 @@ interface LessonPageHeaderProps {
   courseId: string;
   lessonId: string;
   courseTitle: string;
-  topicTitle?: string;
+  topicIndex: number;
+  topicLessons: Array<{ id: string; title: string }>;
   activeTab: ActiveTab;
   showMarkComplete: boolean;
   isCompleted: boolean;
@@ -24,7 +25,8 @@ export function LessonPageHeader({
   courseId,
   lessonId,
   courseTitle,
-  topicTitle,
+  topicIndex,
+  topicLessons,
   activeTab,
   showMarkComplete,
   isCompleted,
@@ -33,6 +35,16 @@ export function LessonPageHeader({
   onToggleComplete,
   extraActions,
 }: LessonPageHeaderProps) {
+  const lessonItems = topicLessons.map((lesson, i) => ({
+    title: `Lesson ${topicIndex}.${i + 1}`,
+    tooltip: lesson.title,
+    current: lesson.id === lessonId,
+    link: {
+      to: "/course/$courseId/lesson/$lessonId",
+      params: { courseId, lessonId: lesson.id },
+    },
+  }));
+
   return (
     <PageHeader>
       <Breadcrumbs
@@ -40,13 +52,14 @@ export function LessonPageHeader({
         items={[
           { title: "Home", link: "/" },
           {
-            title: courseTitle,
+            title: "Course",
+            tooltip: courseTitle,
             link: {
               to: "/course/$courseId",
               params: { courseId },
             },
           },
-          { title: topicTitle ?? "Lesson" },
+          lessonItems,
           [
             {
               title: "Theory",

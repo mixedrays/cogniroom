@@ -7,13 +7,18 @@ import {
   mdToCourse,
 } from "@root/modules/md-formats";
 import type { ContentFormatAdapter } from "../types";
-import type { FlashcardsContent, QuizContent, Course } from "@root/src/lib/types";
+import type {
+  FlashcardsContent,
+  QuizContent,
+  Course,
+} from "@root/src/lib/types";
 
-export const flashcardsMarkdownAdapter: ContentFormatAdapter<FlashcardsContent> = {
-  extension: ".md",
-  serialize: flashcardsToMd,
-  deserialize: mdToFlashcards,
-};
+export const flashcardsMarkdownAdapter: ContentFormatAdapter<FlashcardsContent> =
+  {
+    extension: ".md",
+    serialize: flashcardsToMd,
+    deserialize: mdToFlashcards,
+  };
 
 export const quizMarkdownAdapter: ContentFormatAdapter<QuizContent> = {
   extension: ".md",

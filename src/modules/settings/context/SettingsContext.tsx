@@ -95,15 +95,12 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   const [resolvedMode, setResolvedMode] = useState<"light" | "dark">("light");
 
   // Resolve the actual mode based on setting and system preference
-  const resolveMode = useCallback(
-    (mode: ThemeMode): "light" | "dark" => {
-      if (mode === "system") {
-        return getSystemPreference();
-      }
-      return mode;
-    },
-    []
-  );
+  const resolveMode = useCallback((mode: ThemeMode): "light" | "dark" => {
+    if (mode === "system") {
+      return getSystemPreference();
+    }
+    return mode;
+  }, []);
 
   // Apply settings to the document
   const applySettings = useCallback(

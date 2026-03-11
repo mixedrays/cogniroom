@@ -10,7 +10,10 @@ export default defineEventHandler(async (event) => {
 
   const def = getPromptDefinition(id);
   if (!def) {
-    throw createError({ statusCode: 404, statusMessage: `Unknown prompt: ${id}` });
+    throw createError({
+      statusCode: 404,
+      statusMessage: `Unknown prompt: ${id}`,
+    });
   }
 
   const content = await resetPrompt(id);

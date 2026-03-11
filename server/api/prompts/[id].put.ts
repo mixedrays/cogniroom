@@ -10,12 +10,18 @@ export default defineEventHandler(async (event) => {
 
   const def = getPromptDefinition(id);
   if (!def) {
-    throw createError({ statusCode: 404, statusMessage: `Unknown prompt: ${id}` });
+    throw createError({
+      statusCode: 404,
+      statusMessage: `Unknown prompt: ${id}`,
+    });
   }
 
   const body = await readBody<{ content: string }>(event);
   if (typeof body?.content !== "string") {
-    throw createError({ statusCode: 400, statusMessage: "Missing content field" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing content field",
+    });
   }
 
   await savePrompt(id, body.content);

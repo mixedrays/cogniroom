@@ -67,6 +67,9 @@ describe("console smoke", () => {
   });
 
   it("has no failed requests", () => {
-    expect(failedRequests, JSON.stringify(failedRequests, null, 2)).toHaveLength(0);
+    expect(
+      failedRequests,
+      JSON.stringify(failedRequests, null, 2)
+    ).toHaveLength(0);
   });
 });

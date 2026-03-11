@@ -14,7 +14,12 @@ const ARTIFACTS_DIR = join(process.cwd(), "artifacts", "console");
 const FIXTURE_COURSE_ID = "e2e-fixture-course";
 const FIXTURE_LESSON_ID = "e2e-fixture-lesson";
 const FIXTURE_DIR = join(import.meta.dirname, "fixtures");
-const DATA_COURSE_DIR = join(process.cwd(), "data", "courses", FIXTURE_COURSE_ID);
+const DATA_COURSE_DIR = join(
+  process.cwd(),
+  "data",
+  "courses",
+  FIXTURE_COURSE_ID
+);
 
 const LESSON_BASE_URL = `${APP_URL}/course/${FIXTURE_COURSE_ID}/lesson/${FIXTURE_LESSON_ID}`;
 
@@ -34,7 +39,11 @@ function attachLogCollectors(page: Page): PageLogs {
   const failedRequests: FailedRequest[] = [];
 
   page.on("console", (msg: ConsoleMessage) => {
-    consoleLogs.push({ type: msg.type(), text: msg.text(), url: msg.location().url });
+    consoleLogs.push({
+      type: msg.type(),
+      text: msg.text(),
+      url: msg.location().url,
+    });
   });
 
   page.on("pageerror", (error: unknown) => {
@@ -101,54 +110,66 @@ describe("lesson page console", () => {
   });
 
   it("has no console errors on theory tab", async () => {
-    const { consoleLogs, pageErrors, failedRequests } = await navigateAndCollect(
-      browser,
-      LESSON_BASE_URL,
-      "lesson-theory"
-    );
+    const { consoleLogs, pageErrors, failedRequests } =
+      await navigateAndCollect(browser, LESSON_BASE_URL, "lesson-theory");
 
     const errors = consoleLogs.filter((l) => l.type === "error");
     expect(errors, JSON.stringify(errors, null, 2)).toHaveLength(0);
     expect(pageErrors, JSON.stringify(pageErrors, null, 2)).toHaveLength(0);
-    expect(failedRequests, JSON.stringify(failedRequests, null, 2)).toHaveLength(0);
+    expect(
+      failedRequests,
+      JSON.stringify(failedRequests, null, 2)
+    ).toHaveLength(0);
   });
 
   it("has no console errors on flashcards tab", async () => {
-    const { consoleLogs, pageErrors, failedRequests } = await navigateAndCollect(
-      browser,
-      `${LESSON_BASE_URL}/flashcards`,
-      "lesson-flashcards"
-    );
+    const { consoleLogs, pageErrors, failedRequests } =
+      await navigateAndCollect(
+        browser,
+        `${LESSON_BASE_URL}/flashcards`,
+        "lesson-flashcards"
+      );
 
     const errors = consoleLogs.filter((l) => l.type === "error");
     expect(errors, JSON.stringify(errors, null, 2)).toHaveLength(0);
     expect(pageErrors, JSON.stringify(pageErrors, null, 2)).toHaveLength(0);
-    expect(failedRequests, JSON.stringify(failedRequests, null, 2)).toHaveLength(0);
+    expect(
+      failedRequests,
+      JSON.stringify(failedRequests, null, 2)
+    ).toHaveLength(0);
   });
 
   it("has no console errors on quiz tab", async () => {
-    const { consoleLogs, pageErrors, failedRequests } = await navigateAndCollect(
-      browser,
-      `${LESSON_BASE_URL}/quiz`,
-      "lesson-quiz"
-    );
+    const { consoleLogs, pageErrors, failedRequests } =
+      await navigateAndCollect(
+        browser,
+        `${LESSON_BASE_URL}/quiz`,
+        "lesson-quiz"
+      );
 
     const errors = consoleLogs.filter((l) => l.type === "error");
     expect(errors, JSON.stringify(errors, null, 2)).toHaveLength(0);
     expect(pageErrors, JSON.stringify(pageErrors, null, 2)).toHaveLength(0);
-    expect(failedRequests, JSON.stringify(failedRequests, null, 2)).toHaveLength(0);
+    expect(
+      failedRequests,
+      JSON.stringify(failedRequests, null, 2)
+    ).toHaveLength(0);
   });
 
   it("has no console errors on exercises tab", async () => {
-    const { consoleLogs, pageErrors, failedRequests } = await navigateAndCollect(
-      browser,
-      `${LESSON_BASE_URL}/exercises`,
-      "lesson-exercises"
-    );
+    const { consoleLogs, pageErrors, failedRequests } =
+      await navigateAndCollect(
+        browser,
+        `${LESSON_BASE_URL}/exercises`,
+        "lesson-exercises"
+      );
 
     const errors = consoleLogs.filter((l) => l.type === "error");
     expect(errors, JSON.stringify(errors, null, 2)).toHaveLength(0);
     expect(pageErrors, JSON.stringify(pageErrors, null, 2)).toHaveLength(0);
-    expect(failedRequests, JSON.stringify(failedRequests, null, 2)).toHaveLength(0);
+    expect(
+      failedRequests,
+      JSON.stringify(failedRequests, null, 2)
+    ).toHaveLength(0);
   });
 });

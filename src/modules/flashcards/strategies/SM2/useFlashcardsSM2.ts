@@ -94,46 +94,47 @@ export function useFlashcardsSM2(
 ) {
   const now = useMemo(() => new Date().toISOString(), []);
 
-  const { sessionCards, initialEntriesMap, dueCount, newCount } = useMemo(() => {
-    const entriesMap: Record<string, ReviewEntry> = {};
-    for (const entry of initialReviewData?.entries ?? []) {
-      entriesMap[entry.itemId] = entry;
-    }
-
-    if (showAllCards) {
-      return {
-        sessionCards: cards,
-        initialEntriesMap: entriesMap,
-        dueCount: 0,
-        newCount: cards.length,
-      };
-    }
-
-    const dueCards: Flashcard[] = [];
-    const newCards: Flashcard[] = [];
-
-    for (const card of cards) {
-      const entry = entriesMap[card.id];
-      if (!entry) {
-        newCards.push(card);
-      } else if (entry.nextReviewAt <= now) {
-        dueCards.push(card);
+  const { sessionCards, initialEntriesMap, dueCount, newCount } =
+    useMemo(() => {
+      const entriesMap: Record<string, ReviewEntry> = {};
+      for (const entry of initialReviewData?.entries ?? []) {
+        entriesMap[entry.itemId] = entry;
       }
-    }
 
-    dueCards.sort((a, b) =>
-      (entriesMap[a.id]?.nextReviewAt ?? "").localeCompare(
-        entriesMap[b.id]?.nextReviewAt ?? ""
-      )
-    );
+      if (showAllCards) {
+        return {
+          sessionCards: cards,
+          initialEntriesMap: entriesMap,
+          dueCount: 0,
+          newCount: cards.length,
+        };
+      }
 
-    return {
-      sessionCards: [...dueCards, ...newCards],
-      initialEntriesMap: entriesMap,
-      dueCount: dueCards.length,
-      newCount: newCards.length,
-    };
-  }, [cards, initialReviewData, now, showAllCards]);
+      const dueCards: Flashcard[] = [];
+      const newCards: Flashcard[] = [];
+
+      for (const card of cards) {
+        const entry = entriesMap[card.id];
+        if (!entry) {
+          newCards.push(card);
+        } else if (entry.nextReviewAt <= now) {
+          dueCards.push(card);
+        }
+      }
+
+      dueCards.sort((a, b) =>
+        (entriesMap[a.id]?.nextReviewAt ?? "").localeCompare(
+          entriesMap[b.id]?.nextReviewAt ?? ""
+        )
+      );
+
+      return {
+        sessionCards: [...dueCards, ...newCards],
+        initialEntriesMap: entriesMap,
+        dueCount: dueCards.length,
+        newCount: newCards.length,
+      };
+    }, [cards, initialReviewData, now, showAllCards]);
 
   const [state, dispatch] = useReducer(sm2Reducer, {
     currentIndex: 0,
@@ -177,7 +178,13 @@ export function useFlashcardsSM2(
         dispatch({ type: "RATE_CARD_FINISH" });
       }
     },
-    [currentCard, state.entriesMap, state.isSaving, initialReviewData?.lessonId, onSave]
+    [
+      currentCard,
+      state.entriesMap,
+      state.isSaving,
+      initialReviewData?.lessonId,
+      onSave,
+    ]
   );
 
   const resetSession = useCallback(() => {

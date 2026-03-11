@@ -8,14 +8,14 @@
 
 ## Core Tension
 
-| Requirement                          | Favors structured (JSON/YAML) | Favors freeform (Markdown) |
-| ------------------------------------ | ----------------------------- | -------------------------- |
-| Database storage                     | ++                            | --                         |
-| Filesystem storage                   | +                             | ++                         |
-| LLM API generation (structured output) | ++                         | --                         |
-| LLM CLI/skill generation             | -                             | ++                         |
-| Markdown in content                  | - (escaping)                  | ++ (native)                |
-| Programmatic access (UI rendering)   | ++                            | - (parsing)                |
+| Requirement                            | Favors structured (JSON/YAML) | Favors freeform (Markdown) |
+| -------------------------------------- | ----------------------------- | -------------------------- |
+| Database storage                       | ++                            | --                         |
+| Filesystem storage                     | +                             | ++                         |
+| LLM API generation (structured output) | ++                            | --                         |
+| LLM CLI/skill generation               | -                             | ++                         |
+| Markdown in content                    | - (escaping)                  | ++ (native)                |
+| Programmatic access (UI rendering)     | ++                            | - (parsing)                |
 
 ## Options
 
@@ -39,14 +39,17 @@ Heading levels encode structure.
 
 ```md
 ## Flashcard
+
 **Q:** What is X?
 **A:** X is... with **bold** and `code`
 
 ## Quiz: single-choice
+
 **Q:** Which one?
+
 - [x] Correct answer
 - [ ] Wrong answer
-> Explanation here
+  > Explanation here
 ```
 
 - Pro: Most natural for LLMs (both API and CLI), native markdown, human-editable, great for skills
@@ -64,11 +67,12 @@ X is **something** with formatting
 ::quiz{type="single-choice"}
 Which one is correct?
 #options
+
 - [x] This one
 - [ ] Not this
-#explanation
-Because...
-::
+      #explanation
+      Because...
+      ::
 ```
 
 - Pro: Structured + markdown native, parseable with existing libraries, LLM-friendly
@@ -82,15 +86,20 @@ type: flashcard
 id: f-1
 difficulty: medium
 ---
+
 ## What is X?
-X is **something** with full markdown
----
+
+## X is **something** with full markdown
+
 type: quiz
 id: q-1
 options: ["A", "B", "C", "D"]
 answer: "A"
+
 ---
+
 ## Which one?
+
 Explanation with **markdown**
 ```
 
@@ -113,11 +122,11 @@ Store as JSON (for UI, DB, API). Accept markdown input from CLI/skill, convert t
 
 ## Ranking
 
-| Rank | Option                           | Why                                                                                              |
-| ---- | -------------------------------- | ------------------------------------------------------------------------------------------------ |
-| 1    | **Dual format (6)**              | JSON for API/DB/UI, markdown for CLI/skill generation. Conversion layer is a one-time cost       |
-| 2    | **Markdown with conventions (3)** | If you commit to a solid parser, this is the most LLM-native format for both API and CLI        |
-| 3    | **YAML (2)**                     | Good middle ground if you don't want dual formats. Multiline strings solve markdown-in-content   |
+| Rank | Option                            | Why                                                                                            |
+| ---- | --------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 1    | **Dual format (6)**               | JSON for API/DB/UI, markdown for CLI/skill generation. Conversion layer is a one-time cost     |
+| 2    | **Markdown with conventions (3)** | If you commit to a solid parser, this is the most LLM-native format for both API and CLI       |
+| 3    | **YAML (2)**                      | Good middle ground if you don't want dual formats. Multiline strings solve markdown-in-content |
 
 ## Dual Format — Markdown Examples
 
@@ -125,7 +134,7 @@ Flashcards and quiz questions are stored in separate `.md` files.
 
 ### `flashcards.md`
 
-```md
+````md
 # Flashcards: JavaScript Closures
 
 ## What is a closure in JavaScript?
@@ -140,6 +149,7 @@ function outer() {
   };
 }
 ```
+````
 
 ---
 
@@ -153,11 +163,11 @@ This means `bind()`, `call()`, and `apply()` cannot override `this` in arrow fun
 
 ## What is the difference between `var`, `let`, and `const`?
 
-| Feature | `var` | `let` | `const` |
-|---------|-------|-------|---------|
-| Scope | Function | Block | Block |
+| Feature  | `var`           | `let`     | `const`   |
+| -------- | --------------- | --------- | --------- |
+| Scope    | Function        | Block     | Block     |
 | Hoisting | Yes (undefined) | Yes (TDZ) | Yes (TDZ) |
-| Reassign | Yes | Yes | No |
+| Reassign | Yes             | Yes       | No        |
 
 > **TDZ** = Temporal Dead Zone — accessing before declaration throws `ReferenceError`.
 
@@ -171,7 +181,8 @@ Executes a **reducer function** on each element, accumulating a single result:
 const sum = [1, 2, 3].reduce((acc, val) => acc + val, 0);
 // sum === 6
 ```
-```
+
+````
 
 ### `quiz.md`
 
@@ -184,7 +195,7 @@ const sum = [1, 2, 3].reduce((acc, val) => acc + val, 0);
 for (var i = 0; i < 3; i++) {
   setTimeout(() => console.log(i), 0);
 }
-```
+````
 
 - [ ] 0, 1, 2
 - [x] 3, 3, 3
@@ -203,7 +214,8 @@ for (var i = 0; i < 3; i++) {
 - [ ] Closures can lead to memory leaks if not handled properly
 
 > Closures **can and do** outlive their outer function — that's the whole point.
-```
+
+````
 
 ### Conversion Rules
 
@@ -230,7 +242,7 @@ for (var i = 0; i < 3; i++) {
     }
   ]
 }
-```
+````
 
 The `answer` and `explanation` fields store raw markdown strings — the UI renders them with a markdown renderer. The `id` and `version` fields are added during conversion (not present in the `.md` source).
 

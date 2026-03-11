@@ -68,9 +68,7 @@ export function PromptsSettings({ defaultPromptId }: PromptsSettingsProps) {
     if (result.success) {
       setPrompts((prev) =>
         prev.map((p) =>
-          p.id === selectedId
-            ? { ...p, content: draft, isCustomized: true }
-            : p
+          p.id === selectedId ? { ...p, content: draft, isCustomized: true } : p
         )
       );
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
@@ -97,13 +95,10 @@ export function PromptsSettings({ defaultPromptId }: PromptsSettingsProps) {
   };
 
   // Group prompts by category
-  const categories = prompts.reduce<Record<string, PromptInfo[]>>(
-    (acc, p) => {
-      (acc[p.category] ??= []).push(p);
-      return acc;
-    },
-    {}
-  );
+  const categories = prompts.reduce<Record<string, PromptInfo[]>>((acc, p) => {
+    (acc[p.category] ??= []).push(p);
+    return acc;
+  }, {});
 
   if (isLoading) {
     return (
@@ -139,7 +134,10 @@ export function PromptsSettings({ defaultPromptId }: PromptsSettingsProps) {
                     <span className="flex items-center gap-2">
                       {p.label}
                       {p.isCustomized && (
-                        <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] h-4 px-1.5"
+                        >
                           Customized
                         </Badge>
                       )}

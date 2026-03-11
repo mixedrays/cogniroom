@@ -1,4 +1,8 @@
-import type { FlashcardsContent, QuizContent, Course } from "@root/src/lib/types";
+import type {
+  FlashcardsContent,
+  QuizContent,
+  Course,
+} from "@root/src/lib/types";
 import type { ContentFormatAdapter } from "./types";
 import {
   flashcardsMarkdownAdapter,
@@ -18,7 +22,9 @@ let registry: FormatRegistry = {
   course: courseMarkdownAdapter,
 };
 
-export function getFormatAdapter<K extends keyof FormatRegistry>(key: K): FormatRegistry[K] {
+export function getFormatAdapter<K extends keyof FormatRegistry>(
+  key: K
+): FormatRegistry[K] {
   return registry[key];
 }
 

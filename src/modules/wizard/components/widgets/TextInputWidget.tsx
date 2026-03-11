@@ -9,7 +9,11 @@ interface TextInputWidgetProps {
   disabled?: boolean;
 }
 
-export function TextInputWidget({ data, onAnswer, disabled }: TextInputWidgetProps) {
+export function TextInputWidget({
+  data,
+  onAnswer,
+  disabled,
+}: TextInputWidgetProps) {
   const [value, setValue] = useState("");
 
   const handleSubmit = () => {

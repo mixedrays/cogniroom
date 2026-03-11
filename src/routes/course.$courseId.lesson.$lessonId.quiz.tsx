@@ -53,13 +53,16 @@ export const Route = createFileRoute("/course/$courseId/lesson/$lessonId/quiz")(
 
       let lessonInfo = null;
       let topicInfo = null;
+      let topicIndex = 1;
 
-      for (const topic of course.topics) {
-        const l = topic.lessons?.find((x) => x.id === params.lessonId);
-        if (l) {
-          lessonInfo = l;
-          topicInfo = topic;
-          break;
+      for (let ti = 0; ti < course.topics.length; ti++) {
+        const topic = course.topics[ti];
+        for (const lesson of topic.lessons ?? []) {
+          if (lesson.id === params.lessonId) {
+            lessonInfo = lesson;
+            topicInfo = topic;
+            topicIndex = ti + 1;
+          }
         }
       }
 
@@ -71,6 +74,7 @@ export const Route = createFileRoute("/course/$courseId/lesson/$lessonId/quiz")(
         course,
         lessonInfo,
         topicInfo,
+        topicIndex,
         content: lessonData?.content || null,
       };
     },
@@ -84,14 +88,15 @@ const parseQuizQuestions = (
   if (!input || !Array.isArray(input.quizQuestions)) return [];
   return input.quizQuestions.filter((q): q is QuizQuestion => {
     if (!q?.id || typeof q.question !== "string") return false;
-    if (q.type === "choice") return Array.isArray(q.options) && q.options.length > 0;
+    if (q.type === "choice")
+      return Array.isArray(q.options) && q.options.length > 0;
     if (q.type === "true-false") return typeof q.answer === "boolean";
     return false;
   });
 };
 
 function LessonQuizComponent() {
-  const { course, lessonInfo, topicInfo, content } = useLoaderData({
+  const { course, lessonInfo, topicInfo, topicIndex, content } = useLoaderData({
     from: "/course/$courseId/lesson/$lessonId/quiz",
   });
   const { courseId, lessonId } = useParams({
@@ -126,7 +131,9 @@ function LessonQuizComponent() {
         const result = await generateLessonQuiz(courseId, lessonId, prompt);
         if (result.success) {
           setWizardOpen(false);
-          await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+          await queryClient.invalidateQueries({
+            queryKey: ["course", courseId],
+          });
           router.invalidate();
         } else {
           setError(result.error || "Failed to generate quiz");
@@ -225,7 +232,8 @@ function LessonQuizComponent() {
         courseId={courseId}
         lessonId={lessonId}
         courseTitle={course.title}
-        topicTitle={topicInfo?.title}
+        topicIndex={topicIndex}
+        topicLessons={topicInfo?.lessons ?? []}
         activeTab="quiz"
         showMarkComplete={hasQuestions}
         isCompleted={isCompleted}

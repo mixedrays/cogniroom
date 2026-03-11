@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  ArrowUp as IconPrev,
-  ArrowDown as IconNext,
-} from "lucide-react";
+import { ArrowUp as IconPrev, ArrowDown as IconNext } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

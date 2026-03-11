@@ -14,12 +14,9 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const body = await readBody(event) as object;
+    const body = (await readBody(event)) as object;
 
-    await storageApi.put(
-      storagePaths.reviews(courseId, lessonId),
-      body
-    );
+    await storageApi.put(storagePaths.reviews(courseId, lessonId), body);
 
     return { success: true };
   } catch (error: any) {

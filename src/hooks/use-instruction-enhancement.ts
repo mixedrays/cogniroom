@@ -159,7 +159,10 @@ export function useInstructionEnhancement(): UseInstructionEnhancementReturn {
         setState({
           isEnhancing: false,
           enhancedInstruction: null,
-          error: err instanceof Error ? err.message : "Failed to enhance instruction",
+          error:
+            err instanceof Error
+              ? err.message
+              : "Failed to enhance instruction",
         });
       }
     },

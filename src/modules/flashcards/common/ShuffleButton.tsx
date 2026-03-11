@@ -8,7 +8,10 @@ interface ShuffleButtonProps {
   onToggle: () => void;
 }
 
-export function ShuffleButton({ areCardsShuffled, onToggle }: ShuffleButtonProps) {
+export function ShuffleButton({
+  areCardsShuffled,
+  onToggle,
+}: ShuffleButtonProps) {
   return (
     <Tooltip content="Shuffle cards">
       <Button
