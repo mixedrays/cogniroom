@@ -11,7 +11,7 @@ import type {
 /**
  * Content types that the dialog can generate
  */
-export type ContentType = "lesson" | "tests" | "exercises";
+export type ContentType = "lesson" | "exercises";
 
 /**
  * Content-type specific configuration for the dialog UI

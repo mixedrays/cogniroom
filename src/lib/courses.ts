@@ -9,9 +9,6 @@ import type {
 
 export type CourseSkillLevel = "beginner" | "intermediate" | "advanced";
 
-/** @deprecated Use CourseSkillLevel instead */
-export type RoadmapSkillLevel = CourseSkillLevel;
-
 function getBaseUrl() {
   if (typeof window !== "undefined") return "";
   return "http://localhost:3000";
@@ -34,9 +31,6 @@ export async function listCourses(): Promise<CourseMetadata[]> {
   }
 }
 
-/** @deprecated Use listCourses instead */
-export const listRoadmaps = listCourses;
-
 // Save a course
 export async function saveCourse(
   course: Course
@@ -55,9 +49,6 @@ export async function saveCourse(
     return { success: false, error: String(e) };
   }
 }
-
-/** @deprecated Use saveCourse instead */
-export const saveRoadmap = saveCourse;
 
 export async function generateCourse(params: {
   topic: string;
@@ -94,9 +85,6 @@ export async function generateCourse(params: {
   }
 }
 
-/** @deprecated Use generateCourse instead */
-export const generateRoadmap = generateCourse;
-
 // Get a single course
 export async function getCourse(id: string): Promise<Course | null> {
   try {
@@ -117,9 +105,6 @@ export async function getCourse(id: string): Promise<Course | null> {
   }
 }
 
-/** @deprecated Use getCourse instead */
-export const getRoadmap = getCourse;
-
 // Delete a course
 export async function deleteCourse(
   id: string
@@ -134,9 +119,6 @@ export async function deleteCourse(
     return { success: false, error: String(e) };
   }
 }
-
-/** @deprecated Use deleteCourse instead */
-export const deleteRoadmap = deleteCourse;
 
 // Delete lesson content (theory)
 export async function deleteLessonContent(
@@ -229,23 +211,6 @@ export async function deleteLessonQuiz(
     return await response.json();
   } catch (e) {
     console.error("Error deleting quiz:", e);
-    return { success: false, error: String(e) };
-  }
-}
-
-// Delete lesson tests
-export async function deleteLessonTests(
-  courseId: string,
-  lessonId: string
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/tests`,
-      { method: "DELETE" }
-    );
-    return await response.json();
-  } catch (e) {
-    console.error(`Error deleting lesson tests ${lessonId}:`, e);
     return { success: false, error: String(e) };
   }
 }
@@ -409,34 +374,6 @@ export async function generateLesson(
     return await response.json();
   } catch (e) {
     console.error("Error generating lesson:", e);
-    return { success: false, error: String(e) };
-  }
-}
-
-export async function generateLessonTests(
-  courseId: string,
-  lessonId: string,
-  additionalInstructions?: string,
-  model?: string
-): Promise<{ success: boolean; content?: unknown; error?: string }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/tests/generate`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          additionalInstructions,
-          model,
-        }),
-      }
-    );
-
-    return await response.json();
-  } catch (e) {
-    console.error("Error generating lesson tests:", e);
     return { success: false, error: String(e) };
   }
 }

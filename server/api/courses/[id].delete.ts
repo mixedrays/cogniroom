@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
       return { success: false, error: "Missing course ID" };
     }
 
-    // Delete the entire course folder (includes lessons, tests, exercises)
+    // Delete the entire course folder (includes lessons, exercises)
     const response = await storageApi.delete(storagePaths.courseDir(id), true);
 
     if (!response.ok && response.status !== 404) {

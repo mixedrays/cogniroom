@@ -74,44 +74,6 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
     ].join("\n"),
   },
 
-  // ── Tests generation ───────────────────────────────────────────
-  {
-    id: "tests-generation",
-    label: "Tests Generation",
-    description: "Prompt used when generating flashcards and quiz questions.",
-    category: "Tests",
-    variables: [
-      "courseTitle",
-      "topicTitle",
-      "topicDescription",
-      "lessonTitle",
-      "lessonDescription",
-      "additionalInstructions",
-    ],
-    defaultContent: [
-      "You generate study tests for lessons.",
-      "",
-      "Course: {{courseTitle}}",
-      "Topic: {{topicTitle}} - {{topicDescription}}",
-      "Lesson: {{lessonTitle}} - {{lessonDescription}}",
-      "",
-      "Generate flashcards AND multiple-choice quiz questions for this lesson.",
-      "",
-      "Flashcard guidelines:",
-      "- Generate at least 5 flashcards covering the key concepts",
-      "- Keep questions concise and focused on a single concept",
-      "- Keep answers short but accurate (1-3 sentences)",
-      "- Include a mix of definition, concept, and application questions",
-      "",
-      "Quiz guidelines:",
-      "- Generate at least 3 quiz questions",
-      "- Each quiz question must have exactly 4 options. The answer must be one of the options",
-      "- Include a mix of easy, medium, and hard difficulty questions",
-      "- Make incorrect options plausible but clearly wrong to someone who studied the material",
-      "{{additionalInstructions}}",
-    ].join("\n"),
-  },
-
   // ── Flashcards generation ──────────────────────────────────────
   {
     id: "flashcards-generation",

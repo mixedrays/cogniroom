@@ -47,12 +47,9 @@ export function isLessonSectionCompleted(
 export function isLessonFullyCompleted(lesson: Lesson): boolean {
   const theoryDone =
     !lesson.hasContent || isLessonSectionCompleted(lesson, "theory");
-  const testsDone =
-    (!lesson.hasFlashcards || isLessonSectionCompleted(lesson, "flashcards")) &&
-    (!lesson.hasQuiz || isLessonSectionCompleted(lesson, "quiz"));
   const exercisesDone =
     !lesson.hasExercises || isLessonSectionCompleted(lesson, "exercises");
-  return theoryDone && testsDone && exercisesDone;
+  return theoryDone && exercisesDone;
 }
 
 export interface Topic {
