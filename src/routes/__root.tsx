@@ -1,5 +1,6 @@
 import {
   HeadContent,
+  Link,
   Outlet,
   Scripts,
   createRootRouteWithContext,
@@ -8,6 +9,7 @@ import {
 import { QueryClientProvider } from "@tanstack/react-query";
 import AppSidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
+import { Button } from "@/components/ui/button";
 import { SidebarProvider } from "../components/ui/sidebar";
 import { SettingsProvider } from "@/modules/settings";
 import type { RouterContext } from "@/lib/routerContext";
@@ -41,6 +43,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   }),
 
   component: RootComponent,
+  notFoundComponent: RootNotFound,
 });
 
 function RootComponent() {
@@ -79,5 +82,24 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
+  );
+}
+
+function RootNotFound() {
+  return (
+    <div className="flex h-full min-h-0 items-center justify-center p-8">
+      <div className="flex max-w-md flex-col items-center gap-3 text-center">
+        <p className="text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground">
+          404
+        </p>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+          Page not found
+        </h1>
+        <p className="text-sm leading-6 text-muted-foreground">
+          The route you requested does not exist or is no longer available.
+        </p>
+        <Button variant="outline" render={<Link to="/">Back to home</Link>} />
+      </div>
+    </div>
   );
 }
