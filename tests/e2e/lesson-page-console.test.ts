@@ -70,7 +70,7 @@ async function navigateAndCollect(
   const logs = attachLogCollectors(page);
 
   try {
-    await page.goto(url, { waitUntil: "networkidle0" });
+    await page.goto(url, { waitUntil: "networkidle2" });
   } finally {
     mkdirSync(ARTIFACTS_DIR, { recursive: true });
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");

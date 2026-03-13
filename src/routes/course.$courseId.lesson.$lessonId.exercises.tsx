@@ -235,6 +235,7 @@ function LessonExercisesComponent() {
               </Button>
             }
           />
+
           <Button
             size="lg"
             variant="outline"
@@ -246,6 +247,7 @@ function LessonExercisesComponent() {
           </Button>
         </LessonEmptyState>
       )}
+
       <WizardDialog
         open={wizardOpen}
         onOpenChange={setWizardOpen}

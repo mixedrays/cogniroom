@@ -8,10 +8,7 @@ const data = {
     {
       header: "Topic",
       question: "Pick a topic?",
-      options: [
-        { label: "React", recommended: true },
-        { label: "TypeScript" },
-      ],
+      options: [{ label: "React", recommended: true }, { label: "TypeScript" }],
     },
     {
       header: "Level",
@@ -97,7 +94,9 @@ describe("QuestionsBatchWidget", () => {
     expect(screen.queryByRole("button", { name: /^submit$/i })).toBeNull();
     fireEvent.click(screen.getByLabelText("Next question"));
     fireEvent.click(screen.getByLabelText("Next question"));
-    expect(screen.getByRole("button", { name: /^submit$/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^submit$/i })
+    ).toBeInTheDocument();
     expect(screen.getByText("3/3")).toBeInTheDocument();
   });
 

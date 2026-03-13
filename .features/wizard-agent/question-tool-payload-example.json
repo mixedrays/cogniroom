@@ -39,10 +39,7 @@
     {
       "header": "Repeat",
       "question": "Do you want me to keep asking more after this one?",
-      "options": [
-        { "label": "Yes" },
-        { "label": "No", "recommended": true }
-      ]
+      "options": [{ "label": "Yes" }, { "label": "No", "recommended": true }]
     }
   ]
 }

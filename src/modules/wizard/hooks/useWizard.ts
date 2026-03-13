@@ -125,7 +125,11 @@ function serializeWidget(widget: AgentMessage, answer: unknown): string {
 const WELCOME_MESSAGE: Extract<WizardMessage, { role: "assistant" }> = {
   id: "welcome",
   role: "assistant",
-  data: { type: "text", value: "Hi! I'll help you create learning content. Tell me what you'd like to make — a lesson, flashcard set, quiz, or exercise — and describe the topic. I'll ask a few questions to get it just right." },
+  data: {
+    type: "text",
+    value:
+      "Hi! I'll help you create learning content. Tell me what you'd like to make — a lesson, flashcard set, quiz, or exercise — and describe the topic. I'll ask a few questions to get it just right.",
+  },
   status: "complete",
 };
 
@@ -272,7 +276,13 @@ export function useWizard({
     ) => {
       const text = JSON.stringify(answers);
       const userMsgId = crypto.randomUUID();
-      dispatch({ type: "SUBMIT_BATCH", widgetId, userMsgId, text, sourceWidget: widget });
+      dispatch({
+        type: "SUBMIT_BATCH",
+        widgetId,
+        userMsgId,
+        text,
+        sourceWidget: widget,
+      });
       const updatedMessages = [
         ...messagesRef.current.filter((m) => m.id !== widgetId),
         {

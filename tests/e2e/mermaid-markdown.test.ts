@@ -92,7 +92,7 @@ describe("mermaid markdown rendering", () => {
     const logs = attachLogCollectors(page);
 
     try {
-      await page.goto(LESSON_URL, { waitUntil: "networkidle0" });
+      await page.goto(LESSON_URL, { waitUntil: "networkidle2" });
 
       // Wait for all mermaid diagrams to finish async rendering
       await page.waitForFunction(

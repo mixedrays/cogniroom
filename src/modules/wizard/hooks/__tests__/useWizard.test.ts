@@ -15,10 +15,7 @@ const questionsWidget = {
     {
       header: "Topic",
       question: "Pick one?",
-      options: [
-        { label: "React", recommended: true },
-        { label: "TypeScript" },
-      ],
+      options: [{ label: "React", recommended: true }, { label: "TypeScript" }],
     },
     {
       header: "Notes",
@@ -43,7 +40,9 @@ describe("useWizard — submitBatch", () => {
       result.current.submitBatch(questionsWidget, "widget-to-remove", answers);
     });
 
-    expect(result.current.messages.find((m) => m.id === "widget-to-remove")).toBeUndefined();
+    expect(
+      result.current.messages.find((m) => m.id === "widget-to-remove")
+    ).toBeUndefined();
   });
 
   it("adds a user message with JSON-serialized answers", async () => {
@@ -92,13 +91,17 @@ describe("useWizard — dismissWidget", () => {
     const { result } = renderHook(() => useWizard());
 
     // The welcome message has id "welcome" — dismiss it to test actual removal
-    expect(result.current.messages.find((m) => m.id === "welcome")).toBeDefined();
+    expect(
+      result.current.messages.find((m) => m.id === "welcome")
+    ).toBeDefined();
 
     await act(async () => {
       result.current.dismissWidget("welcome");
     });
 
-    expect(result.current.messages.find((m) => m.id === "welcome")).toBeUndefined();
+    expect(
+      result.current.messages.find((m) => m.id === "welcome")
+    ).toBeUndefined();
   });
 
   it("does not remove messages with non-matching ids", async () => {

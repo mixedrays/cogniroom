@@ -45,7 +45,7 @@ describe("console smoke", () => {
       });
     });
 
-    await page.goto(APP_URL, { waitUntil: "networkidle0" });
+    await page.goto(APP_URL, { waitUntil: "networkidle2" });
   });
 
   afterAll(async () => {

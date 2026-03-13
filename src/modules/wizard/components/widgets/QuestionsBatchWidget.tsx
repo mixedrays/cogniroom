@@ -216,8 +216,7 @@ export function QuestionsBatchWidget({
               <Button onClick={handleSubmit}>Submit</Button>
             </TooltipTrigger>
             <TooltipContent>
-              Submit answers{" "}
-                <Kbd>⌘ + Enter</Kbd>
+              Submit answers <Kbd>⌘ + Enter</Kbd>
             </TooltipContent>
           </Tooltip>
         )}

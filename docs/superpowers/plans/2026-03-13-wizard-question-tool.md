@@ -17,6 +17,7 @@
 ### Task 1: Extend AgentMessageSchema with `questions` type
 
 **Files:**
+
 - Modify: `src/modules/wizard/schema.ts`
 
 - [x] **Step 1: Add the `questions` type to `AgentMessageSchema`**
@@ -62,6 +63,7 @@ git commit -m "feat(wizard): add questions type to AgentMessageSchema"
 ### Task 2: Add `SUBMIT_BATCH` and `REMOVE_MESSAGE` to `useWizard`
 
 **Files:**
+
 - Modify: `src/modules/wizard/hooks/useWizard.ts`
 - Create: `src/modules/wizard/hooks/__tests__/` (directory + test file)
 
@@ -100,10 +102,7 @@ const questionsWidget = {
     {
       header: "Topic",
       question: "Pick one?",
-      options: [
-        { label: "React", recommended: true },
-        { label: "TypeScript" },
-      ],
+      options: [{ label: "React", recommended: true }, { label: "TypeScript" }],
     },
     {
       header: "Notes",
@@ -133,7 +132,9 @@ describe("useWizard — submitBatch", () => {
       result.current.submitBatch(questionsWidget, "widget-to-remove", answers);
     });
 
-    expect(result.current.messages.find((m) => m.id === "widget-to-remove")).toBeUndefined();
+    expect(
+      result.current.messages.find((m) => m.id === "widget-to-remove")
+    ).toBeUndefined();
   });
 
   it("adds a user message with JSON-serialized answers", async () => {
@@ -182,13 +183,17 @@ describe("useWizard — dismissWidget", () => {
     const { result } = renderHook(() => useWizard());
 
     // The welcome message has id "welcome" — dismiss it to test actual removal
-    expect(result.current.messages.find((m) => m.id === "welcome")).toBeDefined();
+    expect(
+      result.current.messages.find((m) => m.id === "welcome")
+    ).toBeDefined();
 
     await act(async () => {
       result.current.dismissWidget("welcome");
     });
 
-    expect(result.current.messages.find((m) => m.id === "welcome")).toBeUndefined();
+    expect(
+      result.current.messages.find((m) => m.id === "welcome")
+    ).toBeUndefined();
   });
 
   it("does not remove messages with non-matching ids", async () => {
@@ -271,7 +276,13 @@ const submitBatch = useCallback(
   ) => {
     const text = JSON.stringify(answers);
     const userMsgId = crypto.randomUUID();
-    dispatch({ type: "SUBMIT_BATCH", widgetId, userMsgId, text, sourceWidget: widget });
+    dispatch({
+      type: "SUBMIT_BATCH",
+      widgetId,
+      userMsgId,
+      text,
+      sourceWidget: widget,
+    });
     const updatedMessages = [
       ...messagesRef.current.filter((m) => m.id !== widgetId),
       {
@@ -317,6 +328,7 @@ git commit -m "feat(wizard): add SUBMIT_BATCH/REMOVE_MESSAGE and submitBatch/dis
 ### Task 3: Implement `QuestionsBatchWidget`
 
 **Files:**
+
 - Create: `src/modules/wizard/components/widgets/QuestionsBatchWidget.tsx`
 - Create: `src/modules/wizard/components/widgets/__tests__/QuestionsBatchWidget.test.tsx`
 
@@ -325,6 +337,7 @@ git commit -m "feat(wizard): add SUBMIT_BATCH/REMOVE_MESSAGE and submitBatch/dis
 Look at `src/modules/wizard/components/widgets/RadioWidget.tsx` for the Tailwind class patterns used in the wizard. Use `Button` from `@/components/ui/button` and `Input` from `@/components/ui/input` (same as `WizardChat.tsx`).
 
 Wireframe references (layout/logic only — use app's own component styles, not visual style from screenshots):
+
 - `images/question-tool-select.png`: numbered rows, checkmark on selected, freeform input as last row, `1/5` footer with back/next navigation
 - `images/question-tool-multi-select.png`: multiple rows checked simultaneously
 - `images/question-tool-submit-button-in-the-last-question.png`: last question: `5/5` + `⌘↵ to submit` hint + blue Submit button
@@ -334,11 +347,11 @@ Wireframe references (layout/logic only — use app's own component styles, not 
 
 Answers are keyed by `header`: `Record<string, string | string[]>`
 
-| Variant | Storage |
-|---|---|
-| Single-select | `string` (option label or `""`) |
-| Multi-select | `string[]` (option labels) |
-| Freeform only | `string` |
+| Variant                    | Storage                                                                                                                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Single-select              | `string` (option label or `""`)                                                                                                                                                                 |
+| Multi-select               | `string[]` (option labels)                                                                                                                                                                      |
+| Freeform only              | `string`                                                                                                                                                                                        |
 | Mixed (options + freeform) | `string` — typing in freeform replaces the whole answer (clears option selection for single-select; for multi-select, typing in freeform sets a plain string answer, clearing array selections) |
 
 #### Initial answers from recommended options
@@ -376,9 +389,11 @@ interface QuestionsBatchWidgetProps {
 #### Dismiss confirmation
 
 Use inline state — no Dialog import needed:
+
 ```ts
 const [confirmingDismiss, setConfirmingDismiss] = useState(false);
 ```
+
 When true: show "Discard these questions?" + Cancel/Discard buttons. Confirm → `onDismiss()`. Cancel → `setConfirmingDismiss(false)`.
 
 #### Keyboard shortcut
@@ -414,10 +429,7 @@ const data = {
     {
       header: "Topic",
       question: "Pick a topic?",
-      options: [
-        { label: "React", recommended: true },
-        { label: "TypeScript" },
-      ],
+      options: [{ label: "React", recommended: true }, { label: "TypeScript" }],
     },
     {
       header: "Level",
@@ -503,7 +515,9 @@ describe("QuestionsBatchWidget", () => {
     expect(screen.queryByRole("button", { name: /^submit$/i })).toBeNull();
     fireEvent.click(screen.getByLabelText("Next question"));
     fireEvent.click(screen.getByLabelText("Next question"));
-    expect(screen.getByRole("button", { name: /^submit$/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^submit$/i })
+    ).toBeInTheDocument();
     expect(screen.getByText("3/3")).toBeInTheDocument();
   });
 
@@ -743,9 +757,7 @@ export function QuestionsBatchWidget({
                 {i + 1}
               </span>
               <span className="flex-1">{option.label}</span>
-              {selected && (
-                <Check className="size-3.5 shrink-0 text-primary" />
-              )}
+              {selected && <Check className="size-3.5 shrink-0 text-primary" />}
             </button>
           );
         })}
@@ -760,10 +772,10 @@ export function QuestionsBatchWidget({
                 Array.isArray(answers[current.header])
                   ? ""
                   : current.options?.some((o) =>
-                      isOptionSelected(current.header, o.label, false)
-                    )
-                  ? ""
-                  : (answers[current.header] as string) ?? ""
+                        isOptionSelected(current.header, o.label, false)
+                      )
+                    ? ""
+                    : ((answers[current.header] as string) ?? "")
               }
               onChange={(e) => {
                 setAnswers((prev) => ({
@@ -843,12 +855,14 @@ git commit -m "feat(wizard): add QuestionsBatchWidget component with tests"
 ### Task 4: Wire `QuestionsBatchWidget` into `WizardMessage` + add summary card
 
 **Files:**
+
 - Modify: `src/modules/wizard/components/WizardMessage.tsx`
 - Create: `src/modules/wizard/components/__tests__/WizardMessage.test.tsx`
 
 #### Background
 
 `WizardMessage` receives `onWidgetAnswer` for existing widget types. Add two new props:
+
 - `onBatchSubmit` — called when user submits the questions batch
 - `onDismissWidget` — called when user confirms discard
 
@@ -890,8 +904,17 @@ const noopWidgetAnswer = vi.fn();
 const questionsWidget = {
   type: "questions" as const,
   questions: [
-    { header: "Topic", question: "Pick a topic?", options: [{ label: "React" }] },
-    { header: "Level", question: "Your level?", multiSelect: true, options: [{ label: "Beginner" }] },
+    {
+      header: "Topic",
+      question: "Pick a topic?",
+      options: [{ label: "React" }],
+    },
+    {
+      header: "Level",
+      question: "Your level?",
+      multiSelect: true,
+      options: [{ label: "Beginner" }],
+    },
   ],
 };
 
@@ -1072,6 +1095,7 @@ git commit -m "feat(wizard): add questions branch and Q&A summary card to Wizard
 ### Task 5: Thread `submitBatch` and `dismissWidget` through `WizardChat`
 
 **Files:**
+
 - Modify: `src/modules/wizard/components/WizardChat.tsx`
 
 #### Background
@@ -1156,6 +1180,7 @@ git commit -m "feat(wizard): thread submitBatch and dismissWidget through Wizard
 ### Task 6: `index.ts` check + final validation
 
 **Files:**
+
 - No change to `src/modules/wizard/index.ts` needed — it only exports `WizardDialog` and types; `QuestionsBatchWidget` is consumed internally and does not need a public export.
 
 - [x] **Step 1: Run full validation suite**
@@ -1185,6 +1210,7 @@ Start dev server with `npm run dev`. Open the wizard dialog. Temporarily add a t
 ```
 
 Verify:
+
 - Card renders with `1/3`, "React" pre-selected
 - Navigate forward/back, answers persist across navigation
 - On question 3: Submit button + `⌘↵` hint appear, `>` is disabled

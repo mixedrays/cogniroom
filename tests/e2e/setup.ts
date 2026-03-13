@@ -16,7 +16,20 @@ async function waitForServer(url: string, timeoutMs = 30000): Promise<void> {
   throw new Error(`Server at ${url} did not start within ${timeoutMs}ms`);
 }
 
+async function isServerRunning(url: string): Promise<boolean> {
+  try {
+    const res = await fetch(url);
+    return res.ok || res.status < 500;
+  } catch {
+    return false;
+  }
+}
+
 export async function setup() {
+  if (await isServerRunning("http://localhost:3000")) {
+    return;
+  }
+
   devServer = spawn("npm", ["run", "dev"], {
     stdio: "pipe",
     shell: true,

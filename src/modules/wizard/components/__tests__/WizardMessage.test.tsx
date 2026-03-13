@@ -9,8 +9,17 @@ const noopWidgetAnswer = vi.fn();
 const questionsWidget = {
   type: "questions" as const,
   questions: [
-    { header: "Topic", question: "Pick a topic?", options: [{ label: "React" }] },
-    { header: "Level", question: "Your level?", multiSelect: true, options: [{ label: "Beginner" }] },
+    {
+      header: "Topic",
+      question: "Pick a topic?",
+      options: [{ label: "React" }],
+    },
+    {
+      header: "Level",
+      question: "Your level?",
+      multiSelect: true,
+      options: [{ label: "Beginner" }],
+    },
   ],
 };
 

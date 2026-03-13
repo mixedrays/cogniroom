@@ -11,27 +11,33 @@ New discriminated union member added to `AgentMessageSchema` in `src/modules/wiz
 ```ts
 z.object({
   type: z.literal("questions"),
-  questions: z.array(z.object({
-    header: z.string(),           // short label, used as answer key
-    question: z.string(),         // full question text shown to user
-    multiSelect: z.boolean().optional(),
-    allowFreeformInput: z.boolean().optional(),
-    options: z.array(z.object({
-      label: z.string(),
-      recommended: z.boolean().optional(),
-    })).optional(),
-  })),
-})
+  questions: z.array(
+    z.object({
+      header: z.string(), // short label, used as answer key
+      question: z.string(), // full question text shown to user
+      multiSelect: z.boolean().optional(),
+      allowFreeformInput: z.boolean().optional(),
+      options: z
+        .array(
+          z.object({
+            label: z.string(),
+            recommended: z.boolean().optional(),
+          })
+        )
+        .optional(),
+    })
+  ),
+});
 ```
 
 ### Question variants
 
-| Variant | Conditions |
-|---|---|
-| Single-select | `options` present, no `multiSelect` |
-| Multi-select | `options` + `multiSelect: true` |
+| Variant       | Conditions                               |
+| ------------- | ---------------------------------------- |
+| Single-select | `options` present, no `multiSelect`      |
+| Multi-select  | `options` + `multiSelect: true`          |
 | Freeform only | `allowFreeformInput: true`, no `options` |
-| Mixed | `options` + `allowFreeformInput: true` |
+| Mixed         | `options` + `allowFreeformInput: true`   |
 
 ## Component: `QuestionsBatchWidget`
 
@@ -45,6 +51,7 @@ z.object({
 ### UI structure
 
 > **Wireframe references** (layout and interaction logic only — use existing app UI components, not the style from screenshots):
+>
 > - `images/question-tool-select.png` — single-select question with numbered options, checkmark on selected, freeform input row, `1/5` footer with back/next
 > - `images/question-tool-multi-select.png` — multi-select question with checkboxes, multiple items checked simultaneously
 > - `images/question-tool-submit-button-in-the-last-question.png` — last question footer: `5/5`, `⌘↵ to submit` hint, blue Submit button
@@ -78,6 +85,7 @@ Clicking X opens a confirmation dialog. On confirm, the widget is discarded with
 ### Submission
 
 On submit (button click or `⌘↵` on last question):
+
 - Calls `submitBatch(widget, answers)` from `useWizard`
 - The widget collapses/disappears from the chat
 - A summary user message bubble appears in its place
@@ -96,6 +104,7 @@ On submit (button click or `⌘↵` on last question):
 ```
 
 Reducer behavior:
+
 1. Remove the `questions` widget message (matched by `widgetId`) from the messages list
 2. Add a new user message with `role: "user"`, `sourceWidget` set to the original widget, and `text` as the JSON-serialized answers
 
@@ -148,10 +157,10 @@ A: Single choice, Multi-select, Freeform text
 
 ## Files changed
 
-| File | Change |
-|---|---|
-| `src/modules/wizard/schema.ts` | Add `questions` type to `AgentMessageSchema` |
-| `src/modules/wizard/hooks/useWizard.ts` | Add `SUBMIT_BATCH` action, `submitBatch` method, export from `UseWizardReturn` |
-| `src/modules/wizard/components/widgets/QuestionsBatchWidget.tsx` | New component |
-| `src/modules/wizard/components/WizardMessage.tsx` | Add `questions` render branch + summary card for `sourceWidget.type === "questions"` |
-| `src/modules/wizard/index.ts` | Export new component if needed |
+| File                                                             | Change                                                                               |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `src/modules/wizard/schema.ts`                                   | Add `questions` type to `AgentMessageSchema`                                         |
+| `src/modules/wizard/hooks/useWizard.ts`                          | Add `SUBMIT_BATCH` action, `submitBatch` method, export from `UseWizardReturn`       |
+| `src/modules/wizard/components/widgets/QuestionsBatchWidget.tsx` | New component                                                                        |
+| `src/modules/wizard/components/WizardMessage.tsx`                | Add `questions` render branch + summary card for `sourceWidget.type === "questions"` |
+| `src/modules/wizard/index.ts`                                    | Export new component if needed                                                       |
