@@ -35,6 +35,25 @@ export const AgentMessageSchema = z.discriminatedUnion("type", [
       "roadmap",
     ]),
   }),
+  z.object({
+    type: z.literal("questions"),
+    questions: z.array(
+      z.object({
+        header: z.string(),
+        question: z.string(),
+        multiSelect: z.boolean().optional(),
+        allowFreeformInput: z.boolean().optional(),
+        options: z
+          .array(
+            z.object({
+              label: z.string(),
+              recommended: z.boolean().optional(),
+            })
+          )
+          .optional(),
+      })
+    ),
+  }),
 ]);
 
 export type AgentMessage = z.infer<typeof AgentMessageSchema>;

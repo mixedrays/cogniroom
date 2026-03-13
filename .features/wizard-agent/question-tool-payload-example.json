@@ -1,0 +1,48 @@
+{
+  "questions": [
+    {
+      "header": "Scenario",
+      "question": "What kind of scenario should this test simulate?",
+      "options": [
+        { "label": "Bug report", "recommended": true },
+        { "label": "Feature request" },
+        { "label": "User feedback" },
+        { "label": "Random input" }
+      ]
+    },
+    {
+      "header": "Fields",
+      "question": "Which field types are most important to verify?",
+      "multiSelect": true,
+      "options": [
+        { "label": "Single choice", "recommended": true },
+        { "label": "Multi-select", "recommended": true },
+        { "label": "Freeform text", "recommended": true },
+        { "label": "Optional-looking blank input" }
+      ]
+    },
+    {
+      "header": "ShortText",
+      "question": "Enter any short text value.",
+      "allowFreeformInput": true
+    },
+    {
+      "header": "MixedField",
+      "question": "Choose an option or add your own text.",
+      "allowFreeformInput": true,
+      "options": [
+        { "label": "Option A" },
+        { "label": "Option B", "recommended": true },
+        { "label": "Option C" }
+      ]
+    },
+    {
+      "header": "Repeat",
+      "question": "Do you want me to keep asking more after this one?",
+      "options": [
+        { "label": "Yes" },
+        { "label": "No", "recommended": true }
+      ]
+    }
+  ]
+}

@@ -15,6 +15,8 @@ export function WizardChat({
   hasPreview,
   sendMessage,
   submitWidget,
+  submitBatch,
+  dismissWidget,
   handleGenerate,
 }: WizardChatProps) {
   const [input, setInput] = useState("");
@@ -51,6 +53,8 @@ export function WizardChat({
               message={msg}
               isAnswered={isAnswered}
               onWidgetAnswer={handleWidgetAnswer}
+              onBatchSubmit={submitBatch}
+              onDismissWidget={dismissWidget}
             />
           );
         })}

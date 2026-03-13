@@ -17,7 +17,15 @@ type Action =
     }
   | { type: "ADD_LOADING_MESSAGE"; id: string }
   | { type: "COMPLETE_ASSISTANT"; id: string; data: AgentMessage }
-  | { type: "SET_GENERATING"; generating: boolean };
+  | { type: "SET_GENERATING"; generating: boolean }
+  | {
+      type: "SUBMIT_BATCH";
+      widgetId: string;
+      userMsgId: string;
+      text: string;
+      sourceWidget: AgentMessage;
+    }
+  | { type: "REMOVE_MESSAGE"; id: string };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -60,6 +68,24 @@ function reducer(state: State, action: Action): State {
       };
     case "SET_GENERATING":
       return { ...state, isGenerating: action.generating };
+    case "SUBMIT_BATCH":
+      return {
+        ...state,
+        messages: [
+          ...state.messages.filter((m) => m.id !== action.widgetId),
+          {
+            id: action.userMsgId,
+            role: "user",
+            text: action.text,
+            sourceWidget: action.sourceWidget,
+          },
+        ],
+      };
+    case "REMOVE_MESSAGE":
+      return {
+        ...state,
+        messages: state.messages.filter((m) => m.id !== action.id),
+      };
     default:
       return state;
   }
@@ -96,6 +122,13 @@ function serializeWidget(widget: AgentMessage, answer: unknown): string {
   }
 }
 
+const WELCOME_MESSAGE: Extract<WizardMessage, { role: "assistant" }> = {
+  id: "welcome",
+  role: "assistant",
+  data: { type: "text", value: "Hi! I'll help you create learning content. Tell me what you'd like to make — a lesson, flashcard set, quiz, or exercise — and describe the topic. I'll ask a few questions to get it just right." },
+  status: "complete",
+};
+
 interface UseWizardOptions {
   context?: WizardContext;
   onGenerate?: (prompt: string, contentType: string) => void;
@@ -108,6 +141,12 @@ export interface UseWizardReturn {
   hasPreview: boolean;
   sendMessage: (text: string) => void;
   submitWidget: (widget: AgentMessage, answer: unknown) => void;
+  submitBatch: (
+    widget: Extract<AgentMessage, { type: "questions" }>,
+    widgetId: string,
+    answers: Record<string, string | string[]>
+  ) => void;
+  dismissWidget: (widgetId: string) => void;
   handleGenerate: () => void;
 }
 
@@ -116,7 +155,7 @@ export function useWizard({
   onGenerate,
 }: UseWizardOptions = {}): UseWizardReturn {
   const [state, dispatch] = useReducer(reducer, {
-    messages: [],
+    messages: [WELCOME_MESSAGE],
     isLoading: false,
     isGenerating: false,
   });
@@ -125,7 +164,6 @@ export function useWizard({
   messagesRef.current = state.messages;
 
   const abortRef = useRef<AbortController | null>(null);
-  const initializedRef = useRef(false);
 
   const sendToAPI = useCallback(
     async (messages: WizardMessage[]) => {
@@ -188,12 +226,6 @@ export function useWizard({
   );
 
   useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
-    sendToAPI([]);
-  }, [sendToAPI]);
-
-  useEffect(() => {
     return () => {
       abortRef.current?.abort();
     };
@@ -232,6 +264,33 @@ export function useWizard({
     [sendToAPI]
   );
 
+  const submitBatch = useCallback(
+    (
+      widget: Extract<AgentMessage, { type: "questions" }>,
+      widgetId: string,
+      answers: Record<string, string | string[]>
+    ) => {
+      const text = JSON.stringify(answers);
+      const userMsgId = crypto.randomUUID();
+      dispatch({ type: "SUBMIT_BATCH", widgetId, userMsgId, text, sourceWidget: widget });
+      const updatedMessages = [
+        ...messagesRef.current.filter((m) => m.id !== widgetId),
+        {
+          id: userMsgId,
+          role: "user" as const,
+          text,
+          sourceWidget: widget,
+        },
+      ];
+      sendToAPI(updatedMessages);
+    },
+    [sendToAPI]
+  );
+
+  const dismissWidget = useCallback((widgetId: string) => {
+    dispatch({ type: "REMOVE_MESSAGE", id: widgetId });
+  }, []);
+
   type AssistantMessage = Extract<WizardMessage, { role: "assistant" }>;
 
   const lastPreview = [...state.messages]
@@ -266,6 +325,8 @@ export function useWizard({
     hasPreview,
     sendMessage,
     submitWidget,
+    submitBatch,
+    dismissWidget,
     handleGenerate,
   };
 }
