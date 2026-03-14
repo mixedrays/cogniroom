@@ -4,9 +4,16 @@ import { Button } from "@/components/ui/button";
 import { PromptTextarea } from "@/components/PromptTextarea";
 import type { UseWizardReturn } from "../hooks/useWizard";
 import type { AgentMessage } from "../schema";
+import type { WizardMessage as WizardMessageType } from "../types";
 import { WizardMessage } from "./WizardMessage";
+import { QuestionsBatchWidget } from "./widgets/QuestionsBatchWidget";
 
 type WizardChatProps = UseWizardReturn;
+
+type ActiveBatchMessage = Extract<WizardMessageType, { role: "assistant" }> & {
+  data: Extract<AgentMessage, { type: "questions" }>;
+  status: "complete";
+};
 
 export function WizardChat({
   messages,
@@ -35,29 +42,62 @@ export function WizardChat({
     submitWidget(widget, answer);
   };
 
+  const messagesWithMeta = messages.map((msg, index) => ({
+    msg,
+    isAnswered:
+      msg.role === "assistant" &&
+      msg.status === "complete" &&
+      index < messages.length - 1 &&
+      messages.slice(index + 1).some((m) => m.role === "user"),
+  }));
+
+  const activeBatchMessage = [...messages].reverse().find(
+    (msg): msg is ActiveBatchMessage =>
+      msg.role === "assistant" &&
+      msg.data.type === "questions" &&
+      msg.status === "complete"
+  );
+
+  const filteredMessages = messagesWithMeta.filter(
+    ({ msg }) =>
+      !(
+        msg.role === "assistant" &&
+        msg.data.type === "questions" &&
+        msg.status === "complete"
+      )
+  );
+
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.map((msg, index) => {
-          const isAnswered =
-            msg.role === "assistant" &&
-            msg.status === "complete" &&
-            index < messages.length - 1 &&
-            messages.slice(index + 1).some((m) => m.role === "user");
-
-          return (
-            <WizardMessage
-              key={msg.id}
-              message={msg}
-              isAnswered={isAnswered}
-              onWidgetAnswer={handleWidgetAnswer}
-              onBatchSubmit={submitBatch}
-              onDismissWidget={dismissWidget}
-            />
-          );
-        })}
+        {filteredMessages.map(({ msg, isAnswered }) => (
+          <WizardMessage
+            key={msg.id}
+            message={msg}
+            isAnswered={isAnswered}
+            onWidgetAnswer={handleWidgetAnswer}
+            onBatchSubmit={submitBatch}
+            onDismissWidget={dismissWidget}
+          />
+        ))}
         <div ref={bottomRef} />
       </div>
+
+      {activeBatchMessage && (
+        <div className="px-4 pt-2">
+          <div className="rounded-2xl bg-muted p-4">
+            <QuestionsBatchWidget
+              key={activeBatchMessage.id}
+              data={activeBatchMessage.data}
+              widgetId={activeBatchMessage.id}
+              onSubmit={(answers) =>
+                submitBatch(activeBatchMessage.data, activeBatchMessage.id, answers)
+              }
+              onDismiss={() => dismissWidget(activeBatchMessage.id)}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="p-4 flex flex-col gap-2">
         <PromptTextarea
