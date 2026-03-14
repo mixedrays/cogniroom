@@ -142,8 +142,8 @@ export function QuestionsBatchWidget({
               className={cn(
                 "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
                 selected
-                  ? "border-primary bg-accent"
-                  : "border-border hover:border-primary/30 hover:bg-accent/50"
+                  ? "border-primary bg-primary/15"
+                  : "border-border hover:border-primary hover:bg-accent/50"
               )}
             >
               <span className="w-4 shrink-0 text-xs text-muted-foreground">
