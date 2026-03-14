@@ -1,20 +1,9 @@
 import { useState } from "react";
 import { ArrowUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectGroup,
-} from "@/components/ui/select";
 import { useSettings } from "@/modules/settings/context/SettingsContext";
-import {
-  AVAILABLE_MODELS,
-  getModelPriceLabel,
-  getValidModel,
-} from "@/lib/llmModels";
+import { getValidModel } from "@/lib/llmModels";
+import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { cn } from "@/lib/utils";
 
 type PromptTextareaProps = {
@@ -68,30 +57,12 @@ export function PromptTextarea({
         disabled={disabled}
       />
       <div className="flex items-center justify-between px-2 pb-2">
-        <Select
+        <ModelSelect
           value={selectedModel}
-          onValueChange={(value) => {
-            if (value) setSelectedModel(value);
-          }}
+          onValueChange={setSelectedModel}
           disabled={disabled}
-        >
-          <SelectTrigger className="border-0 shadow-none hover:bg-accent transition-colors">
-            <SelectValue />
-          </SelectTrigger>
-
-          <SelectContent>
-            <SelectGroup>
-              {Object.entries(AVAILABLE_MODELS).map(([key, model]) => (
-                <SelectItem key={key} value={key} className="justify-between">
-                  {model.label}
-                  <span className="text-muted-foreground">
-                    {getModelPriceLabel(model)}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          triggerClassName="border-0 shadow-none hover:bg-accent transition-colors"
+        />
 
         <Button
           size="icon"

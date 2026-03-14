@@ -59,7 +59,7 @@ export function WizardChat({
         <div ref={bottomRef} />
       </div>
 
-      <div className="border-t p-4 flex flex-col gap-2">
+      <div className="p-4 flex flex-col gap-2">
         <PromptTextarea
           value={input}
           onChange={setInput}

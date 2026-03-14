@@ -10,11 +10,8 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
-import {
-  AVAILABLE_MODELS,
-  getModelLabelWithPrice,
-  getValidModel,
-} from "@/lib/llmModels";
+import { getValidModel } from "@/lib/llmModels";
+import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { useSettings } from "@/modules/settings";
 
 import {
@@ -883,22 +880,12 @@ function GenerateModeDialog({
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="space-y-2">
             <Label htmlFor="model">Model</Label>
-            <Select
+            <ModelSelect
               value={model}
-              onValueChange={(value) => value && setModel(value)}
+              onValueChange={setModel}
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="p-1">
-                {Object.entries(AVAILABLE_MODELS).map(([value, stats]) => (
-                  <SelectItem key={value} value={value}>
-                    {getModelLabelWithPrice(stats)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              className="p-1"
+            />
           </div>
 
           {showIncludeContentToggle && (

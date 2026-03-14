@@ -13,11 +13,8 @@ import {
   saveCourse,
   type CourseSkillLevel,
 } from "@/lib/courses";
-import {
-  AVAILABLE_MODELS,
-  getModelLabelWithPrice,
-  getValidModel,
-} from "@/lib/llmModels";
+import { getValidModel } from "@/lib/llmModels";
+import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { useSettings } from "@/modules/settings";
 import { useInstructionEnhancement } from "@/hooks/use-instruction-enhancement";
 
@@ -33,13 +30,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { PromptPreview } from "@/components/PromptPreview/PromptPreview";
 import { EnhancedInstructionPreview } from "@/components/EnhancedInstructionPreview";
@@ -343,21 +333,11 @@ export default function CreateCourseModal({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="model">Model</Label>
-                <Select
+                <ModelSelect
                   value={model}
-                  onValueChange={(value: any) => setModel(value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="p-1">
-                    {Object.entries(AVAILABLE_MODELS).map(([value, stats]) => (
-                      <SelectItem key={value} value={value}>
-                        {getModelLabelWithPrice(stats)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onValueChange={setModel}
+                  className="p-1"
+                />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">

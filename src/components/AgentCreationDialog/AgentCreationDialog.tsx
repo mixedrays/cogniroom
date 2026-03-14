@@ -1,11 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Bot, Loader2, Plus, Sparkles } from "lucide-react";
 
-import {
-  AVAILABLE_MODELS,
-  getModelLabelWithPrice,
-  getValidModel,
-} from "@/lib/llmModels";
+import { getValidModel } from "@/lib/llmModels";
 import { useSettings } from "@/modules/settings";
 
 import {
@@ -22,13 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { useInstructionEnhancement } from "@/hooks/use-instruction-enhancement";
 import { EnhancedInstructionPreview } from "@/components/EnhancedInstructionPreview";
 
@@ -249,22 +239,12 @@ export function AgentCreationDialog({
 
           <div className="space-y-2">
             <Label htmlFor="model">Model</Label>
-            <Select
+            <ModelSelect
               value={model}
-              onValueChange={(value: any) => setModel(value)}
+              onValueChange={setModel}
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="p-1">
-                {Object.entries(AVAILABLE_MODELS).map(([value, stats]) => (
-                  <SelectItem key={value} value={value}>
-                    {getModelLabelWithPrice(stats)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              className="p-1"
+            />
             <p className="text-xs text-muted-foreground">
               Select the AI model that will power this agent.
             </p>

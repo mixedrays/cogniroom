@@ -1,17 +1,6 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectGroup,
-} from "@/components/ui/select";
 import { useSettings } from "../context/SettingsContext";
-import {
-  AVAILABLE_MODELS,
-  DEFAULT_MODEL,
-  getModelPriceLabel,
-} from "@/lib/llmModels";
+import { AVAILABLE_MODELS } from "@/lib/llmModels";
+import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 
 export function LLMSettings() {
   const { settings, updateLLM } = useSettings();
@@ -27,32 +16,12 @@ export function LLMSettings() {
               Used for generating courses, lessons, and tests
             </p>
           </div>
-          <Select
+          <ModelSelect
             value={settings.llm.defaultModel}
-            onValueChange={(v) => v && updateLLM({ defaultModel: v })}
-          >
-            <SelectTrigger className="w-50">
-              <SelectValue />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectGroup>
-                {Object.entries(AVAILABLE_MODELS).map(([key, model]) => (
-                  <SelectItem
-                    key={key}
-                    value={key}
-                    className="justify-between w-full"
-                  >
-                    {model.label}
-                    <span className="text-muted-foreground">
-                      {getModelPriceLabel(model)}
-                    </span>
-                    {key === DEFAULT_MODEL && "(default)"}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            onValueChange={(v) => updateLLM({ defaultModel: v })}
+            triggerClassName="w-50"
+            showDefault
+          />
         </div>
       </div>
 
