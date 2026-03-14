@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { Loader2, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PromptTextarea } from "@/components/PromptTextarea";
 import type { UseWizardReturn } from "../hooks/useWizard";
 import type { AgentMessage } from "../schema";
 import { WizardMessage } from "./WizardMessage";
@@ -26,9 +26,7 @@ export function WizardChat({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
-    const text = input.trim();
-    if (!text || isLoading) return;
+  const handleSend = (text: string) => {
     setInput("");
     sendMessage(text);
   };
@@ -61,23 +59,18 @@ export function WizardChat({
         <div ref={bottomRef} />
       </div>
 
-      <div className="border-t p-4 flex gap-2">
-        <Input
+      <div className="border-t p-4 flex flex-col gap-2">
+        <PromptTextarea
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={setInput}
+          onSubmit={handleSend}
           placeholder="Type a message..."
           disabled={isLoading}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
         />
         <Button
           onClick={handleGenerate}
           disabled={isLoading || isGenerating}
-          className="shrink-0"
+          className="shrink-0 self-end"
         >
           {isGenerating ? (
             <Loader2 className="size-4 animate-spin" />

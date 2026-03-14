@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -83,15 +84,18 @@ export function AppearanceSettings() {
               v && updateAppearance({ radius: parseFloat(v) })
             }
           >
-            <SelectTrigger className="w-[140px] h-9">
+            <SelectTrigger className="w-35">
               <SelectValue />
             </SelectTrigger>
+
             <SelectContent>
-              {RADIUS_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label} ({opt.value}rem)
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                {RADIUS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label} ({opt.value}rem)
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>

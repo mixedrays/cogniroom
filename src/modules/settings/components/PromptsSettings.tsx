@@ -122,7 +122,7 @@ export function PromptsSettings({ defaultPromptId }: PromptsSettingsProps) {
           value={selectedId ?? undefined}
           onValueChange={(v) => v && handleSelect(v)}
         >
-          <SelectTrigger className="w-full h-9">
+          <SelectTrigger className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

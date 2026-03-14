@@ -73,7 +73,7 @@ export function getModelLabelWithPrice(model: ModelStats): string {
 }
 
 export function getModelPriceLabel(model: ModelStats): string {
-  return model.priceRating > 0 ? ` (${"$".repeat(model.priceRating)})` : "";
+  return model.priceRating > 0 ? ` ${model.priceRating}x` : "";
 }
 
 // Validate and return a model, falling back to default if invalid

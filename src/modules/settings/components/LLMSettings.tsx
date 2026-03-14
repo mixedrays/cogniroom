@@ -4,6 +4,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
 } from "@/components/ui/select";
 import { useSettings } from "../context/SettingsContext";
 import {
@@ -30,23 +31,26 @@ export function LLMSettings() {
             value={settings.llm.defaultModel}
             onValueChange={(v) => v && updateLLM({ defaultModel: v })}
           >
-            <SelectTrigger className="w-50 h-9">
+            <SelectTrigger className="w-50">
               <SelectValue />
             </SelectTrigger>
+
             <SelectContent>
-              {Object.entries(AVAILABLE_MODELS).map(([key, model]) => (
-                <SelectItem
-                  key={key}
-                  value={key}
-                  className="justify-between w-full"
-                >
-                  {model.label}
-                  <span className="text-muted-foreground">
-                    {getModelPriceLabel(model)}
-                  </span>
-                  {key === DEFAULT_MODEL && "(default)"}
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                {Object.entries(AVAILABLE_MODELS).map(([key, model]) => (
+                  <SelectItem
+                    key={key}
+                    value={key}
+                    className="justify-between w-full"
+                  >
+                    {model.label}
+                    <span className="text-muted-foreground">
+                      {getModelPriceLabel(model)}
+                    </span>
+                    {key === DEFAULT_MODEL && "(default)"}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
