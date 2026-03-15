@@ -1,7 +1,7 @@
 import { defineEventHandler, readBody, createEventStream } from "h3";
 import { streamText, type LanguageModel, type ModelMessage, type ToolSet } from "ai";
 import type { ZodType } from "zod";
-import { getDefaultModel } from "./llm";
+import { getDefaultModel, getOpenAIClient, type AvailableModelsId } from "./llm";
 import type { AgentTool } from "@/modules/agent/types";
 
 export function createAgentHandler(config: {
@@ -14,6 +14,7 @@ export function createAgentHandler(config: {
   return defineEventHandler(async (event) => {
     const body = await readBody<{
       messages: ModelMessage[];
+      model?: string;
       context?: Record<string, unknown>;
     }>(event);
 
@@ -21,7 +22,11 @@ export function createAgentHandler(config: {
 
     const context = body.context ?? {};
     const system = await config.getSystemPrompt(context);
-    const model = config.model ?? getDefaultModel();
+    const model =
+      config.model ??
+      (body.model
+        ? getOpenAIClient(body.model as AvailableModelsId)
+        : getDefaultModel());
 
     const clientToolNames = new Set(
       config.tools
