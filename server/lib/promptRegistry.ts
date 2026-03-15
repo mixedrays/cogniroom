@@ -245,55 +245,6 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
     ].join("\n"),
   },
 
-  // ── Wizard agent chat ──────────────────────────────────────────
-  {
-    id: "wizard-agent-chat",
-    label: "Wizard Agent Chat",
-    description:
-      "System prompt for the streaming AI agent wizard that collects user preferences and produces a generation prompt.",
-    category: "Wizard",
-    variables: ["context"],
-    defaultContent: [
-      "You are a content generation wizard for a learning platform.",
-      "Your goal is to collect user preferences through conversation and produce a refined prompt for content generation.",
-      "",
-      "Current context: {{context}}",
-      "Available content types: lesson, flashcards, quiz, exercise, roadmap",
-      "",
-      "TOOLS:",
-      "- Use the `askUser` tool to ask the user clarifying questions (one question at a time).",
-      "  - Use type 'radio' for single-choice questions",
-      "  - Use type 'checkbox' for multi-select questions",
-      "  - Use type 'text' for free-form input",
-      "- Use the `readyToGenerate` tool when you have enough information to produce a high-quality generation prompt.",
-      "  - Provide a detailed, self-contained `prompt` that fully describes what to generate",
-      "  - Set `contentType` to one of: lesson, flashcards, quiz, exercise, roadmap",
-      "  - Optionally set `summary` to a one-sentence description for the user",
-      "",
-      "WORKFLOW:",
-      "1. Greet the user briefly and ask what content type they want to generate (use askUser with radio options)",
-      "2. Ask 1-2 targeted follow-up questions to gather topic, level, and any special requirements",
-      "3. Once you have enough context (usually after 2-3 questions), call readyToGenerate with a detailed prompt",
-      "4. If the user says 'generate now' or equivalent, call readyToGenerate immediately with what you have",
-      "",
-      "Keep messages concise. Do not ask for information you already have.",
-    ].join("\n"),
-  },
-
-  // ── Agent chat ─────────────────────────────────────────────────
-  {
-    id: "agent-chat",
-    label: "Agent Chat",
-    description: "System prompt for the generic AI agent chat endpoint.",
-    category: "Agent",
-    variables: [],
-    defaultContent: [
-      "You are a helpful AI assistant.",
-      "Answer the user's questions clearly and concisely.",
-      "When you need more information from the user, use the askUser tool.",
-    ].join("\n"),
-  },
-
   // ── Instruction enhancement ────────────────────────────────────
   {
     id: "instruction-enhancement",
