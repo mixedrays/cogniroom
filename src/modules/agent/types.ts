@@ -15,6 +15,7 @@ export interface AgentTool<TParams extends ZodType = ZodType> {
       onSubmit: (result: unknown) => void;
       onDismiss: () => void;
     }>;
+    renderAbovePrompt?: boolean;
   };
 }
 

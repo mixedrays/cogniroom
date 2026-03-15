@@ -49,6 +49,24 @@ export function AgentMessage({
   if (message.role === "tool_call") {
     const tool = tools.find((t) => t.client.name === message.toolName);
     if (!tool) return null;
+
+    if (message.status === "dismissed") return null;
+
+    if (message.status === "submitted") {
+      const resultText = Array.isArray(message.result)
+        ? (message.result as string[]).join(", ")
+        : String(message.result ?? "");
+      return (
+        <div className="flex justify-end">
+          <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground">
+            {resultText}
+          </div>
+        </div>
+      );
+    }
+
+    if (tool.client.renderAbovePrompt) return null;
+
     const { Widget } = tool.client;
     return (
       <div className="rounded-2xl bg-muted p-4">

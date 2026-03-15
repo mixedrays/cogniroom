@@ -12,6 +12,7 @@ export const askUserTool: AgentTool<typeof AskUserParamsSchema> = {
   client: {
     name: "askUser",
     Widget: AskUserWidget,
+    renderAbovePrompt: true,
   },
 };
 

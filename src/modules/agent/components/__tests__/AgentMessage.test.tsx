@@ -23,6 +23,19 @@ const mockTool: AgentTool = {
   },
 };
 
+const mockAbovePromptTool: AgentTool = {
+  server: {
+    name: "askUser",
+    description: "Ask the user a question",
+    parameters: {} as never,
+  },
+  client: {
+    name: "askUser",
+    Widget: MockWidget,
+    renderAbovePrompt: true,
+  },
+};
+
 describe("AgentMessage — user", () => {
   it("renders user bubble with message text", () => {
     render(
@@ -65,7 +78,7 @@ describe("AgentMessage — assistant", () => {
 });
 
 describe("AgentMessage — tool_call", () => {
-  it("renders Widget for known tool name", () => {
+  it("renders Widget for pending tool without renderAbovePrompt", () => {
     render(
       <AgentMessage
         message={{
@@ -82,6 +95,84 @@ describe("AgentMessage — tool_call", () => {
       />
     );
     expect(screen.getByTestId("widget")).toBeInTheDocument();
+  });
+
+  it("returns null for pending tool with renderAbovePrompt", () => {
+    const { container } = render(
+      <AgentMessage
+        message={{
+          id: "1",
+          role: "tool_call",
+          toolName: "askUser",
+          toolCallId: "tc1",
+          params: { question: "Q?", type: "radio" },
+          status: "pending",
+        }}
+        tools={[mockAbovePromptTool]}
+        onToolSubmit={vi.fn()}
+        onToolDismiss={vi.fn()}
+      />
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renders answer bubble for submitted tool_call with string result", () => {
+    render(
+      <AgentMessage
+        message={{
+          id: "1",
+          role: "tool_call",
+          toolName: "askUser",
+          toolCallId: "tc1",
+          params: {},
+          status: "submitted",
+          result: "Option A",
+        }}
+        tools={[mockTool]}
+        onToolSubmit={vi.fn()}
+        onToolDismiss={vi.fn()}
+      />
+    );
+    expect(screen.getByText("Option A")).toBeInTheDocument();
+  });
+
+  it("renders answer bubble for submitted tool_call with array result", () => {
+    render(
+      <AgentMessage
+        message={{
+          id: "1",
+          role: "tool_call",
+          toolName: "askUser",
+          toolCallId: "tc1",
+          params: {},
+          status: "submitted",
+          result: ["Option A", "Option C"],
+        }}
+        tools={[mockTool]}
+        onToolSubmit={vi.fn()}
+        onToolDismiss={vi.fn()}
+      />
+    );
+    expect(screen.getByText("Option A, Option C")).toBeInTheDocument();
+  });
+
+  it("returns null for dismissed tool_call", () => {
+    const { container } = render(
+      <AgentMessage
+        message={{
+          id: "1",
+          role: "tool_call",
+          toolName: "askUser",
+          toolCallId: "tc1",
+          params: {},
+          status: "dismissed",
+        }}
+        tools={[mockTool]}
+        onToolSubmit={vi.fn()}
+        onToolDismiss={vi.fn()}
+      />
+    );
+    expect(container.firstChild).toBeNull();
   });
 
   it("returns null for unknown tool name", () => {
