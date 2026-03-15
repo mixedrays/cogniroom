@@ -1,4 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
+import type { LanguageModel } from "ai";
 import { getRequiredEnv } from "../env";
 
 import { type openai } from "@ai-sdk/openai";
@@ -27,4 +28,8 @@ export function getOpenAIClient(model: AvailableModelsId = DEFAULT_MODEL) {
   const apiKey = getRequiredEnv("OPENAI_API_KEY");
   const openai = createOpenAI({ apiKey });
   return openai(model);
+}
+
+export function getDefaultModel(): LanguageModel {
+  return getOpenAIClient(DEFAULT_MODEL);
 }

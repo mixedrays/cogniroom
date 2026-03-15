@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Wand2 } from "lucide-react";
+import { Bot, Wand2 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { WizardDialog } from "@/modules/wizard";
+import { WizardAgentDialog } from "@/modules/wizard-agent";
 import { generateCourse, saveCourse } from "@/lib/courses";
 
 export const Route = createFileRoute("/")({ component: App });
 
 function App() {
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardAgentOpen, setWizardAgentOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const handleGenerate = async (prompt: string) => {
@@ -26,6 +28,18 @@ function App() {
     setWizardOpen(false);
   };
 
+  const handleAgentGenerate = async (prompt: string) => {
+    const result = await generateCourse({
+      topic: prompt,
+      level: "beginner",
+      model: "gpt-4o-mini",
+    });
+    if (result.success && result.course) {
+      await saveCourse(result.course);
+      await queryClient.invalidateQueries({ queryKey: ["courses"] });
+    }
+  };
+
   return (
     <div className="h-full flex flex-col overflow-auto">
       <PageHeader>
@@ -34,7 +48,7 @@ function App() {
       </PageHeader>
       <div className="p-8 flex flex-col gap-4">
         <p>Welcome to {import.meta.env.APP_NAME}</p>
-        <div>
+        <div className="flex gap-2">
           <Button
             variant="outline"
             onClick={() => setWizardOpen(true)}
@@ -43,6 +57,14 @@ function App() {
             <Wand2 className="size-4" />
             AI Wizard
           </Button>
+          <Button
+            variant="outline"
+            onClick={() => setWizardAgentOpen(true)}
+            className="gap-2"
+          >
+            <Bot className="size-4" />
+            AI Agent Wizard
+          </Button>
         </div>
       </div>
       <WizardDialog
@@ -50,6 +72,12 @@ function App() {
         onOpenChange={setWizardOpen}
         context={{ contentType: "roadmap" }}
         onGenerate={handleGenerate}
+      />
+      <WizardAgentDialog
+        open={wizardAgentOpen}
+        onOpenChange={setWizardAgentOpen}
+        context={{ contentType: "roadmap" }}
+        onGenerate={handleAgentGenerate}
       />
     </div>
   );
