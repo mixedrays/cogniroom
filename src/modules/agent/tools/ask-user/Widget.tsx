@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -46,6 +46,13 @@ export function QuestionsBatchWidget({
   );
   const [showDismissDialog, setShowDismissDialog] = useState(false);
 
+  const total = questions.length;
+  const current = questions[currentIndex] ?? null;
+  const isFirst = currentIndex === 0;
+  const isLast = total > 0 && currentIndex === total - 1;
+  const currentAnswer = current ? answers[current.header] : undefined;
+  const currentFreeform = current ? (freeformValues[current.header] ?? "") : "";
+
   useEffect(() => {
     if (!parsed.success) return;
     const initial: Answers = {};
@@ -60,34 +67,71 @@ export function QuestionsBatchWidget({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!parsed.success) return null;
+  const toggleOption = useCallback(
+    (label: string) => {
+      if (!current) return;
+      if (current.multiSelect) {
+        const prev = Array.isArray(currentAnswer) ? currentAnswer : [];
+        const next = prev.includes(label)
+          ? prev.filter((o) => o !== label)
+          : [...prev, label];
+        setAnswers((a) => ({ ...a, [current.header]: next }));
+      } else {
+        setAnswers((a) => ({ ...a, [current.header]: label }));
+        setFreeformValues((f) => ({ ...f, [current.header]: "" }));
+      }
+    },
+    [current, currentAnswer]
+  );
 
-  const total = questions.length;
-  const current = questions[currentIndex];
-  const isFirst = currentIndex === 0;
-  const isLast = currentIndex === total - 1;
+  const handleSubmit = useCallback(() => {
+    onSubmit(answers);
+  }, [onSubmit, answers]);
 
-  const currentAnswer = answers[current.header];
-  const currentFreeform = freeformValues[current.header] ?? "";
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const isInput = (e.target as HTMLElement).tagName === "INPUT";
+
+      if (isLast && (e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        handleSubmit();
+        return;
+      }
+
+      if (!isInput) {
+        if (e.key === "ArrowLeft" && !isFirst) {
+          e.preventDefault();
+          setCurrentIndex((i) => i - 1);
+          return;
+        }
+        if (e.key === "ArrowRight" && !isLast) {
+          e.preventDefault();
+          setCurrentIndex((i) => i + 1);
+          return;
+        }
+
+        const num = parseInt(e.key);
+        if (!isNaN(num) && num >= 1 && current?.options) {
+          const idx = num - 1;
+          if (idx < current.options.length) {
+            e.preventDefault();
+            toggleOption(current.options[idx].label);
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [isFirst, isLast, current, handleSubmit, toggleOption]);
+
+  if (!parsed.success || !current) return null;
 
   const isOptionSelected = (label: string): boolean => {
     if (current.multiSelect) {
       return Array.isArray(currentAnswer) && currentAnswer.includes(label);
     }
     return currentAnswer === label;
-  };
-
-  const toggleOption = (label: string) => {
-    if (current.multiSelect) {
-      const prev = Array.isArray(currentAnswer) ? currentAnswer : [];
-      const next = prev.includes(label)
-        ? prev.filter((o) => o !== label)
-        : [...prev, label];
-      setAnswers((a) => ({ ...a, [current.header]: next }));
-    } else {
-      setAnswers((a) => ({ ...a, [current.header]: label }));
-      setFreeformValues((f) => ({ ...f, [current.header]: "" }));
-    }
   };
 
   const handleFreeformChange = (value: string) => {
@@ -105,19 +149,8 @@ export function QuestionsBatchWidget({
     }
   };
 
-  const handleSubmit = () => {
-    onSubmit(answers);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (isLast && (e.metaKey || e.ctrlKey) && e.key === "Enter") {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
-
   return (
-    <div className="space-y-3" onKeyDown={handleKeyDown}>
+    <div className="space-y-3">
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-medium">{current.question}</p>
         <button
@@ -130,14 +163,14 @@ export function QuestionsBatchWidget({
       </div>
 
       {current.options && (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1">
           {current.options.map((opt, idx) => (
             <button
               key={opt.label}
               type="button"
               onClick={() => toggleOption(opt.label)}
               className={cn(
-                "flex items-center gap-3 rounded-lg border px-4 py-2.5 text-left text-sm transition-colors cursor-pointer",
+                "flex items-center gap-2 rounded-lg border px-4 py-2.5 text-left text-sm transition-colors cursor-pointer",
                 isOptionSelected(opt.label)
                   ? "border-primary bg-primary/10"
                   : "border-border hover:border-primary/50 hover:bg-accent"
@@ -166,7 +199,7 @@ export function QuestionsBatchWidget({
       {current.allowFreeformInput && (
         <div
           className={cn(
-            "flex items-center gap-3 rounded-lg border px-4 py-2.5 text-sm",
+            "flex -mt-2 items-center gap-2 rounded-lg border px-4 py-2.5 text-sm",
             "border-border focus-within:border-primary/50 transition-colors"
           )}
         >
@@ -189,22 +222,40 @@ export function QuestionsBatchWidget({
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
-          <Button
-            variant="secondary"
-            size="icon"
-            disabled={isFirst}
-            onClick={() => setCurrentIndex((i) => i - 1)}
-          >
-            <ChevronLeft className="size-4" />
-          </Button>
-          <Button
-            variant="secondary"
-            size="icon"
-            disabled={isLast}
-            onClick={() => setCurrentIndex((i) => i + 1)}
-          >
-            <ChevronRight className="size-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  disabled={isFirst}
+                  onClick={() => setCurrentIndex((i) => i - 1)}
+                >
+                  <ChevronLeft />
+                </Button>
+              }
+            />
+            <TooltipContent>
+              Previous question <Kbd>←</Kbd>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  disabled={isLast}
+                  onClick={() => setCurrentIndex((i) => i + 1)}
+                >
+                  <ChevronRight />
+                </Button>
+              }
+            />
+            <TooltipContent>
+              Next question <Kbd>→</Kbd>
+            </TooltipContent>
+          </Tooltip>
           <span className="text-xs text-muted-foreground ml-1">
             {currentIndex + 1}/{total}
           </span>

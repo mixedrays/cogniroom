@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowUp, Loader2 } from "lucide-react";
+import { ArrowUp, Loader2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/modules/settings/context/SettingsContext";
 import { getValidModel } from "@/lib/llmModels";
@@ -12,6 +12,8 @@ type PromptTextareaProps = {
   onSubmit: (text: string, model: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  isStreaming?: boolean;
+  onStop?: () => void;
 };
 
 export function PromptTextarea({
@@ -20,6 +22,8 @@ export function PromptTextarea({
   onSubmit,
   placeholder = "Type a message...",
   disabled = false,
+  isStreaming = false,
+  onStop,
 }: PromptTextareaProps) {
   const { settings } = useSettings();
   const [selectedModel, setSelectedModel] = useState(() =>
@@ -33,13 +37,14 @@ export function PromptTextarea({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !isStreaming) {
       e.preventDefault();
       handleSubmit();
     }
   };
 
   const isSendDisabled = disabled || !value.trim();
+  const isInputDisabled = disabled || isStreaming;
 
   return (
     <div
@@ -49,33 +54,44 @@ export function PromptTextarea({
       )}
     >
       <textarea
-        className="w-full resize-none bg-transparent px-3 pt-3 text-sm outline-none placeholder:text-muted-foreground field-sizing-content focus-visible:ring-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full resize-none bg-transparent px-3 pt-3 pb-2 text-sm outline-none placeholder:text-muted-foreground field-sizing-content focus-visible:ring-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        disabled={disabled}
+        disabled={isInputDisabled}
       />
       <div className="flex items-center justify-between px-2 pb-2">
         <ModelSelect
           value={selectedModel}
           onValueChange={setSelectedModel}
-          disabled={disabled}
+          disabled={isInputDisabled}
           triggerClassName="border-0 shadow-none hover:bg-accent transition-colors"
         />
 
-        <Button
-          size="icon"
-          onClick={handleSubmit}
-          disabled={isSendDisabled}
-          aria-label={disabled ? "Sending..." : "Send"}
-        >
-          {disabled ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <ArrowUp className="size-4" />
-          )}
-        </Button>
+        {isStreaming ? (
+          <Button
+            size="icon"
+            onClick={onStop}
+            aria-label="Stop"
+            variant="secondary"
+          >
+            <Square className="size-3 fill-current" />
+          </Button>
+        ) : (
+          <Button
+            size="icon"
+            onClick={handleSubmit}
+            disabled={isSendDisabled}
+            aria-label={disabled ? "Sending..." : "Send"}
+          >
+            {disabled ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <ArrowUp className="size-4" />
+            )}
+          </Button>
+        )}
       </div>
     </div>
   );

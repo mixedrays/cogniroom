@@ -24,7 +24,7 @@ export type AgentMessageState =
   | {
       id: string;
       role: "assistant";
-      status: "streaming" | "complete";
+      status: "streaming" | "complete" | "cancelled";
       text: string;
     }
   | {

@@ -72,16 +72,16 @@ export function WizardAgentDialog({
         <AgentChat
           messages={messages}
           tools={TOOLS}
-          isStreaming={isStreaming}
           onToolSubmit={handleToolSubmit}
           onToolDismiss={dismissToolCall}
-          onStop={stopStreaming}
+          welcomeMessage="Describe what content you'd like to generate and I'll help you get started."
           promptSlot={
             <PromptTextarea
               value={input}
               onChange={setInput}
               onSubmit={handleSubmit}
-              disabled={isStreaming}
+              isStreaming={isStreaming}
+              onStop={stopStreaming}
               placeholder="Describe what you want to generate..."
             />
           }

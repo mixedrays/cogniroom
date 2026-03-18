@@ -51,12 +51,14 @@ export function WizardChat({
       messages.slice(index + 1).some((m) => m.role === "user"),
   }));
 
-  const activeBatchMessage = [...messages].reverse().find(
-    (msg): msg is ActiveBatchMessage =>
-      msg.role === "assistant" &&
-      msg.data.type === "questions" &&
-      msg.status === "complete"
-  );
+  const activeBatchMessage = [...messages]
+    .reverse()
+    .find(
+      (msg): msg is ActiveBatchMessage =>
+        msg.role === "assistant" &&
+        msg.data.type === "questions" &&
+        msg.status === "complete"
+    );
 
   const filteredMessages = messagesWithMeta.filter(
     ({ msg }) =>
@@ -91,7 +93,11 @@ export function WizardChat({
               data={activeBatchMessage.data}
               widgetId={activeBatchMessage.id}
               onSubmit={(answers) =>
-                submitBatch(activeBatchMessage.data, activeBatchMessage.id, answers)
+                submitBatch(
+                  activeBatchMessage.data,
+                  activeBatchMessage.id,
+                  answers
+                )
               }
               onDismiss={() => dismissWidget(activeBatchMessage.id)}
             />

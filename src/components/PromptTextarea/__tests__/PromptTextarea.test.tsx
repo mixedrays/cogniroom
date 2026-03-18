@@ -18,24 +18,33 @@ describe("PromptTextarea", () => {
         placeholder="Describe what to build"
       />
     );
-    expect(screen.getByPlaceholderText("Describe what to build")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Describe what to build")
+    ).toBeInTheDocument();
   });
 
   it("calls onChange when typing", () => {
     const onChange = vi.fn();
-    render(
-      <PromptTextarea value="" onChange={onChange} onSubmit={vi.fn()} />
-    );
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "hello" } });
+    render(<PromptTextarea value="" onChange={onChange} onSubmit={vi.fn()} />);
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "hello" },
+    });
     expect(onChange).toHaveBeenCalledWith("hello");
   });
 
   it("calls onSubmit with trimmed text and model on Enter", () => {
     const onSubmit = vi.fn();
     render(
-      <PromptTextarea value="  hello  " onChange={vi.fn()} onSubmit={onSubmit} />
+      <PromptTextarea
+        value="  hello  "
+        onChange={vi.fn()}
+        onSubmit={onSubmit}
+      />
     );
-    fireEvent.keyDown(screen.getByRole("textbox"), { key: "Enter", shiftKey: false });
+    fireEvent.keyDown(screen.getByRole("textbox"), {
+      key: "Enter",
+      shiftKey: false,
+    });
     expect(onSubmit).toHaveBeenCalledWith("hello", "gpt-5-mini");
   });
 
@@ -44,7 +53,10 @@ describe("PromptTextarea", () => {
     render(
       <PromptTextarea value="hello" onChange={vi.fn()} onSubmit={onSubmit} />
     );
-    fireEvent.keyDown(screen.getByRole("textbox"), { key: "Enter", shiftKey: true });
+    fireEvent.keyDown(screen.getByRole("textbox"), {
+      key: "Enter",
+      shiftKey: true,
+    });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -53,31 +65,47 @@ describe("PromptTextarea", () => {
     render(
       <PromptTextarea value="   " onChange={vi.fn()} onSubmit={onSubmit} />
     );
-    fireEvent.keyDown(screen.getByRole("textbox"), { key: "Enter", shiftKey: false });
+    fireEvent.keyDown(screen.getByRole("textbox"), {
+      key: "Enter",
+      shiftKey: false,
+    });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it("does not submit when disabled", () => {
     const onSubmit = vi.fn();
     render(
-      <PromptTextarea value="hello" onChange={vi.fn()} onSubmit={onSubmit} disabled />
+      <PromptTextarea
+        value="hello"
+        onChange={vi.fn()}
+        onSubmit={onSubmit}
+        disabled
+      />
     );
-    fireEvent.keyDown(screen.getByRole("textbox"), { key: "Enter", shiftKey: false });
+    fireEvent.keyDown(screen.getByRole("textbox"), {
+      key: "Enter",
+      shiftKey: false,
+    });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it("disables the textarea when disabled prop is true", () => {
     render(
-      <PromptTextarea value="hello" onChange={vi.fn()} onSubmit={vi.fn()} disabled />
+      <PromptTextarea
+        value="hello"
+        onChange={vi.fn()}
+        onSubmit={vi.fn()}
+        disabled
+      />
     );
     expect(screen.getByRole("textbox")).toBeDisabled();
   });
 
   it("uses default placeholder when none provided", () => {
-    render(
-      <PromptTextarea value="" onChange={vi.fn()} onSubmit={vi.fn()} />
-    );
-    expect(screen.getByPlaceholderText("Type a message...")).toBeInTheDocument();
+    render(<PromptTextarea value="" onChange={vi.fn()} onSubmit={vi.fn()} />);
+    expect(
+      screen.getByPlaceholderText("Type a message...")
+    ).toBeInTheDocument();
   });
 
   it("calls onSubmit when send button is clicked", () => {
@@ -87,5 +115,52 @@ describe("PromptTextarea", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
     expect(onSubmit).toHaveBeenCalledWith("hello", "gpt-5-mini");
+  });
+
+  it("shows stop button and calls onStop when isStreaming is true", () => {
+    const onStop = vi.fn();
+    render(
+      <PromptTextarea
+        value="hello"
+        onChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isStreaming
+        onStop={onStop}
+      />
+    );
+    expect(screen.queryByRole("button", { name: "Send" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Stop" }));
+    expect(onStop).toHaveBeenCalled();
+  });
+
+  it("disables textarea when isStreaming is true", () => {
+    render(
+      <PromptTextarea
+        value="hello"
+        onChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isStreaming
+        onStop={vi.fn()}
+      />
+    );
+    expect(screen.getByRole("textbox")).toBeDisabled();
+  });
+
+  it("does not submit on Enter when isStreaming is true", () => {
+    const onSubmit = vi.fn();
+    render(
+      <PromptTextarea
+        value="hello"
+        onChange={vi.fn()}
+        onSubmit={onSubmit}
+        isStreaming
+        onStop={vi.fn()}
+      />
+    );
+    fireEvent.keyDown(screen.getByRole("textbox"), {
+      key: "Enter",
+      shiftKey: false,
+    });
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });

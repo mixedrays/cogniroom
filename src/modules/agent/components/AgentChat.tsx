@@ -1,17 +1,14 @@
 import { useRef, useEffect, type ReactNode } from "react";
-import { Square } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import type { AgentMessageState, AgentTool } from "../types";
 import { AgentMessage } from "./AgentMessage";
 
 interface AgentChatProps {
   messages: AgentMessageState[];
   tools: AgentTool[];
-  isStreaming: boolean;
   onToolSubmit: (toolCallId: string, result: unknown) => void;
   onToolDismiss: (toolCallId: string) => void;
-  onStop: () => void;
   promptSlot: ReactNode;
+  welcomeMessage?: string;
 }
 
 type ToolCallMessage = Extract<AgentMessageState, { role: "tool_call" }>;
@@ -19,11 +16,10 @@ type ToolCallMessage = Extract<AgentMessageState, { role: "tool_call" }>;
 export function AgentChat({
   messages,
   tools,
-  isStreaming,
   onToolSubmit,
   onToolDismiss,
-  onStop,
   promptSlot,
+  welcomeMessage,
 }: AgentChatProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -52,11 +48,17 @@ export function AgentChat({
     ? tools.find((t) => t.client?.name === activeAbovePromptCall.toolName)
     : undefined;
 
-  console.log("chatMessages", chatMessages);
-
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {chatMessages.length === 0 && welcomeMessage && (
+          <div className="flex h-full items-center justify-center m-0">
+            <p className="text-muted-foreground text-center">
+              {welcomeMessage}
+            </p>
+          </div>
+        )}
+
         {chatMessages.map((msg) => (
           <AgentMessage
             key={msg.id}
@@ -83,22 +85,7 @@ export function AgentChat({
         </div>
       )}
 
-      <div className="p-4 space-y-2">
-        {isStreaming && (
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onStop}
-              className="gap-2"
-            >
-              <Square className="size-3 fill-current" />
-              Stop
-            </Button>
-          </div>
-        )}
-        {promptSlot}
-      </div>
+      <div className="p-4">{promptSlot}</div>
     </div>
   );
 }

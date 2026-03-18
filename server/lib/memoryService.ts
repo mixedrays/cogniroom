@@ -5,13 +5,7 @@ import os from "os";
 function getMemoryDir(): string {
   const projectRoot = process.cwd();
   const projectHash = projectRoot.replace(/\//g, "-");
-  return path.join(
-    os.homedir(),
-    ".claude",
-    "projects",
-    projectHash,
-    "memory"
-  );
+  return path.join(os.homedir(), ".claude", "projects", projectHash, "memory");
 }
 
 export async function readMemory(key: string): Promise<string | null> {

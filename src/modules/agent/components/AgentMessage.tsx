@@ -38,18 +38,34 @@ export function AgentMessage({
       );
     }
 
+    if (message.status === "cancelled" && !message.text) {
+      return (
+        <div className="flex justify-end">
+          <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-destructive/10 px-4 py-2.5 text-sm text-muted-foreground">
+            Generation stopped
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex justify-start">
         <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-muted px-4 py-2.5 text-sm">
           <Markdown content={message.text} className="text-sm" />
-          {/* {message.text} */}
         </div>
       </div>
     );
   }
 
   if (message.role === "tool_call") {
-    if (message.status === "dismissed") return null;
+    if (message.status === "dismissed")
+      return (
+        <div className="flex justify-end">
+          <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-destructive/10 px-4 py-2.5 text-sm text-balanced-foreground">
+            Tool call dismissed
+          </div>
+        </div>
+      );
 
     if (message.status === "submitted" && message.toolName === "askUser") {
       const parsed = AskUserParamsSchema.safeParse(message.params);
@@ -65,7 +81,9 @@ export function AgentMessage({
                   : (ans ?? "—");
                 return (
                   <div key={q.header}>
-                    <p className="text-muted-foreground text-xs">{q.question}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {q.question}
+                    </p>
                     <p className="font-medium">{ansText}</p>
                   </div>
                 );

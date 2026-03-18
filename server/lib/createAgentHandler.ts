@@ -1,7 +1,16 @@
 import { defineEventHandler, readBody, createEventStream } from "h3";
-import { streamText, type LanguageModel, type ModelMessage, type ToolSet } from "ai";
+import {
+  streamText,
+  type LanguageModel,
+  type ModelMessage,
+  type ToolSet,
+} from "ai";
 import type { ZodType } from "zod";
-import { getDefaultModel, getOpenAIClient, type AvailableModelsId } from "./llm";
+import {
+  getDefaultModel,
+  getOpenAIClient,
+  type AvailableModelsId,
+} from "./llm";
 import type { AgentTool } from "@/modules/agent/types";
 
 export function createAgentHandler(config: {
@@ -29,9 +38,7 @@ export function createAgentHandler(config: {
         : getDefaultModel());
 
     const clientToolNames = new Set(
-      config.tools
-        .filter((t) => !t.server.execute)
-        .map((t) => t.server.name)
+      config.tools.filter((t) => !t.server.execute).map((t) => t.server.name)
     );
 
     const tools: ToolSet = {};

@@ -5,7 +5,7 @@ import { Bot, Wand2 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { WizardDialog } from "@/modules/wizard";
-import { AgentDialog } from "@/modules/agent";
+import { WizardAgentDialog } from "@/modules/wizard-agent";
 import { generateCourse, saveCourse } from "@/lib/courses";
 
 export const Route = createFileRoute("/")({ component: App });
@@ -61,11 +61,11 @@ function App() {
         context={{ contentType: "roadmap" }}
         onGenerate={handleGenerate}
       />
-      <AgentDialog
+      <WizardAgentDialog
         open={agentOpen}
         onOpenChange={setAgentOpen}
-        title="AI Agent"
-        placeholder="Ask me anything…"
+        context={{ contentType: "roadmap" }}
+        onGenerate={handleGenerate}
       />
     </div>
   );

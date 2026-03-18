@@ -12,6 +12,7 @@ type Action =
   | { type: "ADD_STREAMING_ASSISTANT"; id: string }
   | { type: "APPEND_TOKEN"; id: string; delta: string }
   | { type: "COMPLETE_ASSISTANT"; id: string }
+  | { type: "CANCEL_ASSISTANT"; id: string }
   | {
       type: "ADD_TOOL_CALL";
       assistantId: string;
@@ -58,6 +59,16 @@ function reducer(state: State, action: Action): State {
         messages: state.messages.map((m) =>
           m.id === action.id && m.role === "assistant"
             ? { ...m, status: "complete" }
+            : m
+        ),
+      };
+    case "CANCEL_ASSISTANT":
+      return {
+        ...state,
+        isStreaming: false,
+        messages: state.messages.map((m) =>
+          m.id === action.id && m.role === "assistant"
+            ? { ...m, status: "cancelled" }
             : m
         ),
       };
@@ -252,7 +263,7 @@ export function useAgent({
         }
       } catch (e) {
         if ((e as Error).name === "AbortError") {
-          dispatch({ type: "COMPLETE_ASSISTANT", id: assistantId });
+          dispatch({ type: "CANCEL_ASSISTANT", id: assistantId });
           return;
         }
         dispatch({

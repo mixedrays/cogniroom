@@ -35,8 +35,14 @@ export function AgentDialog({
   placeholder,
 }: AgentDialogProps) {
   const [input, setInput] = useState("");
-  const { messages, isStreaming, sendMessage, stopStreaming, submitToolResult, dismissToolCall } =
-    useAgent({ endpoint, context });
+  const {
+    messages,
+    isStreaming,
+    sendMessage,
+    stopStreaming,
+    submitToolResult,
+    dismissToolCall,
+  } = useAgent({ endpoint, context });
 
   const handleSubmit = (text: string, model: string) => {
     setInput("");
@@ -55,16 +61,16 @@ export function AgentDialog({
         <AgentChat
           messages={messages}
           tools={tools}
-          isStreaming={isStreaming}
           onToolSubmit={submitToolResult}
           onToolDismiss={dismissToolCall}
-          onStop={stopStreaming}
+          welcomeMessage="How can I help you today?"
           promptSlot={
             <PromptTextarea
               value={input}
               onChange={setInput}
               onSubmit={handleSubmit}
-              disabled={isStreaming}
+              isStreaming={isStreaming}
+              onStop={stopStreaming}
               placeholder={placeholder ?? "Type a message…"}
             />
           }

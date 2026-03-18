@@ -10,9 +10,8 @@ export const memoryTool: AgentTool<typeof MemoryParamsSchema> = {
       "Use action 'read' to retrieve a memory by key, 'write' to save content under a key.",
     parameters: MemoryParamsSchema,
     execute: async (params) => {
-      const { readMemory, writeMemory } = await import(
-        "@root/server/lib/memoryService"
-      );
+      const { readMemory, writeMemory } =
+        await import("@root/server/lib/memoryService");
       if (params.action === "read") {
         const content = await readMemory(params.key);
         return content ?? null;
