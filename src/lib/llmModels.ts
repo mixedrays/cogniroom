@@ -74,19 +74,18 @@ export const AVAILABLE_MODELS: AvailableModels = {
 
 export const DEFAULT_MODEL = "gpt-5-mini";
 
-export function getModelLabelWithPrice(model: ModelStats): string {
-  const priceSuffix =
-    model.priceRating > 0 ? ` (${"$".repeat(model.priceRating)})` : "";
-  return `${model.label}${priceSuffix}`;
+export function getModelPriceLabel({ priceRating }: ModelStats): string {
+  if (!priceRating) return "";
+
+  if (priceRating > 3) return `$$$+`;
+
+  const priceSuffix = ` ${"$".repeat(priceRating)}`;
+  return `${priceSuffix}`;
 }
 
 export function getModelLabel(modelId: string | undefined | null): string {
   const model = AVAILABLE_MODELS[modelId as keyof typeof AVAILABLE_MODELS];
   return model ? model.label : modelId || "Unknown model";
-}
-
-export function getModelPriceLabel(model: ModelStats): string {
-  return model.priceRating > 0 ? ` ${model.priceRating}x` : "";
 }
 
 // Validate and return a model, falling back to default if invalid
