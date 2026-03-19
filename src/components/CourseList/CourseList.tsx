@@ -6,9 +6,7 @@ import {
   Link as LinkIcon,
   Trash2,
   ChevronDown,
-  Settings,
 } from "lucide-react";
-import { SettingsDialog } from "@/modules/settings";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Course } from "@/lib/types";
@@ -38,7 +36,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarFooter,
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
@@ -288,16 +285,6 @@ export default function CourseList() {
         </div>
       </div>
 
-      <SidebarFooter>
-        <SettingsDialog
-          trigger={
-            <SidebarMenuButton>
-              <Settings />
-              Settings
-            </SidebarMenuButton>
-          }
-        />
-      </SidebarFooter>
     </div>
   );
 }

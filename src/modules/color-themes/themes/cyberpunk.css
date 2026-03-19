@@ -73,10 +73,17 @@
   --status-waiting: oklch(0.6 0.18 50);
 
   --shadow-xs: 0 1px 2px oklch(0.18 0.04 290 / 0.08);
-  --shadow-sm: 0 1px 3px oklch(0.18 0.04 290 / 0.1), 0 1px 2px oklch(0.18 0.04 290 / 0.08);
-  --shadow-md: 0 4px 6px -1px oklch(0.18 0.04 290 / 0.1), 0 2px 4px -1px oklch(0.18 0.04 290 / 0.08);
-  --shadow-lg: 0 10px 15px -3px oklch(0.18 0.04 290 / 0.1), 0 4px 6px -2px oklch(0.18 0.04 290 / 0.06);
-  --shadow-xl: 0 20px 25px -5px oklch(0.18 0.04 290 / 0.12), 0 10px 10px -5px oklch(0.18 0.04 290 / 0.08);
+  --shadow-sm:
+    0 1px 3px oklch(0.18 0.04 290 / 0.1), 0 1px 2px oklch(0.18 0.04 290 / 0.08);
+  --shadow-md:
+    0 4px 6px -1px oklch(0.18 0.04 290 / 0.1),
+    0 2px 4px -1px oklch(0.18 0.04 290 / 0.08);
+  --shadow-lg:
+    0 10px 15px -3px oklch(0.18 0.04 290 / 0.1),
+    0 4px 6px -2px oklch(0.18 0.04 290 / 0.06);
+  --shadow-xl:
+    0 20px 25px -5px oklch(0.18 0.04 290 / 0.12),
+    0 10px 10px -5px oklch(0.18 0.04 290 / 0.08);
 }
 
 .cyberpunk .content-bg {
@@ -176,10 +183,17 @@
   --status-waiting: oklch(0.68 0.22 50);
 
   --shadow-xs: 0 1px 2px oklch(0.7 0.3 330 / 0.15);
-  --shadow-sm: 0 1px 3px oklch(0.7 0.3 330 / 0.2), 0 1px 2px oklch(0.7 0.3 330 / 0.15);
-  --shadow-md: 0 4px 6px -1px oklch(0.7 0.3 330 / 0.2), 0 2px 4px -1px oklch(0.7 0.3 330 / 0.15);
-  --shadow-lg: 0 10px 15px -3px oklch(0.7 0.3 330 / 0.25), 0 4px 6px -2px oklch(0.65 0.28 200 / 0.15);
-  --shadow-xl: 0 20px 25px -5px oklch(0.7 0.3 330 / 0.3), 0 10px 10px -5px oklch(0.65 0.28 200 / 0.2);
+  --shadow-sm:
+    0 1px 3px oklch(0.7 0.3 330 / 0.2), 0 1px 2px oklch(0.7 0.3 330 / 0.15);
+  --shadow-md:
+    0 4px 6px -1px oklch(0.7 0.3 330 / 0.2),
+    0 2px 4px -1px oklch(0.7 0.3 330 / 0.15);
+  --shadow-lg:
+    0 10px 15px -3px oklch(0.7 0.3 330 / 0.25),
+    0 4px 6px -2px oklch(0.65 0.28 200 / 0.15);
+  --shadow-xl:
+    0 20px 25px -5px oklch(0.7 0.3 330 / 0.3),
+    0 10px 10px -5px oklch(0.65 0.28 200 / 0.2);
 }
 
 .dark.cyberpunk .content-bg {

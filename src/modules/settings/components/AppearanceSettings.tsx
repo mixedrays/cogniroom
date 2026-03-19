@@ -54,7 +54,6 @@ export function AppearanceSettings() {
                 variant={
                   settings.appearance.mode === value ? "secondary" : "ghost"
                 }
-                className="h-8 gap-1.5 px-3"
                 onClick={() => updateAppearance({ mode: value })}
               >
                 <Icon />
@@ -71,6 +70,7 @@ export function AppearanceSettings() {
         <CssThemeSelector
           selectedId={settings.appearance.cssThemeId}
           onSelect={(id) => updateAppearance({ cssThemeId: id })}
+          isDark={resolvedMode === "dark"}
         />
       </div>
 

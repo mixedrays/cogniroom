@@ -1,5 +1,14 @@
 import { useLocation } from "@tanstack/react-router";
-import { Sidebar, SidebarContent, SidebarRail } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+import { Settings } from "lucide-react";
+import { SettingsDialog } from "@/modules/settings";
 import CourseList from "@/components/CourseList";
 import CourseTree from "@/components/CourseTree";
 
@@ -30,6 +39,18 @@ export default function AppSidebar() {
           <CourseTree />
         </div>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SettingsDialog
+            trigger={
+              <SidebarMenuButton>
+                <Settings />
+                Settings
+              </SidebarMenuButton>
+            }
+          />
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

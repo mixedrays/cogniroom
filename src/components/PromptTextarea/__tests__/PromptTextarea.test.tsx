@@ -128,7 +128,9 @@ describe("PromptTextarea", () => {
         onStop={onStop}
       />
     );
-    expect(screen.queryByRole("button", { name: "Send" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Send" })
+    ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Stop" }));
     expect(onStop).toHaveBeenCalled();
   });

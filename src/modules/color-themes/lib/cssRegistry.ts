@@ -1,4 +1,15 @@
-import { Waves, Atom, Leaf, Sun, Flame, Zap, Trees, Snowflake, Sparkles, Palette } from "lucide-react";
+import {
+  Waves,
+  Atom,
+  Leaf,
+  Sun,
+  Flame,
+  Zap,
+  Trees,
+  Snowflake,
+  Sparkles,
+  Palette,
+} from "lucide-react";
 
 import oneUrl from "../themes/one.css?url";
 import oceanUrl from "../themes/ocean.css?url";
