@@ -9,7 +9,7 @@ import {
 import {
   AVAILABLE_MODELS,
   DEFAULT_MODEL,
-  getModelLabelWithPrice,
+  getModelPriceLabel,
   getModelLabel,
 } from "@/lib/llmModels";
 import { cn } from "@/lib/utils";
@@ -38,19 +38,28 @@ export function ModelSelect({
       disabled={disabled}
     >
       <SelectTrigger className={triggerClassName}>
-        <SelectValue>{(v) => getModelLabel(v)}</SelectValue>
+        <SelectValue>{getModelLabel}</SelectValue>
       </SelectTrigger>
+
       <SelectContent className={cn("w-auto", className)}>
         <SelectGroup>
           {Object.entries(AVAILABLE_MODELS).map(([key, model]) => (
             <SelectItem key={key} value={key}>
               <div className="flex flex-col gap-1">
-                {getModelLabelWithPrice(model)}
-                {showDefault && key === DEFAULT_MODEL && " (default)"}
+                <span>
+                  {model.label}{" "}
+                  <span className="text-xs text-green-600 dark:text-green-400">
+                    {getModelPriceLabel(model)}
+                  </span>
+                  {showDefault && key === DEFAULT_MODEL && (
+                    <span> (default)</span>
+                  )}
+                </span>
+
                 {model.hint && (
-                  <div className="text-xs text-muted-foreground block">
+                  <span className="text-xs text-muted-foreground block">
                     {model.hint}
-                  </div>
+                  </span>
                 )}
               </div>
             </SelectItem>
