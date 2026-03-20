@@ -17,6 +17,7 @@ dist-ssr
 .vscode
 .features
 .plans
+.history
 docs/superpowers
 
 # IDE

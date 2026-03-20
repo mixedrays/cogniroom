@@ -6,11 +6,10 @@ import {
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { Plus, Trash2, Wand2 } from "lucide-react";
+import { Bot, Trash2 } from "lucide-react";
 import {
   getLessonQuiz,
   getCourse,
-  generateLessonQuiz,
   deleteLessonQuiz,
   updateLessonCompletion,
 } from "@/lib/courses";
@@ -18,15 +17,11 @@ import { Button } from "@/components/ui/button";
 import { Quiz } from "@/modules/quiz";
 import type { QuizQuestion } from "@/lib/types";
 import {
-  ContentCreationDialog,
-  type ContentGenerationData,
-} from "@/components/ContentCreationDialog";
-import {
   LessonPageShell,
   LessonPageHeader,
   LessonEmptyState,
 } from "@/components/LessonPage";
-import { WizardDialog } from "@/modules/wizard";
+import { WizardAgentDialog } from "@/modules/wizard-agent";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -104,9 +99,7 @@ function LessonQuizComponent() {
   });
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [wizardOpen, setWizardOpen] = useState(false);
+  const [agentOpen, setAgentOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
@@ -123,59 +116,13 @@ function LessonQuizComponent() {
   const questions = useMemo(() => parseQuizQuestions(content), [content]);
   const hasQuestions = questions.length > 0;
 
-  const handleWizardGenerate = useCallback(
-    async (prompt: string) => {
-      setIsGenerating(true);
-      setError(null);
-      try {
-        const result = await generateLessonQuiz(courseId, lessonId, prompt);
-        if (result.success) {
-          setWizardOpen(false);
-          await queryClient.invalidateQueries({
-            queryKey: ["course", courseId],
-          });
-          router.invalidate();
-        } else {
-          setError(result.error || "Failed to generate quiz");
-        }
-      } catch (e) {
-        setError(String(e));
-      } finally {
-        setIsGenerating(false);
-      }
-    },
-    [courseId, lessonId, queryClient, router]
-  );
-
-  const handleGenerate = useCallback(
-    async (data: ContentGenerationData) => {
-      setIsGenerating(true);
-      setError(null);
-      try {
-        const result = await generateLessonQuiz(
-          courseId,
-          lessonId,
-          data.instructions,
-          data.model,
-          data.includeContent
-        );
-        if (result.success) {
-          setIsDialogOpen(false);
-          await queryClient.invalidateQueries({
-            queryKey: ["course", courseId],
-          });
-          router.invalidate();
-        } else {
-          setError(result.error || "Failed to generate quiz");
-        }
-      } catch (e) {
-        setError(String(e));
-      } finally {
-        setIsGenerating(false);
-      }
-    },
-    [courseId, lessonId, queryClient, router]
-  );
+  const handleAgentOpenChange = (open: boolean) => {
+    setAgentOpen(open);
+    if (!open) {
+      queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+      router.invalidate();
+    }
+  };
 
   const handleDelete = useCallback(async () => {
     setIsDeleting(true);
@@ -297,50 +244,28 @@ function LessonQuizComponent() {
             lessonInfo.description || "No quiz available for this lesson yet."
           }
         >
-          <ContentCreationDialog
-            mode="generate"
-            generationType="quiz"
-            open={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
-            onGenerate={handleGenerate}
-            isCreating={isGenerating}
-            error={error}
-            contentContext={{
-              courseTitle: course.title,
-              topicTitle: topicInfo?.title,
-              topicDescription: topicInfo?.description,
-              lessonTitle: lessonInfo.title,
-              lessonDescription: lessonInfo.description,
-            }}
-            trigger={
-              <Button size="lg" className="gap-2">
-                <Plus />
-                Create Quiz
-              </Button>
-            }
-          />
+          {error && <p className="text-sm text-destructive">{error}</p>}
           <Button
             size="lg"
-            variant="outline"
             className="gap-2"
-            onClick={() => setWizardOpen(true)}
+            onClick={() => setAgentOpen(true)}
           >
-            <Wand2 className="size-4" />
-            AI Wizard
+            <Bot className="size-4" />
+            Create Quiz
           </Button>
         </LessonEmptyState>
       )}
-      <WizardDialog
-        open={wizardOpen}
-        onOpenChange={setWizardOpen}
+      <WizardAgentDialog
+        open={agentOpen}
+        onOpenChange={handleAgentOpenChange}
         context={{
           contentType: "quiz",
           courseId,
           lessonId,
           topic: topicInfo?.title,
           lessonTitle: lessonInfo.title,
+          courseTitle: course.title,
         }}
-        onGenerate={handleWizardGenerate}
       />
     </LessonPageShell>
   );

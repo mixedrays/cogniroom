@@ -5,16 +5,20 @@ import { AskUserParamsSchema } from "../tools/ask-user/schema";
 
 interface AgentMessageProps {
   message: AgentMessageState;
+  messages: AgentMessageState[];
   tools: AgentTool[];
   onToolSubmit: (toolCallId: string, result: unknown) => void;
   onToolDismiss: (toolCallId: string) => void;
+  context?: Record<string, unknown>;
 }
 
 export function AgentMessage({
   message,
+  messages,
   tools,
   onToolSubmit,
   onToolDismiss,
+  context,
 }: AgentMessageProps) {
   if (message.role === "user") {
     return (
@@ -94,6 +98,13 @@ export function AgentMessage({
       }
     }
 
+    if (
+      message.status === "submitted" &&
+      message.toolName === "presentContent"
+    ) {
+      return null;
+    }
+
     if (message.status === "submitted") {
       const resultText = Array.isArray(message.result)
         ? (message.result as string[]).join(", ")
@@ -113,14 +124,27 @@ export function AgentMessage({
     if (tool.client.renderAbovePrompt) return null;
 
     const { Widget } = tool.client;
+
+    const messageIndex = messages.indexOf(message);
+    const isSuperseded =
+      message.toolName === "presentContent" &&
+      message.status === "pending" &&
+      messages.some(
+        (m, i) =>
+          i > messageIndex &&
+          m.role === "tool_call" &&
+          m.toolName === "presentContent" &&
+          m.status === "pending"
+      );
+
     return (
-      <div className="rounded-2xl bg-muted p-4">
-        <Widget
-          params={message.params}
-          onSubmit={(result) => onToolSubmit(message.toolCallId, result)}
-          onDismiss={() => onToolDismiss(message.toolCallId)}
-        />
-      </div>
+      <Widget
+        params={message.params}
+        onSubmit={(result) => onToolSubmit(message.toolCallId, result)}
+        onDismiss={() => onToolDismiss(message.toolCallId)}
+        context={context}
+        superseded={isSuperseded}
+      />
     );
   }
 

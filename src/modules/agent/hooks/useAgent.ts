@@ -22,7 +22,8 @@ type Action =
     }
   | { type: "SUBMIT_TOOL_RESULT"; toolCallId: string; result: unknown }
   | { type: "DISMISS_TOOL_CALL"; toolCallId: string }
-  | { type: "SET_ERROR"; id: string; message: string };
+  | { type: "SET_ERROR"; id: string; message: string }
+  | { type: "LOAD_MESSAGES"; messages: AgentMessageState[] };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -116,6 +117,8 @@ function reducer(state: State, action: Action): State {
             : m
         ),
       };
+    case "LOAD_MESSAGES":
+      return { ...state, messages: action.messages, isStreaming: false };
     default:
       return state;
   }
@@ -166,6 +169,7 @@ export interface UseAgentReturn {
   stopStreaming: () => void;
   submitToolResult: (toolCallId: string, result: unknown) => void;
   dismissToolCall: (toolCallId: string) => void;
+  loadMessages: (messages: AgentMessageState[]) => void;
 }
 
 interface UseAgentConfig {
@@ -308,6 +312,10 @@ export function useAgent({
     dispatch({ type: "DISMISS_TOOL_CALL", toolCallId });
   }, []);
 
+  const loadMessages = useCallback((messages: AgentMessageState[]) => {
+    dispatch({ type: "LOAD_MESSAGES", messages });
+  }, []);
+
   return {
     messages: state.messages,
     isStreaming: state.isStreaming,
@@ -315,5 +323,6 @@ export function useAgent({
     stopStreaming,
     submitToolResult,
     dismissToolCall,
+    loadMessages,
   };
 }

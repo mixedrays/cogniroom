@@ -408,6 +408,86 @@ export async function generateLessonExercises(
   }
 }
 
+export async function saveLessonContent(
+  courseId: string,
+  lessonId: string,
+  content: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/save`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      }
+    );
+    return await response.json();
+  } catch (e) {
+    return { success: false, error: String(e) };
+  }
+}
+
+export async function saveLessonQuiz(
+  courseId: string,
+  lessonId: string,
+  content: unknown
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz/save`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      }
+    );
+    return await response.json();
+  } catch (e) {
+    return { success: false, error: String(e) };
+  }
+}
+
+export async function saveLessonFlashcards(
+  courseId: string,
+  lessonId: string,
+  content: unknown
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards/save`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      }
+    );
+    return await response.json();
+  } catch (e) {
+    return { success: false, error: String(e) };
+  }
+}
+
+export async function saveLessonExercises(
+  courseId: string,
+  lessonId: string,
+  content: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises/save`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      }
+    );
+    return await response.json();
+  } catch (e) {
+    return { success: false, error: String(e) };
+  }
+}
+
 export async function updateLessonCompletion(
   courseId: string,
   lessonId: string,

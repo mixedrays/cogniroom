@@ -14,6 +14,8 @@ export interface AgentTool<TParams extends ZodType = ZodType> {
       params: unknown;
       onSubmit: (result: unknown) => void;
       onDismiss: () => void;
+      context?: Record<string, unknown>;
+      superseded?: boolean;
     }>;
     renderAbovePrompt?: boolean;
   };

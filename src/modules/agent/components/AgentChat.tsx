@@ -9,6 +9,7 @@ interface AgentChatProps {
   onToolDismiss: (toolCallId: string) => void;
   promptSlot: ReactNode;
   welcomeMessage?: string;
+  context?: Record<string, unknown>;
 }
 
 type ToolCallMessage = Extract<AgentMessageState, { role: "tool_call" }>;
@@ -20,6 +21,7 @@ export function AgentChat({
   onToolDismiss,
   promptSlot,
   welcomeMessage,
+  context,
 }: AgentChatProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -63,11 +65,14 @@ export function AgentChat({
           <AgentMessage
             key={msg.id}
             message={msg}
+            messages={messages}
             tools={tools}
             onToolSubmit={onToolSubmit}
             onToolDismiss={onToolDismiss}
+            context={context}
           />
         ))}
+
         <div ref={bottomRef} />
       </div>
 
@@ -80,6 +85,7 @@ export function AgentChat({
                 onToolSubmit(activeAbovePromptCall.toolCallId, result)
               }
               onDismiss={() => onToolDismiss(activeAbovePromptCall.toolCallId)}
+              context={context}
             />
           </div>
         </div>

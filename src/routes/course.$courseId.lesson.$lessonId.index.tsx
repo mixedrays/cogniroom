@@ -9,21 +9,16 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { Suspense, useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Markdown } from "@/modules/markdown";
-import { Loader2, Plus, Wand2 } from "lucide-react";
+import { Loader2, Bot } from "lucide-react";
 import {
   getLesson,
   getCourse,
-  generateLesson,
   updateLessonCompletion,
 } from "@/lib/courses";
 import { Button } from "@/components/ui/button";
-import {
-  ContentCreationDialog,
-  type ContentGenerationData,
-} from "@/components/ContentCreationDialog";
-import { WizardDialog } from "@/modules/wizard";
+import { WizardAgentDialog } from "@/modules/wizard-agent";
 import {
   LessonPageShell,
   LessonPageHeader,
@@ -100,11 +95,8 @@ function LessonComponent() {
   });
   const content = lessonQuery.data?.content ?? null;
   const router = useRouter();
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [agentOpen, setAgentOpen] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [wizardOpen, setWizardOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [completionError, setCompletionError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(
     lessonInfo.theoryCompleted ?? lessonInfo.completed ?? false
@@ -114,78 +106,15 @@ function LessonComponent() {
     setIsCompleted(lessonInfo.theoryCompleted ?? lessonInfo.completed ?? false);
   }, [lessonInfo.theoryCompleted, lessonInfo.completed]);
 
-  const handleWizardGenerate = useCallback(
-    async (prompt: string) => {
-      setIsGenerating(true);
-      setError(null);
-      try {
-        const result = await generateLesson(courseId, lessonId, prompt);
-        if (result.success) {
-          setWizardOpen(false);
-          await queryClient.invalidateQueries({
-            queryKey: ["course", courseId],
-          });
-          if (result.content) {
-            queryClient.setQueryData(
-              lessonQueryOptions(courseId, lessonId).queryKey,
-              { content: result.content }
-            );
-          } else {
-            await queryClient.invalidateQueries({
-              queryKey: lessonQueryOptions(courseId, lessonId).queryKey,
-            });
-          }
-        } else {
-          setError(result.error || "Failed to generate lesson content");
-        }
-      } catch (e) {
-        setError(String(e));
-      } finally {
-        setIsGenerating(false);
-      }
-    },
-    [courseId, lessonId, queryClient]
-  );
-
-  const handleGenerate = useCallback(
-    async (data: ContentGenerationData) => {
-      setIsGenerating(true);
-      setError(null);
-      try {
-        const result = await generateLesson(
-          courseId,
-          lessonId,
-          data.instructions,
-          data.model
-        );
-        if (result.success) {
-          setIsDialogOpen(false);
-          await queryClient.invalidateQueries({
-            queryKey: ["course", courseId],
-          });
-          if (result.content) {
-            queryClient.setQueryData(
-              lessonQueryOptions(courseId, lessonId).queryKey,
-              {
-                content: result.content,
-              }
-            );
-          } else {
-            await queryClient.invalidateQueries({
-              queryKey: lessonQueryOptions(courseId, lessonId).queryKey,
-            });
-          }
-        } else {
-          setError(result.error || "Failed to generate lesson content");
-        }
-      } catch (e) {
-        setError(String(e));
-      } finally {
-        setIsGenerating(false);
-      }
-    },
-    [courseId, lessonId, queryClient]
-  );
+  const handleAgentOpenChange = (open: boolean) => {
+    setAgentOpen(open);
+    if (!open) {
+      queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+      queryClient.invalidateQueries({
+        queryKey: lessonQueryOptions(courseId, lessonId).queryKey,
+      });
+    }
+  };
 
   const handleToggleComplete = async () => {
     setIsCompleting(true);
@@ -256,51 +185,28 @@ function LessonComponent() {
               "No content available for this lesson yet."
             }
           >
-            <ContentCreationDialog
-              mode="generate"
-              generationType="theory"
-              open={isDialogOpen}
-              onOpenChange={setIsDialogOpen}
-              onGenerate={handleGenerate}
-              isCreating={isGenerating}
-              error={error}
-              contentContext={{
-                courseTitle: course.title,
-                topicTitle: topicInfo?.title,
-                topicDescription: topicInfo?.description,
-                lessonTitle: lessonInfo.title,
-                lessonDescription: lessonInfo.description,
-              }}
-              trigger={
-                <Button size="lg" className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Create Theory Content
-                </Button>
-              }
-            />
             <Button
               size="lg"
-              variant="outline"
               className="gap-2"
-              onClick={() => setWizardOpen(true)}
+              onClick={() => setAgentOpen(true)}
             >
-              <Wand2 className="size-4" />
-              AI Wizard
+              <Bot className="size-4" />
+              Create Lesson
             </Button>
           </LessonEmptyState>
         )}
       </Suspense>
-      <WizardDialog
-        open={wizardOpen}
-        onOpenChange={setWizardOpen}
+      <WizardAgentDialog
+        open={agentOpen}
+        onOpenChange={handleAgentOpenChange}
         context={{
           contentType: "lesson",
           courseId,
           lessonId,
           topic: topicInfo?.title,
           lessonTitle: lessonInfo.title,
+          courseTitle: course.title,
         }}
-        onGenerate={handleWizardGenerate}
       />
     </LessonPageShell>
   );

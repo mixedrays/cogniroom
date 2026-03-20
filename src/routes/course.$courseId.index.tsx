@@ -45,11 +45,13 @@ function CourseComponent() {
             <span>•</span>
             <span>{course.topics.length} topics</span>
             <span>•</span>
-            <span>
-              {new Intl.DateTimeFormat("en-US", {
-                dateStyle: "medium",
-              }).format(new Date(course.updatedAt))}
-            </span>
+            {course.updatedAt && (
+              <span>
+                {new Intl.DateTimeFormat("en-US", {
+                  dateStyle: "medium",
+                }).format(new Date(course.updatedAt))}
+              </span>
+            )}
           </div>
         </div>
 
@@ -57,7 +59,7 @@ function CourseComponent() {
           {course.topics.map((topic, index) => (
             <div
               key={topic.id}
-              className="rounded-xl border bg-card text-card-foreground shadow-sm"
+              className="rounded-xl w-full overflow-hidden border bg-card text-card-foreground shadow-sm"
             >
               <div className="p-6">
                 <div className="flex items-center gap-4 mb-4">

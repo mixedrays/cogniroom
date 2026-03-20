@@ -5,27 +5,22 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Markdown } from "@/modules/markdown";
-import { Plus, Wand2 } from "lucide-react";
+import { Bot } from "lucide-react";
 import {
   getLessonExercises,
   getCourse,
-  generateLessonExercises,
   updateLessonCompletion,
 } from "@/lib/courses";
 import { Button } from "@/components/ui/button";
-import {
-  ContentCreationDialog,
-  type ContentGenerationData,
-} from "@/components/ContentCreationDialog";
 import {
   LessonPageShell,
   LessonPageHeader,
   LessonEmptyState,
   LessonContentArea,
 } from "@/components/LessonPage";
-import { WizardDialog } from "@/modules/wizard";
+import { WizardAgentDialog } from "@/modules/wizard-agent";
 
 export const Route = createFileRoute(
   "/course/$courseId/lesson/$lessonId/exercises"
@@ -79,10 +74,7 @@ function LessonExercisesComponent() {
   });
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [wizardOpen, setWizardOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [agentOpen, setAgentOpen] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(
@@ -93,63 +85,13 @@ function LessonExercisesComponent() {
     setIsCompleted(lessonInfo.exercisesCompleted ?? false);
   }, [lessonInfo.exercisesCompleted]);
 
-  const handleWizardGenerate = useCallback(
-    async (prompt: string) => {
-      setIsGenerating(true);
-      setError(null);
-      try {
-        const result = await generateLessonExercises(
-          courseId,
-          lessonId,
-          prompt
-        );
-        if (result.success) {
-          setWizardOpen(false);
-          await queryClient.invalidateQueries({
-            queryKey: ["course", courseId],
-          });
-          router.invalidate();
-        } else {
-          setError(result.error || "Failed to generate exercises content");
-        }
-      } catch (e) {
-        setError(String(e));
-      } finally {
-        setIsGenerating(false);
-      }
-    },
-    [courseId, lessonId, queryClient, router]
-  );
-
-  const handleGenerate = useCallback(
-    async (data: ContentGenerationData) => {
-      setIsGenerating(true);
-      setError(null);
-      try {
-        const result = await generateLessonExercises(
-          courseId,
-          lessonId,
-          data.instructions,
-          data.model,
-          data.includeContent
-        );
-        if (result.success) {
-          setIsDialogOpen(false);
-          await queryClient.invalidateQueries({
-            queryKey: ["course", courseId],
-          });
-          router.invalidate();
-        } else {
-          setError(result.error || "Failed to generate exercises content");
-        }
-      } catch (e) {
-        setError(String(e));
-      } finally {
-        setIsGenerating(false);
-      }
-    },
-    [courseId, lessonId, queryClient, router]
-  );
+  const handleAgentOpenChange = (open: boolean) => {
+    setAgentOpen(open);
+    if (!open) {
+      queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+      router.invalidate();
+    }
+  };
 
   const handleToggleComplete = async () => {
     setIsCompleting(true);
@@ -213,52 +155,28 @@ function LessonExercisesComponent() {
             "No exercises available for this lesson yet."
           }
         >
-          <ContentCreationDialog
-            mode="generate"
-            generationType="exercises"
-            open={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
-            onGenerate={handleGenerate}
-            isCreating={isGenerating}
-            error={error}
-            contentContext={{
-              courseTitle: course.title,
-              topicTitle: topicInfo?.title,
-              topicDescription: topicInfo?.description,
-              lessonTitle: lessonInfo.title,
-              lessonDescription: lessonInfo.description,
-            }}
-            trigger={
-              <Button size="lg" className="gap-2">
-                <Plus className="w-4 h-4" />
-                Create Exercises Content
-              </Button>
-            }
-          />
-
           <Button
             size="lg"
-            variant="outline"
             className="gap-2"
-            onClick={() => setWizardOpen(true)}
+            onClick={() => setAgentOpen(true)}
           >
-            <Wand2 className="size-4" />
-            AI Wizard
+            <Bot className="size-4" />
+            Create Exercises
           </Button>
         </LessonEmptyState>
       )}
 
-      <WizardDialog
-        open={wizardOpen}
-        onOpenChange={setWizardOpen}
+      <WizardAgentDialog
+        open={agentOpen}
+        onOpenChange={handleAgentOpenChange}
         context={{
           contentType: "exercise",
           courseId,
           lessonId,
           topic: topicInfo?.title,
           lessonTitle: lessonInfo.title,
+          courseTitle: course.title,
         }}
-        onGenerate={handleWizardGenerate}
       />
     </LessonPageShell>
   );

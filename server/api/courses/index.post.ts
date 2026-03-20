@@ -6,7 +6,7 @@ import { getFormatAdapter } from "@root/modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
 
 function toSlug(title: string): string {
-  return title
+  const slug = title
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, "")
     .trim()
@@ -14,10 +14,11 @@ function toSlug(title: string): string {
     .replace(/-+/g, "-")
     .slice(0, 50)
     .replace(/-$/, "");
+  return slug;
 }
 
 function courseId(title: string): string {
-  const slug = toSlug(title);
+  const slug = toSlug(title) || `course-${Date.now()}`;
   let existing: string[] = [];
   try {
     existing = readdirSync(COURSES_DIR);
@@ -50,11 +51,20 @@ export default defineEventHandler(async (event) => {
       ...topic,
       lessons: (topic.lessons ?? []).map((lesson) => {
         lessonCounter++;
-        return { ...lesson, id: `${lessonCounter}-${toSlug(lesson.title)}` };
+        const lessonSlug = toSlug(lesson.title) || `lesson`;
+        return { ...lesson, id: `${lessonCounter}-${lessonSlug}` };
       }),
     }));
 
-    const course = { ...body, id, topics: updatedTopics };
+    const now = new Date().toISOString();
+    const course = {
+      ...body,
+      id,
+      topics: updatedTopics,
+      source: body.source ?? "llm",
+      createdAt: body.createdAt ?? now,
+      updatedAt: now,
+    };
 
     const courseAdapter = getFormatAdapter("course");
     const response = await storageApi.post(
