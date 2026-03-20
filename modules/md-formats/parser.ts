@@ -42,20 +42,56 @@ export function splitOnBoundaries(content: string): string[] {
 /**
  * Parse a frontmatter block (key: value pairs) into a plain object.
  * Splits on the FIRST ": " occurrence so values may contain colons.
+ * Supports multiline values (e.g. code blocks embedded in question fields).
+ * A new key is detected when a line matches `word-chars: ` at the start.
  * Booleans `true` / `false` are converted to their JS equivalents.
  */
 export function parseFrontmatter(
   text: string
 ): Record<string, string | boolean> {
   const result: Record<string, string | boolean> = {};
-  for (const line of text.trim().split("\n")) {
-    const colonIdx = line.indexOf(": ");
-    if (colonIdx === -1) continue;
-    const key = line.slice(0, colonIdx).trim();
-    const value = line.slice(colonIdx + 2).trim();
-    if (value === "true") result[key] = true;
-    else if (value === "false") result[key] = false;
-    else result[key] = value;
+  const lines = text.trim().split("\n");
+
+  let currentKey: string | null = null;
+  let currentValueLines: string[] = [];
+
+  const flush = () => {
+    if (currentKey === null) return;
+    const value = currentValueLines.join("\n").trim();
+    if (value === "true") result[currentKey] = true;
+    else if (value === "false") result[currentKey] = false;
+    else result[currentKey] = value;
+    currentKey = null;
+    currentValueLines = [];
+  };
+
+  let inCodeBlock = false;
+
+  for (const line of lines) {
+    if (/^```/.test(line) || /^~~~/.test(line)) {
+      inCodeBlock = !inCodeBlock;
+      if (currentKey !== null) currentValueLines.push(line);
+      continue;
+    }
+
+    if (!inCodeBlock) {
+      const colonIdx = line.indexOf(": ");
+      if (colonIdx !== -1) {
+        const potentialKey = line.slice(0, colonIdx);
+        if (/^[\w-]+$/.test(potentialKey)) {
+          flush();
+          currentKey = potentialKey;
+          currentValueLines = [line.slice(colonIdx + 2)];
+          continue;
+        }
+      }
+    }
+
+    if (currentKey !== null) {
+      currentValueLines.push(line);
+    }
   }
+
+  flush();
   return result;
 }
