@@ -28,6 +28,18 @@ const getPricePerToken = (pricePerMillion: number) => {
 };
 
 export const AVAILABLE_MODELS: AvailableModels = {
+  "gpt-5.4": {
+    price: { input: getPricePerToken(2.5), output: getPricePerToken(15) },
+    priceRating: 3,
+    label: "GPT-5.4",
+    hint: "Most capable model, best for complex tasks",
+  },
+  "gpt-5.4-pro": {
+    price: { input: getPricePerToken(30), output: getPricePerToken(180) },
+    priceRating: 5,
+    label: "GPT-5.4 Pro",
+    hint: "Top-tier performance for critical applications",
+  },
   "gpt-5.2": {
     price: { input: getPricePerToken(1.75), output: getPricePerToken(14) },
     priceRating: 2,
