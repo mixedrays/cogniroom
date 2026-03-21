@@ -11,7 +11,9 @@ function getHistoryPath(contextId: string): string {
   return path.join(getHistoryDir(), `${safe}.json`);
 }
 
-export async function readHistory(contextId: string): Promise<AgentMessageState[]> {
+export async function readHistory(
+  contextId: string
+): Promise<AgentMessageState[]> {
   try {
     const text = await fs.readFile(getHistoryPath(contextId), "utf-8");
     return JSON.parse(text);
@@ -26,7 +28,11 @@ export async function writeHistory(
 ): Promise<void> {
   const dir = getHistoryDir();
   await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(getHistoryPath(contextId), JSON.stringify(messages), "utf-8");
+  await fs.writeFile(
+    getHistoryPath(contextId),
+    JSON.stringify(messages),
+    "utf-8"
+  );
 }
 
 export async function clearHistory(contextId: string): Promise<void> {

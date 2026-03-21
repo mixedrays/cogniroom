@@ -50,7 +50,10 @@ async function fetchHistory(ctxId: string): Promise<AgentMessageState[]> {
   }
 }
 
-async function saveHistory(ctxId: string, messages: AgentMessageState[]): Promise<void> {
+async function saveHistory(
+  ctxId: string,
+  messages: AgentMessageState[]
+): Promise<void> {
   try {
     await fetch(`/api/wizard-agent/history/${ctxId}`, {
       method: "POST",
@@ -75,11 +78,14 @@ async function clearHistory(ctxId: string): Promise<void> {
 }
 
 const WELCOME: Record<WizardAgentContext["contentType"], string> = {
-  roadmap: "Tell me about the course you want to create and I'll build a roadmap.",
+  roadmap:
+    "Tell me about the course you want to create and I'll build a roadmap.",
   lesson: "Describe what you'd like this lesson to cover.",
   quiz: "I'll generate a quiz for this lesson. Add any specific instructions, or just click Generate.",
-  flashcards: "I'll generate flashcards for this lesson. Add any focus areas, or just click Generate.",
-  exercise: "I'll generate exercises for this lesson. Add any specific requirements, or just click Generate.",
+  flashcards:
+    "I'll generate flashcards for this lesson. Add any focus areas, or just click Generate.",
+  exercise:
+    "I'll generate exercises for this lesson. Add any specific requirements, or just click Generate.",
 };
 
 export function WizardAgentDialog({
@@ -99,7 +105,10 @@ export function WizardAgentDialog({
     submitToolResult,
     dismissToolCall,
     loadMessages,
-  } = useAgent({ endpoint: "/api/wizard-agent/chat", context: context as unknown as Record<string, unknown> });
+  } = useAgent({
+    endpoint: "/api/wizard-agent/chat",
+    context: context as unknown as Record<string, unknown>,
+  });
 
   useEffect(() => {
     if (!open) return;

@@ -8,7 +8,9 @@ export default createAgentHandler({
   tools: [askUserTool, memoryTool, presentContentTool],
   getSystemPrompt: async (context) =>
     getRenderedPrompt("wizard-agent-chat", {
-      contentType: String((context as Record<string, unknown>)?.contentType ?? "lesson"),
+      contentType: String(
+        (context as Record<string, unknown>)?.contentType ?? "lesson"
+      ),
       context: JSON.stringify(context),
     }),
 });

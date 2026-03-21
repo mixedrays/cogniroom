@@ -12,11 +12,7 @@ import {
 import { Suspense, useEffect, useState } from "react";
 import { Markdown } from "@/modules/markdown";
 import { Loader2, Bot } from "lucide-react";
-import {
-  getLesson,
-  getCourse,
-  updateLessonCompletion,
-} from "@/lib/courses";
+import { getLesson, getCourse, updateLessonCompletion } from "@/lib/courses";
 import { Button } from "@/components/ui/button";
 import { WizardAgentDialog } from "@/modules/wizard-agent";
 import {

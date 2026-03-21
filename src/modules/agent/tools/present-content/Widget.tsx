@@ -54,13 +54,21 @@ export function ContentBubble({
           return;
         }
         if (type === "lesson") {
-          result = await saveLessonContent(courseId, lessonId, content as string);
+          result = await saveLessonContent(
+            courseId,
+            lessonId,
+            content as string
+          );
         } else if (type === "quiz") {
           result = await saveLessonQuiz(courseId, lessonId, content);
         } else if (type === "flashcards") {
           result = await saveLessonFlashcards(courseId, lessonId, content);
         } else {
-          result = await saveLessonExercises(courseId, lessonId, content as string);
+          result = await saveLessonExercises(
+            courseId,
+            lessonId,
+            content as string
+          );
         }
       }
 
@@ -89,7 +97,9 @@ export function ContentBubble({
           <Badge variant="secondary" className="capitalize text-xs">
             {type}
           </Badge>
-          {summary && <span className="text-muted-foreground text-xs">{summary}</span>}
+          {summary && (
+            <span className="text-muted-foreground text-xs">{summary}</span>
+          )}
         </div>
         {saveState === "saved" && (
           <span className="flex items-center gap-1 text-xs text-green-600">
@@ -103,25 +113,23 @@ export function ContentBubble({
         <ContentPreview type={type} content={content} />
       </div>
 
-      {!superseded && saveState !== "saved" && (
-        <div className="flex items-center gap-2 px-4 py-3 border-t border-border/50">
-          <Button
-            size="sm"
-            onClick={handleSave}
-            disabled={saveState === "saving"}
-          >
-            {saveState === "saving" ? (
-              <>
-                <Loader2 className="size-3 animate-spin mr-1.5" />
-                Saving…
-              </>
-            ) : (
-              "Save"
-            )}
-          </Button>
-          {error && <p className="text-xs text-destructive">{error}</p>}
-        </div>
-      )}
+      <div className="flex items-center gap-2 px-4 py-3 border-t border-border/50">
+        <Button
+          size="sm"
+          onClick={handleSave}
+          disabled={saveState === "saving" || saveState === "saved"}
+        >
+          {saveState === "saving" ? (
+            <>
+              <Loader2 className="size-3 animate-spin mr-1.5" />
+              Saving…
+            </>
+          ) : (
+            "Save"
+          )}
+        </Button>
+        {error && <p className="text-xs text-destructive">{error}</p>}
+      </div>
     </div>
   );
 }
@@ -162,13 +170,18 @@ function ContentPreview({
       <div className="space-y-2">
         <p className="text-muted-foreground text-xs">{cards.length} cards</p>
         {cards.slice(0, 3).map((card, i) => (
-          <div key={i} className="rounded border border-border/50 px-3 py-2 space-y-1">
+          <div
+            key={i}
+            className="rounded border border-border/50 px-3 py-2 space-y-1"
+          >
             <p className="font-medium text-xs">{card.question}</p>
             <p className="text-muted-foreground text-xs">{card.answer}</p>
           </div>
         ))}
         {cards.length > 3 && (
-          <p className="text-muted-foreground text-xs">+{cards.length - 3} more…</p>
+          <p className="text-muted-foreground text-xs">
+            +{cards.length - 3} more…
+          </p>
         )}
       </div>
     );
@@ -179,7 +192,9 @@ function ContentPreview({
     const questions = quiz?.quizQuestions ?? [];
     return (
       <div className="space-y-2">
-        <p className="text-muted-foreground text-xs">{questions.length} questions</p>
+        <p className="text-muted-foreground text-xs">
+          {questions.length} questions
+        </p>
         {questions.slice(0, 3).map((q, i) => (
           <div key={i} className="text-xs">
             <span className="font-medium">{i + 1}. </span>
@@ -187,7 +202,9 @@ function ContentPreview({
           </div>
         ))}
         {questions.length > 3 && (
-          <p className="text-muted-foreground text-xs">+{questions.length - 3} more…</p>
+          <p className="text-muted-foreground text-xs">
+            +{questions.length - 3} more…
+          </p>
         )}
       </div>
     );

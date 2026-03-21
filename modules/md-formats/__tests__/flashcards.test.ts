@@ -71,7 +71,7 @@ print("text")
     const card = result.flashcards[0];
     expect(card.question).toBe("How do you print in Python?");
     expect(card.answer).toBe(
-      "Use the built-in print function:\n\n```python\nprint(\"text\")\n```"
+      'Use the built-in print function:\n\n```python\nprint("text")\n```'
     );
   });
 

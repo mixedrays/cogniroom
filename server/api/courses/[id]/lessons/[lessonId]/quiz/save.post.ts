@@ -8,16 +8,25 @@ export default defineEventHandler(async (event) => {
   const lessonId = getRouterParam(event, "lessonId");
 
   if (!courseId || !lessonId) {
-    throw createError({ statusCode: 400, statusMessage: "Missing courseId or lessonId" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing courseId or lessonId",
+    });
   }
 
   const body = await readBody<{ content: unknown }>(event);
   if (!body?.content) {
-    throw createError({ statusCode: 400, statusMessage: "content is required" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "content is required",
+    });
   }
 
   const adapter = getFormatAdapter("quiz");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await storageApi.post(storagePaths.quiz(courseId, lessonId), adapter.serialize(body.content as any));
+  await storageApi.post(
+    storagePaths.quiz(courseId, lessonId),
+    adapter.serialize(body.content as any)
+  );
   return { success: true };
 });

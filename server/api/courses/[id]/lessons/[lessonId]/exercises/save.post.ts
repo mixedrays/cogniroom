@@ -7,14 +7,23 @@ export default defineEventHandler(async (event) => {
   const lessonId = getRouterParam(event, "lessonId");
 
   if (!courseId || !lessonId) {
-    throw createError({ statusCode: 400, statusMessage: "Missing courseId or lessonId" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing courseId or lessonId",
+    });
   }
 
   const body = await readBody<{ content: string }>(event);
   if (typeof body?.content !== "string") {
-    throw createError({ statusCode: 400, statusMessage: "content must be a string" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "content must be a string",
+    });
   }
 
-  await storageApi.post(storagePaths.exercise(courseId, lessonId), body.content);
+  await storageApi.post(
+    storagePaths.exercise(courseId, lessonId),
+    body.content
+  );
   return { success: true };
 });
