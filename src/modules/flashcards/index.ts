@@ -1,7 +1,6 @@
 export { default as StudyFlashCard } from "./common/Flashcard";
 export * from "./common/Flashcard";
 export * from "./common/useFlashCards";
-export * from "./common/useSlidesApi";
 export * from "./common/context";
 
 export { KnownCardsUI } from "./strategies/KnownCards/KnownCardsUI";

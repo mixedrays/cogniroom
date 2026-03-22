@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { SlidesApi } from "./useSlidesApi";
-import Flashcard from "./Flashcard";
+import Flashcard from "./../../Flashcard";
 
 export interface SliderCard {
   id: string;

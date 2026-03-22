@@ -7,7 +7,7 @@ import { ResetButton } from "../../common/ResetButton";
 import { FlipButton } from "../../common/FlipButton";
 import { ShuffleButton } from "../../common/ShuffleButton";
 import { ProgressBar } from "../../common/ProgressBar";
-import { Slider } from "../../common/Slider";
+import { Slider } from "../../common/components/VerticalSlider";
 import { BottomBar } from "../../common/BottomBar";
 import { useSharedContext } from "../../common/context";
 import { SM2Provider, useSM2Context } from "./context";

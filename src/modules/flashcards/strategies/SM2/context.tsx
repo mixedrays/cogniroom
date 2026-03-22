@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
 import type { Flashcard, ReviewData } from "@/lib/types";
 import { useFlashCards } from "../../common/useFlashCards";
-import { useSlidesApi } from "../../common/useSlidesApi";
+import { useSlidesApi } from "../../common/components/VerticalSlider";
 import {
   SharedFlashcardsProvider,
   type SharedFlashcardsContext,
