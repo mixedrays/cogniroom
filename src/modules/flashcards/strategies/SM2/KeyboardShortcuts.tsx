@@ -3,7 +3,7 @@ import { useSharedContext } from "../../common/context";
 import { useSM2Context } from "./context";
 
 export function KeyboardShortcuts() {
-  const { currentIndex, onFlipCard } = useSharedContext();
+  const { currentIndex, onFlipCard, slidesApi } = useSharedContext();
   const { rateCard, currentCard, sessionComplete, isSaving } = useSM2Context();
 
   useEffect(() => {
@@ -17,6 +17,14 @@ export function KeyboardShortcuts() {
         e.preventDefault();
         onFlipCard(currentIndex);
       }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        slidesApi.scrollToPrev();
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        slidesApi.scrollToNext();
+      }
       if (!currentCard || sessionComplete || isSaving) return;
       if (e.key === "1") void rateCard(1);
       if (e.key === "2") void rateCard(3);
@@ -27,6 +35,7 @@ export function KeyboardShortcuts() {
   }, [
     currentIndex,
     onFlipCard,
+    slidesApi,
     rateCard,
     currentCard,
     sessionComplete,

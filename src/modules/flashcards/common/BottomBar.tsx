@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowUp as IconPrev, ArrowDown as IconNext } from "lucide-react";
+import { ArrowLeft as IconPrev, ArrowRight as IconNext } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -32,7 +32,7 @@ export function BottomBar({
         content={
           <>
             Previous card{" "}
-            <span className="text-muted-foreground text-xs">(Up Arrow)</span>
+            <span className="text-muted-foreground text-xs">(Left Arrow)</span>
           </>
         }
       >
@@ -54,7 +54,7 @@ export function BottomBar({
         content={
           <>
             Next card{" "}
-            <span className="text-muted-foreground text-xs">(Down Arrow)</span>
+            <span className="text-muted-foreground text-xs">(Right Arrow)</span>
           </>
         }
       >
