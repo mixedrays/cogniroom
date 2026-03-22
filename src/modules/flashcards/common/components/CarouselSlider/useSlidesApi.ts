@@ -23,7 +23,7 @@ export function useSlidesApi({
   onIndexChange,
 }: UseSlidesApiOptions): SlidesApi {
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    axis: "y",
+    axis: "x",
     watchDrag: true,
   });
 

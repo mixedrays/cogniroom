@@ -31,7 +31,7 @@ export function Slider({
       ref={slidesApi.scrollContainerRef}
       className={cn("grow overflow-hidden", className)}
     >
-      <div className="flex h-full flex-col">
+      <div className="flex h-full">
         {cards.map((card, index) => (
           <div
             key={card.id}
