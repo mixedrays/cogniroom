@@ -6,7 +6,7 @@ import { ResetButton } from "../../common/ResetButton";
 import { FlipButton } from "../../common/FlipButton";
 import { ShuffleButton } from "../../common/ShuffleButton";
 import { ProgressBar } from "../../common/ProgressBar";
-import { Slider } from "../../common/components/VerticalSlider";
+import { Slider } from "../../common/components/CarouselSlider";
 import { BottomBar } from "../../common/BottomBar";
 import { useSharedContext } from "../../common/context";
 import {

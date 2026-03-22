@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { SlidesApi } from "./components";
+import type { SlidesApi } from "./components/CarouselSlider/useSlidesApi";
 
 export interface SharedFlashcardsContext {
   currentIndex: number;

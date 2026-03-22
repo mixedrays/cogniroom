@@ -7,7 +7,7 @@ import { ResetButton } from "../../common/ResetButton";
 import { FlipButton } from "../../common/FlipButton";
 import { ShuffleButton } from "../../common/ShuffleButton";
 import { ProgressBar } from "../../common/ProgressBar";
-import { Slider } from "../../common/components/VerticalSlider";
+import { Slider } from "../../common/components/CarouselSlider";
 import { BottomBar } from "../../common/BottomBar";
 import { useSharedContext } from "../../common/context";
 import { SM2Provider, useSM2Context } from "./context";
@@ -75,6 +75,7 @@ function SM2Layout({ className }: { className?: string }) {
       <KeyboardShortcuts />
       <SM2Topbar />
       <SM2Slider />
+      asdf
       <BottomBar
         onScrollToPrev={slidesApi.scrollToPrev}
         onScrollToNext={slidesApi.scrollToNext}

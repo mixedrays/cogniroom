@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from "react";
 import { useFlashCards } from "../../common/useFlashCards";
-import { useSlidesApi } from "../../common/components/VerticalSlider";
+import { useSlidesApi } from "../../common/components/CarouselSlider";
 import {
   SharedFlashcardsProvider,
   type SharedFlashcardsContext,
