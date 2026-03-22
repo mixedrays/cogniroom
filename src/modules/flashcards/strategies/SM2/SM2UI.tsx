@@ -75,7 +75,6 @@ function SM2Layout({ className }: { className?: string }) {
       <KeyboardShortcuts />
       <SM2Topbar />
       <SM2Slider />
-      asdf
       <BottomBar
         onScrollToPrev={slidesApi.scrollToPrev}
         onScrollToNext={slidesApi.scrollToNext}
