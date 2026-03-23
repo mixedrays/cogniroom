@@ -6,8 +6,8 @@ import React, {
 } from "react";
 import {
   Undo as IconReset,
-  ArrowUp as IconPrev,
-  ArrowDown as IconNext,
+  ArrowLeft as IconPrev,
+  ArrowRight as IconNext,
 } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { AlertDialog } from "@/components/AlertDialog";
 import { Slider as ProgressSlider } from "@/components/Slider";
 import { cn } from "@/lib/utils";
 import type { QuizQuestion } from "@/lib/types";
-import { useSlidesApi } from "@/modules/flashcards/common/components/VerticalSlider";
+import { useSlidesApi } from "@/modules/flashcards/common/components/CarouselSlider";
 import { useQuiz } from "../hooks/useQuiz";
 import { useQuizAnswers } from "../hooks/useQuizAnswers";
 import { QuizOption } from "./QuizOption";
@@ -144,63 +144,66 @@ const QuizQuestionView = () => {
   } = useQuizContext();
 
   return (
-    <div
-      ref={slidesApi.scrollContainerRef}
-      className="grow snap-y snap-mandatory overflow-y-auto scroll-smooth"
-    >
-      {questions.map((q, index) => {
-        const checked = isChecked(q.id);
+    <div ref={slidesApi.scrollContainerRef} className="grow overflow-hidden">
+      <div className="flex h-full">
+        {questions.map((q) => {
+          const checked = isChecked(q.id);
 
-        let inputType: "radio" | "checkbox" = "radio";
-        let optionsToRender: { text: string; isCorrect: boolean }[] = [];
-        let handleSelect: (optionText: string) => void;
+          let inputType: "radio" | "checkbox" = "radio";
+          let optionsToRender: { text: string; isCorrect: boolean }[] = [];
+          let handleSelect: (optionText: string) => void;
 
-        if (q.type === "true-false") {
-          inputType = "radio";
-          optionsToRender = [
-            { text: "True", isCorrect: q.answer === true },
-            { text: "False", isCorrect: q.answer === false },
-          ];
-          handleSelect = (optionText) => selectSingle(q.id, optionText);
-        } else {
-          const correctCount = q.options.filter((o) => o.isCorrect).length;
-          inputType = correctCount > 1 ? "checkbox" : "radio";
-          optionsToRender = getShuffledOptions(q.id);
-          handleSelect =
-            inputType === "radio"
-              ? (optionText) => selectSingle(q.id, optionText)
-              : (optionText) => toggleMulti(q.id, optionText);
-        }
+          if (q.type === "true-false") {
+            inputType = "radio";
+            optionsToRender = [
+              { text: "True", isCorrect: q.answer === true },
+              { text: "False", isCorrect: q.answer === false },
+            ];
+            handleSelect = (optionText) => selectSingle(q.id, optionText);
+          } else {
+            const correctCount = q.options.filter((o) => o.isCorrect).length;
+            inputType = correctCount > 1 ? "checkbox" : "radio";
+            optionsToRender = getShuffledOptions(q.id);
+            handleSelect =
+              inputType === "radio"
+                ? (optionText) => selectSingle(q.id, optionText)
+                : (optionText) => toggleMulti(q.id, optionText);
+          }
 
-        return (
-          <div
-            key={q.id}
-            ref={slidesApi.getSlideRef(index)}
-            className="flex h-full w-full snap-start snap-always items-start justify-center px-4 pb-6 pt-4"
-          >
-            <div className="w-full max-w-2xl space-y-6 m-auto">
-              <Markdown content={q.question} variant="quiz" />
-              <div className="space-y-2">
-                {optionsToRender.map((option) => (
-                  <QuizOption
-                    key={option.text}
-                    option={option}
-                    isSelected={isOptionSelected(q.id, option.text)}
-                    isChecked={checked}
-                    inputType={inputType}
-                    onClick={() => handleSelect(option.text)}
-                  />
-                ))}
-              </div>
-              {checked && q.explanation && (
-                <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">
+          return (
+            <div
+              key={q.id}
+              className="flex items-center h-full min-h-0 w-full shrink-0 grow-0 basis-full justify-center overflow-y-auto px-4 pb-6 pt-4"
+            >
+              <div className="w-full max-w-2xl space-y-6">
+                <Markdown content={q.question} variant="quiz" />
+
+                <div className="space-y-2">
+                  {optionsToRender.map((option) => (
+                    <QuizOption
+                      key={option.text}
+                      option={option}
+                      isSelected={isOptionSelected(q.id, option.text)}
+                      isChecked={checked}
+                      inputType={inputType}
+                      onClick={() => handleSelect(option.text)}
+                    />
+                  ))}
+                </div>
+
+                <div
+                  className={cn(
+                    "text-sm invisible text-muted-foreground p-3 bg-muted/50 rounded-md",
+                    checked && q.explanation && "visible"
+                  )}
+                >
                   {q.explanation}
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -214,7 +217,7 @@ const QuizControls = () => {
         content={
           <>
             Previous question{" "}
-            <span className="text-muted-foreground text-xs">(Up Arrow)</span>
+            <span className="text-muted-foreground text-xs">(Left Arrow)</span>
           </>
         }
       >
@@ -234,7 +237,7 @@ const QuizControls = () => {
         content={
           <>
             Next question{" "}
-            <span className="text-muted-foreground text-xs">(Down Arrow)</span>
+            <span className="text-muted-foreground text-xs">(Right Arrow)</span>
           </>
         }
       >
@@ -265,12 +268,12 @@ const QuizKeyboardShortcuts = () => {
 
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown") {
+      if (e.key === "ArrowRight") {
         e.preventDefault();
         slidesApi.scrollToNext();
       }
 
-      if (e.key === "ArrowUp") {
+      if (e.key === "ArrowLeft") {
         e.preventDefault();
         slidesApi.scrollToPrev();
       }
