@@ -106,7 +106,7 @@ const useSM2Value = ({
     flippedCards: flashcards.flippedCards,
     flipCards: flashcards.flipCards,
     areCardsShuffled: flashcards.areCardsShuffled,
-    canReset: sm2.currentIndex > 0,
+    canReset: sm2.currentIndex > 0 || Object.keys(sessionRatingsByCard).length > 0,
     onFlipCard: (index: number) => flashcards.toggleCardFlip(index),
     handleToggleFlipCards: flashcards.handleToggleFlipCards,
     handleToggleShuffleCards,
