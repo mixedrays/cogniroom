@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { createContext, useContext, useCallback } from "react";
 import {
   Undo as IconReset,
   ArrowLeft as IconPrev,
@@ -18,7 +13,9 @@ import type { QuizQuestion } from "@/lib/types";
 import { useSlidesApi } from "@/modules/flashcards/common/components/CarouselSlider";
 import { useQuiz } from "../hooks/useQuiz";
 import { useQuizAnswers } from "../hooks/useQuizAnswers";
-import { QuizOption } from "./QuizOption";
+import { useQuizKeyboardShortcuts } from "../hooks/useQuizKeyboardShortcuts";
+import { QuizOptionRadio } from "./QuizOptionRadio";
+import { QuizOptionCheckbox } from "./QuizOptionCheckbox";
 import { Markdown } from "@/modules/markdown";
 
 type QuizContextValue = ReturnType<typeof useQuiz> &
@@ -138,8 +135,10 @@ const QuizQuestionView = () => {
     getShuffledOptions,
     selectSingle,
     toggleMulti,
+    checkMulti,
     isOptionSelected,
     isChecked,
+    hasSelection,
     slidesApi,
   } = useQuizContext();
 
@@ -179,17 +178,39 @@ const QuizQuestionView = () => {
                 <Markdown content={q.question} variant="quiz" />
 
                 <div className="space-y-2">
-                  {optionsToRender.map((option) => (
-                    <QuizOption
-                      key={option.text}
-                      option={option}
-                      isSelected={isOptionSelected(q.id, option.text)}
-                      isChecked={checked}
-                      inputType={inputType}
-                      onClick={() => handleSelect(option.text)}
-                    />
-                  ))}
+                  {optionsToRender.map((option, idx) =>
+                    inputType === "checkbox" ? (
+                      <QuizOptionCheckbox
+                        key={option.text}
+                        option={option}
+                        isSelected={isOptionSelected(q.id, option.text)}
+                        isChecked={checked}
+                        onClick={() => handleSelect(option.text)}
+                        shortcutKey={idx + 1}
+                      />
+                    ) : (
+                      <QuizOptionRadio
+                        key={option.text}
+                        option={option}
+                        isSelected={isOptionSelected(q.id, option.text)}
+                        isChecked={checked}
+                        onClick={() => handleSelect(option.text)}
+                        shortcutKey={idx + 1}
+                      />
+                    )
+                  )}
                 </div>
+
+                {inputType === "checkbox" && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    disabled={!hasSelection(q.id) || checked}
+                    onClick={() => checkMulti(q.id)}
+                  >
+                    Check answers
+                  </Button>
+                )}
 
                 <div
                   className={cn(
@@ -262,51 +283,22 @@ const QuizKeyboardShortcuts = () => {
     getShuffledOptions,
     selectSingle,
     toggleMulti,
+    checkMulti,
     isChecked,
+    hasSelection,
     slidesApi,
   } = useQuizContext();
 
-  useEffect(() => {
-    const handleKeydown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        slidesApi.scrollToNext();
-      }
-
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        slidesApi.scrollToPrev();
-      }
-
-      if (currentQuestion?.type === "choice") {
-        const qId = currentQuestion.id;
-        const options = getShuffledOptions(qId);
-        const isMulti =
-          currentQuestion.options.filter((o) => o.isCorrect).length > 1;
-
-        const num = parseInt(e.key);
-        if (num >= 1 && num <= options.length && !isChecked(qId)) {
-          e.preventDefault();
-          const optionText = options[num - 1].text;
-          if (isMulti) {
-            toggleMulti(qId, optionText);
-          } else {
-            selectSingle(qId, optionText);
-          }
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeydown);
-    return () => window.removeEventListener("keydown", handleKeydown);
-  }, [
+  useQuizKeyboardShortcuts({
     currentQuestion,
     getShuffledOptions,
     selectSingle,
     toggleMulti,
+    checkMulti,
     isChecked,
+    hasSelection,
     slidesApi,
-  ]);
+  });
 
   return null;
 };

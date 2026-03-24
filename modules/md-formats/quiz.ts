@@ -50,7 +50,12 @@ export function quizToMd(content: QuizContent): string {
     if (q.explanation) lines.push(`explanation: ${q.explanation}`);
     lines.push("---");
     lines.push("");
-    lines.push(`## ${q.question}`);
+    const questionLines = q.question.split("\n");
+    lines.push(`## ${questionLines[0]}`);
+    if (questionLines.length > 1) {
+      lines.push("");
+      lines.push(...questionLines.slice(1));
+    }
     lines.push("");
 
     if (q.type === "choice") {
@@ -110,18 +115,28 @@ function parseQuizBody(body: string): {
   options: { text: string; isCorrect: boolean }[];
 } {
   const lines = body.split("\n");
-  let question = "";
+  const questionLines: string[] = [];
   const options: { text: string; isCorrect: boolean }[] = [];
+  let inQuestion = false;
 
   for (const line of lines) {
     if (line.startsWith("## ")) {
-      question = line.slice(3).trim();
+      inQuestion = true;
+      questionLines.push(line.slice(3));
     } else if (line.startsWith("- [x] ")) {
+      inQuestion = false;
       options.push({ text: line.slice(6).trim(), isCorrect: true });
     } else if (line.startsWith("- [ ] ")) {
+      inQuestion = false;
       options.push({ text: line.slice(6).trim(), isCorrect: false });
+    } else if (inQuestion) {
+      questionLines.push(line);
     }
   }
 
-  return { question, options };
+  while (questionLines.length > 0 && questionLines[questionLines.length - 1].trim() === "") {
+    questionLines.pop();
+  }
+
+  return { question: questionLines.join("\n"), options };
 }

@@ -9,6 +9,7 @@ interface QuizAnswersState {
 type QuizAnswersAction =
   | { type: "SELECT_SINGLE"; questionId: string; option: string }
   | { type: "TOGGLE_MULTI"; questionId: string; option: string }
+  | { type: "CHECK_MULTI"; questionId: string }
   | { type: "RESET" };
 
 const initialState: QuizAnswersState = {
@@ -35,16 +36,21 @@ function quizAnswersReducer(
       };
     }
     case "TOGGLE_MULTI": {
+      if (state.checkedQuestions[action.questionId]) return state;
       const current = state.selections[action.questionId] ?? [];
       const updated = current.includes(action.option)
         ? current.filter((o) => o !== action.option)
         : [...current, action.option];
       return {
+        ...state,
         selections: { ...state.selections, [action.questionId]: updated },
-        checkedQuestions: {
-          ...state.checkedQuestions,
-          [action.questionId]: true,
-        },
+      };
+    }
+    case "CHECK_MULTI": {
+      if (state.checkedQuestions[action.questionId]) return state;
+      return {
+        ...state,
+        checkedQuestions: { ...state.checkedQuestions, [action.questionId]: true },
       };
     }
     case "RESET":
@@ -56,7 +62,7 @@ function quizAnswersReducer(
 
 function isQuestionCorrect(q: QuizQuestion, selected: string[]): boolean {
   if (q.type === "true-false") {
-    return selected[0] === String(q.answer);
+    return selected[0].toLowerCase() === String(q.answer);
   }
   const correctTexts = q.options
     .filter((o) => o.isCorrect)
@@ -78,6 +84,10 @@ export function useQuizAnswers() {
 
   const toggleMulti = useCallback((questionId: string, option: string) => {
     dispatch({ type: "TOGGLE_MULTI", questionId, option });
+  }, []);
+
+  const checkMulti = useCallback((questionId: string) => {
+    dispatch({ type: "CHECK_MULTI", questionId });
   }, []);
 
   const isChecked = useCallback(
@@ -137,6 +147,7 @@ export function useQuizAnswers() {
       checkedQuestions: state.checkedQuestions,
       selectSingle,
       toggleMulti,
+      checkMulti,
       isChecked,
       isOptionSelected,
       hasSelection,
@@ -149,6 +160,7 @@ export function useQuizAnswers() {
       state.checkedQuestions,
       selectSingle,
       toggleMulti,
+      checkMulti,
       isChecked,
       isOptionSelected,
       hasSelection,

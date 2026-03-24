@@ -72,15 +72,26 @@ describe("useQuizAnswers", () => {
     expect(result.current.isOptionSelected("q1", "3")).toBe(false);
   });
 
-  it("auto-checks on toggleMulti", () => {
+  it("toggleMulti updates selection without checking", () => {
     const { result } = renderHook(() => useQuizAnswers());
 
     act(() => {
       result.current.toggleMulti("q2", "2");
     });
 
-    expect(result.current.isChecked("q2")).toBe(true);
+    expect(result.current.isChecked("q2")).toBe(false);
     expect(result.current.isOptionSelected("q2", "2")).toBe(true);
+  });
+
+  it("checkMulti marks question as checked", () => {
+    const { result } = renderHook(() => useQuizAnswers());
+
+    act(() => {
+      result.current.toggleMulti("q2", "2");
+      result.current.checkMulti("q2");
+    });
+
+    expect(result.current.isChecked("q2")).toBe(true);
   });
 
   it("scores correctly for single-choice question", () => {
@@ -113,9 +124,8 @@ describe("useQuizAnswers", () => {
 
     act(() => {
       result.current.toggleMulti("q2", "2");
-    });
-    act(() => {
       result.current.toggleMulti("q2", "4");
+      result.current.checkMulti("q2");
     });
 
     const score = result.current.getScore([multiChoiceQuestion]);
