@@ -103,6 +103,8 @@ export function useFlashCards<TCard extends CardLike>(
   };
 
   const areCardsShuffled = state.shuffledCards !== undefined;
+  const cardFilter = options?.cardFilter;
+
   const cardsToDisplay = useMemo(() => {
     const orderedCards = areCardsShuffled
       ? (state.shuffledCards
@@ -110,10 +112,10 @@ export function useFlashCards<TCard extends CardLike>(
           .filter(Boolean) as TCard[])
       : cards;
 
-    return options?.cardFilter
-      ? orderedCards.filter(options.cardFilter)
+    return cardFilter
+      ? orderedCards.filter(cardFilter)
       : orderedCards;
-  }, [areCardsShuffled, cards, options?.cardFilter, state.shuffledCards]);
+  }, [areCardsShuffled, cardFilter, cards, state.shuffledCards]);
 
   const currentCard = cardsToDisplay[state.currentIndex];
   const currentCardId = currentCard?.id;
