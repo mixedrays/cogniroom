@@ -10,8 +10,11 @@ import {
   AVAILABLE_MODELS,
   DEFAULT_MODEL,
   getModelPriceLabel,
+  getModelPriceFullLabel,
+  formatPricePerMillion,
   getModelLabel,
 } from "@/lib/llmModels";
+import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { cn } from "@/lib/utils";
 
 type ModelSelectProps = {
@@ -48,9 +51,35 @@ export function ModelSelect({
               <div className="flex flex-col gap-1">
                 <span>
                   {model.label}{" "}
-                  <span className="text-xs text-green-600 dark:text-green-400">
-                    {getModelPriceLabel(model)}
-                  </span>
+                  {model.priceRating && (
+                    <Tooltip
+                      content={
+                        <div className="space-y-1">
+                          <div className="font-medium text-green-500">
+                            {getModelPriceFullLabel(model)}
+                          </div>
+                          {model.price && (
+                            <>
+                              <div>
+                                Input:{" "}
+                                {formatPricePerMillion(model.price.input)} / 1M
+                                tokens
+                              </div>
+                              <div>
+                                Output:{" "}
+                                {formatPricePerMillion(model.price.output)} / 1M
+                                tokens
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      }
+                    >
+                      <span className="text-xs text-green-600 dark:text-green-400 cursor-help underline decoration-dotted underline-offset-2">
+                        {getModelPriceLabel(model)}
+                      </span>
+                    </Tooltip>
+                  )}
                   {showDefault && key === DEFAULT_MODEL && (
                     <span> (default)</span>
                   )}

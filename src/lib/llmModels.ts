@@ -40,9 +40,21 @@ export const AVAILABLE_MODELS: AvailableModels = {
     label: "GPT-5.4 Pro",
     hint: "Top-tier performance for critical applications",
   },
+  "gpt-5.4-mini": {
+    price: { input: getPricePerToken(0.75), output: getPricePerToken(4.5) },
+    priceRating: 2,
+    label: "GPT-5.4 Mini",
+    hint: "Cost-effective version of GPT-5.4",
+  },
+  "gpt-5.4-nano": {
+    price: { input: getPricePerToken(0.2), output: getPricePerToken(1.25) },
+    priceRating: 2,
+    label: "GPT-5.4 Nano",
+    hint: "Ultra low-cost for simple tasks",
+  },
   "gpt-5.2": {
     price: { input: getPricePerToken(1.75), output: getPricePerToken(14) },
-    priceRating: 2,
+    priceRating: 3,
     label: "GPT-5.2",
     hint: "Most cost-effective for general use",
   },
@@ -54,7 +66,7 @@ export const AVAILABLE_MODELS: AvailableModels = {
   },
   "gpt-5-mini": {
     price: { input: getPricePerToken(0.25), output: getPricePerToken(2) },
-    priceRating: 1,
+    priceRating: 2,
     label: "GPT-5 Mini",
     hint: "Good for simple tasks and testing",
   },
@@ -66,19 +78,19 @@ export const AVAILABLE_MODELS: AvailableModels = {
   },
   o1: {
     price: { input: getPricePerToken(15), output: getPricePerToken(60) },
-    priceRating: 3,
+    priceRating: 4,
     label: "O1",
     hint: "Optimized for reasoning tasks",
   },
   o3: {
     price: { input: getPricePerToken(2), output: getPricePerToken(8) },
-    priceRating: 2,
+    priceRating: 3,
     label: "O3",
     hint: "Balanced model for a wide range of tasks",
   },
   "o3-mini": {
     price: { input: getPricePerToken(1.1), output: getPricePerToken(4.4) },
-    priceRating: 2,
+    priceRating: 3,
     label: "O3 Mini",
     hint: "Cost-effective version of O3",
   },
@@ -88,11 +100,18 @@ export const DEFAULT_MODEL = "gpt-5-mini";
 
 export function getModelPriceLabel({ priceRating }: ModelStats): string {
   if (!priceRating) return "";
+  if (priceRating > 3) return "$$$+";
+  return "$".repeat(priceRating);
+}
 
-  if (priceRating > 3) return `$$$+`;
+export function getModelPriceFullLabel({ priceRating }: ModelStats): string {
+  if (!priceRating) return "";
+  return "$".repeat(priceRating);
+}
 
-  const priceSuffix = ` ${"$".repeat(priceRating)}`;
-  return `${priceSuffix}`;
+export function formatPricePerMillion(pricePerToken: number): string {
+  const perMillion = pricePerToken * 1_000_000;
+  return `$${perMillion % 1 === 0 ? perMillion.toFixed(0) : perMillion % 0.01 === 0 ? perMillion.toFixed(2) : perMillion.toFixed(2)}`;
 }
 
 export function getModelLabel(modelId: string | undefined | null): string {
