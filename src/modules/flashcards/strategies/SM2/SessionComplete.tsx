@@ -24,31 +24,32 @@ function DonutChart({ stats }: { stats: SessionStats }) {
   const sw = 20;
   const C = 2 * Math.PI * r;
 
-  let theta = 0;
   const activeSegments = SEGMENTS.filter((s) => stats[s.key] > 0);
+  const segmentData = activeSegments.reduce<
+    { seg: (typeof activeSegments)[0]; dash: number; dashoffset: number }[]
+  >((acc, seg) => {
+    const theta = acc.reduce((sum, d) => sum + d.dash / C, 0);
+    const f = stats[seg.key] / total;
+    const dash = f * C;
+    return [...acc, { seg, dash, dashoffset: C * (1 - theta) }];
+  }, []);
 
   return (
     <div className="relative">
       <svg viewBox="0 0 160 160" className="-rotate-90 size-44">
-        {activeSegments.map((seg) => {
-          const f = stats[seg.key] / total;
-          const dash = f * C;
-          const dashoffset = C * (1 - theta);
-          theta += f;
-          return (
-            <circle
-              key={seg.key}
-              r={r}
-              cx={cx}
-              cy={cy}
-              fill="none"
-              stroke={seg.color}
-              strokeWidth={sw}
-              strokeDasharray={`${dash} ${C - dash}`}
-              strokeDashoffset={dashoffset}
-            />
-          );
-        })}
+        {segmentData.map(({ seg, dash, dashoffset }) => (
+          <circle
+            key={seg.key}
+            r={r}
+            cx={cx}
+            cy={cy}
+            fill="none"
+            stroke={seg.color}
+            strokeWidth={sw}
+            strokeDasharray={`${dash} ${C - dash}`}
+            strokeDashoffset={dashoffset}
+          />
+        ))}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-bold">{total}</span>

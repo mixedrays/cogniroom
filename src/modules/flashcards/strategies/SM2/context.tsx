@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import type { Flashcard, ReviewData } from "@/lib/types";
 import { useFlashCards } from "../../common/useFlashCards";
 import { useSlidesApi } from "../../common/components/CarouselSlider";
@@ -45,46 +45,39 @@ const useSM2Value = ({
     onIndexChange: sm2.setCurrentIndex,
   });
 
-  const handleToggleShuffleCards = useCallback(() => {
+  const handleToggleShuffleCards = () => {
     flashcards.handleToggleShuffleCards();
     setRatingColors([]);
     setSessionRatingsByCard({});
     sm2.resetSession();
     slidesApi.scrollToSlide(0);
-  }, [
-    flashcards.handleToggleShuffleCards,
-    sm2.resetSession,
-    slidesApi.scrollToSlide,
-  ]);
+  };
 
-  const rateCard = useCallback(
-    async (q: QualityRating) => {
-      const index = sm2.currentIndex;
-      const cardId = sm2.currentCard?.id;
-      if (cardId) {
-        setSessionRatingsByCard((prev) => ({
-          ...prev,
-          [cardId]: toRatingKey(q),
-        }));
-      }
-      setRatingColors((prev) => {
-        const next = [...prev];
-        next[index] = getRatingColor(q);
-        return next;
-      });
-      await sm2.rateCard(q);
-      setTimeout(() => slidesApi.scrollToSlide(index + 1), 300);
-    },
-    [sm2.currentIndex, sm2.currentCard, sm2.rateCard, slidesApi.scrollToSlide]
-  );
+  const rateCard = async (q: QualityRating) => {
+    const index = sm2.currentIndex;
+    const cardId = sm2.currentCard?.id;
+    if (cardId) {
+      setSessionRatingsByCard((prev) => ({
+        ...prev,
+        [cardId]: toRatingKey(q),
+      }));
+    }
+    setRatingColors((prev) => {
+      const next = [...prev];
+      next[index] = getRatingColor(q);
+      return next;
+    });
+    await sm2.rateCard(q);
+    setTimeout(() => slidesApi.scrollToSlide(index + 1), 300);
+  };
 
-  const resetSession = useCallback(() => {
+  const resetSession = () => {
     sm2.resetSession();
     setRatingColors([]);
     setSessionRatingsByCard({});
     flashcards.resetStudyState();
     slidesApi.scrollToSlide(0);
-  }, [sm2.resetSession, flashcards.resetStudyState, slidesApi.scrollToSlide]);
+  };
 
   const ratingValues = Object.values(sessionRatingsByCard);
   const sessionStats = {

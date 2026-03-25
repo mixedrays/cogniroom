@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { Course } from "@/lib/types";
 import { deleteCourse, listCourses } from "@/lib/courses";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/LoadingState";
@@ -61,7 +60,7 @@ export default function CourseList() {
   const courses = coursesQuery.data ?? [];
   const queryIsLoading = coursesQuery.isLoading;
 
-  const handleCourseCreated = (_course: Course) => {
+  const handleCourseCreated = () => {
     // Reload courses to get updated list
     coursesQuery.refetch();
   };

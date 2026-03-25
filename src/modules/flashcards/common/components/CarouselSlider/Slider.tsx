@@ -28,6 +28,7 @@ export function Slider({
 }: SliderProps) {
   return (
     <div
+      // eslint-disable-next-line react-hooks/refs
       ref={slidesApi.scrollContainerRef}
       className={cn("grow overflow-hidden", className)}
     >

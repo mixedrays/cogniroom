@@ -28,7 +28,6 @@ type SaveState = "idle" | "saving" | "saved" | "error";
 
 export function ContentBubble({
   params,
-  onSubmit,
   context,
   superseded = false,
 }: ContentBubbleProps) {

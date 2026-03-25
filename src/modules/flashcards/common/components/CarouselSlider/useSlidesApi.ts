@@ -75,7 +75,7 @@ export function useSlidesApi({
   }, [currentIndex, slidesCount, scrollToSlide]);
 
   const getSlideRef = useCallback(
-    (_index: number) => (_el: HTMLDivElement | null) => {},
+    () => () => {},
     []
   );
 

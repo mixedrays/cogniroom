@@ -182,6 +182,7 @@ const QuizQuestionView = () => {
   }
 
   return (
+    // eslint-disable-next-line react-hooks/refs
     <div ref={slidesApi.scrollContainerRef} className="grow overflow-hidden">
       <div className="flex h-full">
         {questions.map((q) => {

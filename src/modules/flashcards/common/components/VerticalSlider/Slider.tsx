@@ -34,23 +34,26 @@ export function Slider({
         className
       )}
     >
-      {cards.map((card, index) => (
-        <div
-          key={card.id}
-          ref={slidesApi.getSlideRef(index)}
-          className="flex h-full w-full snap-start snap-always items-center justify-center px-4 pb-6 pt-4"
-        >
-          <Flashcard
-            question={card.question}
-            answer={card.answer}
-            knownCount={card.knownCount}
-            isFlipped={flippedCards.includes(index)}
-            className="h-full w-full sm:h-auto"
-            isFlippedByDefault={flipCards}
-            onClick={() => onFlipCard(index)}
-          />
-        </div>
-      ))}
+      {
+        // eslint-disable-next-line react-hooks/refs
+        cards.map((card, index) => (
+          <div
+            key={card.id}
+            ref={slidesApi.getSlideRef(index)}
+            className="flex h-full w-full snap-start snap-always items-center justify-center px-4 pb-6 pt-4"
+          >
+            <Flashcard
+              question={card.question}
+              answer={card.answer}
+              knownCount={card.knownCount}
+              isFlipped={flippedCards.includes(index)}
+              className="h-full w-full sm:h-auto"
+              isFlippedByDefault={flipCards}
+              onClick={() => onFlipCard(index)}
+            />
+          </div>
+        ))
+      }
     </div>
   );
 }

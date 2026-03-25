@@ -11,6 +11,7 @@ export function useOS() {
   useEffect(() => {
     const { userAgent } = window.navigator;
     const ua = userAgent.toLowerCase();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (ua.includes("mac")) setOs("mac");
     else if (ua.includes("win")) setOs("windows");
     else if (ua.includes("linux")) setOs("linux");

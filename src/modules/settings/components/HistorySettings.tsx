@@ -17,10 +17,6 @@ export function HistorySettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [restoringId, setRestoringId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
-
   const loadHistory = async () => {
     setIsLoading(true);
     const result = await getSettingsHistory();
@@ -29,6 +25,11 @@ export function HistorySettings() {
     }
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadHistory();
+  }, []);
 
   const handleDelete = async (id: string) => {
     const result = await deleteHistoryEntry(id);

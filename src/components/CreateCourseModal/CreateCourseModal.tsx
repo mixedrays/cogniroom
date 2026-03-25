@@ -139,7 +139,16 @@ export default function CreateCourseModal({
     setError(null);
 
     try {
-      const parsed = JSON.parse(importJson);
+      const parsed = JSON.parse(importJson) as {
+        title?: string;
+        description?: string;
+        topics?: Array<{
+          id?: string;
+          title?: string;
+          description?: string;
+          lessons?: Array<{ id?: string; title?: string; description?: string }>;
+        }>;
+      };
       const now = new Date().toISOString();
 
       // Create course from imported JSON
@@ -151,12 +160,12 @@ export default function CreateCourseModal({
         updatedAt: now,
         source: "import",
         topics: Array.isArray(parsed.topics)
-          ? parsed.topics.map((topic: any) => ({
+          ? parsed.topics.map((topic) => ({
               id: topic.id || generateId(),
               title: topic.title || "Untitled Topic",
               description: topic.description || "",
               lessons: Array.isArray(topic.lessons)
-                ? topic.lessons.map((lesson: any) => ({
+                ? topic.lessons.map((lesson) => ({
                     id: lesson.id || generateId(),
                     title: lesson.title || "Untitled Lesson",
                     description: lesson.description || "",
