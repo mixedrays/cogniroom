@@ -17,11 +17,11 @@ export function KeyboardShortcuts() {
         e.preventDefault();
         onFlipCard(currentIndex);
       }
-      if (e.key === "ArrowLeft") {
+      if (e.key === "j") {
         e.preventDefault();
         slidesApi.scrollToPrev();
       }
-      if (e.key === "ArrowRight") {
+      if (e.key === "k") {
         e.preventDefault();
         slidesApi.scrollToNext();
       }

@@ -45,7 +45,8 @@ export function QuizOptionCheckbox({
           showNeutral && "border-muted-foreground/40",
           showSelected && "border-primary bg-primary",
           showCorrect && "border-green-500 bg-green-500",
-          showIncorrect && "border-red-500"
+          showIncorrect && "border-red-500",
+          showChecked && showIncorrect && "bg-red-500"
         )}
       >
         {showSelected && <Check className="size-3 text-primary-foreground" />}

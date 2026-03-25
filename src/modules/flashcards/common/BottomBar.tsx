@@ -32,7 +32,7 @@ export function BottomBar({
         content={
           <>
             Previous card{" "}
-            <span className="text-muted-foreground text-xs">(Left Arrow)</span>
+            <span className="text-muted-foreground text-xs">(J)</span>
           </>
         }
       >
@@ -54,7 +54,7 @@ export function BottomBar({
         content={
           <>
             Next card{" "}
-            <span className="text-muted-foreground text-xs">(Right Arrow)</span>
+            <span className="text-muted-foreground text-xs">(K)</span>
           </>
         }
       >

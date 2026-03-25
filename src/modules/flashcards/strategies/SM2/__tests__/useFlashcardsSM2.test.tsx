@@ -245,31 +245,23 @@ describe("useFlashcardsSM2", () => {
     expect(reviewedA?.interval).toBe(6);
     expect(reviewedA?.easeFactor).toBeCloseTo(2.36, 10);
 
-    expect(result.current.currentIndex).toBe(1);
+    expect(result.current.currentIndex).toBe(0);
     expect(result.current.isSaving).toBe(false);
   });
 
   it("accumulates entries across multiple rated cards", async () => {
-    const reviewData: ReviewData = {
-      lessonId: "fixture-lesson",
-      entries: [
-        entry({
-          itemId: "a",
-          repetitions: 1,
-          easeFactor: 2.5,
-          interval: 1,
-          nextReviewAt: "2026-02-20T00:00:00.000Z",
-        }),
-      ],
-    };
     const onSave = createOnSaveMock();
 
     const { result } = renderHook(() =>
-      useFlashcardsSM2([cards[0], cards[1]], reviewData, onSave, true)
+      useFlashcardsSM2([cards[0], cards[1]], null, onSave, true)
     );
 
     await act(async () => {
       await result.current.rateCard(3);
+    });
+
+    act(() => {
+      result.current.setCurrentIndex(1);
     });
 
     await act(async () => {
@@ -298,6 +290,10 @@ describe("useFlashcardsSM2", () => {
 
     await act(async () => {
       await result.current.rateCard(5);
+    });
+
+    act(() => {
+      result.current.setCurrentIndex(1);
     });
 
     expect(result.current.currentIndex).toBe(1);
@@ -387,6 +383,10 @@ describe("useFlashcardsSM2", () => {
 
     await act(async () => {
       await result.current.rateCard(5);
+    });
+
+    act(() => {
+      result.current.setCurrentIndex(1);
     });
 
     expect(result.current.currentIndex).toBe(1);

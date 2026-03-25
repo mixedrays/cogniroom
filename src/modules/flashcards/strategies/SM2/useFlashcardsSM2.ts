@@ -28,7 +28,6 @@ function sm2Reducer(state: SM2State, action: SM2Action): SM2State {
       return {
         ...state,
         entriesMap: action.entriesMap,
-        currentIndex: state.currentIndex + 1,
         isSaving: true,
       };
     case "RATE_CARD_FINISH":

@@ -28,11 +28,11 @@ export function KeyboardShortcuts() {
         onFlipCard(currentIndex);
       }
 
-      if (e.key === "ArrowRight") {
+      if (e.key === "k") {
         toggleKnownCardWithAutoScroll(true);
       }
 
-      if (e.key === "ArrowLeft") {
+      if (e.key === "j") {
         toggleKnownCardWithAutoScroll(false);
       }
 

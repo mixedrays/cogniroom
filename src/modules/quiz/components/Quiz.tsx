@@ -16,11 +16,13 @@ import { useQuizAnswers } from "../hooks/useQuizAnswers";
 import { useQuizKeyboardShortcuts } from "../hooks/useQuizKeyboardShortcuts";
 import { QuizOptionRadio } from "./QuizOptionRadio";
 import { QuizOptionCheckbox } from "./QuizOptionCheckbox";
+import { QuizComplete } from "./QuizComplete";
 import { Markdown } from "@/modules/markdown";
 
 type QuizContextValue = ReturnType<typeof useQuiz> &
   ReturnType<typeof useQuizAnswers> & {
     slidesApi: ReturnType<typeof useSlidesApi>;
+    isSessionComplete: boolean;
   };
 
 const QuizContext = createContext<QuizContextValue | null>(null);
@@ -53,8 +55,12 @@ const QuizContainer = ({
     onIndexChange: quizHook.setCurrentIndex,
   });
 
+  const isSessionComplete =
+    quizHook.questionsCount > 0 &&
+    answersHook.isChecked(quizHook.questions[quizHook.questionsCount - 1].id);
+
   return (
-    <QuizContext.Provider value={{ ...quizHook, ...answersHook, slidesApi }}>
+    <QuizContext.Provider value={{ ...quizHook, ...answersHook, slidesApi, isSessionComplete }}>
       <div className={cn("relative flex h-full flex-col", className)}>
         {children}
       </div>
@@ -69,6 +75,7 @@ const QuizTopbar = () => {
     questions,
     getScore,
     getStatuses,
+    isSessionComplete,
     resetQuiz,
     resetAnswers,
     slidesApi,
@@ -82,6 +89,10 @@ const QuizTopbar = () => {
     resetAnswers();
     slidesApi.scrollToSlide(0);
   }, [resetQuiz, resetAnswers, slidesApi]);
+
+  if (isSessionComplete) {
+    return null;
+  }
 
   return (
     <div>
@@ -132,6 +143,7 @@ const QuizTopbar = () => {
 const QuizQuestionView = () => {
   const {
     questions,
+    questionsCount,
     getShuffledOptions,
     selectSingle,
     toggleMulti,
@@ -139,8 +151,35 @@ const QuizQuestionView = () => {
     isOptionSelected,
     isChecked,
     hasSelection,
+    getScore,
+    isSessionComplete,
+    resetQuiz,
+    resetAnswers,
     slidesApi,
   } = useQuizContext();
+
+  const score = getScore(questions);
+
+  const handleReset = useCallback(() => {
+    resetQuiz();
+    resetAnswers();
+    slidesApi.scrollToSlide(0);
+  }, [resetQuiz, resetAnswers, slidesApi]);
+
+  if (isSessionComplete) {
+    return (
+      <div className="grow overflow-hidden">
+        <QuizComplete
+          stats={{
+            correct: score.correct,
+            incorrect: score.checked - score.correct,
+            unanswered: questionsCount - score.checked,
+          }}
+          onReset={handleReset}
+        />
+      </div>
+    );
+  }
 
   return (
     <div ref={slidesApi.scrollContainerRef} className="grow overflow-hidden">
@@ -230,7 +269,9 @@ const QuizQuestionView = () => {
 };
 
 const QuizControls = () => {
-  const { slidesApi } = useQuizContext();
+  const { isSessionComplete, slidesApi } = useQuizContext();
+
+  if (isSessionComplete) return null;
 
   return (
     <div className="flex w-full items-center justify-between gap-1 p-4">
@@ -238,7 +279,7 @@ const QuizControls = () => {
         content={
           <>
             Previous question{" "}
-            <span className="text-muted-foreground text-xs">(Left Arrow)</span>
+            <span className="text-muted-foreground text-xs">(J)</span>
           </>
         }
       >
@@ -258,7 +299,7 @@ const QuizControls = () => {
         content={
           <>
             Next question{" "}
-            <span className="text-muted-foreground text-xs">(Right Arrow)</span>
+            <span className="text-muted-foreground text-xs">(K)</span>
           </>
         }
       >

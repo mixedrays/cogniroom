@@ -73,7 +73,7 @@ const useSM2Value = ({
         return next;
       });
       await sm2.rateCard(q);
-      slidesApi.scrollToSlide(index + 1);
+      setTimeout(() => slidesApi.scrollToSlide(index + 1), 300);
     },
     [sm2.currentIndex, sm2.currentCard, sm2.rateCard, slidesApi.scrollToSlide]
   );
@@ -106,7 +106,8 @@ const useSM2Value = ({
     flippedCards: flashcards.flippedCards,
     flipCards: flashcards.flipCards,
     areCardsShuffled: flashcards.areCardsShuffled,
-    canReset: sm2.currentIndex > 0 || Object.keys(sessionRatingsByCard).length > 0,
+    canReset:
+      sm2.currentIndex > 0 || Object.keys(sessionRatingsByCard).length > 0,
     onFlipCard: (index: number) => flashcards.toggleCardFlip(index),
     handleToggleFlipCards: flashcards.handleToggleFlipCards,
     handleToggleShuffleCards,
@@ -119,6 +120,7 @@ const useSM2Value = ({
     rateCard,
     resetSession,
     ratingColors,
+    sessionRatingsByCard,
     isAnswerVisible,
     sessionStats,
     showAllCards,

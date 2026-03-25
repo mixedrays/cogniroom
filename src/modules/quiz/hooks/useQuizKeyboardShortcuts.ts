@@ -25,12 +25,12 @@ export function useQuizKeyboardShortcuts({
 }: UseQuizKeyboardShortcutsParams) {
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") {
+      if (e.key === "k") {
         e.preventDefault();
         slidesApi.scrollToNext();
       }
 
-      if (e.key === "ArrowLeft") {
+      if (e.key === "j") {
         e.preventDefault();
         slidesApi.scrollToPrev();
       }
