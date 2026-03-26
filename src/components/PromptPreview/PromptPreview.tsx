@@ -23,6 +23,7 @@ export function PromptPreview({ promptId, variables }: PromptPreviewProps) {
           <ChevronRight className="size-4 transition-transform group-data-open/prompt:rotate-90" />
           Result Prompt Preview
         </CollapsibleTrigger>
+
         <SettingsDialog
           defaultTab="prompts"
           defaultPromptId={promptId}
@@ -39,6 +40,7 @@ export function PromptPreview({ promptId, variables }: PromptPreviewProps) {
           }
         />
       </div>
+
       <CollapsibleContent>
         {isLoading ? (
           <div className="mt-2 rounded-md bg-muted/50 border p-3 space-y-2 animate-pulse">

@@ -158,6 +158,7 @@ export function WizardAgentDialog({
               ? "Create Course"
               : `Create ${context.contentType.charAt(0).toUpperCase()}${context.contentType.slice(1)}`}
           </DialogTitle>
+          
           {messages.length > 0 && (
             <Button
               size="icon-sm"
@@ -169,6 +170,7 @@ export function WizardAgentDialog({
             </Button>
           )}
         </DialogHeader>
+
         <AgentChat
           messages={messages}
           tools={TOOLS}

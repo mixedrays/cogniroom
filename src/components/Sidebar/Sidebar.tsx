@@ -22,6 +22,7 @@ export default function AppSidebar() {
         <span className="font-semibold text-sm">Courses</span>
         <SidebarTrigger />
       </SidebarHeader> */}
+
       <SidebarContent className="overflow-xhidden relative p-0">
         <div
           className={`absolute inset-0 w-full h-full transition-transform duration-300 ease-in-out ${
@@ -39,6 +40,7 @@ export default function AppSidebar() {
           <CourseTree />
         </div>
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
           <SettingsDialog
@@ -51,6 +53,7 @@ export default function AppSidebar() {
           />
         </SidebarMenu>
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
