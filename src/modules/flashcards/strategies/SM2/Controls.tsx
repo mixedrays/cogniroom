@@ -1,6 +1,7 @@
 import { Frown, Smile, Laugh } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 import { useSM2Context } from "./context";
 import type { QualityRating } from "./useFlashcardsSM2";
@@ -82,10 +83,7 @@ export function Controls() {
               key={q}
               content={
                 <>
-                  {description}{" "}
-                  <span className="text-muted-foreground text-xs">
-                    ({shortcut})
-                  </span>
+                  {description} <Kbd>{shortcut}</Kbd>
                 </>
               }
             >

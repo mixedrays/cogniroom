@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { AlertDialog } from "@/components/AlertDialog";
 import { Slider as ProgressSlider } from "@/components/Slider";
 import { cn } from "@/lib/utils";
@@ -60,7 +61,9 @@ const QuizContainer = ({
     answersHook.isChecked(quizHook.questions[quizHook.questionsCount - 1].id);
 
   return (
-    <QuizContext.Provider value={{ ...quizHook, ...answersHook, slidesApi, isSessionComplete }}>
+    <QuizContext.Provider
+      value={{ ...quizHook, ...answersHook, slidesApi, isSessionComplete }}
+    >
       <div className={cn("relative flex h-full flex-col", className)}>
         {children}
       </div>
@@ -192,20 +195,33 @@ const QuizQuestionView = () => {
           let optionsToRender: { text: string; isCorrect: boolean }[] = [];
           let handleSelect: (optionText: string) => void;
 
+          const scrollToNextDelayed = () => {
+            if (!slidesApi.isLastSlide) {
+              // commented for now
+              // setTimeout(() => slidesApi.scrollToNext(), 500);
+            }
+          };
+
           if (q.type === "true-false") {
             inputType = "radio";
             optionsToRender = [
               { text: "True", isCorrect: q.answer === true },
               { text: "False", isCorrect: q.answer === false },
             ];
-            handleSelect = (optionText) => selectSingle(q.id, optionText);
+            handleSelect = (optionText) => {
+              selectSingle(q.id, optionText);
+              scrollToNextDelayed();
+            };
           } else {
             const correctCount = q.options.filter((o) => o.isCorrect).length;
             inputType = correctCount > 1 ? "checkbox" : "radio";
             optionsToRender = getShuffledOptions(q.id);
             handleSelect =
               inputType === "radio"
-                ? (optionText) => selectSingle(q.id, optionText)
+                ? (optionText) => {
+                    selectSingle(q.id, optionText);
+                    scrollToNextDelayed();
+                  }
                 : (optionText) => toggleMulti(q.id, optionText);
           }
 
@@ -246,7 +262,10 @@ const QuizQuestionView = () => {
                     variant="default"
                     size="sm"
                     disabled={!hasSelection(q.id) || checked}
-                    onClick={() => checkMulti(q.id)}
+                    onClick={() => {
+                      checkMulti(q.id);
+                      scrollToNextDelayed();
+                    }}
                   >
                     Check answers
                   </Button>
@@ -279,8 +298,7 @@ const QuizControls = () => {
       <Tooltip
         content={
           <>
-            Previous question{" "}
-            <span className="text-muted-foreground text-xs">(J)</span>
+            Previous question <Kbd>J</Kbd>
           </>
         }
       >
@@ -299,8 +317,7 @@ const QuizControls = () => {
       <Tooltip
         content={
           <>
-            Next question{" "}
-            <span className="text-muted-foreground text-xs">(K)</span>
+            Next question <Kbd>K</Kbd>
           </>
         }
       >

@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 import { useKnownCardsContext } from "./context";
 
@@ -43,8 +44,7 @@ export function Controls({
       <Tooltip
         content={
           <>
-            I don&apos;t know this card{" "}
-            <span className="text-muted-foreground text-xs">(Arrow Left)</span>
+            I don&apos;t know this card <Kbd>←</Kbd>
           </>
         }
       >
@@ -63,11 +63,7 @@ export function Controls({
           content={
             <>
               Finish session{" "}
-              {finishShortcutLabel && (
-                <span className="text-muted-foreground text-xs">
-                  ({finishShortcutLabel})
-                </span>
-              )}
+              {finishShortcutLabel && <Kbd>{finishShortcutLabel}</Kbd>}
             </>
           }
         >
@@ -91,8 +87,7 @@ export function Controls({
       <Tooltip
         content={
           <>
-            I know this card{" "}
-            <span className="text-muted-foreground text-xs">(Arrow Right)</span>
+            I know this card <Kbd>→</Kbd>
           </>
         }
       >
