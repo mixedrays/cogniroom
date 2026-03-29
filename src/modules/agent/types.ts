@@ -45,3 +45,11 @@ export type AgentSseEvent =
   | { type: "tool_call"; toolCallId: string; toolName: string; params: unknown }
   | { type: "error"; message: string }
   | { type: "done" };
+
+export type ChatBackend = (params: {
+  messages: AgentMessageState[];
+  model: string;
+  context: Record<string, unknown>;
+  signal: AbortSignal;
+  onEvent: (event: AgentSseEvent) => void;
+}) => Promise<void>;

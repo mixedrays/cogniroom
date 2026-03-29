@@ -23,10 +23,15 @@ export function AgentChat({
   welcomeMessage,
   context,
 }: AgentChatProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [messages]);
 
   const activeAbovePromptCall = [...messages]
@@ -52,7 +57,7 @@ export function AgentChat({
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-6">
         {chatMessages.length === 0 && welcomeMessage && (
           <div className="flex h-full items-center justify-center m-0">
             <p className="text-muted-foreground text-center">
@@ -72,8 +77,6 @@ export function AgentChat({
             context={context}
           />
         ))}
-
-        <div ref={bottomRef} />
       </div>
 
       {activeAbovePromptCall && abovePromptTool?.client && (

@@ -74,16 +74,14 @@ export function useSlidesApi({
     scrollToSlide(Math.min(currentIndex + 1, slidesCount - 1));
   }, [currentIndex, slidesCount, scrollToSlide]);
 
-  const getSlideRef = useCallback(
-    () => () => {},
-    []
-  );
+  const getSlideRef = useCallback(() => () => {}, []);
 
   const isFirstSlide = currentIndex === 0;
   const isLastSlide = currentIndex === slidesCount - 1;
 
   return {
-    scrollContainerRef: emblaRef as unknown as React.RefObject<HTMLDivElement | null>,
+    scrollContainerRef:
+      emblaRef as unknown as React.RefObject<HTMLDivElement | null>,
     getSlideRef,
     scrollToSlide,
     scrollToPrev,

@@ -50,7 +50,10 @@ function quizAnswersReducer(
       if (state.checkedQuestions[action.questionId]) return state;
       return {
         ...state,
-        checkedQuestions: { ...state.checkedQuestions, [action.questionId]: true },
+        checkedQuestions: {
+          ...state.checkedQuestions,
+          [action.questionId]: true,
+        },
       };
     }
     case "RESET":

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Bot } from "lucide-react";
 import {
   Dialog,
@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { PromptTextarea } from "@/components/PromptTextarea";
 import { useAgent } from "../hooks/useAgent";
+import { useChatBackend } from "../hooks/useChatBackend";
 import { AgentChat } from "./AgentChat";
 import { askUserTool } from "../tools/ask-user";
 import { memoryTool } from "../tools/memory";
@@ -35,6 +36,15 @@ export function AgentDialog({
   placeholder,
 }: AgentDialogProps) {
   const [input, setInput] = useState("");
+
+  const getSystemPrompt = useCallback(async () => {
+    const res = await fetch("/api/agent/prompt");
+    const data = (await res.json()) as { prompt: string };
+    return data.prompt;
+  }, []);
+
+  const backend = useChatBackend(endpoint, tools, getSystemPrompt);
+
   const {
     messages,
     isStreaming,
@@ -42,7 +52,7 @@ export function AgentDialog({
     stopStreaming,
     submitToolResult,
     dismissToolCall,
-  } = useAgent({ endpoint, context });
+  } = useAgent({ backend, context });
 
   const handleSubmit = (text: string, model: string) => {
     setInput("");

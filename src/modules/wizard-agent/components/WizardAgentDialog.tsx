@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PromptTextarea } from "@/components/PromptTextarea";
 import { useAgent } from "@/modules/agent/hooks/useAgent";
+import { useChatBackend } from "@/modules/agent/hooks/useChatBackend";
 import { AgentChat } from "@/modules/agent/components/AgentChat";
 import { askUserTool } from "@/modules/agent/tools/ask-user";
 import { memoryTool } from "@/modules/agent/tools/memory";
@@ -97,6 +98,22 @@ export function WizardAgentDialog({
   const ctxId = contextId(context);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const getSystemPrompt = useCallback(async () => {
+    const params = new URLSearchParams({
+      contentType: context.contentType,
+      context: JSON.stringify(context),
+    });
+    const res = await fetch(`/api/wizard-agent/prompt?${params}`);
+    const data = (await res.json()) as { prompt: string };
+    return data.prompt;
+  }, [context]);
+
+  const backend = useChatBackend(
+    "/api/wizard-agent/chat",
+    TOOLS,
+    getSystemPrompt
+  );
+
   const {
     messages,
     isStreaming,
@@ -106,7 +123,7 @@ export function WizardAgentDialog({
     dismissToolCall,
     loadMessages,
   } = useAgent({
-    endpoint: "/api/wizard-agent/chat",
+    backend,
     context: context as unknown as Record<string, unknown>,
   });
 
@@ -158,7 +175,7 @@ export function WizardAgentDialog({
               ? "Create Course"
               : `Create ${context.contentType.charAt(0).toUpperCase()}${context.contentType.slice(1)}`}
           </DialogTitle>
-          
+
           {messages.length > 0 && (
             <Button
               size="icon-sm"

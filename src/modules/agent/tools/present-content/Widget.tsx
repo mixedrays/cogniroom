@@ -108,7 +108,7 @@ export function ContentBubble({
         )}
       </div>
 
-      <div className="px-4 py-3 max-h-64 overflow-y-auto">
+      <div className="px-4 py-3 max-h-80 overflow-y-auto">
         <ContentPreview type={type} content={content} />
       </div>
 

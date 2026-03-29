@@ -112,9 +112,7 @@ export function useFlashCards<TCard extends CardLike>(
           .filter(Boolean) as TCard[])
       : cards;
 
-    return cardFilter
-      ? orderedCards.filter(cardFilter)
-      : orderedCards;
+    return cardFilter ? orderedCards.filter(cardFilter) : orderedCards;
   }, [areCardsShuffled, cardFilter, cards, state.shuffledCards]);
 
   const currentCard = cardsToDisplay[state.currentIndex];

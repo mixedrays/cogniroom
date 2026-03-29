@@ -4,7 +4,9 @@ import type { useSlidesApi } from "@/modules/flashcards/common/components/Carous
 
 interface UseQuizKeyboardShortcutsParams {
   currentQuestion: QuizQuestion | undefined;
-  getShuffledOptions: (questionId: string) => { text: string; isCorrect: boolean }[];
+  getShuffledOptions: (
+    questionId: string
+  ) => { text: string; isCorrect: boolean }[];
   selectSingle: (questionId: string, option: string) => void;
   toggleMulti: (questionId: string, option: string) => void;
   checkMulti: (questionId: string) => void;
@@ -50,7 +52,12 @@ export function useQuizKeyboardShortcuts({
         const isMulti =
           currentQuestion.options.filter((o) => o.isCorrect).length > 1;
 
-        if (e.key === "Enter" && isMulti && !isChecked(qId) && hasSelection(qId)) {
+        if (
+          e.key === "Enter" &&
+          isMulti &&
+          !isChecked(qId) &&
+          hasSelection(qId)
+        ) {
           e.preventDefault();
           checkMulti(qId);
         }

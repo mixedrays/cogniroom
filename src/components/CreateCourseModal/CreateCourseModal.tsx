@@ -146,7 +146,11 @@ export default function CreateCourseModal({
           id?: string;
           title?: string;
           description?: string;
-          lessons?: Array<{ id?: string; title?: string; description?: string }>;
+          lessons?: Array<{
+            id?: string;
+            title?: string;
+            description?: string;
+          }>;
         }>;
       };
       const now = new Date().toISOString();

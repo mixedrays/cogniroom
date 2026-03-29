@@ -28,6 +28,23 @@
  * ## <question statement>
  *
  * ---
+ *
+ * Multi choice questions:
+ * ---
+ * id: <uuid>
+ * type: multi-choice
+ * difficulty: easy|medium|hard
+ * explanation: <optional>
+ * ---
+ *
+ * ## <question statement>
+ *
+ * ---
+ * - [ ] <wrong option>
+ * - [x] <correct option>
+ * - [x] <correct option>
+ *
+ * ---
  */
 
 import type {
@@ -134,7 +151,10 @@ function parseQuizBody(body: string): {
     }
   }
 
-  while (questionLines.length > 0 && questionLines[questionLines.length - 1].trim() === "") {
+  while (
+    questionLines.length > 0 &&
+    questionLines[questionLines.length - 1].trim() === ""
+  ) {
     questionLines.pop();
   }
 

@@ -5,6 +5,7 @@ import {
   HistoryIcon,
   MessageSquareTextIcon,
   ChevronRightIcon,
+  KeyRoundIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -18,12 +19,14 @@ import {
 } from "@/components/ui/sidebar";
 import { AppearanceSettings } from "./AppearanceSettings";
 import { LLMSettings } from "./LLMSettings";
+import { ApiKeySettings } from "./ApiKeySettings";
 import { HistorySettings } from "./HistorySettings";
 import { PromptsSettings } from "./PromptsSettings";
 
 const NAV_ITEMS = [
   { key: "appearance", label: "Appearance", icon: PaletteIcon },
   { key: "llm", label: "LLM Models", icon: BrainCircuitIcon },
+  { key: "api-key", label: "API Key", icon: KeyRoundIcon },
   { key: "prompts", label: "Prompts", icon: MessageSquareTextIcon },
   { key: "history", label: "History", icon: HistoryIcon },
 ] as const;
@@ -83,6 +86,7 @@ export function SettingsContent({
         <div className="p-4 h-full overflow-auto">
           {activeTab === "appearance" && <AppearanceSettings />}
           {activeTab === "llm" && <LLMSettings />}
+          {activeTab === "api-key" && <ApiKeySettings />}
           {activeTab === "prompts" && (
             <PromptsSettings defaultPromptId={defaultPromptId} />
           )}

@@ -8,7 +8,7 @@ import { SettingsContent } from "./SettingsContent";
 
 interface SettingsDialogProps {
   trigger?: React.ReactElement;
-  defaultTab?: "appearance" | "llm" | "prompts" | "history";
+  defaultTab?: "appearance" | "llm" | "api-key" | "prompts" | "history";
   defaultPromptId?: string;
 }
 

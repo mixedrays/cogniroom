@@ -1,6 +1,6 @@
-import { useReducer, useRef, useCallback } from "react";
+import { useReducer, useRef, useCallback, useEffect } from "react";
 import type { ModelMessage } from "ai";
-import type { AgentMessageState, AgentSseEvent } from "../types";
+import type { AgentMessageState, AgentSseEvent, ChatBackend } from "../types";
 
 type State = {
   messages: AgentMessageState[];
@@ -173,12 +173,12 @@ export interface UseAgentReturn {
 }
 
 interface UseAgentConfig {
-  endpoint: string;
+  backend: ChatBackend;
   context?: Record<string, unknown>;
 }
 
 export function useAgent({
-  endpoint,
+  backend,
   context = {},
 }: UseAgentConfig): UseAgentReturn {
   const [state, dispatch] = useReducer(reducer, {
@@ -187,10 +187,37 @@ export function useAgent({
   });
 
   const messagesRef = useRef<AgentMessageState[]>([]);
-  messagesRef.current = state.messages;
+  useEffect(() => {
+    messagesRef.current = state.messages;
+  }, [state.messages]);
 
   const abortRef = useRef<AbortController | null>(null);
   const modelRef = useRef<string>("");
+
+  const handleEvent = useCallback(
+    (assistantId: string, event: AgentSseEvent) => {
+      if (event.type === "token") {
+        dispatch({ type: "APPEND_TOKEN", id: assistantId, delta: event.delta });
+      } else if (event.type === "tool_call") {
+        dispatch({
+          type: "ADD_TOOL_CALL",
+          assistantId,
+          toolCallId: event.toolCallId,
+          toolName: event.toolName,
+          params: event.params,
+        });
+      } else if (event.type === "error") {
+        dispatch({
+          type: "SET_ERROR",
+          id: assistantId,
+          message: event.message,
+        });
+      } else if (event.type === "done") {
+        dispatch({ type: "COMPLETE_ASSISTANT", id: assistantId });
+      }
+    },
+    []
+  );
 
   const sendToAPI = useCallback(
     async (messages: AgentMessageState[]) => {
@@ -202,69 +229,13 @@ export function useAgent({
       dispatch({ type: "ADD_STREAMING_ASSISTANT", id: assistantId });
 
       try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: serializeMessages(messages),
-            model: modelRef.current,
-            context,
-          }),
+        await backend({
+          messages,
+          model: modelRef.current,
+          context,
           signal: controller.signal,
+          onEvent: (event) => handleEvent(assistantId, event),
         });
-
-        if (!response.ok || !response.body) {
-          const err = await response.json().catch(() => ({}));
-          throw new Error(
-            (err as Record<string, string>)?.statusMessage ??
-              (err as Record<string, string>)?.message ??
-              `Request failed (${response.status})`
-          );
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const events = buffer.split("\n\n");
-          buffer = events.pop() ?? "";
-
-          for (const eventStr of events) {
-            const dataLine = eventStr
-              .split("\n")
-              .find((l) => l.startsWith("data: "));
-            if (!dataLine) continue;
-            const event = JSON.parse(dataLine.slice(6)) as AgentSseEvent;
-
-            if (event.type === "token") {
-              dispatch({
-                type: "APPEND_TOKEN",
-                id: assistantId,
-                delta: event.delta,
-              });
-            } else if (event.type === "tool_call") {
-              dispatch({
-                type: "ADD_TOOL_CALL",
-                assistantId,
-                toolCallId: event.toolCallId,
-                toolName: event.toolName,
-                params: event.params,
-              });
-            } else if (event.type === "error") {
-              dispatch({
-                type: "SET_ERROR",
-                id: assistantId,
-                message: event.message,
-              });
-            } else if (event.type === "done") {
-              dispatch({ type: "COMPLETE_ASSISTANT", id: assistantId });
-            }
-          }
-        }
       } catch (e) {
         if ((e as Error).name === "AbortError") {
           dispatch({ type: "CANCEL_ASSISTANT", id: assistantId });
@@ -277,7 +248,7 @@ export function useAgent({
         });
       }
     },
-    [endpoint, context]
+    [backend, context, handleEvent]
   );
 
   const sendMessage = useCallback(
