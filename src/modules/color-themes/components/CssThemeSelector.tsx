@@ -30,6 +30,7 @@ export function CssThemeSelector({
         const isSelected = selectedId === cssTheme.id;
         return (
           <div
+            key={cssTheme.id}
             onClick={() => onSelect(cssTheme.id)}
             className={cn(
               "border-base-content/20 hover:border-base-content/40 overflow-hidden",

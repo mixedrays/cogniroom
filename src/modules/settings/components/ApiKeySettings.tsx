@@ -2,6 +2,19 @@ import { useState } from "react";
 import { useSettings } from "../context/SettingsContext";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
 import {
   Field,
   FieldContent,
@@ -27,6 +40,11 @@ export function ApiKeySettings() {
     }
   };
 
+  const handleDeleteKey = () => {
+    setApiKey("");
+    localStorage.removeItem(OPENAI_API_KEY_STORAGE);
+  };
+
   return (
     <div className="divide-y divide-border">
       <div className="py-4 first:pt-0">
@@ -48,12 +66,42 @@ export function ApiKeySettings() {
 
         {useOwnKey && (
           <div className="mt-3">
-            <Input
-              type="password"
-              placeholder="sk-..."
-              value={apiKey}
-              onChange={(e) => handleApiKeyChange(e.target.value)}
-            />
+            <div className="flex gap-1">
+              <Input
+                type="password"
+                placeholder="sk-..."
+                value={apiKey}
+                onChange={(e) => handleApiKeyChange(e.target.value)}
+              />
+              {apiKey && (
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    render={
+                      <Button variant="destructive" size="icon">
+                        <Trash2 />
+                      </Button>
+                    }
+                  />
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete API key?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will remove your saved OpenAI API key.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        variant="destructive"
+                        onClick={handleDeleteKey}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground mt-1.5">
               Stored in browser localStorage only. Tool actions that require
               server access (e.g. memory) are skipped in this mode.
