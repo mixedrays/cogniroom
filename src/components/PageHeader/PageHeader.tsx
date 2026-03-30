@@ -2,12 +2,9 @@ import { PanelLeftIcon, PanelRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { PropsWithChildren } from "react";
 
-interface PageHeaderProps {
-  children: React.ReactNode;
-}
-
-export function PageHeader({ children }: PageHeaderProps) {
+export function PageHeader({ children }: PropsWithChildren) {
   const { toggleSidebar, toggleSidebarByName } = useSidebar();
 
   return (

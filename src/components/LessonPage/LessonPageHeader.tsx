@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { BookOpen, Layers, ListChecks, Code } from "lucide-react";
+import { BookOpen, Home, Layers, ListChecks, Code } from "lucide-react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ export function LessonPageHeader({
       <Breadcrumbs
         className="flex items-center"
         items={[
-          { title: "Home", link: "/" },
+          { title: "", icon: <Home className="size-4" />, link: "/" },
           {
             title: "Course",
             tooltip: courseTitle,
