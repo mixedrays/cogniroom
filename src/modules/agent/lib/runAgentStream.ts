@@ -56,6 +56,8 @@ export async function runAgentStream({
         params: part.input,
       });
       break;
+    } else if (part.type === "error") {
+      throw part.error;
     }
   }
 }

@@ -1,4 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
+import { APICallError } from "ai";
 import type { AgentTool, ChatBackend } from "../types";
 import { runAgentStream } from "../lib/runAgentStream";
 import { serializeMessages } from "../hooks/useAgent";
@@ -13,6 +14,10 @@ export function createClientBackend(
 
   return async ({ messages, model, signal, onEvent }) => {
     const apiKey = localStorage.getItem(OPENAI_API_KEY_STORAGE) ?? "";
+    if (!apiKey.trim()) {
+      onEvent({ type: "error", message: "OpenAI API key is not set. Please add it in Settings." });
+      return;
+    }
     const openai = createOpenAI({ apiKey });
     const system = await getSystemPrompt();
 
@@ -28,10 +33,18 @@ export function createClientBackend(
       onEvent({ type: "done" });
     } catch (e) {
       if ((e as Error).name === "AbortError") throw e;
-      onEvent({
-        type: "error",
-        message: (e as Error).message ?? "Something went wrong",
-      });
+      let message = (e as Error).message ?? "Something went wrong";
+      if (APICallError.isInstance(e) && e.responseBody) {
+        try {
+          const body = JSON.parse(e.responseBody);
+          const detail =
+            body?.error?.message ?? body?.message ?? e.responseBody;
+          message = `${e.statusCode ? `[${e.statusCode}] ` : ""}${detail}`;
+        } catch {
+          message = `${e.statusCode ? `[${e.statusCode}] ` : ""}${e.responseBody}`;
+        }
+      }
+      onEvent({ type: "error", message });
     }
   };
 }

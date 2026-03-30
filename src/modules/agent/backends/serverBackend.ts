@@ -17,8 +17,8 @@ export function createServerBackend(endpoint: string): ChatBackend {
     if (!response.ok || !response.body) {
       const err = await response.json().catch(() => ({}));
       throw new Error(
-        (err as Record<string, string>)?.statusMessage ??
-          (err as Record<string, string>)?.message ??
+        (err as Record<string, string>)?.message ??
+          (err as Record<string, string>)?.statusMessage ??
           `Request failed (${response.status})`
       );
     }

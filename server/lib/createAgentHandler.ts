@@ -25,14 +25,14 @@ export function createAgentHandler(config: {
 
     const context = body.context ?? {};
     const system = await config.getSystemPrompt(context);
-    const model = body.model
-      ? getOpenAIClient(body.model as AvailableModelsId)
-      : getDefaultModel();
 
     const eventStream = createEventStream(event);
 
     void (async () => {
       try {
+        const model = body.model
+          ? getOpenAIClient(body.model as AvailableModelsId)
+          : getDefaultModel();
         await runAgentStream({
           model,
           system,
