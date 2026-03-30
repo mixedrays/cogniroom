@@ -2,7 +2,7 @@ import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { getCourse } from "@/lib/courses";
 import { PageHeader } from "@/components/PageHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { Code, Layers, ListChecks } from "lucide-react";
+import { Code, Home, Layers, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/course/$courseId/")({
@@ -24,7 +24,7 @@ function CourseComponent() {
       <PageHeader>
         <Breadcrumbs
           className="flex items-center"
-          items={[{ title: "Home", link: "/" }, { title: "Course" }]}
+          items={[{ title: "", icon: <Home className="size-4" />, link: "/" }, { title: "Course" }]}
         />
       </PageHeader>
 
