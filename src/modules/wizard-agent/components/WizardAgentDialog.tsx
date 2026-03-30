@@ -181,9 +181,10 @@ export function WizardAgentDialog({
               size="icon-sm"
               variant="ghost"
               onClick={handleClear}
+              className="absolute right-12 top-4"
               aria-label="Clear conversation"
             >
-              <RotateCcw className="size-4" />
+              <RotateCcw />
             </Button>
           )}
         </DialogHeader>
