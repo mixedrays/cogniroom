@@ -1,7 +1,8 @@
 import { defineEventHandler, getRouterParam, createError } from "h3";
-import { storageApi } from "@root/modules/storage";
-import { getFormatAdapter } from "@root/modules/content-formats";
+import { storageApi } from "@modules/storage";
+import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import type { Topic, Lesson } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -29,9 +30,9 @@ export default defineEventHandler(async (event) => {
     const course = courseAdapter.deserialize(await response.text());
 
     const topics = await Promise.all(
-      (course.topics ?? []).map(async (topic: any) => {
+      (course.topics ?? []).map(async (topic: Topic) => {
         const lessons = await Promise.all(
-          (topic.lessons ?? []).map(async (lesson: any) => {
+          (topic.lessons ?? []).map(async (lesson: Lesson) => {
             // Check lesson content
             const lessonStat = await storageApi.stat(
               storagePaths.lesson(id, lesson.id)

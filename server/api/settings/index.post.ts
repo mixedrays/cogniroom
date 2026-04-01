@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { defineEventHandler, readBody } from "h3";
-import { FileSystemAdapter } from "@root/modules/storage";
+import { FileSystemAdapter } from "@modules/storage";
 import { v4 as uuid } from "uuid";
 
 // Settings storage uses .settings directory in project root

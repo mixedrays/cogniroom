@@ -1,4 +1,4 @@
-import { storageApi } from "@root/modules/storage";
+import { storageApi } from "@modules/storage";
 import { getPromptDefinition, PROMPT_REGISTRY } from "./promptRegistry";
 import { renderPromptTemplate } from "./promptTemplate";
 

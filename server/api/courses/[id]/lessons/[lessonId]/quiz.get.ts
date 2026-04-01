@@ -1,6 +1,6 @@
 import { defineEventHandler, getRouterParam, createError } from "h3";
-import { storageApi } from "@root/modules/storage";
-import { getFormatAdapter } from "@root/modules/content-formats";
+import { storageApi } from "@modules/storage";
+import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
 
 export default defineEventHandler(async (event) => {

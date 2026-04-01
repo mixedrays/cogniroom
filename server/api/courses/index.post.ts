@@ -1,65 +1,50 @@
 import { defineEventHandler, readBody } from "h3";
 import { readdirSync } from "node:fs";
-import { storageApi } from "@root/modules/storage";
+import { storageApi } from "@modules/storage";
 import { COURSES_DIR } from "@root/server/env";
-import { getFormatAdapter } from "@root/modules/content-formats";
+import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
-
-function toSlug(title: string): string {
-  const slug = title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 50)
-    .replace(/-$/, "");
-  return slug;
-}
-
-function courseId(title: string): string {
-  const slug = toSlug(title) || `course-${Date.now()}`;
-  let existing: string[] = [];
-  try {
-    existing = readdirSync(COURSES_DIR);
-  } catch {}
-  if (!existing.includes(slug)) return slug;
-  let n = 2;
-  while (existing.includes(`${slug}-${n}`)) n++;
-  return `${slug}-${n}`;
-}
+import { toSlug, generateUniqueCourseId } from "@modules/core";
+import type { Course } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
   try {
-    const body = await readBody<{
-      title: string;
-      topics?: Array<{
-        lessons?: Array<{ title: string; [key: string]: unknown }>;
-        [key: string]: unknown;
-      }>;
-      [key: string]: unknown;
-    }>(event);
+    const body = await readBody<Partial<Course>>(event);
 
     if (!body || !body.title) {
       return { success: false, error: "Invalid course data" };
     }
 
-    const id = courseId(body.title);
+    let existingIds: string[] = [];
+    try {
+      existingIds = readdirSync(COURSES_DIR);
+    } catch {}
+    const id = generateUniqueCourseId(body.title, existingIds);
 
-    let lessonCounter = 0;
-    const updatedTopics = (body.topics ?? []).map((topic) => ({
-      ...topic,
-      lessons: (topic.lessons ?? []).map((lesson) => {
-        lessonCounter++;
-        const lessonSlug = toSlug(lesson.title) || `lesson`;
-        return { ...lesson, id: `${lessonCounter}-${lessonSlug}` };
-      }),
-    }));
+    const updatedTopics = (body.topics ?? []).map((topic) => {
+      const topicTitle = typeof topic.title === "string" ? topic.title : "";
+      const topicId =
+        typeof topic.id === "string" && topic.id
+          ? topic.id
+          : toSlug(topicTitle) || "topic";
+      return {
+        ...topic,
+        id: topicId,
+        lessons: (topic.lessons ?? []).map((lesson) => ({
+          ...lesson,
+          id:
+            typeof lesson.id === "string" && lesson.id
+              ? lesson.id
+              : toSlug(lesson.title) || "lesson",
+        })),
+      };
+    });
 
     const now = new Date().toISOString();
-    const course = {
+    const course: Course = {
       ...body,
       id,
+      title: body.title ?? "Untitled Course",
       topics: updatedTopics,
       source: body.source ?? "llm",
       createdAt: body.createdAt ?? now,
@@ -69,7 +54,7 @@ export default defineEventHandler(async (event) => {
     const courseAdapter = getFormatAdapter("course");
     const response = await storageApi.post(
       storagePaths.course(id),
-      courseAdapter.serialize(course as any)
+      courseAdapter.serialize(course)
     );
 
     if (!response.ok) {

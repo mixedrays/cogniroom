@@ -1,6 +1,7 @@
 import { defineEventHandler, getRouterParam, readBody, createError } from "h3";
-import { storageApi } from "@root/modules/storage";
+import { storageApi } from "@modules/storage";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import type { ReviewData } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -14,7 +15,11 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const body = (await readBody(event)) as object;
+    const body = await readBody<ReviewData>(event);
+
+    if (!body) {
+      throw createError({ statusCode: 400, statusMessage: "Missing body" });
+    }
 
     await storageApi.put(storagePaths.reviews(courseId, lessonId), body);
 

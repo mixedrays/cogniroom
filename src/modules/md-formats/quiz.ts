@@ -52,7 +52,7 @@ import type {
   QuizContent,
   QuizQuestion,
   TrueFalseQuizQuestion,
-} from "../../src/lib/types";
+} from "@modules/core";
 import { parseFrontmatter, splitOnBoundaries } from "./parser";
 
 export function quizToMd(content: QuizContent): string {

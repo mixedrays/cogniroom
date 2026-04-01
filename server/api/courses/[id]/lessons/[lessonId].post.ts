@@ -1,9 +1,8 @@
 import { defineEventHandler, readBody, createError, getRouterParam } from "h3";
-import { storageApi } from "@root/modules/storage";
-import { getFormatAdapter } from "@root/modules/content-formats";
+import { storageApi } from "@modules/storage";
+import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
-
-type LessonSection = "theory" | "flashcards" | "quiz" | "exercises";
+import type { Lesson, LessonSection } from "@modules/core";
 
 interface UpdateLessonBody {
   completed?: boolean;
@@ -38,10 +37,10 @@ export default defineEventHandler(async (event) => {
 
     const course = courseAdapter.deserialize(await response.text());
 
-    let targetLesson: any = null;
+    let targetLesson: Lesson | null = null;
 
     for (const topic of course.topics ?? []) {
-      const lesson = topic.lessons?.find((l: any) => l.id === lessonId);
+      const lesson = topic.lessons?.find((l) => l.id === lessonId);
       if (lesson) {
         targetLesson = lesson;
         break;
@@ -60,22 +59,25 @@ export default defineEventHandler(async (event) => {
     // Get the field names based on section
     const completedField = `${section}Completed`;
     const completedAtField = `${section}CompletedAt`;
+    const lessonRecord = targetLesson as unknown as Record<string, unknown>;
 
     // Determine the current value (handle legacy 'completed' field for theory)
     const currentValue =
       section === "theory"
-        ? (targetLesson[completedField] ?? targetLesson.completed ?? false)
-        : (targetLesson[completedField] ?? false);
+        ? ((lessonRecord[completedField] as boolean | undefined) ??
+          targetLesson.completed ??
+          false)
+        : ((lessonRecord[completedField] as boolean | undefined) ?? false);
 
     const nextCompleted =
       typeof body?.completed === "boolean" ? body.completed : !currentValue;
 
     // Update the section-specific fields
-    targetLesson[completedField] = nextCompleted;
+    lessonRecord[completedField] = nextCompleted;
     if (nextCompleted) {
-      targetLesson[completedAtField] = now;
+      lessonRecord[completedAtField] = now;
     } else {
-      delete targetLesson[completedAtField];
+      delete lessonRecord[completedAtField];
     }
 
     // For backwards compatibility, also update legacy fields for theory

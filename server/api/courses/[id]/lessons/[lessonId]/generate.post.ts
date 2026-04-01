@@ -6,9 +6,10 @@ import {
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { storageApi } from "@root/modules/storage";
-import { getFormatAdapter } from "@root/modules/content-formats";
+import { storageApi } from "@modules/storage";
+import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import type { Lesson, Topic } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -44,11 +45,11 @@ export default defineEventHandler(async (event) => {
     const course = courseAdapter.deserialize(await courseResponse.text());
 
     // 2. Find Lesson and Context
-    let targetLesson: any = null;
-    let targetTopic: any = null;
+    let targetLesson: Lesson | null = null;
+    let targetTopic: Topic | null = null;
 
     for (const topic of course.topics) {
-      const lesson = topic.lessons?.find((l: any) => l.id === lessonId);
+      const lesson = topic.lessons?.find((l) => l.id === lessonId);
       if (lesson) {
         targetLesson = lesson;
         targetTopic = topic;
@@ -56,7 +57,7 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    if (!targetLesson) {
+    if (!targetLesson || !targetTopic) {
       throw createError({
         statusCode: 404,
         statusMessage: "Lesson not found in course",
@@ -71,9 +72,9 @@ export default defineEventHandler(async (event) => {
     const prompt = await getRenderedPrompt("lesson-generation", {
       courseTitle: course.title,
       topicTitle: targetTopic.title,
-      topicDescription: targetTopic.description,
+      topicDescription: targetTopic.description ?? "",
       lessonTitle: targetLesson.title,
-      lessonDescription: targetLesson.description,
+      lessonDescription: targetLesson.description ?? "",
       additionalInstructions,
     });
 

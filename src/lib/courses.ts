@@ -38,9 +38,7 @@ export async function saveCourse(
   try {
     const response = await fetch(`${getBaseUrl()}/api/courses`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(course),
     });
     return await response.json();

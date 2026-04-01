@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { defineEventHandler } from "h3";
-import { FileSystemAdapter } from "@root/modules/storage";
+import { FileSystemAdapter } from "@modules/storage";
 
 // Default settings matching the client-side defaults
 const DEFAULT_SETTINGS = {

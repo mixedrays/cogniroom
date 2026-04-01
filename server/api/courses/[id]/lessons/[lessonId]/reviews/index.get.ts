@@ -1,6 +1,7 @@
 import { defineEventHandler, getRouterParam, createError } from "h3";
-import { storage } from "@root/modules/storage";
+import { storage } from "@modules/storage";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import type { ReviewData } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -14,7 +15,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const response = await storage<any>(
+    const response = await storage<ReviewData>(
       storagePaths.reviews(courseId, lessonId)
     );
 

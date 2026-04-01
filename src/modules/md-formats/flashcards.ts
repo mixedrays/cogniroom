@@ -14,7 +14,7 @@
  * ---   ← item separator / start of next item
  */
 
-import type { Flashcard, FlashcardsContent } from "../../src/lib/types";
+import type { Flashcard, FlashcardsContent } from "@modules/core";
 import { parseFrontmatter, splitOnBoundaries } from "./parser";
 
 export function flashcardsToMd(content: FlashcardsContent): string {

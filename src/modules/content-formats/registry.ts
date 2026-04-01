@@ -2,7 +2,7 @@ import type {
   FlashcardsContent,
   QuizContent,
   Course,
-} from "@root/src/lib/types";
+} from "@modules/core";
 import type { ContentFormatAdapter } from "./types";
 import {
   flashcardsMarkdownAdapter,

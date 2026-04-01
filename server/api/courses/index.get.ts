@@ -1,7 +1,8 @@
 import { defineEventHandler } from "h3";
-import { storageApi } from "@root/modules/storage";
-import { getFormatAdapter } from "@root/modules/content-formats";
+import { storageApi } from "@modules/storage";
+import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import type { Topic, Lesson } from "@modules/core";
 
 export default defineEventHandler(async () => {
   try {
@@ -25,14 +26,15 @@ export default defineEventHandler(async () => {
           const topicCount = course.topics?.length || 0;
           const lessonCount =
             course.topics?.reduce(
-              (acc: number, topic: any) => acc + (topic.lessons?.length || 0),
+              (acc: number, topic: Topic) => acc + (topic.lessons?.length || 0),
               0
             ) || 0;
           const completedCount =
             course.topics?.reduce(
-              (acc: number, topic: any) =>
+              (acc: number, topic: Topic) =>
                 acc +
-                (topic.lessons?.filter((l: any) => l.completed)?.length || 0),
+                (topic.lessons?.filter((l: Lesson) => l.completed)?.length ||
+                  0),
               0
             ) || 0;
           const progress =

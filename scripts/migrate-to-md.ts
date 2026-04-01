@@ -25,7 +25,7 @@ import {
   courseToMd,
   flashcardsToMd,
   quizToMd,
-} from "../modules/md-formats/index.js";
+} from "../src/modules/md-formats/index.js";
 import type {
   Course,
   FlashcardsContent,

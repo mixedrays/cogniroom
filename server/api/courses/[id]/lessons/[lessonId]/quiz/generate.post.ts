@@ -8,10 +8,10 @@ import {
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { storageApi } from "@root/modules/storage";
-import { getFormatAdapter } from "@root/modules/content-formats";
+import { storageApi } from "@modules/storage";
+import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
-import type { QuizContent } from "@root/src/lib/types";
+import type { QuizContent, Lesson, Topic } from "@modules/core";
 
 // Flat schema required because OpenAI structured outputs do not support oneOf/discriminatedUnion.
 // Fields that belong only to one type are nullable; type is reconstructed after parsing.
@@ -63,11 +63,11 @@ export default defineEventHandler(async (event) => {
     }
     const course = courseAdapter.deserialize(await courseResponse.text());
 
-    let targetLesson: any = null;
-    let targetTopic: any = null;
+    let targetLesson: Lesson | null = null;
+    let targetTopic: Topic | null = null;
 
     for (const topic of course.topics) {
-      const lesson = topic.lessons?.find((l: any) => l.id === lessonId);
+      const lesson = topic.lessons?.find((l) => l.id === lessonId);
       if (lesson) {
         targetLesson = lesson;
         targetTopic = topic;
@@ -75,7 +75,7 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    if (!targetLesson) {
+    if (!targetLesson || !targetTopic) {
       throw createError({
         statusCode: 404,
         statusMessage: "Lesson not found in course",
@@ -102,9 +102,9 @@ export default defineEventHandler(async (event) => {
     const prompt = await getRenderedPrompt("quiz-generation", {
       courseTitle: course.title,
       topicTitle: targetTopic.title,
-      topicDescription: targetTopic.description,
+      topicDescription: targetTopic.description ?? "",
       lessonTitle: targetLesson.title,
-      lessonDescription: targetLesson.description,
+      lessonDescription: targetLesson.description ?? "",
       lessonContent,
       additionalInstructions,
     });

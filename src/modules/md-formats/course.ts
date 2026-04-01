@@ -28,7 +28,7 @@
  * ---
  */
 
-import type { Course, Lesson, Topic } from "../../src/lib/types";
+import type { Course, Lesson, Topic } from "@modules/core";
 import { parseFrontmatter, splitOnBoundaries } from "./parser";
 
 export function courseToMd(course: Course): string {

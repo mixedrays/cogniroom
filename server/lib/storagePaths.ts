@@ -1,4 +1,4 @@
-import { getFormatAdapter } from "@root/modules/content-formats";
+import { getFormatAdapter } from "@modules/content-formats";
 
 export const storagePaths = {
   courseDir(courseId: string): string {

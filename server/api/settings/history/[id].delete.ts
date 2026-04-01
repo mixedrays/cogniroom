@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { defineEventHandler, getRouterParam } from "h3";
-import { FileSystemAdapter } from "@root/modules/storage";
+import { FileSystemAdapter } from "@modules/storage";
 
 interface HistoryEntry {
   id: string;

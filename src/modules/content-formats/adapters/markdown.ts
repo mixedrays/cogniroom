@@ -5,13 +5,13 @@ import {
   mdToQuiz,
   courseToMd,
   mdToCourse,
-} from "@root/modules/md-formats";
+} from "@modules/md-formats";
 import type { ContentFormatAdapter } from "../types";
 import type {
   FlashcardsContent,
   QuizContent,
   Course,
-} from "@root/src/lib/types";
+} from "@modules/core";
 
 export const flashcardsMarkdownAdapter: ContentFormatAdapter<FlashcardsContent> =
   {
