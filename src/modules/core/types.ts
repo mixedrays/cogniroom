@@ -60,6 +60,39 @@ export interface CourseMetadata {
 /** @deprecated Use CourseMetadata instead */
 export type RoadmapMetadata = CourseMetadata;
 
+/**
+ * Normalized lesson snapshot used for shape-based comparisons between generated
+ * roadmap previews and persisted course data.
+ */
+export interface NormalizedLesson
+  extends Pick<Lesson, "title" | "description"> {
+  description: string;
+}
+
+/**
+ * Normalized topic snapshot that keeps only comparison-relevant fields and
+ * ensures nested lessons follow the same normalized shape.
+ */
+export interface NormalizedTopic extends Pick<Topic, "title" | "description"> {
+  description: string;
+  lessons: NormalizedLesson[];
+}
+
+/**
+ * Metadata-free course shape for deterministic roadmap matching. It excludes
+ * persistence fields such as ids, timestamps, and source information.
+ */
+export interface NormalizedCourse
+  extends Pick<Course, "title" | "description"> {
+  description: string;
+  topics: NormalizedTopic[];
+}
+
+/**
+ * Backward-compatible alias for roadmap terminology in agent-facing code.
+ */
+export type NormalizedRoadmap = NormalizedCourse;
+
 export interface Flashcard {
   id: string;
   question: string;
