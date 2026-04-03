@@ -42,13 +42,32 @@ export async function runAgentStream({
     abortSignal: signal,
   });
 
+  let streamingClientTool = false;
+
   for await (const part of result.fullStream) {
     if (part.type === "text-delta") {
       await onEvent({ type: "token", delta: part.text });
     } else if (
+      part.type === "tool-input-start" &&
+      clientToolNames.has(part.toolName)
+    ) {
+      streamingClientTool = true;
+      await onEvent({
+        type: "tool_call_start",
+        toolCallId: part.id,
+        toolName: part.toolName,
+      });
+    } else if (part.type === "tool-input-delta" && streamingClientTool) {
+      await onEvent({
+        type: "tool_call_delta",
+        toolCallId: part.id,
+        delta: part.delta,
+      });
+    } else if (
       part.type === "tool-call" &&
       clientToolNames.has(part.toolName)
     ) {
+      streamingClientTool = false;
       await onEvent({
         type: "tool_call",
         toolCallId: part.toolCallId,

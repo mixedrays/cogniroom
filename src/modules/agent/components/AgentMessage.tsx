@@ -140,6 +140,8 @@ export function AgentMessage({
     return (
       <Widget
         params={message.params}
+        streamingInput={message.streamingInput}
+        isStreaming={message.status === "streaming"}
         onSubmit={(result) => onToolSubmit(message.toolCallId, result)}
         onDismiss={() => onToolDismiss(message.toolCallId)}
         context={context}

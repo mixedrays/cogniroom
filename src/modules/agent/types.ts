@@ -12,6 +12,8 @@ export interface AgentTool<TParams extends ZodType = ZodType> {
     name: string;
     Widget: ComponentType<{
       params: unknown;
+      streamingInput?: string;
+      isStreaming?: boolean;
       onSubmit: (result: unknown) => void;
       onDismiss: () => void;
       context?: Record<string, unknown>;
@@ -35,13 +37,20 @@ export type AgentMessageState =
       toolName: string;
       toolCallId: string;
       params: unknown;
-      status: "pending" | "submitted" | "dismissed";
+      status: "streaming" | "pending" | "submitted" | "dismissed";
+      streamingInput?: string;
       result?: unknown;
     }
   | { id: string; role: "error"; message: string };
 
 export type AgentSseEvent =
   | { type: "token"; delta: string }
+  | {
+      type: "tool_call_start";
+      toolCallId: string;
+      toolName: string;
+    }
+  | { type: "tool_call_delta"; toolCallId: string; delta: string }
   | { type: "tool_call"; toolCallId: string; toolName: string; params: unknown }
   | { type: "error"; message: string }
   | { type: "done" };

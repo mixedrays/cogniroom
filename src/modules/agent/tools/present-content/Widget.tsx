@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { parsePartialJson } from "../../lib/parsePartialJson";
 import type { PresentContentParams } from "./schema";
 import type {
   Course,
@@ -23,6 +24,8 @@ import {
 
 interface ContentBubbleProps {
   params: unknown;
+  streamingInput?: string;
+  isStreaming?: boolean;
   onSubmit: (result: unknown) => void;
   onDismiss: () => void;
   context?: {
@@ -134,6 +137,8 @@ async function findMatchingSavedRoadmapId(
 
 export function ContentBubble({
   params,
+  streamingInput,
+  isStreaming = false,
   context,
   superseded = false,
 }: ContentBubbleProps) {
@@ -141,11 +146,35 @@ export function ContentBubble({
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
 
-  const data = params as PresentContentParams;
-  const { type, content, summary } = data;
+  const lastParsedRef = useRef<Partial<PresentContentParams> | undefined>(
+    undefined
+  );
+
+  const partialData = useMemo(() => {
+    if (!isStreaming || !streamingInput) {
+      lastParsedRef.current = undefined;
+      return undefined;
+    }
+    const parsed = parsePartialJson(streamingInput) as
+      | Partial<PresentContentParams>
+      | undefined;
+    if (parsed !== undefined) {
+      lastParsedRef.current = parsed;
+    }
+    return lastParsedRef.current;
+  }, [isStreaming, streamingInput]);
+
+  const data = isStreaming
+    ? (partialData as PresentContentParams | undefined)
+    : (params as PresentContentParams);
+
+  const type = data?.type;
+  const content = data?.content;
+  const summary = data?.summary;
+
   const roadmapSignature = type === "roadmap" ? getRoadmapSignature(content) : null;
   const shouldCheckSavedRoadmap =
-    type === "roadmap" && Boolean(roadmapSignature) && !superseded;
+    !isStreaming && type === "roadmap" && Boolean(roadmapSignature) && !superseded;
 
   const savedRoadmapQuery = useQuery({
     queryKey: ["presentContent", "savedRoadmap", roadmapSignature],
@@ -159,10 +188,22 @@ export function ContentBubble({
     (type === "roadmap" && Boolean(savedRoadmapQuery.data));
   const canResaveRoadmap = type === "roadmap" && isSaved && !superseded;
   const isSaveDisabled =
+    isStreaming ||
     superseded ||
     saveState === "saving" ||
     isCheckingSavedRoadmap ||
     (!canResaveRoadmap && isSaved);
+
+  if (!type) {
+    return (
+      <div className="rounded-2xl rounded-tl-sm border border-border bg-card text-sm">
+        <div className="flex items-center gap-2 px-4 py-3">
+          <Loader2 className="size-3 animate-spin text-muted-foreground" />
+          <span className="text-muted-foreground text-xs">Generating…</span>
+        </div>
+      </div>
+    );
+  }
 
   const handleSave = async () => {
     setSaveState("saving");
@@ -233,7 +274,13 @@ export function ContentBubble({
             <span className="text-muted-foreground text-xs">{summary}</span>
           )}
         </div>
-        {isSaved && (
+        {isStreaming && (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Loader2 className="size-3 animate-spin" />
+            Generating…
+          </span>
+        )}
+        {!isStreaming && isSaved && (
           <span className="flex items-center gap-1 text-xs text-green-600">
             <Check className="size-3" />
             Saved

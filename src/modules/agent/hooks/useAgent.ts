@@ -14,6 +14,13 @@ type Action =
   | { type: "COMPLETE_ASSISTANT"; id: string }
   | { type: "CANCEL_ASSISTANT"; id: string }
   | {
+      type: "START_TOOL_CALL_STREAM";
+      assistantId: string;
+      toolCallId: string;
+      toolName: string;
+    }
+  | { type: "APPEND_TOOL_CALL_DELTA"; toolCallId: string; delta: string }
+  | {
       type: "ADD_TOOL_CALL";
       assistantId: string;
       toolCallId: string;
@@ -68,15 +75,17 @@ function reducer(state: State, action: Action): State {
         ...state,
         isStreaming: false,
         messages: state.messages.map((m) =>
-          m.id === action.id && m.role === "assistant"
-            ? { ...m, status: "cancelled" }
+          m.id === action.id
+            ? m.role === "assistant"
+              ? { ...m, status: "cancelled" }
+              : { id: m.id, role: "assistant", status: "cancelled", text: "" }
             : m
         ),
       };
-    case "ADD_TOOL_CALL":
+    case "START_TOOL_CALL_STREAM":
       return {
         ...state,
-        isStreaming: false,
+        isStreaming: true,
         messages: [
           ...state.messages.filter((m) => m.id !== action.assistantId),
           {
@@ -84,10 +93,52 @@ function reducer(state: State, action: Action): State {
             role: "tool_call",
             toolName: action.toolName,
             toolCallId: action.toolCallId,
-            params: action.params,
-            status: "pending",
+            params: undefined,
+            streamingInput: "",
+            status: "streaming",
           },
         ],
+      };
+    case "APPEND_TOOL_CALL_DELTA":
+      return {
+        ...state,
+        messages: state.messages.map((m) =>
+          m.role === "tool_call" &&
+          m.toolCallId === action.toolCallId &&
+          m.status === "streaming"
+            ? { ...m, streamingInput: (m.streamingInput ?? "") + action.delta }
+            : m
+        ),
+      };
+    case "ADD_TOOL_CALL":
+      return {
+        ...state,
+        isStreaming: false,
+        messages: state.messages.some(
+          (m) =>
+            m.role === "tool_call" && m.toolCallId === action.toolCallId
+        )
+          ? state.messages.map((m) =>
+              m.role === "tool_call" && m.toolCallId === action.toolCallId
+                ? {
+                    ...m,
+                    params: action.params,
+                    streamingInput: undefined,
+                    status: "pending" as const,
+                  }
+                : m
+            )
+          : [
+              ...state.messages.filter((m) => m.id !== action.assistantId),
+              {
+                id: action.assistantId,
+                role: "tool_call" as const,
+                toolName: action.toolName,
+                toolCallId: action.toolCallId,
+                params: action.params,
+                status: "pending" as const,
+              },
+            ],
       };
     case "SUBMIT_TOOL_RESULT":
       return {
@@ -198,6 +249,19 @@ export function useAgent({
     (assistantId: string, event: AgentSseEvent) => {
       if (event.type === "token") {
         dispatch({ type: "APPEND_TOKEN", id: assistantId, delta: event.delta });
+      } else if (event.type === "tool_call_start") {
+        dispatch({
+          type: "START_TOOL_CALL_STREAM",
+          assistantId,
+          toolCallId: event.toolCallId,
+          toolName: event.toolName,
+        });
+      } else if (event.type === "tool_call_delta") {
+        dispatch({
+          type: "APPEND_TOOL_CALL_DELTA",
+          toolCallId: event.toolCallId,
+          delta: event.delta,
+        });
       } else if (event.type === "tool_call") {
         dispatch({
           type: "ADD_TOOL_CALL",
