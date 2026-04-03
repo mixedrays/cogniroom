@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { getOpenAIClient, type AvailableModelsId } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
+import { toErrorMessage } from "@root/server/lib/errors";
 
 const RoadmapDraftSchema = z.object({
   title: z.string().min(1),
@@ -39,8 +40,7 @@ type GenerateRoadmapRequest = {
 };
 
 function toSafeErrorMessage(error: unknown): string {
-  const raw = error instanceof Error ? error.message : String(error);
-  // Defensive scrubbing just in case a provider includes auth headers.
+  const raw = toErrorMessage(error);
   return raw
     .replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]")
     .replace(/OPENAI_API_KEY\s*=\s*[^\s]+/gi, "OPENAI_API_KEY=[redacted]")
@@ -104,7 +104,7 @@ export default defineEventHandler(async (event) => {
     };
 
     return { success: true, roadmap };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error generating roadmap:", error);
 
     const message = toSafeErrorMessage(error);

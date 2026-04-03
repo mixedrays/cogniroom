@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody, createError, getRouterParam } from "h3";
+import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
 import { storagePaths } from "@root/server/lib/storagePaths";
 
@@ -7,17 +7,17 @@ export default defineEventHandler(async (event) => {
   const lessonId = getRouterParam(event, "lessonId");
 
   if (!courseId || !lessonId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Missing courseId or lessonId",
+    throw new HTTPError({
+      status: 400,
+      message: "Missing courseId or lessonId",
     });
   }
 
   const body = await readBody<{ content: string }>(event);
   if (typeof body?.content !== "string") {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "content must be a string",
+    throw new HTTPError({
+      status: 400,
+      message: "content must be a string",
     });
   }
 

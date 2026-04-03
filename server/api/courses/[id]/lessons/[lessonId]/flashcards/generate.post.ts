@@ -1,5 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { defineEventHandler, readBody, createError, getRouterParam } from "h3";
+import {
+  defineEventHandler,
+  readBody,
+  HTTPError,
+  getRouterParam,
+} from "h3";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import {
@@ -8,6 +13,7 @@ import {
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
+import { toErrorMessage } from "@root/server/lib/errors";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
@@ -36,9 +42,9 @@ export default defineEventHandler(async (event) => {
     const model = (body?.model ?? DEFAULT_MODEL).trim() as AvailableModelsId;
 
     if (!courseId || !lessonId) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: "Missing courseId or lessonId",
+      throw new HTTPError({
+        status: 400,
+        message: "Missing courseId or lessonId",
       });
     }
 
@@ -47,9 +53,9 @@ export default defineEventHandler(async (event) => {
       storagePaths.course(courseId)
     );
     if (!courseResponse.ok) {
-      throw createError({
-        statusCode: courseResponse.status,
-        statusMessage:
+      throw new HTTPError({
+        status: courseResponse.status,
+        message:
           courseResponse.status === 404
             ? "Course not found"
             : courseResponse.statusText,
@@ -70,9 +76,9 @@ export default defineEventHandler(async (event) => {
     }
 
     if (!targetLesson || !targetTopic) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: "Lesson not found in course",
+      throw new HTTPError({
+        status: 404,
+        message: "Lesson not found in course",
       });
     }
 
@@ -134,17 +140,13 @@ export default defineEventHandler(async (event) => {
 
     return { success: true, content };
   } catch (error: unknown) {
-    if (error && typeof error === "object" && "statusCode" in error) {
+    if (error instanceof HTTPError) {
       throw error;
     }
     console.error("Error generating flashcards:", error);
-    throw createError({
-      statusCode: 500,
-      statusMessage: `Failed to generate flashcards: ${
-        error && typeof error === "object" && "message" in error
-          ? error.message
-          : "Unknown error"
-      }`,
+    throw new HTTPError({
+      status: 500,
+      message: `Failed to generate flashcards: ${toErrorMessage(error)}`,
     });
   }
 });

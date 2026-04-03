@@ -1,4 +1,4 @@
-import { defineEventHandler, getRouterParam, createError } from "h3";
+import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storage } from "@modules/storage";
 import { storagePaths } from "@root/server/lib/storagePaths";
 import type { ReviewData } from "@modules/core";
@@ -9,9 +9,9 @@ export default defineEventHandler(async (event) => {
     const lessonId = getRouterParam(event, "lessonId");
 
     if (!courseId || !lessonId) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: "Missing course ID or lesson ID",
+      throw new HTTPError({
+        status: 400,
+        message: "Missing course ID or lesson ID",
       });
     }
 
@@ -23,17 +23,17 @@ export default defineEventHandler(async (event) => {
       return await response.json();
     }
 
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Reviews not found",
+    throw new HTTPError({
+      status: 404,
+      message: "Reviews not found",
     });
-  } catch (error: any) {
-    if (error.statusCode) {
+  } catch (error: unknown) {
+    if (error instanceof HTTPError) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Failed to load reviews",
+    throw new HTTPError({
+      status: 500,
+      message: "Failed to load reviews",
     });
   }
 });

@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { defineEventHandler, getRouterParam } from "h3";
 import { FileSystemAdapter } from "@modules/storage";
+import { toErrorMessage } from "@root/server/lib/errors";
 
 interface HistoryEntry {
   id: string;
@@ -59,8 +60,8 @@ export default defineEventHandler(async (event) => {
     });
 
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error deleting history entry:", error);
-    return { success: false, error: String(error) };
+    return { success: false, error: toErrorMessage(error) };
   }
 });

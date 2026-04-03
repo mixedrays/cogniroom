@@ -2,6 +2,7 @@ import { defineEventHandler, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import { toErrorMessage } from "@root/server/lib/errors";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -44,8 +45,8 @@ export default defineEventHandler(async (event) => {
     }
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting quiz:", error);
-    return { success: false, error: String(error) };
+    return { success: false, error: toErrorMessage(error) };
   }
 });

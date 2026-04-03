@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { defineEventHandler } from "h3";
 import { FileSystemAdapter } from "@modules/storage";
+import { toErrorMessage } from "@root/server/lib/errors";
 
 interface HistoryEntry {
   id: string;
@@ -47,11 +48,11 @@ export default defineEventHandler(async () => {
       success: true,
       history: { entries: [], maxEntries: 50 },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error reading settings history:", error);
     return {
       success: false,
-      error: String(error),
+      error: toErrorMessage(error),
       history: { entries: [], maxEntries: 50 },
     };
   }

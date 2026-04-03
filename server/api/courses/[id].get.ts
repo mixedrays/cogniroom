@@ -1,4 +1,4 @@
-import { defineEventHandler, getRouterParam, createError } from "h3";
+import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
@@ -9,9 +9,9 @@ export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, "id");
 
     if (!id) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: "Missing course ID",
+      throw new HTTPError({
+        status: 400,
+        message: "Missing course ID",
       });
     }
 
@@ -20,9 +20,9 @@ export default defineEventHandler(async (event) => {
     const response = await storageApi.get<string>(storagePaths.course(id));
 
     if (!response.ok) {
-      throw createError({
-        statusCode: response.status,
-        statusMessage:
+      throw new HTTPError({
+        status: response.status,
+        message:
           response.status === 404 ? "Course not found" : response.statusText,
       });
     }
@@ -82,14 +82,14 @@ export default defineEventHandler(async (event) => {
     );
 
     return { ...course, topics };
-  } catch (error: any) {
-    if (error.statusCode) {
+  } catch (error: unknown) {
+    if (error instanceof HTTPError) {
       throw error;
     }
     console.error("Error getting course:", error);
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Internal server error",
+    throw new HTTPError({
+      status: 500,
+      message: "Internal server error",
     });
   }
 });

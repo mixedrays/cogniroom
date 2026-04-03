@@ -54,7 +54,7 @@ export default defineEventHandler(async () => {
             completedCount,
             progress,
           };
-        } catch (error) {
+        } catch (error: unknown) {
           console.error(`Error reading course ${folder.name}:`, error);
           return null;
         }
@@ -69,7 +69,7 @@ export default defineEventHandler(async () => {
     );
 
     return validCourses;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error listing courses:", error);
     return [];
   }

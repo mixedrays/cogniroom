@@ -1,7 +1,8 @@
-import { defineEventHandler, readBody, createError } from "h3";
+import { defineEventHandler, readBody, HTTPError } from "h3";
 import { generateText } from "ai";
 import { getOpenAIClient, DEFAULT_MODEL } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
+import { toErrorMessage } from "@root/server/lib/errors";
 
 type ApiMessage = { role: "user" | "assistant"; content: string };
 
@@ -12,7 +13,7 @@ export default defineEventHandler(async (event) => {
   }>(event);
 
   if (!Array.isArray(body?.messages)) {
-    throw createError({ statusCode: 400, statusMessage: "Missing messages" });
+    throw new HTTPError({ status: 400, message: "Missing messages" });
   }
 
   const context = JSON.stringify(body.context ?? {});
@@ -55,8 +56,8 @@ export default defineEventHandler(async (event) => {
 
     return { success: true, message };
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : String(error);
+    const msg = toErrorMessage(error);
     console.error("[wizard/chat] error:", msg);
-    throw createError({ statusCode: 500, statusMessage: msg.slice(0, 300) });
+    throw new HTTPError({ status: 500, message: msg.slice(0, 300) });
   }
 });

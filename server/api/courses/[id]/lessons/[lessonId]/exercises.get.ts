@@ -1,4 +1,4 @@
-import { defineEventHandler, getRouterParam, createError } from "h3";
+import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storage } from "@modules/storage";
 import { storagePaths } from "@root/server/lib/storagePaths";
 
@@ -8,9 +8,9 @@ export default defineEventHandler(async (event) => {
     const lessonId = getRouterParam(event, "lessonId");
 
     if (!courseId || !lessonId) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: "Missing course ID or lesson ID",
+      throw new HTTPError({
+        status: 400,
+        message: "Missing course ID or lesson ID",
       });
     }
 
@@ -19,9 +19,9 @@ export default defineEventHandler(async (event) => {
     );
 
     if (!response.ok) {
-      throw createError({
-        statusCode: response.status,
-        statusMessage:
+      throw new HTTPError({
+        status: response.status,
+        message:
           response.status === 404
             ? "Exercises content not found"
             : response.statusText,
@@ -30,13 +30,13 @@ export default defineEventHandler(async (event) => {
 
     const content = await response.text();
     return { content };
-  } catch (error: any) {
-    if (error.statusCode) {
+  } catch (error: unknown) {
+    if (error instanceof HTTPError) {
       throw error;
     }
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Failed to load exercises content",
+    throw new HTTPError({
+      status: 500,
+      message: "Failed to load exercises content",
     });
   }
 });

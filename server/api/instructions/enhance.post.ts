@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody, createError } from "h3";
+import { defineEventHandler, readBody, HTTPError } from "h3";
 import { generateText } from "ai";
 import {
   getOpenAIClient,
@@ -11,6 +11,7 @@ import {
   type InstructionEnhancementContext,
 } from "@root/server/lib/instructionEnhancementPrompt";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
+import { toErrorMessage } from "@root/server/lib/errors";
 
 interface EnhanceInstructionRequest extends InstructionEnhancementContext {
   model?: string;
@@ -29,25 +30,25 @@ export default defineEventHandler(
 
       // Validate required fields
       if (!body?.userInstruction) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: "Missing required field: userInstruction",
+        throw new HTTPError({
+          status: 400,
+          message: "Missing required field: userInstruction",
         });
       }
 
       if (!body?.contentType) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: "Missing required field: contentType",
+        throw new HTTPError({
+          status: 400,
+          message: "Missing required field: contentType",
         });
       }
 
       // Validate content type
       const validContentTypes = ["lesson", "exercise", "test", "course"];
       if (!validContentTypes.includes(body.contentType)) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: `Invalid contentType. Must be one of: ${validContentTypes.join(", ")}`,
+        throw new HTTPError({
+          status: 400,
+          message: `Invalid contentType. Must be one of: ${validContentTypes.join(", ")}`,
         });
       }
 
@@ -86,18 +87,16 @@ export default defineEventHandler(
         success: true,
         enhancedInstruction: result.text.trim(),
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error enhancing instruction:", error);
 
-      // If it's already an HTTP error, re-throw it
-      if (error.statusCode) {
+      if (error instanceof HTTPError) {
         throw error;
       }
 
-      // Handle other errors
-      throw createError({
-        statusCode: 500,
-        statusMessage: `Failed to enhance instruction: ${error.message}`,
+      throw new HTTPError({
+        status: 500,
+        message: `Failed to enhance instruction: ${toErrorMessage(error)}`,
       });
     }
   }

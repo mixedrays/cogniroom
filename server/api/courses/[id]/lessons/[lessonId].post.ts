@@ -1,4 +1,9 @@
-import { defineEventHandler, readBody, createError, getRouterParam } from "h3";
+import {
+  defineEventHandler,
+  readBody,
+  HTTPError,
+  getRouterParam,
+} from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
@@ -16,9 +21,9 @@ export default defineEventHandler(async (event) => {
     const body = await readBody<UpdateLessonBody>(event);
 
     if (!courseId || !lessonId) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: "Missing courseId or lessonId",
+      throw new HTTPError({
+        status: 400,
+        message: "Missing courseId or lessonId",
       });
     }
 
@@ -28,9 +33,9 @@ export default defineEventHandler(async (event) => {
     const response = await storageApi.get<string>(coursePath);
 
     if (!response.ok) {
-      throw createError({
-        statusCode: response.status,
-        statusMessage:
+      throw new HTTPError({
+        status: response.status,
+        message:
           response.status === 404 ? "Course not found" : response.statusText,
       });
     }
@@ -48,9 +53,9 @@ export default defineEventHandler(async (event) => {
     }
 
     if (!targetLesson) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: "Lesson not found in course",
+      throw new HTTPError({
+        status: 404,
+        message: "Lesson not found in course",
       });
     }
 
@@ -100,15 +105,15 @@ export default defineEventHandler(async (event) => {
       completed: nextCompleted,
       completedAt: nextCompleted ? now : null,
     };
-  } catch (error: any) {
-    if (error?.statusCode) {
+  } catch (error: unknown) {
+    if (error instanceof HTTPError) {
       throw error;
     }
 
     console.error("Error updating lesson completion:", error);
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Internal server error",
+    throw new HTTPError({
+      status: 500,
+      message: "Internal server error",
     });
   }
 });

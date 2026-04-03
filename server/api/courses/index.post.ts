@@ -3,6 +3,7 @@ import { readdirSync } from "node:fs";
 import { storageApi } from "@modules/storage";
 import { COURSES_DIR } from "@root/server/env";
 import { getFormatAdapter } from "@modules/content-formats";
+import { toErrorMessage } from "@root/server/lib/errors";
 import { storagePaths } from "@root/server/lib/storagePaths";
 import { toSlug, generateUniqueCourseId } from "@modules/core";
 import type { Course } from "@modules/core";
@@ -62,8 +63,8 @@ export default defineEventHandler(async (event) => {
     }
 
     return { success: true, id };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error saving course:", error);
-    return { success: false, error: String(error) };
+    return { success: false, error: toErrorMessage(error) };
   }
 });

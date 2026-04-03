@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { defineEventHandler } from "h3";
 import { FileSystemAdapter } from "@modules/storage";
+import { toErrorMessage } from "@root/server/lib/errors";
 
 // Default settings matching the client-side defaults
 const DEFAULT_SETTINGS = {
@@ -43,11 +44,11 @@ export default defineEventHandler(async () => {
     // Other error
     console.error("Error reading settings:", response.statusText);
     return { success: true, settings: DEFAULT_SETTINGS, isDefault: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error reading settings:", error);
     return {
       success: false,
-      error: String(error),
+      error: toErrorMessage(error),
       settings: DEFAULT_SETTINGS,
     };
   }

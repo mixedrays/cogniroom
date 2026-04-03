@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { defineEventHandler, readBody } from "h3";
 import { FileSystemAdapter } from "@modules/storage";
 import { v4 as uuid } from "uuid";
+import { toErrorMessage } from "@root/server/lib/errors";
 
 // Settings storage uses .settings directory in project root
 const settingsAdapter = new FileSystemAdapter({
@@ -157,8 +158,8 @@ export default defineEventHandler(async (event) => {
     }
 
     return { success: true, settings };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error saving settings:", error);
-    return { success: false, error: String(error) };
+    return { success: false, error: toErrorMessage(error) };
   }
 });
