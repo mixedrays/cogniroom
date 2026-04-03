@@ -4,6 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: This file is auto-generated from INSTRUCTIONS.md. Edit INSTRUCTIONS.md and run `scripts/sync-instructions.sh` to update.
 
+
 ## Project Overview
 
 CogniRoom - A platform for creating, managing, and tracking skill learning roadmaps. Users can generate roadmaps via LLM, import them (e.g., from roadmap.sh), or extract from external sources (video URLs, documentation pages), then generate lessons, tests, exercises content and track learning progress.
@@ -25,6 +26,13 @@ CogniRoom - A platform for creating, managing, and tracking skill learning roadm
 - Do not hardcode any API keys or sensitive information in the codebase. Use environment variables instead.
 - Do not add comments to the code unless necessary for clarity. The code should be self-explanatory and follow best practices for readability.
 - After making changes, run `npm run validate` to run all checks (typecheck, lint, unit tests, e2e tests).
+
+## Core Domain Modeling
+
+- Treat `src/modules/core` as the single source of truth for core business entities and shared domain types.
+- When introducing a new business entity, add its canonical type definitions to the core module first if they do not already exist there.
+- Before adding or changing entity types or interfaces, first check whether the shape belongs in the core module and reuse or extend the exported core type instead of redefining a parallel shape elsewhere.
+- If a normalized, preview, or otherwise derived representation of a core entity is needed across modules, define that shared type in the core module as an explicit derivation from the base core entity and import it from there.
 
 ## Tailwind CSS Guidelines
 
