@@ -33,7 +33,7 @@ export function getContentTypeGuidelines(
       "- Learning objectives and outcomes",
       "- Depth of theoretical explanation",
       "- Use of examples and analogies",
-      "- Code samples or practical demonstrations (if applicable)",
+      "- Practical demonstrations, examples, or walkthroughs appropriate to the subject",
       "- Summary or key takeaways",
     ],
     exercise: [
@@ -46,7 +46,7 @@ export function getContentTypeGuidelines(
     ],
     test: [
       "For test/quiz content, ensure the enhanced instruction addresses:",
-      "- Question types and variety (multiple choice, coding, etc.)",
+      "- Question types and variety (multiple choice, true/false, scenario-based, etc.)",
       "- Coverage of key concepts",
       "- Difficulty distribution",
       "- Clear answer explanations",
@@ -95,7 +95,7 @@ export function validateInstructionForEnhancement(
  */
 export const ENHANCEMENT_TEMPLATES = {
   focusOnPractical:
-    "Focus on practical, hands-on examples. Include working code snippets that learners can run and modify. Prioritize real-world applications over theoretical concepts.",
+    "Focus on practical, hands-on examples. Prioritize real-world applications over theoretical concepts. For programming topics, include working code snippets; for other topics, include actionable steps and demonstrations.",
 
   beginnerFriendly:
     "Explain concepts as if teaching someone with no prior experience. Use simple analogies, break down complex terms, and provide step-by-step explanations.",
