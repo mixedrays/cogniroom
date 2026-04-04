@@ -44,7 +44,10 @@ describe("isLessonSectionCompleted", () => {
 
   it("returns true for theory when theoryCompleted is true", () => {
     expect(
-      isLessonSectionCompleted({ ...baseLesson, theoryCompleted: true }, "theory")
+      isLessonSectionCompleted(
+        { ...baseLesson, theoryCompleted: true },
+        "theory"
+      )
     ).toBe(true);
   });
 
@@ -94,15 +97,15 @@ describe("isLessonFullyCompleted", () => {
   });
 
   it("returns false when hasContent is true but theory not completed", () => {
-    expect(
-      isLessonFullyCompleted({ ...baseLesson, hasContent: true })
-    ).toBe(false);
+    expect(isLessonFullyCompleted({ ...baseLesson, hasContent: true })).toBe(
+      false
+    );
   });
 
   it("returns false when hasExercises is true but exercises not completed", () => {
-    expect(
-      isLessonFullyCompleted({ ...baseLesson, hasExercises: true })
-    ).toBe(false);
+    expect(isLessonFullyCompleted({ ...baseLesson, hasExercises: true })).toBe(
+      false
+    );
   });
 
   it("returns true when both content and exercises are completed", () => {
@@ -139,7 +142,11 @@ describe("calculateProgress", () => {
     const course: Course = {
       ...baseCourse,
       topics: [
-        { id: "t1", title: "T1", lessons: [baseLesson, { ...baseLesson, id: "l2" }] },
+        {
+          id: "t1",
+          title: "T1",
+          lessons: [baseLesson, { ...baseLesson, id: "l2" }],
+        },
       ],
     };
     expect(calculateProgress(course)).toBe(0);

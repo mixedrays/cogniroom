@@ -24,7 +24,10 @@ function CourseComponent() {
       <PageHeader>
         <Breadcrumbs
           className="flex items-center"
-          items={[{ title: "", icon: <Home className="size-4" />, link: "/" }, { title: "Course" }]}
+          items={[
+            { title: "", icon: <Home className="size-4" />, link: "/" },
+            { title: "Course" },
+          ]}
         />
       </PageHeader>
 

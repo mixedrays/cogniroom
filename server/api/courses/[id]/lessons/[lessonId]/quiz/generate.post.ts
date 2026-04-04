@@ -1,10 +1,5 @@
 import { randomUUID } from "node:crypto";
-import {
-  defineEventHandler,
-  readBody,
-  HTTPError,
-  getRouterParam,
-} from "h3";
+import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import {

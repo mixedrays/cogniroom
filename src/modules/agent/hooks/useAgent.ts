@@ -115,8 +115,7 @@ function reducer(state: State, action: Action): State {
         ...state,
         isStreaming: false,
         messages: state.messages.some(
-          (m) =>
-            m.role === "tool_call" && m.toolCallId === action.toolCallId
+          (m) => m.role === "tool_call" && m.toolCallId === action.toolCallId
         )
           ? state.messages.map((m) =>
               m.role === "tool_call" && m.toolCallId === action.toolCallId

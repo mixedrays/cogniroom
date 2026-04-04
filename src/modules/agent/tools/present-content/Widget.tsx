@@ -102,7 +102,10 @@ function getRoadmapSignature(content: unknown): string | null {
 }
 
 function getLessonCount(roadmap: NormalizedRoadmap): number {
-  return roadmap.topics.reduce((count, topic) => count + topic.lessons.length, 0);
+  return roadmap.topics.reduce(
+    (count, topic) => count + topic.lessons.length,
+    0
+  );
 }
 
 async function findMatchingSavedRoadmapId(
@@ -172,9 +175,13 @@ export function ContentBubble({
   const content = data?.content;
   const summary = data?.summary;
 
-  const roadmapSignature = type === "roadmap" ? getRoadmapSignature(content) : null;
+  const roadmapSignature =
+    type === "roadmap" ? getRoadmapSignature(content) : null;
   const shouldCheckSavedRoadmap =
-    !isStreaming && type === "roadmap" && Boolean(roadmapSignature) && !superseded;
+    !isStreaming &&
+    type === "roadmap" &&
+    Boolean(roadmapSignature) &&
+    !superseded;
 
   const savedRoadmapQuery = useQuery({
     queryKey: ["presentContent", "savedRoadmap", roadmapSignature],
@@ -182,7 +189,8 @@ export function ContentBubble({
     enabled: shouldCheckSavedRoadmap,
   });
 
-  const isCheckingSavedRoadmap = shouldCheckSavedRoadmap && savedRoadmapQuery.isPending;
+  const isCheckingSavedRoadmap =
+    shouldCheckSavedRoadmap && savedRoadmapQuery.isPending;
   const isSaved =
     saveState === "saved" ||
     (type === "roadmap" && Boolean(savedRoadmapQuery.data));
@@ -293,11 +301,7 @@ export function ContentBubble({
       </div>
 
       <div className="flex items-center gap-2 px-4 py-3 border-t border-border/50">
-        <Button
-          size="sm"
-          onClick={handleSave}
-          disabled={isSaveDisabled}
-        >
+        <Button size="sm" onClick={handleSave} disabled={isSaveDisabled}>
           {saveState === "saving" ? (
             <>
               <Loader2 className="size-3 animate-spin mr-1.5" />

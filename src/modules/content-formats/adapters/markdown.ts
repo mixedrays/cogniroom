@@ -7,11 +7,7 @@ import {
   mdToCourse,
 } from "@modules/md-formats";
 import type { ContentFormatAdapter } from "../types";
-import type {
-  FlashcardsContent,
-  QuizContent,
-  Course,
-} from "@modules/core";
+import type { FlashcardsContent, QuizContent, Course } from "@modules/core";
 
 export const flashcardsMarkdownAdapter: ContentFormatAdapter<FlashcardsContent> =
   {

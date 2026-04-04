@@ -64,8 +64,10 @@ export type RoadmapMetadata = CourseMetadata;
  * Normalized lesson snapshot used for shape-based comparisons between generated
  * roadmap previews and persisted course data.
  */
-export interface NormalizedLesson
-  extends Pick<Lesson, "title" | "description"> {
+export interface NormalizedLesson extends Pick<
+  Lesson,
+  "title" | "description"
+> {
   description: string;
 }
 
@@ -82,8 +84,10 @@ export interface NormalizedTopic extends Pick<Topic, "title" | "description"> {
  * Metadata-free course shape for deterministic roadmap matching. It excludes
  * persistence fields such as ids, timestamps, and source information.
  */
-export interface NormalizedCourse
-  extends Pick<Course, "title" | "description"> {
+export interface NormalizedCourse extends Pick<
+  Course,
+  "title" | "description"
+> {
   description: string;
   topics: NormalizedTopic[];
 }

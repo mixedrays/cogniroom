@@ -43,7 +43,9 @@ describe("parsePartialJson", () => {
 
   it("closes nested structures", () => {
     expect(
-      parsePartialJson('{"topics":[{"title":"Ownership","lessons":[{"title":"Intro"')
+      parsePartialJson(
+        '{"topics":[{"title":"Ownership","lessons":[{"title":"Intro"'
+      )
     ).toEqual({
       topics: [{ title: "Ownership", lessons: [{ title: "Intro" }] }],
     });
@@ -86,8 +88,9 @@ describe("parsePartialJson", () => {
   });
 
   it("handles array of objects", () => {
-    expect(
-      parsePartialJson('[{"q":"What is Rust?"},{"q":"What is')
-    ).toEqual([{ q: "What is Rust?" }, { q: "What is" }]);
+    expect(parsePartialJson('[{"q":"What is Rust?"},{"q":"What is')).toEqual([
+      { q: "What is Rust?" },
+      { q: "What is" },
+    ]);
   });
 });

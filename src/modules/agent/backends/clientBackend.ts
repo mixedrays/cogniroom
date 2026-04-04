@@ -15,7 +15,10 @@ export function createClientBackend(
   return async ({ messages, model, signal, onEvent }) => {
     const apiKey = localStorage.getItem(OPENAI_API_KEY_STORAGE) ?? "";
     if (!apiKey.trim()) {
-      onEvent({ type: "error", message: "OpenAI API key is not set. Please add it in Settings." });
+      onEvent({
+        type: "error",
+        message: "OpenAI API key is not set. Please add it in Settings.",
+      });
       return;
     }
     const openai = createOpenAI({ apiKey });

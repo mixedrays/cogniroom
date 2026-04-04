@@ -1,9 +1,4 @@
-import {
-  defineEventHandler,
-  readBody,
-  HTTPError,
-  getRouterParam,
-} from "h3";
+import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { generateText } from "ai";
 import {
   getOpenAIClient,

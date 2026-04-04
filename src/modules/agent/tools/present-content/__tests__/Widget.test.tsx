@@ -112,9 +112,7 @@ describe("ContentBubble", () => {
     renderWidget();
 
     expect(await screen.findByText("Saved")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Save again" })
-    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Save again" })).toBeEnabled();
     expect(coursesApi.getCourse).toHaveBeenCalledWith(savedCourse.id);
   });
 
@@ -131,9 +129,7 @@ describe("ContentBubble", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Save" }));
 
     expect(await screen.findByText("Saved")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Save again" })
-    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Save again" })).toBeEnabled();
     expect(coursesApi.saveCourse).toHaveBeenCalledTimes(1);
   });
 
@@ -174,9 +170,8 @@ describe("ContentBubble", () => {
   });
 
   it("shows a disabled save button when a pending roadmap bubble becomes superseded", async () => {
-    const pendingCourses = deferredPromise<
-      Awaited<ReturnType<typeof coursesApi.listCourses>>
-    >();
+    const pendingCourses =
+      deferredPromise<Awaited<ReturnType<typeof coursesApi.listCourses>>>();
     vi.mocked(coursesApi.listCourses).mockReturnValue(pendingCourses.promise);
 
     const queryClient = new QueryClient({
@@ -197,7 +192,9 @@ describe("ContentBubble", () => {
       </QueryClientProvider>
     );
 
-    expect(await screen.findByRole("button", { name: "Checking…" })).toBeDisabled();
+    expect(
+      await screen.findByRole("button", { name: "Checking…" })
+    ).toBeDisabled();
 
     rerender(
       <QueryClientProvider client={queryClient}>
@@ -211,7 +208,9 @@ describe("ContentBubble", () => {
     );
 
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-    expect(screen.queryByRole("button", { name: "Checking…" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Checking…" })
+    ).not.toBeInTheDocument();
 
     pendingCourses.resolve([]);
   });

@@ -1,9 +1,4 @@
-import {
-  defineEventHandler,
-  readBody,
-  HTTPError,
-  getRouterParam,
-} from "h3";
+import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";

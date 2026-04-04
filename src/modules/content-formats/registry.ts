@@ -1,8 +1,4 @@
-import type {
-  FlashcardsContent,
-  QuizContent,
-  Course,
-} from "@modules/core";
+import type { FlashcardsContent, QuizContent, Course } from "@modules/core";
 import type { ContentFormatAdapter } from "./types";
 import {
   flashcardsMarkdownAdapter,
