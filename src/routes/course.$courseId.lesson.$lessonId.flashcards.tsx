@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { Bot, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import {
   getLessonFlashcards,
   getCourse,
@@ -23,7 +23,7 @@ import {
   LessonPageHeader,
   LessonEmptyState,
 } from "@/components/LessonPage";
-import { WizardAgentDialog } from "@/modules/wizard-agent";
+import { QuickCreate } from "@/components/QuickCreate";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -112,7 +112,6 @@ function LessonFlashcardsComponent() {
   });
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [agentOpen, setAgentOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
@@ -135,14 +134,6 @@ function LessonFlashcardsComponent() {
     },
     [courseId, lessonId]
   );
-
-  const handleAgentOpenChange = (open: boolean) => {
-    setAgentOpen(open);
-    if (!open) {
-      queryClient.invalidateQueries({ queryKey: ["course", courseId] });
-      router.invalidate();
-    }
-  };
 
   const handleDelete = useCallback(async () => {
     setIsDeleting(true);
@@ -265,28 +256,28 @@ function LessonFlashcardsComponent() {
           }
         >
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button
-            size="lg"
-            className="gap-2"
-            onClick={() => setAgentOpen(true)}
-          >
-            <Bot className="size-4" />
-            Create Flashcards
-          </Button>
+          <QuickCreate
+            contentType="flashcards"
+            courseId={courseId}
+            lessonId={lessonId}
+            wizardContext={{
+              contentType: "flashcards",
+              courseId,
+              lessonId,
+              topic: topicInfo?.title,
+              lessonTitle: lessonInfo.title,
+              courseTitle: course.title,
+            }}
+            contentContext={{
+              courseTitle: course.title,
+              topicTitle: topicInfo?.title,
+              topicDescription: topicInfo?.description,
+              lessonTitle: lessonInfo.title,
+              lessonDescription: lessonInfo.description,
+            }}
+          />
         </LessonEmptyState>
       )}
-      <WizardAgentDialog
-        open={agentOpen}
-        onOpenChange={handleAgentOpenChange}
-        context={{
-          contentType: "flashcards",
-          courseId,
-          lessonId,
-          topic: topicInfo?.title,
-          lessonTitle: lessonInfo.title,
-          courseTitle: course.title,
-        }}
-      />
     </LessonPageShell>
   );
 }

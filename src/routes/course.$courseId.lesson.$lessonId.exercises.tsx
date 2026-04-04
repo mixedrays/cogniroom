@@ -7,20 +7,18 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Markdown } from "@/modules/markdown";
-import { Bot } from "lucide-react";
 import {
   getLessonExercises,
   getCourse,
   updateLessonCompletion,
 } from "@/lib/courses";
-import { Button } from "@/components/ui/button";
+import { QuickCreate } from "@/components/QuickCreate";
 import {
   LessonPageShell,
   LessonPageHeader,
   LessonEmptyState,
   LessonContentArea,
 } from "@/components/LessonPage";
-import { WizardAgentDialog } from "@/modules/wizard-agent";
 
 export const Route = createFileRoute(
   "/course/$courseId/lesson/$lessonId/exercises"
@@ -74,7 +72,6 @@ function LessonExercisesComponent() {
   });
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [agentOpen, setAgentOpen] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(
@@ -84,14 +81,6 @@ function LessonExercisesComponent() {
   useEffect(() => {
     setIsCompleted(lessonInfo.exercisesCompleted ?? false);
   }, [lessonInfo.exercisesCompleted]);
-
-  const handleAgentOpenChange = (open: boolean) => {
-    setAgentOpen(open);
-    if (!open) {
-      queryClient.invalidateQueries({ queryKey: ["course", courseId] });
-      router.invalidate();
-    }
-  };
 
   const handleToggleComplete = async () => {
     setIsCompleting(true);
@@ -155,29 +144,29 @@ function LessonExercisesComponent() {
             "No exercises available for this lesson yet."
           }
         >
-          <Button
-            size="lg"
-            className="gap-2"
-            onClick={() => setAgentOpen(true)}
-          >
-            <Bot className="size-4" />
-            Create Exercises
-          </Button>
+          <QuickCreate
+            contentType="exercises"
+            courseId={courseId}
+            lessonId={lessonId}
+            wizardContext={{
+              contentType: "exercise",
+              courseId,
+              lessonId,
+              topic: topicInfo?.title,
+              lessonTitle: lessonInfo.title,
+              courseTitle: course.title,
+            }}
+            contentContext={{
+              courseTitle: course.title,
+              topicTitle: topicInfo?.title,
+              topicDescription: topicInfo?.description,
+              lessonTitle: lessonInfo.title,
+              lessonDescription: lessonInfo.description,
+            }}
+          />
         </LessonEmptyState>
       )}
 
-      <WizardAgentDialog
-        open={agentOpen}
-        onOpenChange={handleAgentOpenChange}
-        context={{
-          contentType: "exercise",
-          courseId,
-          lessonId,
-          topic: topicInfo?.title,
-          lessonTitle: lessonInfo.title,
-          courseTitle: course.title,
-        }}
-      />
     </LessonPageShell>
   );
 }
