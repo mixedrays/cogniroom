@@ -61,6 +61,7 @@ CogniRoom - A platform for creating, managing, and tracking skill learning roadm
 - Use Shadcn UI components for consistent design and functionality.
 - Do not customize Shadcn components (`src/components/ui`) with additional styles or classes. Use the provided variants, and props for customization.
 - Do not add size classes to Button component, use the `size` prop instead (e.g., `size="sm"`).
+- Don not add size classes to Icon component inside Button, it will inherit size from the Button.
 
 ## CLI Initializers (Token Optimization)
 
