@@ -21,7 +21,9 @@ function App() {
 
   return (
     <div className="h-full flex flex-col overflow-auto">
-      <PageHeader>{/* <Home className="size-4" /> */}</PageHeader>
+      <PageHeader showRightSidebarToggle={false}>
+        {/* <Home className="size-4" /> */}
+      </PageHeader>
 
       <div className="p-8 flex flex-col gap-4">
         <p>Welcome to {import.meta.env.APP_NAME}</p>

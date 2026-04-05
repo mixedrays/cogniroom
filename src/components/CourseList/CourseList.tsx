@@ -35,12 +35,18 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 export default function CourseList() {
   const [deleteDialogOpenId, setDeleteDialogOpenId] = useState<string | null>(
@@ -98,30 +104,7 @@ export default function CourseList() {
 
   return (
     <div className="flex flex-col h-full">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              render={
-                <Link to="/">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <BookOpen className="size-4" />
-                  </div>
-                  <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-semibold">
-                      {import.meta.env.APP_NAME}
-                    </span>
-                    <span className="">v{APP_VERSION}</span>
-                  </div>
-                </Link>
-              }
-            />
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
-      <div className="p-2 border-t border-sidebar-border">
+      <div className="p-2">
         <CreateCourseModal onCreated={handleCourseCreated} />
       </div>
 

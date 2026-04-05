@@ -1,16 +1,21 @@
-import { useLocation } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarRail,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Settings } from "lucide-react";
+import { BookOpen as IconApp, Settings } from "lucide-react";
 import { SettingsDialog } from "@/modules/settings";
 import CourseList from "@/components/CourseList";
 import CourseTree from "@/components/CourseTree";
+import { Tooltip, TooltipContent } from "../ui/tooltip";
+import { TooltipTrigger } from "../ui/tooltip";
+import { Button } from "../ui/button";
 
 export default function AppSidebar() {
   const location = useLocation();
@@ -18,10 +23,25 @@ export default function AppSidebar() {
 
   return (
     <Sidebar collapsible="offExamples">
-      {/* <SidebarHeader className="flex-row items-center justify-between border-b px-3">
-        <span className="font-semibold text-sm">Courses</span>
+      <SidebarHeader className="flex-row border-b items-center justify-between">
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                className="hover:bg-secondary"
+                render={<Link to="/" />}
+              >
+                <IconApp /> {import.meta.env.APP_NAME}
+              </Button>
+            }
+          />
+
+          <TooltipContent side="right">v{APP_VERSION}</TooltipContent>
+        </Tooltip>
+
         <SidebarTrigger />
-      </SidebarHeader> */}
+      </SidebarHeader>
 
       <SidebarContent className="overflow-xhidden relative p-0">
         <div
