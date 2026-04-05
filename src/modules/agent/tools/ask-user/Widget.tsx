@@ -99,12 +99,12 @@ export function QuestionsBatchWidget({
       }
 
       if (!isInput) {
-        if (e.key === "ArrowLeft" && !isFirst) {
+        if ((e.key === "ArrowLeft" || e.key === "j") && !isFirst) {
           e.preventDefault();
           setCurrentIndex((i) => i - 1);
           return;
         }
-        if (e.key === "ArrowRight" && !isLast) {
+        if ((e.key === "ArrowRight" || e.key === "k") && !isLast) {
           e.preventDefault();
           setCurrentIndex((i) => i + 1);
           return;
@@ -121,8 +121,8 @@ export function QuestionsBatchWidget({
       }
     };
 
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    document.addEventListener("keydown", handler, true);
+    return () => document.removeEventListener("keydown", handler, true);
   }, [isFirst, isLast, current, handleSubmit, toggleOption]);
 
   if (!parsed.success || !current) return null;
@@ -236,7 +236,7 @@ export function QuestionsBatchWidget({
               }
             />
             <TooltipContent>
-              Previous question <Kbd>←</Kbd>
+              Previous question <Kbd>←</Kbd> or <Kbd>J</Kbd>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -253,7 +253,7 @@ export function QuestionsBatchWidget({
               }
             />
             <TooltipContent>
-              Next question <Kbd>→</Kbd>
+              Next question <Kbd>→</Kbd> or <Kbd>K</Kbd>
             </TooltipContent>
           </Tooltip>
           <span className="text-xs text-muted-foreground ml-1">
