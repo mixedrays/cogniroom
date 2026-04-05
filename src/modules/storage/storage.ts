@@ -30,9 +30,10 @@ export function initStorage(adapter: StorageAdapter): void {
  */
 export function getAdapter(): StorageAdapter {
   if (!defaultAdapter) {
-    // Default to filesystem adapter with data directory as base
     const basePath = resolve(process.cwd(), process.env.DATA_PATH || "./data");
-    defaultAdapter = new FileSystemAdapter({ basePath });
+    const adapter =
+      (process.env.STORAGE_ADAPTER as StorageConfig["adapter"]) ?? "filesystem";
+    defaultAdapter = createStorage({ basePath, adapter });
   }
   return defaultAdapter;
 }
@@ -79,9 +80,10 @@ export function createStorage(config: StorageConfig = {}): StorageAdapter {
  */
 export async function storage<T = unknown>(
   path: string,
-  init: StorageInit = {}
+  init: StorageInit = {},
+  customAdapter?: StorageAdapter
 ): Promise<StorageResponse<T>> {
-  const adapter = getAdapter();
+  const adapter = customAdapter ?? getAdapter();
 
   const request: StorageRequest = {
     path,
@@ -169,3 +171,40 @@ export const storageApi = {
     return getAdapter().stat(path);
   },
 };
+
+export type StorageApi = typeof storageApi;
+
+/**
+ * Create a scoped storage API bound to a custom adapter configuration.
+ * Use this to access storage with a different base path or backend.
+ *
+ * @example
+ * const settingsStorage = createStorageApi({ basePath: ".settings" });
+ * const response = await settingsStorage.get<Settings>("settings.json");
+ */
+export function createStorageApi(config: StorageConfig): StorageApi {
+  const adapter = createStorage(config);
+
+  return {
+    get: <T = unknown>(path: string) =>
+      storage<T>(path, { method: "GET" }, adapter),
+
+    post: <T = unknown>(path: string, body: string | object) =>
+      storage<T>(path, { method: "POST", body }, adapter),
+
+    put: <T = unknown>(path: string, body: string | object) =>
+      storage<T>(path, { method: "PUT", body }, adapter),
+
+    delete: (path: string, recursive = false) =>
+      storage<void>(path, { method: "DELETE", options: { recursive } }, adapter),
+
+    exists: async (path: string) => {
+      const response = await storage(path, { method: "HEAD" }, adapter);
+      return response.ok;
+    },
+
+    list: (path: string, options?: ListOptions) => adapter.list(path, options),
+
+    stat: (path: string) => adapter.stat(path),
+  };
+}

@@ -13,24 +13,23 @@
  * // Using convenience methods
  * const exists = await storageApi.exists("courses/123/course.json");
  * const files = await storageApi.list("courses", { extension: ".json" });
+ *
+ * // Creating a scoped storage API with a different base path
+ * const settingsStorage = createStorageApi({ basePath: ".settings" });
+ * const settings = await settingsStorage.get<Settings>("settings.json");
  */
 
 // Main API
 export {
   createStorage,
+  createStorageApi,
   getAdapter,
   initStorage,
   storage,
   storageApi,
 } from "./storage";
 
-// Adapters
-export {
-  DatabaseAdapter,
-  FileSystemAdapter,
-  LocalStorageAdapter,
-  StorageAdapter,
-} from "./adapters";
+export type { StorageApi } from "./storage";
 
 // Types
 export type {
@@ -41,7 +40,6 @@ export type {
   StorageInit,
   StorageMethod,
   StorageOptions,
-  StorageRequest,
   StorageResponse,
   StorageStatusCode,
 } from "./types";

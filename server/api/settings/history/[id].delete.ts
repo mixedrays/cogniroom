@@ -1,6 +1,5 @@
-import { resolve } from "node:path";
 import { defineEventHandler, getRouterParam } from "h3";
-import { FileSystemAdapter } from "@modules/storage";
+import { settingsStorage } from "@root/server/lib/settingsStorage";
 import { toErrorMessage } from "@root/server/lib/errors";
 
 interface HistoryEntry {
@@ -15,11 +14,6 @@ interface History {
   maxEntries: number;
 }
 
-// Settings storage uses .settings directory in project root
-const settingsAdapter = new FileSystemAdapter({
-  basePath: resolve(process.cwd(), ".settings"),
-});
-
 export default defineEventHandler(async (event) => {
   try {
     const id = getRouterParam(event, "id");
@@ -29,12 +23,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Read existing history
-    const response = await settingsAdapter.execute<History>({
-      path: "history.json",
-      method: "GET",
-      headers: {},
-      options: {},
-    });
+    const response = await settingsStorage.get<History>("history.json");
 
     if (!response.ok) {
       return { success: false, error: "History file not found" };
@@ -51,13 +40,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Save updated history
-    await settingsAdapter.execute({
-      path: "history.json",
-      method: "PUT",
-      body: history,
-      headers: {},
-      options: {},
-    });
+    await settingsStorage.put("history.json", history);
 
     return { success: true };
   } catch (error: unknown) {

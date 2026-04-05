@@ -1,6 +1,5 @@
-import { resolve } from "node:path";
 import { defineEventHandler } from "h3";
-import { FileSystemAdapter } from "@modules/storage";
+import { settingsStorage } from "@root/server/lib/settingsStorage";
 import { toErrorMessage } from "@root/server/lib/errors";
 
 interface HistoryEntry {
@@ -15,19 +14,9 @@ interface History {
   maxEntries: number;
 }
 
-// Settings storage uses .settings directory in project root
-const settingsAdapter = new FileSystemAdapter({
-  basePath: resolve(process.cwd(), ".settings"),
-});
-
 export default defineEventHandler(async () => {
   try {
-    const response = await settingsAdapter.execute<History>({
-      path: "history.json",
-      method: "GET",
-      headers: {},
-      options: {},
-    });
+    const response = await settingsStorage.get<History>("history.json");
 
     if (response.ok) {
       const history = await response.json();

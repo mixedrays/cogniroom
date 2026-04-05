@@ -1,6 +1,5 @@
-import { resolve } from "node:path";
 import { defineEventHandler } from "h3";
-import { FileSystemAdapter } from "@modules/storage";
+import { settingsStorage } from "@root/server/lib/settingsStorage";
 import { toErrorMessage } from "@root/server/lib/errors";
 
 // Default settings matching the client-side defaults
@@ -17,19 +16,9 @@ const DEFAULT_SETTINGS = {
   version: 1,
 };
 
-// Settings storage uses .settings directory in project root
-const settingsAdapter = new FileSystemAdapter({
-  basePath: resolve(process.cwd(), ".settings"),
-});
-
 export default defineEventHandler(async () => {
   try {
-    const response = await settingsAdapter.execute<any>({
-      path: "settings.json",
-      method: "GET",
-      headers: {},
-      options: {},
-    });
+    const response = await settingsStorage.get<any>("settings.json");
 
     if (response.ok) {
       const settings = await response.json();

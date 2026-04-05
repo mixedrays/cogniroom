@@ -1,13 +1,7 @@
-import { resolve } from "node:path";
 import { defineEventHandler, readBody } from "h3";
-import { FileSystemAdapter } from "@modules/storage";
+import { settingsStorage } from "@root/server/lib/settingsStorage";
 import { v4 as uuid } from "uuid";
 import { toErrorMessage } from "@root/server/lib/errors";
-
-// Settings storage uses .settings directory in project root
-const settingsAdapter = new FileSystemAdapter({
-  basePath: resolve(process.cwd(), ".settings"),
-});
 
 const VALID_MODES = ["light", "dark", "system"];
 
@@ -78,12 +72,7 @@ function validateSettings(settings: unknown): settings is Settings {
 
 async function loadHistory(): Promise<History> {
   try {
-    const response = await settingsAdapter.execute<History>({
-      path: "history.json",
-      method: "GET",
-      headers: {},
-      options: {},
-    });
+    const response = await settingsStorage.get<History>("history.json");
     if (response.ok) {
       return await response.json();
     }
@@ -94,13 +83,7 @@ async function loadHistory(): Promise<History> {
 }
 
 async function saveHistory(history: History): Promise<void> {
-  await settingsAdapter.execute({
-    path: "history.json",
-    method: "PUT",
-    body: history,
-    headers: {},
-    options: {},
-  });
+  await settingsStorage.put("history.json", history);
 }
 
 export default defineEventHandler(async (event) => {
@@ -127,14 +110,8 @@ export default defineEventHandler(async (event) => {
       version: 1,
     };
 
-    // Save settings (auto-creates parent directories)
-    await settingsAdapter.execute({
-      path: "settings.json",
-      method: "PUT",
-      body: settings,
-      headers: {},
-      options: {},
-    });
+    // Save settings
+    await settingsStorage.put("settings.json", settings);
 
     // Add to history if requested (default: true)
     if (body.addToHistory !== false) {

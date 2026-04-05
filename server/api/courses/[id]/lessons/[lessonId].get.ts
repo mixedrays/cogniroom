@@ -1,5 +1,5 @@
 import { defineEventHandler, getRouterParam, HTTPError } from "h3";
-import { storage } from "@modules/storage";
+import { storageApi } from "@modules/storage";
 import { storagePaths } from "@root/server/lib/storagePaths";
 
 export default defineEventHandler(async (event) => {
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const response = await storage<string>(
+    const response = await storageApi.get<string>(
       storagePaths.lesson(courseId, lessonId)
     );
 
