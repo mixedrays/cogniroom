@@ -1,4 +1,5 @@
 import { useRef, useEffect, type ReactNode } from "react";
+import { Loader2 } from "lucide-react";
 import type { AgentMessageState, AgentTool } from "../types";
 import { AgentMessage } from "./AgentMessage";
 
@@ -39,7 +40,7 @@ export function AgentChat({
     .find(
       (msg): msg is ToolCallMessage =>
         msg.role === "tool_call" &&
-        msg.status === "pending" &&
+        (msg.status === "pending" || msg.status === "streaming") &&
         tools.some(
           (t) =>
             t.client?.name === (msg as ToolCallMessage).toolName &&
@@ -82,14 +83,25 @@ export function AgentChat({
       {activeAbovePromptCall && abovePromptTool?.client && (
         <div className="px-4 pt-2">
           <div className="rounded-2xl bg-muted p-4">
-            <abovePromptTool.client.Widget
-              params={activeAbovePromptCall.params}
-              onSubmit={(result) =>
-                onToolSubmit(activeAbovePromptCall.toolCallId, result)
-              }
-              onDismiss={() => onToolDismiss(activeAbovePromptCall.toolCallId)}
-              context={context}
-            />
+            {activeAbovePromptCall.status === "streaming" ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                <span className="text-muted-foreground text-sm">
+                  Preparing questions…
+                </span>
+              </div>
+            ) : (
+              <abovePromptTool.client.Widget
+                params={activeAbovePromptCall.params}
+                onSubmit={(result) =>
+                  onToolSubmit(activeAbovePromptCall.toolCallId, result)
+                }
+                onDismiss={() =>
+                  onToolDismiss(activeAbovePromptCall.toolCallId)
+                }
+                context={context}
+              />
+            )}
           </div>
         </div>
       )}
