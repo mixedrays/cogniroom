@@ -25,7 +25,7 @@ export default function AppSidebar() {
   const { open } = useSidebar();
 
   return (
-    <Sidebar collapsible="offExamples">
+    <Sidebar>
       <SidebarHeader className="flex-row border-b items-center justify-between">
         <Tooltip>
           <TooltipTrigger
@@ -44,10 +44,9 @@ export default function AppSidebar() {
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger render={<SidebarTrigger />} />
+          <TooltipTrigger render={<SidebarTrigger size="icon" />} />
           <TooltipContent side="right">
-            {open ? "Close" : "Open"} sidebar{" "}
-            <Kbd>⌘ + B</Kbd>
+            {open ? "Close" : "Open"} sidebar <Kbd>⌘ + B</Kbd>
           </TooltipContent>
         </Tooltip>
       </SidebarHeader>
