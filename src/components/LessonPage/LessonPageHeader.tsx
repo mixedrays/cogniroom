@@ -1,8 +1,8 @@
-import type { ReactNode } from "react";
 import { BookOpen, Home, Layers, ListChecks, Code } from "lucide-react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PageHeader } from "@/components/PageHeader";
-import { Button } from "@/components/ui/button";
+import { LessonActionsMenu } from "./LessonActionsMenu";
+import type { ContentContext } from "@/components/ContentCreationDialog";
 
 type ActiveTab = "theory" | "flashcards" | "quiz" | "exercises";
 
@@ -13,12 +13,13 @@ interface LessonPageHeaderProps {
   topicIndex: number;
   topicLessons: Array<{ id: string; title: string }>;
   activeTab: ActiveTab;
+  hasContent: boolean;
   showMarkComplete: boolean;
   isCompleted: boolean;
   isCompleting: boolean;
   completionError: string | null;
   onToggleComplete: () => void;
-  extraActions?: ReactNode;
+  contentContext?: ContentContext;
 }
 
 export function LessonPageHeader({
@@ -28,12 +29,13 @@ export function LessonPageHeader({
   topicIndex,
   topicLessons,
   activeTab,
+  hasContent,
   showMarkComplete,
   isCompleted,
   isCompleting,
   completionError,
   onToggleComplete,
-  extraActions,
+  contentContext,
 }: LessonPageHeaderProps) {
   const lessonItems = topicLessons.map((lesson, i) => ({
     title: `Lesson ${topicIndex}.${i + 1}`,
@@ -46,7 +48,21 @@ export function LessonPageHeader({
   }));
 
   return (
-    <PageHeader>
+    <PageHeader
+      actions={
+        <LessonActionsMenu
+          courseId={courseId}
+          lessonId={lessonId}
+          contentType={activeTab}
+          hasContent={hasContent}
+          contentContext={contentContext}
+          showMarkComplete={showMarkComplete}
+          isCompleted={isCompleted}
+          isCompleting={isCompleting}
+          onToggleComplete={onToggleComplete}
+        />
+      }
+    >
       <Breadcrumbs
         className="flex items-center"
         items={[
@@ -101,23 +117,11 @@ export function LessonPageHeader({
         ]}
       />
 
-      <div className="flex items-center gap-2">
-        {completionError && (
-          <p className="text-sm text-destructive font-medium">
-            {completionError}
-          </p>
-        )}
-        {extraActions}
-        {showMarkComplete && (
-          <Button
-            onClick={onToggleComplete}
-            disabled={isCompleting}
-            variant={isCompleted ? "secondary" : "default"}
-          >
-            {isCompleted ? "Mark Incomplete" : "Mark Complete"}
-          </Button>
-        )}
-      </div>
+      {completionError && (
+        <p className="text-sm text-destructive font-medium">
+          {completionError}
+        </p>
+      )}
     </PageHeader>
   );
 }

@@ -5,15 +5,12 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState, useCallback, useEffect } from "react";
-import { Trash2 } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
 import {
   getLessonQuiz,
   getCourse,
-  deleteLessonQuiz,
   updateLessonCompletion,
 } from "@/lib/courses";
-import { Button } from "@/components/ui/button";
 import { Quiz } from "@/modules/quiz";
 import type { QuizQuestion } from "@/lib/types";
 import {
@@ -22,17 +19,6 @@ import {
   LessonEmptyState,
 } from "@/components/LessonPage";
 import { QuickCreate } from "@/components/QuickCreate";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/course/$courseId/lesson/$lessonId/quiz")(
   {
@@ -99,14 +85,11 @@ function LessonQuizComponent() {
   });
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(
     lessonInfo.quizCompleted ?? false
   );
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     setIsCompleted(lessonInfo.quizCompleted ?? false);
@@ -114,24 +97,6 @@ function LessonQuizComponent() {
 
   const questions = useMemo(() => parseQuizQuestions(content), [content]);
   const hasQuestions = questions.length > 0;
-
-  const handleDelete = useCallback(async () => {
-    setIsDeleting(true);
-    try {
-      const result = await deleteLessonQuiz(courseId, lessonId);
-      if (result.success) {
-        setDeleteDialogOpen(false);
-        await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
-        router.invalidate();
-      } else {
-        setError(result.error || "Failed to delete quiz");
-      }
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [courseId, lessonId, queryClient, router]);
 
   const handleToggleComplete = async () => {
     setIsCompleting(true);
@@ -173,48 +138,19 @@ function LessonQuizComponent() {
         topicIndex={topicIndex}
         topicLessons={topicInfo?.lessons ?? []}
         activeTab="quiz"
+        hasContent={hasQuestions}
         showMarkComplete={hasQuestions}
         isCompleted={isCompleted}
         isCompleting={isCompleting}
         completionError={completionError}
         onToggleComplete={handleToggleComplete}
-        extraActions={
-          hasQuestions ? (
-            <AlertDialog
-              open={deleteDialogOpen}
-              onOpenChange={setDeleteDialogOpen}
-            >
-              <AlertDialogTrigger
-                render={
-                  <Button size="icon" variant="outline">
-                    <Trash2 />
-                  </Button>
-                }
-              />
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete quiz?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete all quiz questions for this
-                    lesson.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isDeleting}>
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    variant="destructive"
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? "Deleting…" : "Delete"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : undefined
-        }
+        contentContext={{
+          courseTitle: course.title,
+          topicTitle: topicInfo?.title,
+          topicDescription: topicInfo?.description,
+          lessonTitle: lessonInfo.title,
+          lessonDescription: lessonInfo.description,
+        }}
       />
 
       {hasQuestions ? (
@@ -235,7 +171,6 @@ function LessonQuizComponent() {
             lessonInfo.description || "No quiz available for this lesson yet."
           }
         >
-          {error && <p className="text-sm text-destructive">{error}</p>}
           <QuickCreate
             contentType="quiz"
             courseId={courseId}

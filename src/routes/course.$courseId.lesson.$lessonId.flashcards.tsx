@@ -6,16 +6,13 @@ import {
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { Trash2 } from "lucide-react";
 import {
   getLessonFlashcards,
   getCourse,
-  deleteLessonFlashcards,
   updateLessonCompletion,
   getFlashcardsReviews,
   saveFlashcardsReviews,
 } from "@/lib/courses";
-import { Button } from "@/components/ui/button";
 import { SM2UI } from "@/modules/flashcards/strategies/SM2/SM2UI";
 import type { Flashcard, ReviewData } from "@/lib/types";
 import {
@@ -24,17 +21,6 @@ import {
   LessonEmptyState,
 } from "@/components/LessonPage";
 import { QuickCreate } from "@/components/QuickCreate";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute(
   "/course/$courseId/lesson/$lessonId/flashcards"
@@ -112,14 +98,11 @@ function LessonFlashcardsComponent() {
   });
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(
     lessonInfo.flashcardsCompleted ?? false
   );
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     setIsCompleted(lessonInfo.flashcardsCompleted ?? false);
@@ -134,24 +117,6 @@ function LessonFlashcardsComponent() {
     },
     [courseId, lessonId]
   );
-
-  const handleDelete = useCallback(async () => {
-    setIsDeleting(true);
-    try {
-      const result = await deleteLessonFlashcards(courseId, lessonId);
-      if (result.success) {
-        setDeleteDialogOpen(false);
-        await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
-        router.invalidate();
-      } else {
-        setError(result.error || "Failed to delete flashcards");
-      }
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [courseId, lessonId, queryClient, router]);
 
   const handleToggleComplete = async () => {
     setIsCompleting(true);
@@ -193,47 +158,19 @@ function LessonFlashcardsComponent() {
         topicIndex={topicIndex}
         topicLessons={topicInfo?.lessons ?? []}
         activeTab="flashcards"
+        hasContent={hasCards}
         showMarkComplete={hasCards}
         isCompleted={isCompleted}
         isCompleting={isCompleting}
         completionError={completionError}
         onToggleComplete={handleToggleComplete}
-        extraActions={
-          hasCards ? (
-            <AlertDialog
-              open={deleteDialogOpen}
-              onOpenChange={setDeleteDialogOpen}
-            >
-              <AlertDialogTrigger
-                render={
-                  <Button size="icon" variant="outline">
-                    <Trash2 />
-                  </Button>
-                }
-              />
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete flashcards?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete all flashcards for this lesson.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isDeleting}>
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    variant="destructive"
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? "Deleting…" : "Delete"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : undefined
-        }
+        contentContext={{
+          courseTitle: course.title,
+          topicTitle: topicInfo?.title,
+          topicDescription: topicInfo?.description,
+          lessonTitle: lessonInfo.title,
+          lessonDescription: lessonInfo.description,
+        }}
       />
 
       {hasCards ? (
@@ -255,7 +192,6 @@ function LessonFlashcardsComponent() {
             "No flashcards available for this lesson yet."
           }
         >
-          {error && <p className="text-sm text-destructive">{error}</p>}
           <QuickCreate
             contentType="flashcards"
             courseId={courseId}

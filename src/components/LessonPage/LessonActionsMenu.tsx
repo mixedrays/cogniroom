@@ -1,8 +1,22 @@
 import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
-import { Trash2, RefreshCw, Loader2 } from "lucide-react";
+import {
+  EllipsisVertical,
+  Trash2,
+  RefreshCw,
+  Loader2,
+  CircleCheck,
+  Circle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +26,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
   ContentCreationDialog,
@@ -33,12 +46,16 @@ import {
 
 type ContentType = "theory" | "flashcards" | "quiz" | "exercises";
 
-interface LessonContentActionsProps {
+interface LessonActionsMenuProps {
   courseId: string;
   lessonId: string;
   contentType: ContentType;
   hasContent: boolean;
   contentContext?: ContentContext;
+  showMarkComplete: boolean;
+  isCompleted: boolean;
+  isCompleting: boolean;
+  onToggleComplete: () => void;
 }
 
 const CONTENT_LABELS: Record<ContentType, string> = {
@@ -55,18 +72,23 @@ const GENERATION_TYPE_MAP: Record<ContentType, GenerationType> = {
   exercises: "exercises",
 };
 
-export function LessonContentActions({
+export function LessonActionsMenu({
   courseId,
   lessonId,
   contentType,
   hasContent,
   contentContext,
-}: LessonContentActionsProps) {
+  showMarkComplete,
+  isCompleted,
+  isCompleting,
+  onToggleComplete,
+}: LessonActionsMenuProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const invalidateAndRefresh = useCallback(async () => {
@@ -94,6 +116,7 @@ export function LessonContentActions({
 
       const result = await deleteFn(courseId, lessonId);
       if (result.success) {
+        setIsDeleteDialogOpen(false);
         await invalidateAndRefresh();
       } else {
         setError(result.error || "Failed to delete content");
@@ -148,10 +171,39 @@ export function LessonContentActions({
   const generationType: GenerationType = GENERATION_TYPE_MAP[contentType];
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-        Actions
-      </h3>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger render={<Button variant="ghost" size="icon" />}>
+          <EllipsisVertical />
+          <span className="sr-only">Lesson actions</span>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" side="bottom" className="w-auto">
+          {showMarkComplete && (
+            <DropdownMenuItem
+              onClick={onToggleComplete}
+              disabled={isCompleting}
+            >
+              {isCompleted ? <Circle /> : <CircleCheck />}
+              {isCompleted ? "Mark Incomplete" : "Mark Complete"}
+            </DropdownMenuItem>
+          )}
+
+          <DropdownMenuItem onClick={() => setIsRegenerateDialogOpen(true)}>
+            <RefreshCw />
+            Regenerate {label}
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => setIsDeleteDialogOpen(true)}
+          >
+            <Trash2 />
+            Delete {label}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <ContentCreationDialog
         mode="generate"
@@ -162,37 +214,13 @@ export function LessonContentActions({
         isCreating={isRegenerating}
         error={error}
         contentContext={contentContext}
-        trigger={
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start gap-2"
-            disabled={isDeleting}
-          >
-            <RefreshCw className="size-4" />
-            Regenerate {label}
-          </Button>
-        }
+        trigger={<button hidden />}
       />
 
-      <AlertDialog>
-        <AlertDialogTrigger
-          render={
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start gap-2 text-destructive hover:text-destructive"
-              disabled={isDeleting || isRegenerating}
-            />
-          }
-        >
-          {isDeleting ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Trash2 className="size-4" />
-          )}
-          Delete {label}
-        </AlertDialogTrigger>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {label}?</AlertDialogTitle>
@@ -202,17 +230,28 @@ export function LessonContentActions({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete}>
-              Delete
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Deleting…
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {error && !isRegenerateDialogOpen && (
+      {error && !isRegenerateDialogOpen && !isDeleteDialogOpen && (
         <p className="text-xs text-destructive">{error}</p>
       )}
-    </div>
+    </>
   );
 }

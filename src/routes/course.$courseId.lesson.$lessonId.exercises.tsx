@@ -122,11 +122,19 @@ function LessonExercisesComponent() {
         topicIndex={topicIndex}
         topicLessons={topicInfo?.lessons ?? []}
         activeTab="exercises"
+        hasContent={!!content}
         showMarkComplete={!!content}
         isCompleted={isCompleted}
         isCompleting={isCompleting}
         completionError={completionError}
         onToggleComplete={handleToggleComplete}
+        contentContext={{
+          courseTitle: course.title,
+          topicTitle: topicInfo?.title,
+          topicDescription: topicInfo?.description,
+          lessonTitle: lessonInfo.title,
+          lessonDescription: lessonInfo.description,
+        }}
       />
 
       {content ? (

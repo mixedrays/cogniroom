@@ -4,12 +4,10 @@ import {
   Outlet,
   Scripts,
   createRootRouteWithContext,
-  useMatchRoute,
   useRouter,
 } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import AppSidebar from "@/components/Sidebar";
-import RightSidebar from "@/components/RightSidebar";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider } from "../components/ui/sidebar";
 import { SettingsProvider } from "@/modules/settings";
@@ -50,9 +48,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 function RootComponent() {
   const router = useRouter();
   const queryClient = router.options.context.queryClient;
-  const matchRoute = useMatchRoute();
-  const isHome = matchRoute({ to: "/" });
-
   return (
     <RootDocument>
       <QueryClientProvider client={queryClient}>
@@ -64,7 +59,6 @@ function RootComponent() {
               <Outlet />
             </main>
 
-            {!isHome && <RightSidebar />}
           </SidebarProvider>
         </SettingsProvider>
       </QueryClientProvider>
