@@ -8,6 +8,7 @@ import {
   SidebarMenuButton,
   SidebarRail,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { BookOpen as IconApp, Settings } from "lucide-react";
 import { SettingsDialog } from "@/modules/settings";
@@ -16,10 +17,12 @@ import CourseTree from "@/components/CourseTree";
 import { Tooltip, TooltipContent } from "../ui/tooltip";
 import { TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
+import { Kbd } from "../ui/kbd";
 
 export default function AppSidebar() {
   const location = useLocation();
   const isCourseView = location.pathname.startsWith("/course/");
+  const { open } = useSidebar();
 
   return (
     <Sidebar collapsible="offExamples">
@@ -40,7 +43,13 @@ export default function AppSidebar() {
           <TooltipContent side="right">v{APP_VERSION}</TooltipContent>
         </Tooltip>
 
-        <SidebarTrigger />
+        <Tooltip>
+          <TooltipTrigger render={<SidebarTrigger />} />
+          <TooltipContent side="right">
+            {open ? "Close" : "Open"} sidebar{" "}
+            <Kbd>⌘ + B</Kbd>
+          </TooltipContent>
+        </Tooltip>
       </SidebarHeader>
 
       <SidebarContent className="overflow-xhidden relative p-0">

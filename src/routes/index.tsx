@@ -2,7 +2,6 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Bot } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { WizardAgentDialog } from "@/modules/wizard-agent";
 
@@ -21,10 +20,6 @@ function App() {
 
   return (
     <div className="h-full flex flex-col overflow-auto">
-      <PageHeader showRightSidebarToggle={false}>
-        {/* <Home className="size-4" /> */}
-      </PageHeader>
-
       <div className="p-8 flex flex-col gap-4">
         <p>Welcome to {import.meta.env.APP_NAME}</p>
 
