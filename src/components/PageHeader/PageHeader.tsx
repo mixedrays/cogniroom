@@ -20,7 +20,7 @@ export function PageHeader({ children, actions }: PageHeaderProps) {
         </TooltipContent>
       </Tooltip>
 
-      <Separator orientation="vertical" className="mx-2 h-4" />
+      <Separator orientation="vertical" className="mx-2 !h-4 !self-center" />
 
       <div className="flex-1 gap-2 px-2 flex items-center justify-between min-w-0">
         {children}
