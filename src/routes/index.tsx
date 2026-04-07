@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/PageHeader";
 import { WizardAgentDialog } from "@/modules/wizard-agent";
 
 export const Route = createFileRoute("/")({ component: App });
@@ -20,9 +21,8 @@ function App() {
 
   return (
     <div className="h-full flex flex-col overflow-auto">
+      <PageHeader />
       <div className="p-8 flex flex-col gap-4">
-        <p>Welcome to {import.meta.env.APP_NAME}</p>
-
         <div className="flex gap-2">
           <Button
             variant="outline"
