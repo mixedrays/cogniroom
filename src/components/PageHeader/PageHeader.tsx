@@ -1,7 +1,11 @@
 import { PropsWithChildren, ReactNode } from "react";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Kbd } from "@/components/ui/kbd";
 
 interface PageHeaderProps extends PropsWithChildren {
@@ -14,17 +18,20 @@ export function PageHeader({ children, actions }: PageHeaderProps) {
   return (
     <div className="sticky p-2 min-h-13 mx-0.5 flex items-center left-0 top-0 z-20 bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/60">
       <Tooltip>
-        <TooltipTrigger render={<SidebarTrigger size="icon-sm" />} />
+        <TooltipTrigger render={<SidebarTrigger size="icon" />} />
         <TooltipContent>
           {open ? "Close" : "Open"} sidebar <Kbd>⌘ + B</Kbd>
         </TooltipContent>
       </Tooltip>
 
-      <Separator orientation="vertical" className="mx-2 !h-4 !self-center" />
-
-      <div className="flex-1 gap-2 px-2 flex items-center justify-between min-w-0">
-        {children}
-      </div>
+      {children && (
+        <>
+          <Separator orientation="vertical" className="mx-2 h-4 self-center!" />
+          <div className="flex-1 gap-2 px-1 flex items-center justify-between min-w-0">
+            {children}
+          </div>
+        </>
+      )}
 
       {actions}
     </div>

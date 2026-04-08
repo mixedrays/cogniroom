@@ -13,7 +13,6 @@ import { deleteCourse, listCourses } from "@/lib/courses";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
-import CreateCourseModal from "@/components/CreateCourseModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,11 +58,6 @@ export default function CourseList() {
   const courses = coursesQuery.data ?? [];
   const queryIsLoading = coursesQuery.isLoading;
 
-  const handleCourseCreated = () => {
-    // Reload courses to get updated list
-    coursesQuery.refetch();
-  };
-
   const handleDeleteCourse = async (id: string) => {
     setDeletingId(id);
     setDeleteError(null);
@@ -97,10 +91,6 @@ export default function CourseList() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-2">
-        <CreateCourseModal onCreated={handleCourseCreated} />
-      </div>
-
       <div className="flex-1 min-h-0">
         <div className="h-full overflow-y-auto">
           {queryIsLoading ? (

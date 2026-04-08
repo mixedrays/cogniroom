@@ -49,12 +49,12 @@ export function PromptTextarea({
   return (
     <div
       className={cn(
-        "border rounded-md transition-[border-color,box-shadow]",
+        "border rounded-lg bg-primary-foreground transition-[border-color,box-shadow]",
         "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
       )}
     >
       <textarea
-        className="w-full resize-none bg-transparent px-3 pt-3 pb-2 text-sm outline-none placeholder:text-muted-foreground field-sizing-content focus-visible:ring-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full resize-none px-3 pt-3 pb-2 text-sm outline-none placeholder:text-muted-foreground field-sizing-content focus-visible:ring-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}

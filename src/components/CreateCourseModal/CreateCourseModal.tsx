@@ -35,10 +35,12 @@ import { PromptPreview } from "@/components/PromptPreview/PromptPreview";
 import { EnhancedInstructionPreview } from "@/components/EnhancedInstructionPreview";
 interface CreateCourseModalProps {
   onCreated: (course: Course) => void;
+  trigger?: React.ReactElement;
 }
 
 export default function CreateCourseModal({
   onCreated,
+  trigger,
 }: CreateCourseModalProps) {
   const { settings } = useSettings();
   const [activeTab, setActiveTab] = useState("generate");
@@ -276,10 +278,16 @@ export default function CreateCourseModal({
 
   return (
     <Dialog>
-      <DialogTrigger render={<Button className="w-full" />}>
-        <Plus />
-        <span>Create Course</span>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          trigger ?? (
+            <Button className="w-full">
+              <Plus />
+              <span>Create Course</span>
+            </Button>
+          )
+        }
+      />
 
       <DialogContent className="sm:max-w-125">
         <DialogHeader>
@@ -287,7 +295,7 @@ export default function CreateCourseModal({
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          {/* <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="generate">
               <Sparkles className="w-4 h-4 mr-2" />
               Generate
@@ -300,7 +308,7 @@ export default function CreateCourseModal({
               <LinkIcon className="w-4 h-4 mr-2" />
               Extract
             </TabsTrigger>
-          </TabsList>
+          </TabsList> */}
 
           <div className="mt-4">
             {error && (

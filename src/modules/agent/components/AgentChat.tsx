@@ -1,5 +1,6 @@
 import { useRef, useEffect, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { AgentMessageState, AgentTool } from "../types";
 import { AgentMessage } from "./AgentMessage";
 
@@ -11,6 +12,7 @@ interface AgentChatProps {
   promptSlot: ReactNode;
   welcomeMessage?: string;
   context?: Record<string, unknown>;
+  className?: string;
 }
 
 type ToolCallMessage = Extract<AgentMessageState, { role: "tool_call" }>;
@@ -23,6 +25,7 @@ export function AgentChat({
   promptSlot,
   welcomeMessage,
   context,
+  className,
 }: AgentChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +60,7 @@ export function AgentChat({
     : undefined;
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
+    <div className={cn("flex flex-col flex-1 overflow-hidden", className)}>
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-6">
         {chatMessages.length === 0 && welcomeMessage && (
           <div className="flex h-full items-center justify-center m-0">
