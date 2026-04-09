@@ -22,28 +22,86 @@ import {
   FieldLabel,
   FieldTitle,
 } from "@/components/ui/field";
-import { OPENAI_API_KEY_STORAGE } from "@/modules/agent/backends/clientBackend";
+import {
+  OPENAI_API_KEY_STORAGE,
+  ANTHROPIC_API_KEY_STORAGE,
+} from "@/modules/agent/backends/clientBackend";
 
-export function ApiKeySettings() {
-  const { settings, updateLLM } = useSettings();
-  const useOwnKey = settings.llm.useOwnKey ?? false;
+function ApiKeyField({
+  label,
+  placeholder,
+  storageKey,
+  deleteDescription,
+}: {
+  label: string;
+  placeholder: string;
+  storageKey: string;
+  deleteDescription: string;
+}) {
   const [apiKey, setApiKey] = useState(
-    () => localStorage.getItem(OPENAI_API_KEY_STORAGE) ?? ""
+    () => localStorage.getItem(storageKey) ?? ""
   );
 
   const handleApiKeyChange = (value: string) => {
     setApiKey(value);
     if (value) {
-      localStorage.setItem(OPENAI_API_KEY_STORAGE, value);
+      localStorage.setItem(storageKey, value);
     } else {
-      localStorage.removeItem(OPENAI_API_KEY_STORAGE);
+      localStorage.removeItem(storageKey);
     }
   };
 
   const handleDeleteKey = () => {
     setApiKey("");
-    localStorage.removeItem(OPENAI_API_KEY_STORAGE);
+    localStorage.removeItem(storageKey);
   };
+
+  return (
+    <div>
+      <p className="text-sm font-medium mb-1.5">{label}</p>
+      <div className="flex gap-1">
+        <Input
+          type="password"
+          placeholder={placeholder}
+          value={apiKey}
+          onChange={(e) => handleApiKeyChange(e.target.value)}
+        />
+        {apiKey && (
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={
+                <Button variant="destructive" size="icon">
+                  <Trash2 />
+                </Button>
+              }
+            />
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete API key?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {deleteDescription}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={handleDeleteKey}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function ApiKeySettings() {
+  const { settings, updateLLM } = useSettings();
+  const useOwnKey = settings.llm.useOwnKey ?? false;
 
   return (
     <div className="divide-y divide-border">
@@ -51,9 +109,9 @@ export function ApiKeySettings() {
         <FieldLabel htmlFor="use-own-key">
           <Field orientation="horizontal">
             <FieldContent>
-              <FieldTitle>Use own API key</FieldTitle>
+              <FieldTitle>Use own API keys</FieldTitle>
               <FieldDescription>
-                Connect directly to OpenAI from the browser
+                Connect directly to LLM providers from the browser
               </FieldDescription>
             </FieldContent>
             <Switch
@@ -65,44 +123,20 @@ export function ApiKeySettings() {
         </FieldLabel>
 
         {useOwnKey && (
-          <div className="mt-3">
-            <div className="flex gap-1">
-              <Input
-                type="password"
-                placeholder="sk-..."
-                value={apiKey}
-                onChange={(e) => handleApiKeyChange(e.target.value)}
-              />
-              {apiKey && (
-                <AlertDialog>
-                  <AlertDialogTrigger
-                    render={
-                      <Button variant="destructive" size="icon">
-                        <Trash2 />
-                      </Button>
-                    }
-                  />
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete API key?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will remove your saved OpenAI API key.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        variant="destructive"
-                        onClick={handleDeleteKey}
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1.5">
+          <div className="mt-3 space-y-3">
+            <ApiKeyField
+              label="OpenAI"
+              placeholder="sk-..."
+              storageKey={OPENAI_API_KEY_STORAGE}
+              deleteDescription="This will remove your saved OpenAI API key."
+            />
+            <ApiKeyField
+              label="Anthropic"
+              placeholder="sk-ant-..."
+              storageKey={ANTHROPIC_API_KEY_STORAGE}
+              deleteDescription="This will remove your saved Anthropic API key."
+            />
+            <p className="text-xs text-muted-foreground">
               Stored in browser localStorage only. Tool actions that require
               server access (e.g. memory) are skipped in this mode.
             </p>

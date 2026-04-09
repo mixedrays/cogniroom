@@ -13,6 +13,7 @@ export interface AppearanceSettings {
 export interface LLMSettings {
   defaultModel: string;
   useOwnKey?: boolean;
+  hiddenModels?: string[];
 }
 
 // Complete settings object
