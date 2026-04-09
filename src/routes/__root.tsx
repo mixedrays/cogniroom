@@ -95,7 +95,7 @@ function RootNotFound() {
         <p className="text-sm leading-6 text-muted-foreground">
           The route you requested does not exist or is no longer available.
         </p>
-        <Button variant="outline" render={<Link to="/">Back to home</Link>} />
+        <Button variant="outline" nativeButton={false} render={<Link to="/">Back to home</Link>} />
       </div>
     </div>
   );
