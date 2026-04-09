@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
-import { getValidModel } from "@/lib/llmModels";
+import { getValidModel } from "@/lib/llm-models";
 import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { useSettings } from "@/modules/settings";
 

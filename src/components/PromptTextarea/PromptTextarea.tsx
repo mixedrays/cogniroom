@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowUp, Loader2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/modules/settings/context/SettingsContext";
-import { getValidModel } from "@/lib/llmModels";
+import { getValidModel } from "@/lib/llm-models";
 import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { cn } from "@/lib/utils";
 

@@ -6,7 +6,7 @@ import { type openai } from "@ai-sdk/openai";
 import {
   AVAILABLE_MODELS,
   DEFAULT_MODEL as DEFAULT_MODEL_ID,
-} from "@/lib/llmModels";
+} from "@/lib/llm-models";
 
 // take type of openai modelId param
 export type OpenAIResponsesModelId = Parameters<typeof openai>[0];

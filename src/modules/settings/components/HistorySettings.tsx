@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TrashIcon, RotateCcwIcon } from "lucide-react";
 import { useSettings } from "../context/SettingsContext";
 import { type SettingsHistoryEntry } from "../lib/settingsTypes";
-import { AVAILABLE_MODELS } from "@/lib/llmModels";
+import { AVAILABLE_MODELS } from "@/lib/llm-models";
 import {
   getSettingsHistory,
   deleteHistoryEntry,

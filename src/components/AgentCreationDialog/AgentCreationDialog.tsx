@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Bot, Loader2, Plus, Sparkles } from "lucide-react";
 
-import { getValidModel } from "@/lib/llmModels";
+import { getValidModel } from "@/lib/llm-models";
 import { useSettings } from "@/modules/settings";
 
 import {

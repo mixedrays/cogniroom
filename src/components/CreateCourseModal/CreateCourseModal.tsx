@@ -13,7 +13,7 @@ import {
   saveCourse,
   type CourseSkillLevel,
 } from "@/lib/courses";
-import { getValidModel } from "@/lib/llmModels";
+import { getValidModel } from "@/lib/llm-models";
 import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { useSettings } from "@/modules/settings";
 import { useInstructionEnhancement } from "@/hooks/use-instruction-enhancement";
@@ -29,7 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { PromptPreview } from "@/components/PromptPreview/PromptPreview";
 import { EnhancedInstructionPreview } from "@/components/EnhancedInstructionPreview";
