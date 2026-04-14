@@ -2,30 +2,25 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { SettingsContent } from "./SettingsContent";
+import { useSettingsSearch } from "../hooks/useSettingsSearch";
 
-interface SettingsDialogProps {
-  trigger?: React.ReactElement;
-  defaultTab?: "appearance" | "llm" | "api-key" | "prompts" | "history";
-  defaultPromptId?: string;
-}
+export function SettingsDialog() {
+  const { isOpen, tab, section, close } = useSettingsSearch();
 
-export function SettingsDialog({
-  trigger,
-  defaultTab,
-  defaultPromptId,
-}: SettingsDialogProps) {
   return (
-    <Dialog>
-      {trigger && <DialogTrigger render={trigger} />}
+    <Dialog
+      open={isOpen}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) close();
+      }}
+    >
       <DialogContent className="sm:max-w-3xl h-[min(80vh,600px)] overflow-hidden p-0 gap-0">
         <DialogTitle className="sr-only">Settings</DialogTitle>
-        <SettingsContent
-          defaultTab={defaultTab}
-          defaultPromptId={defaultPromptId}
-        />
+        {isOpen && (
+          <SettingsContent defaultTab={tab} section={section} />
+        )}
       </DialogContent>
     </Dialog>
   );

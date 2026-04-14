@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   PaletteIcon,
   BrainCircuitIcon,
@@ -36,16 +36,37 @@ type SettingsTab = (typeof NAV_ITEMS)[number]["key"];
 interface SettingsContentProps {
   defaultTab?: SettingsTab;
   defaultPromptId?: string;
+  section?: string;
   className?: string;
 }
 
 export function SettingsContent({
   defaultTab = "appearance",
   defaultPromptId,
+  section,
   className,
 }: SettingsContentProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>(defaultTab);
   const activeLabel = NAV_ITEMS.find((i) => i.key === activeTab)!.label;
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setActiveTab(defaultTab);
+  }, [defaultTab]);
+
+  useEffect(() => {
+    if (!section) return;
+    // Wait for tab content to render before scrolling
+    const timer = setTimeout(() => {
+      const el = scrollAreaRef.current?.querySelector(
+        `[data-settings-section="${section}"]`
+      );
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [section, activeTab]);
 
   return (
     <SidebarProvider className={cn("min-h-0 flex-1", className)}>
@@ -83,12 +104,17 @@ export function SettingsContent({
           <span className="font-medium">{activeLabel}</span>
         </div>
 
-        <div className="p-4 h-full overflow-auto">
+        <div ref={scrollAreaRef} className="p-4 h-full overflow-auto">
           {activeTab === "appearance" && <AppearanceSettings />}
           {activeTab === "llm" && <LLMSettings />}
           {activeTab === "api-key" && <ApiKeySettings />}
           {activeTab === "prompts" && (
-            <PromptsSettings defaultPromptId={defaultPromptId} />
+            <PromptsSettings
+              defaultPromptId={
+                defaultPromptId ??
+                (activeTab === defaultTab ? section : undefined)
+              }
+            />
           )}
           {activeTab === "history" && <HistorySettings />}
         </div>

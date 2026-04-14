@@ -10,7 +10,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import AppSidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider } from "../components/ui/sidebar";
-import { SettingsProvider } from "@/modules/settings";
+import { SettingsProvider, SettingsDialog } from "@/modules/settings";
 import type { RouterContext } from "@/lib/routerContext";
 import appCss from "../styles.css?url";
 import { CSS_THEMES, ThemeInitScriptElement } from "@/modules/color-themes";
@@ -60,6 +60,7 @@ function RootComponent() {
             </main>
 
           </SidebarProvider>
+          <SettingsDialog />
         </SettingsProvider>
       </QueryClientProvider>
     </RootDocument>

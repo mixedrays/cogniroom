@@ -9,7 +9,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { BookOpen as IconApp, Settings } from "lucide-react";
-import { SettingsDialog } from "@/modules/settings";
+import { useSettingsSearch } from "@/modules/settings";
 import CourseList from "@/components/CourseList";
 import CourseTree from "@/components/CourseTree";
 import { Tooltip, TooltipContent } from "../ui/tooltip";
@@ -19,6 +19,7 @@ import { Button } from "../ui/button";
 export default function AppSidebar() {
   const location = useLocation();
   const isCourseView = location.pathname.startsWith("/course/");
+  const { open: openSettings } = useSettingsSearch();
   return (
     <Sidebar>
       <SidebarHeader className="flex-row border-b items-center">
@@ -60,14 +61,10 @@ export default function AppSidebar() {
 
       <SidebarFooter>
         <SidebarMenu>
-          <SettingsDialog
-            trigger={
-              <SidebarMenuButton>
-                <Settings />
-                Settings
-              </SidebarMenuButton>
-            }
-          />
+          <SidebarMenuButton onClick={() => openSettings()}>
+            <Settings />
+            Settings
+          </SidebarMenuButton>
         </SidebarMenu>
       </SidebarFooter>
 

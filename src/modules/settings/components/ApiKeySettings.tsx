@@ -105,7 +105,7 @@ export function ApiKeySettings() {
 
   return (
     <div className="divide-y divide-border">
-      <div className="py-4 first:pt-0">
+      <div data-settings-section="api-keys" className="py-4 first:pt-0">
         <FieldLabel htmlFor="use-own-key">
           <Field orientation="horizontal">
             <FieldContent>

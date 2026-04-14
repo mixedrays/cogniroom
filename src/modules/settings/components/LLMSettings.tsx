@@ -21,7 +21,7 @@ export function LLMSettings() {
   return (
     <div className="divide-y divide-border">
       {/* Default Model */}
-      <div className="py-4 first:pt-0">
+      <div data-settings-section="default-model" className="py-4 first:pt-0">
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium">Default model</p>
@@ -39,7 +39,7 @@ export function LLMSettings() {
       </div>
 
       {/* Available Models */}
-      <div className="py-4">
+      <div data-settings-section="available-models" className="py-4">
         <p className="font-medium mb-3">Available models</p>
         <p className="text-sm text-muted-foreground mb-3">
           Toggle visibility in model selector. Cost per 1M tokens.

@@ -5,7 +5,7 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
-import { SettingsDialog } from "@/modules/settings";
+import { useSettingsSearch } from "@/modules/settings";
 import { usePromptPreview } from "@/hooks/use-prompt-preview";
 
 interface PromptPreviewProps {
@@ -15,6 +15,7 @@ interface PromptPreviewProps {
 
 export function PromptPreview({ promptId, variables }: PromptPreviewProps) {
   const { renderedPrompt, isLoading } = usePromptPreview(promptId, variables);
+  const { open: openSettings } = useSettingsSearch();
 
   return (
     <Collapsible defaultOpen={false} className="group/prompt">
@@ -24,21 +25,15 @@ export function PromptPreview({ promptId, variables }: PromptPreviewProps) {
           Result Prompt Preview
         </CollapsibleTrigger>
 
-        <SettingsDialog
-          defaultTab="prompts"
-          defaultPromptId={promptId}
-          trigger={
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto text-xs text-muted-foreground hover:text-foreground"
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            >
-              <SquarePen className="size-3 mr-1" />
-              Edit system prompt
-            </Button>
-          }
-        />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="ml-auto text-xs text-muted-foreground hover:text-foreground"
+          onClick={() => openSettings("prompts")}
+        >
+          <SquarePen />
+          Edit system prompt
+        </Button>
       </div>
 
       <CollapsibleContent>

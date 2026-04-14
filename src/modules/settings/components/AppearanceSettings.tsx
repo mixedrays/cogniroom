@@ -37,7 +37,7 @@ export function AppearanceSettings() {
   return (
     <div className="divide-y divide-border">
       {/* Theme Mode */}
-      <div className="py-4 first:pt-0">
+      <div data-settings-section="theme" className="py-4 first:pt-0">
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium">Theme</p>
@@ -65,7 +65,7 @@ export function AppearanceSettings() {
       </div>
 
       {/* Preset Themes */}
-      <div className="py-4">
+      <div data-settings-section="preset-theme" className="py-4">
         <p className="font-medium mb-3">Preset theme</p>
         <CssThemeSelector
           selectedId={settings.appearance.cssThemeId}
@@ -75,7 +75,7 @@ export function AppearanceSettings() {
       </div>
 
       {/* Border Radius */}
-      <div className="py-4">
+      <div data-settings-section="border-radius" className="py-4">
         <div className="flex items-center justify-between">
           <p className="font-medium">Border radius</p>
           <Select
