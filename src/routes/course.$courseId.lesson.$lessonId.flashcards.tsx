@@ -175,7 +175,7 @@ function LessonFlashcardsComponent() {
 
       {hasCards ? (
         <div className="flex-1 min-h-0">
-          <div className="max-w-4xl w-full mx-auto min-h-0 p-4 h-full">
+          <div className="max-w-4xl w-full mx-auto min-h-0 h-full">
             <SM2UI
               cards={cards}
               reviewData={reviewData}

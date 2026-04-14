@@ -271,14 +271,19 @@ const QuizQuestionView = () => {
                   </Button>
                 )}
 
-                <div
-                  className={cn(
-                    "text-sm invisible text-muted-foreground p-3 bg-muted/50 rounded-md",
-                    checked && q.explanation && "visible"
-                  )}
-                >
-                  {q.explanation}
-                </div>
+                {q.explanation && (
+                  <div
+                    className={cn(
+                      "text-sm invisible text-muted-foreground p-3 bg-muted/50 rounded-md",
+                      checked && "visible"
+                    )}
+                  >
+                    <Markdown
+                      content={q.explanation}
+                      className="text-sm text-muted-foreground"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           );
