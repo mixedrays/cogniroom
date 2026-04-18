@@ -6,6 +6,8 @@ import {
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState, useCallback, useEffect } from "react";
+import { RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   getLessonFlashcards,
   getCourse,
@@ -18,9 +20,9 @@ import type { Flashcard, ReviewData } from "@/lib/types";
 import {
   LessonPageShell,
   LessonPageHeader,
-  LessonEmptyState,
 } from "@/components/LessonPage";
-import { QuickCreate } from "@/components/QuickCreate";
+import { ContentQuickGenerate } from "@/components/ContentQuickGenerate";
+import { WizardAgentInline } from "@/modules/wizard-agent";
 
 export const Route = createFileRoute(
   "/course/$courseId/lesson/$lessonId/flashcards"
@@ -149,70 +151,88 @@ function LessonFlashcardsComponent() {
     }
   };
 
+  const headerProps = {
+    courseId,
+    lessonId,
+    courseTitle: course.title,
+    topicIndex,
+    topicLessons: topicInfo?.lessons ?? [],
+    activeTab: "flashcards" as const,
+    hasContent: hasCards,
+    showMarkComplete: hasCards,
+    isCompleted,
+    isCompleting,
+    completionError,
+    onToggleComplete: handleToggleComplete,
+    contentContext: {
+      courseTitle: course.title,
+      topicTitle: topicInfo?.title,
+      topicDescription: topicInfo?.description,
+      lessonTitle: lessonInfo.title,
+      lessonDescription: lessonInfo.description,
+    },
+  };
+
   return (
     <LessonPageShell>
-      <LessonPageHeader
-        courseId={courseId}
-        lessonId={lessonId}
-        courseTitle={course.title}
-        topicIndex={topicIndex}
-        topicLessons={topicInfo?.lessons ?? []}
-        activeTab="flashcards"
-        hasContent={hasCards}
-        showMarkComplete={hasCards}
-        isCompleted={isCompleted}
-        isCompleting={isCompleting}
-        completionError={completionError}
-        onToggleComplete={handleToggleComplete}
-        contentContext={{
-          courseTitle: course.title,
-          topicTitle: topicInfo?.title,
-          topicDescription: topicInfo?.description,
-          lessonTitle: lessonInfo.title,
-          lessonDescription: lessonInfo.description,
-        }}
-      />
-
       {hasCards ? (
-        <div className="flex-1 min-h-0">
-          <div className="max-w-4xl w-full mx-auto min-h-0 h-full">
-            <SM2UI
-              cards={cards}
-              reviewData={reviewData}
-              onSave={handleSave}
-              className="m-auto h-full"
-            />
+        <>
+          <LessonPageHeader {...headerProps} />
+          <div className="flex-1 min-h-0">
+            <div className="max-w-4xl w-full mx-auto min-h-0 h-full">
+              <SM2UI
+                cards={cards}
+                reviewData={reviewData}
+                onSave={handleSave}
+                className="m-auto h-full"
+              />
+            </div>
           </div>
-        </div>
+        </>
       ) : (
-        <LessonEmptyState
-          title={lessonInfo.title}
-          description={
+        <WizardAgentInline
+          context={{
+            contentType: "flashcards",
+            courseId,
+            lessonId,
+            topic: topicInfo?.title,
+            lessonTitle: lessonInfo.title,
+            courseTitle: course.title,
+          }}
+          welcomeTitle={lessonInfo.title}
+          welcomeDescription={
             lessonInfo.description ||
             "No flashcards available for this lesson yet."
           }
+          placeholder="Describe the flashcards you want to create…"
+          className="max-w-3xl w-full mx-auto"
+          promptExtra={
+            <ContentQuickGenerate
+              contentType="flashcards"
+              courseId={courseId}
+              lessonId={lessonId}
+              contentContext={headerProps.contentContext}
+            />
+          }
         >
-          <QuickCreate
-            contentType="flashcards"
-            courseId={courseId}
-            lessonId={lessonId}
-            wizardContext={{
-              contentType: "flashcards",
-              courseId,
-              lessonId,
-              topic: topicInfo?.title,
-              lessonTitle: lessonInfo.title,
-              courseTitle: course.title,
-            }}
-            contentContext={{
-              courseTitle: course.title,
-              topicTitle: topicInfo?.title,
-              topicDescription: topicInfo?.description,
-              lessonTitle: lessonInfo.title,
-              lessonDescription: lessonInfo.description,
-            }}
-          />
-        </LessonEmptyState>
+          {({ hasMessages, onClear }) => (
+            <LessonPageHeader
+              {...headerProps}
+              extraActions={
+                hasMessages ? (
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={onClear}
+                    aria-label="Clear conversation"
+                  >
+                    <RotateCcw />
+                  </Button>
+                ) : undefined
+              }
+            />
+          )}
+        </WizardAgentInline>
       )}
     </LessonPageShell>
   );

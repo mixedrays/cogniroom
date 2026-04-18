@@ -16,7 +16,7 @@ export function PageHeader({ children, actions }: PageHeaderProps) {
   const { open } = useSidebar();
 
   return (
-    <div className="sticky p-2 min-h-13 mx-0.5 flex items-center left-0 top-0 z-20 bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/60">
+    <div className="sticky p-2 min-h-13 mx-0.5 flex items-center left-0 top-0 bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/60">
       <Tooltip>
         <TooltipTrigger render={<SidebarTrigger size="icon" />} />
         <TooltipContent>

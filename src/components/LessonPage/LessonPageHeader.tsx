@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { BookOpen, Home, Layers, ListChecks, Code } from "lucide-react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PageHeader } from "@/components/PageHeader";
@@ -20,6 +21,7 @@ interface LessonPageHeaderProps {
   completionError: string | null;
   onToggleComplete: () => void;
   contentContext?: ContentContext;
+  extraActions?: ReactNode;
 }
 
 export function LessonPageHeader({
@@ -36,6 +38,7 @@ export function LessonPageHeader({
   completionError,
   onToggleComplete,
   contentContext,
+  extraActions,
 }: LessonPageHeaderProps) {
   const lessonItems = topicLessons.map((lesson, i) => ({
     title: `Lesson ${topicIndex}.${i + 1}`,
@@ -50,17 +53,20 @@ export function LessonPageHeader({
   return (
     <PageHeader
       actions={
-        <LessonActionsMenu
-          courseId={courseId}
-          lessonId={lessonId}
-          contentType={activeTab}
-          hasContent={hasContent}
-          contentContext={contentContext}
-          showMarkComplete={showMarkComplete}
-          isCompleted={isCompleted}
-          isCompleting={isCompleting}
-          onToggleComplete={onToggleComplete}
-        />
+        <>
+          {extraActions}
+          <LessonActionsMenu
+            courseId={courseId}
+            lessonId={lessonId}
+            contentType={activeTab}
+            hasContent={hasContent}
+            contentContext={contentContext}
+            showMarkComplete={showMarkComplete}
+            isCompleted={isCompleted}
+            isCompleting={isCompleting}
+            onToggleComplete={onToggleComplete}
+          />
+        </>
       }
     >
       <Breadcrumbs

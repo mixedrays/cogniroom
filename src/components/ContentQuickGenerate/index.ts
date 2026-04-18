@@ -1,0 +1,1 @@
+export { ContentQuickGenerate } from "./ContentQuickGenerate";

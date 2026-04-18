@@ -12,13 +12,14 @@ import {
 import { Suspense, useEffect, useState } from "react";
 
 import { Markdown } from "@/modules/markdown";
-import { Loader2 } from "lucide-react";
+import { Loader2, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { getLesson, getCourse, updateLessonCompletion } from "@/lib/courses";
-import { QuickCreate } from "@/components/QuickCreate";
+import { ContentQuickGenerate } from "@/components/ContentQuickGenerate";
+import { WizardAgentInline } from "@/modules/wizard-agent";
 import {
   LessonPageShell,
   LessonPageHeader,
-  LessonEmptyState,
   LessonContentArea,
 } from "@/components/LessonPage";
 
@@ -132,75 +133,93 @@ function LessonComponent() {
     }
   };
 
+  const headerProps = {
+    courseId,
+    lessonId,
+    courseTitle: course.title,
+    topicIndex,
+    topicLessons: topicInfo?.lessons ?? [],
+    activeTab: "theory" as const,
+    hasContent: !!content,
+    showMarkComplete: !!content,
+    isCompleted,
+    isCompleting,
+    completionError,
+    onToggleComplete: handleToggleComplete,
+    contentContext: {
+      courseTitle: course.title,
+      topicTitle: topicInfo?.title,
+      topicDescription: topicInfo?.description,
+      lessonTitle: lessonInfo.title,
+      lessonDescription: lessonInfo.description,
+    },
+  };
+
   return (
     <LessonPageShell>
-      <LessonPageHeader
-        courseId={courseId}
-        lessonId={lessonId}
-        courseTitle={course.title}
-        topicIndex={topicIndex}
-        topicLessons={topicInfo?.lessons ?? []}
-        activeTab="theory"
-        hasContent={!!content}
-        showMarkComplete={!!content}
-        isCompleted={isCompleted}
-        isCompleting={isCompleting}
-        completionError={completionError}
-        onToggleComplete={handleToggleComplete}
-        contentContext={{
-          courseTitle: course.title,
-          topicTitle: topicInfo?.title,
-          topicDescription: topicInfo?.description,
-          lessonTitle: lessonInfo.title,
-          lessonDescription: lessonInfo.description,
-        }}
-      />
-
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center min-h-[50vh]">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        }
-      >
-        {content ? (
-          <LessonContentArea
-            title={lessonInfo.title}
-            description={lessonInfo.description}
-          >
-            <Markdown content={content} variant="lesson" />
-          </LessonContentArea>
-        ) : (
-          <LessonEmptyState
-            title={lessonInfo.title}
-            description={
-              lessonInfo.description ||
-              "No content available for this lesson yet."
+      {content ? (
+        <>
+          <LessonPageHeader {...headerProps} />
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center min-h-[50vh]">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
             }
           >
-            <QuickCreate
+            <LessonContentArea
+              title={lessonInfo.title}
+              description={lessonInfo.description}
+            >
+              <Markdown content={content} variant="lesson" />
+            </LessonContentArea>
+          </Suspense>
+        </>
+      ) : (
+        <WizardAgentInline
+          context={{
+            contentType: "lesson",
+            courseId,
+            lessonId,
+            topic: topicInfo?.title,
+            lessonTitle: lessonInfo.title,
+            courseTitle: course.title,
+          }}
+          welcomeTitle={lessonInfo.title}
+          welcomeDescription={
+            lessonInfo.description ||
+            "No content available for this lesson yet."
+          }
+          placeholder="Describe the lesson content you want to create…"
+          className="max-w-3xl w-full mx-auto"
+          promptExtra={
+            <ContentQuickGenerate
               contentType="theory"
               courseId={courseId}
               lessonId={lessonId}
-              wizardContext={{
-                contentType: "lesson",
-                courseId,
-                lessonId,
-                topic: topicInfo?.title,
-                lessonTitle: lessonInfo.title,
-                courseTitle: course.title,
-              }}
-              contentContext={{
-                courseTitle: course.title,
-                topicTitle: topicInfo?.title,
-                topicDescription: topicInfo?.description,
-                lessonTitle: lessonInfo.title,
-                lessonDescription: lessonInfo.description,
-              }}
+              contentContext={headerProps.contentContext}
             />
-          </LessonEmptyState>
-        )}
-      </Suspense>
+          }
+        >
+          {({ hasMessages, onClear }) => (
+            <LessonPageHeader
+              {...headerProps}
+              extraActions={
+                hasMessages ? (
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={onClear}
+                    aria-label="Clear conversation"
+                  >
+                    <RotateCcw />
+                  </Button>
+                ) : undefined
+              }
+            />
+          )}
+        </WizardAgentInline>
+      )}
     </LessonPageShell>
   );
 }

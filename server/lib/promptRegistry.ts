@@ -212,7 +212,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
     description:
       "System prompt for the streaming AI agent wizard that collects user preferences and generates content inline.",
     category: "Wizard",
-    variables: ["contentType", "context"],
+    variables: ["contentType", "context", "contextPrompt"],
     defaultContent: [
       "You are a course creation assistant for a learning platform.",
       "",
@@ -247,6 +247,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "- Never ask for information already available in context",
       "- Keep any conversational text concise",
       "- Generate complete, production-quality output when calling presentContent",
+      "{{contextPrompt}}",
     ].join("\n"),
   },
 

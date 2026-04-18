@@ -6,7 +6,9 @@ import type { WizardAgentContext } from "./WizardAgentDialog";
 
 interface WizardAgentInlineProps {
   context: WizardAgentContext;
+  contextPrompt?: string;
   welcomeTitle?: string;
+  welcomeDescription?: string;
   welcomeMessage?: string;
   placeholder?: string;
   promptExtra?: ReactNode;
@@ -19,14 +21,16 @@ interface WizardAgentInlineProps {
 
 export function WizardAgentInline({
   context,
+  contextPrompt,
   welcomeTitle,
+  welcomeDescription,
   welcomeMessage,
   placeholder = "Type a message…",
   promptExtra,
   className,
   children,
 }: WizardAgentInlineProps) {
-  const agent = useWizardAgent({ context });
+  const agent = useWizardAgent({ context, contextPrompt });
 
   const promptSlot = (
     <div className="flex flex-col gap-2 w-full mx-auto">
@@ -67,8 +71,17 @@ export function WizardAgentInline({
         />
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center px-4 pb-16 max-w-3xl mx-auto w-full">
-          {welcomeTitle && (
-            <h1 className="text-2xl font-semibold mb-8">{welcomeTitle}</h1>
+          {(welcomeTitle || welcomeDescription) && (
+            <div className="text-center space-y-2 mb-8">
+              {welcomeTitle && (
+                <h1 className="text-2xl font-semibold">{welcomeTitle}</h1>
+              )}
+              {welcomeDescription && (
+                <p className="text-muted-foreground max-w-md">
+                  {welcomeDescription}
+                </p>
+              )}
+            </div>
           )}
           {promptSlot}
         </div>

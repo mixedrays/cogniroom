@@ -23,6 +23,7 @@ interface WizardAgentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   context: WizardAgentContext;
+  contextPrompt?: string;
 }
 
 const WELCOME: Record<WizardAgentContext["contentType"], string> = {
@@ -40,8 +41,9 @@ export function WizardAgentDialog({
   open,
   onOpenChange,
   context,
+  contextPrompt,
 }: WizardAgentDialogProps) {
-  const agent = useWizardAgent({ context, active: open });
+  const agent = useWizardAgent({ context, contextPrompt, active: open });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -6,11 +6,16 @@ import { getRenderedPrompt } from "@root/server/lib/promptService";
 
 export default createAgentHandler({
   tools: [askUserTool, memoryTool, presentContentTool],
-  getSystemPrompt: async (context) =>
-    getRenderedPrompt("wizard-agent-chat", {
-      contentType: String(
-        (context as Record<string, unknown>)?.contentType ?? "lesson"
-      ),
-      context: JSON.stringify(context),
-    }),
+  getSystemPrompt: async (fullContext) => {
+    const { contextPrompt: rawContextPrompt, ...restContext } =
+      fullContext as Record<string, unknown>;
+    const contextPromptStr = String(rawContextPrompt ?? "");
+    return getRenderedPrompt("wizard-agent-chat", {
+      contentType: String(restContext?.contentType ?? "lesson"),
+      context: JSON.stringify(restContext),
+      contextPrompt: contextPromptStr
+        ? `\nADDITIONAL CONTEXT:\n${contextPromptStr}`
+        : "",
+    });
+  },
 });

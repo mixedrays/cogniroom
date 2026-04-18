@@ -6,17 +6,19 @@ import {
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Markdown } from "@/modules/markdown";
 import {
   getLessonExercises,
   getCourse,
   updateLessonCompletion,
 } from "@/lib/courses";
-import { QuickCreate } from "@/components/QuickCreate";
+import { ContentQuickGenerate } from "@/components/ContentQuickGenerate";
+import { WizardAgentInline } from "@/modules/wizard-agent";
 import {
   LessonPageShell,
   LessonPageHeader,
-  LessonEmptyState,
   LessonContentArea,
 } from "@/components/LessonPage";
 
@@ -113,68 +115,85 @@ function LessonExercisesComponent() {
     }
   };
 
+  const headerProps = {
+    courseId,
+    lessonId,
+    courseTitle: course.title,
+    topicIndex,
+    topicLessons: topicInfo?.lessons ?? [],
+    activeTab: "exercises" as const,
+    hasContent: !!content,
+    showMarkComplete: !!content,
+    isCompleted,
+    isCompleting,
+    completionError,
+    onToggleComplete: handleToggleComplete,
+    contentContext: {
+      courseTitle: course.title,
+      topicTitle: topicInfo?.title,
+      topicDescription: topicInfo?.description,
+      lessonTitle: lessonInfo.title,
+      lessonDescription: lessonInfo.description,
+    },
+  };
+
   return (
     <LessonPageShell>
-      <LessonPageHeader
-        courseId={courseId}
-        lessonId={lessonId}
-        courseTitle={course.title}
-        topicIndex={topicIndex}
-        topicLessons={topicInfo?.lessons ?? []}
-        activeTab="exercises"
-        hasContent={!!content}
-        showMarkComplete={!!content}
-        isCompleted={isCompleted}
-        isCompleting={isCompleting}
-        completionError={completionError}
-        onToggleComplete={handleToggleComplete}
-        contentContext={{
-          courseTitle: course.title,
-          topicTitle: topicInfo?.title,
-          topicDescription: topicInfo?.description,
-          lessonTitle: lessonInfo.title,
-          lessonDescription: lessonInfo.description,
-        }}
-      />
-
       {content ? (
-        <LessonContentArea
-          title={lessonInfo.title}
-          description={lessonInfo.description}
-        >
-          <Markdown content={content} variant="lesson" />
-        </LessonContentArea>
+        <>
+          <LessonPageHeader {...headerProps} />
+          <LessonContentArea
+            title={lessonInfo.title}
+            description={lessonInfo.description}
+          >
+            <Markdown content={content} variant="lesson" />
+          </LessonContentArea>
+        </>
       ) : (
-        <LessonEmptyState
-          title={lessonInfo.title}
-          description={
+        <WizardAgentInline
+          context={{
+            contentType: "exercise",
+            courseId,
+            lessonId,
+            topic: topicInfo?.title,
+            lessonTitle: lessonInfo.title,
+            courseTitle: course.title,
+          }}
+          welcomeTitle={lessonInfo.title}
+          welcomeDescription={
             lessonInfo.description ||
             "No exercises available for this lesson yet."
           }
+          placeholder="Describe the exercises you want to create…"
+          className="max-w-3xl w-full mx-auto"
+          promptExtra={
+            <ContentQuickGenerate
+              contentType="exercises"
+              courseId={courseId}
+              lessonId={lessonId}
+              contentContext={headerProps.contentContext}
+            />
+          }
         >
-          <QuickCreate
-            contentType="exercises"
-            courseId={courseId}
-            lessonId={lessonId}
-            wizardContext={{
-              contentType: "exercise",
-              courseId,
-              lessonId,
-              topic: topicInfo?.title,
-              lessonTitle: lessonInfo.title,
-              courseTitle: course.title,
-            }}
-            contentContext={{
-              courseTitle: course.title,
-              topicTitle: topicInfo?.title,
-              topicDescription: topicInfo?.description,
-              lessonTitle: lessonInfo.title,
-              lessonDescription: lessonInfo.description,
-            }}
-          />
-        </LessonEmptyState>
+          {({ hasMessages, onClear }) => (
+            <LessonPageHeader
+              {...headerProps}
+              extraActions={
+                hasMessages ? (
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={onClear}
+                    aria-label="Clear conversation"
+                  >
+                    <RotateCcw />
+                  </Button>
+                ) : undefined
+              }
+            />
+          )}
+        </WizardAgentInline>
       )}
-
     </LessonPageShell>
   );
 }

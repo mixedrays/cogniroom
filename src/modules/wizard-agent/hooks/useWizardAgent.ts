@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useAgent } from "@/modules/agent/hooks/useAgent";
 import { useChatBackend } from "@/modules/agent/hooks/useChatBackend";
 import { askUserTool } from "@/modules/agent/tools/ask-user";
@@ -56,10 +56,15 @@ async function clearHistory(ctxId: string): Promise<void> {
 
 interface UseWizardAgentOptions {
   context: WizardAgentContext;
+  contextPrompt?: string;
   active?: boolean;
 }
 
-export function useWizardAgent({ context, active = true }: UseWizardAgentOptions) {
+export function useWizardAgent({
+  context,
+  contextPrompt,
+  active = true,
+}: UseWizardAgentOptions) {
   const [input, setInput] = useState("");
   const ctxId = contextId(context);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -68,16 +73,25 @@ export function useWizardAgent({ context, active = true }: UseWizardAgentOptions
     const params = new URLSearchParams({
       contentType: context.contentType,
       context: JSON.stringify(context),
+      ...(contextPrompt ? { contextPrompt } : {}),
     });
     const res = await fetch(`/api/wizard-agent/prompt?${params}`);
     const data = (await res.json()) as { prompt: string };
     return data.prompt;
-  }, [context]);
+  }, [context, contextPrompt]);
 
   const backend = useChatBackend(
     "/api/wizard-agent/chat",
     TOOLS,
     getSystemPrompt
+  );
+
+  const transportContext = useMemo(
+    () =>
+      (contextPrompt
+        ? { ...context, contextPrompt }
+        : context) as unknown as Record<string, unknown>,
+    [context, contextPrompt]
   );
 
   const {
@@ -90,7 +104,7 @@ export function useWizardAgent({ context, active = true }: UseWizardAgentOptions
     loadMessages,
   } = useAgent({
     backend,
-    context: context as unknown as Record<string, unknown>,
+    context: transportContext,
   });
 
   useEffect(() => {

@@ -59,6 +59,10 @@ const GENERATION_TYPE_MAP: Record<ContentType, GenerationType> = {
   exercises: "exercises",
 };
 
+/**
+ * @deprecated Use `WizardAgentInline` with `ContentQuickGenerate` as `promptExtra` instead.
+ * This component is kept for reference but should not be used in new code.
+ */
 export function QuickCreate({
   contentType,
   courseId,
