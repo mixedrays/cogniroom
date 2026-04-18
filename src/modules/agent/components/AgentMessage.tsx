@@ -1,5 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { Markdown } from "@/modules/markdown";
+import { ErrorMessage } from "@/components/ErrorMessage/ErrorMessage";
 import type { AgentMessageState, AgentTool } from "../types";
 import { AskUserParamsSchema } from "../tools/ask-user/schema";
 
@@ -154,7 +155,7 @@ export function AgentMessage({
     return (
       <div className="flex justify-start">
         <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-destructive/10 px-4 py-2.5 text-sm text-destructive">
-          {message.message}
+          <ErrorMessage message={message.message} />
         </div>
       </div>
     );

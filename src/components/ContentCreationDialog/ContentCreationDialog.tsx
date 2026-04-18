@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { getValidModel } from "@/lib/llm-models";
 import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { useSettings } from "@/modules/settings";
+import { ErrorMessage } from "@/components/ErrorMessage/ErrorMessage";
 
 import {
   Dialog,
@@ -565,7 +566,7 @@ function CreateModeDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           {displayError && (
             <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
-              {displayError}
+              <ErrorMessage message={displayError} />
             </div>
           )}
 
@@ -965,7 +966,7 @@ function GenerateModeDialog({
 
           {displayError && (
             <div className="text-sm text-destructive font-medium">
-              {displayError}
+              <ErrorMessage message={displayError} />
             </div>
           )}
 
