@@ -5,7 +5,14 @@ import {
   Link as LinkIcon,
   Loader2,
   Plus,
+  ChevronDown,
 } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 import type { Course } from "@/lib/types";
 import { generateId } from "@/lib/types";
 import {
@@ -46,6 +53,7 @@ export default function CreateCourseModal({
   const [activeTab, setActiveTab] = useState("generate");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   // Generate tab state
   const [skillTopic, setSkillTopic] = useState("");
@@ -360,66 +368,94 @@ export default function CreateCourseModal({
                   className="p-1"
                 />
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="instructions">
-                    Additional Instructions (Optional)
-                  </Label>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleEnhanceInstructions}
-                    disabled={isEnhanceDisabled}
-                  >
-                    {enhancement.isEnhancing ? (
-                      <>
-                        <Loader2 className="animate-spin" />
-                        Enhancing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles />
-                        Enhance with AI
-                      </>
+
+              <Collapsible
+                open={advancedOpen}
+                onOpenChange={setAdvancedOpen}
+                className="border-t pt-3"
+              >
+                <CollapsibleTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-between text-muted-foreground hover:text-foreground"
+                    />
+                  }
+                >
+                  <span>Advanced</span>
+                  <ChevronDown
+                    className={cn(
+                      "transition-transform",
+                      advancedOpen && "rotate-180"
                     )}
-                  </Button>
-                </div>
-                <Textarea
-                  id="instructions"
-                  placeholder="e.g., Focus on practical projects, include real-world examples..."
-                  value={instructions}
-                  onChange={(e) => {
-                    setInstructions(e.target.value);
-                    if (enhancement.enhancedInstruction) {
-                      enhancement.reject();
-                    }
-                  }}
-                  className="h-32 resize-none"
-                  disabled={isLoading || enhancement.isEnhancing}
-                />
-
-                {enhancement.error && (
-                  <div className="text-sm text-destructive bg-destructive/10 p-2 rounded-md border border-destructive/20">
-                    {enhancement.error}
-                  </div>
-                )}
-
-                {enhancement.enhancedInstruction && (
-                  <EnhancedInstructionPreview
-                    enhancedInstruction={enhancement.enhancedInstruction}
-                    onAccept={handleAcceptEnhancement}
-                    onReject={handleRejectEnhancement}
-                    title="Enhanced Instructions"
-                    disabled={isLoading}
                   />
-                )}
-              </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="instructions">
+                        Additional Instructions (Optional)
+                      </Label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleEnhanceInstructions}
+                        disabled={isEnhanceDisabled}
+                      >
+                        {enhancement.isEnhancing ? (
+                          <>
+                            <Loader2 className="animate-spin" />
+                            Enhancing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles />
+                            Enhance with AI
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    <Textarea
+                      id="instructions"
+                      placeholder="e.g., Focus on practical projects, include real-world examples..."
+                      value={instructions}
+                      onChange={(e) => {
+                        setInstructions(e.target.value);
+                        if (enhancement.enhancedInstruction) {
+                          enhancement.reject();
+                        }
+                      }}
+                      className="h-28 resize-none"
+                      disabled={isLoading || enhancement.isEnhancing}
+                    />
 
-              <PromptPreview
-                promptId="course-generation"
-                variables={coursePromptVariables}
-              />
+                    {enhancement.error && (
+                      <div className="text-sm text-destructive bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                        {enhancement.error}
+                      </div>
+                    )}
+
+                    {enhancement.enhancedInstruction && (
+                      <EnhancedInstructionPreview
+                        enhancedInstruction={enhancement.enhancedInstruction}
+                        onAccept={handleAcceptEnhancement}
+                        onReject={handleRejectEnhancement}
+                        title="Enhanced Instructions"
+                        disabled={isLoading}
+                      />
+                    )}
+                  </div>
+
+                  <PromptPreview
+                    promptId="course-generation"
+                    variables={coursePromptVariables}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+
               <Button
                 onClick={handleGenerate}
                 disabled={isLoading}

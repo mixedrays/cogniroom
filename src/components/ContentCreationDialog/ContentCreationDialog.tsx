@@ -7,8 +7,15 @@ import {
   ListChecks,
   Sparkles,
   Wand2,
+  ChevronDown,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 
 import { getValidModel } from "@/lib/llm-models";
 import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
@@ -104,6 +111,31 @@ export type ContentData =
   | ExerciseContentData;
 
 /**
+ * Per-type generation options that tune how content is produced.
+ * Only fields relevant to the selected GenerationType are used.
+ */
+export type TheoryDepth = "short" | "standard" | "deep";
+export type FlashcardStyle = "qa" | "cloze" | "definition";
+export type FlashcardFocus =
+  | "definitions"
+  | "concepts"
+  | "application"
+  | "mixed";
+export type QuizQuestionType = "single" | "multi" | "true-false" | "mixed";
+export type Difficulty = "easy" | "medium" | "hard" | "mixed";
+export type ExerciseFormat = "coding" | "conceptual" | "mixed";
+
+export interface GenerationOptions {
+  depth?: TheoryDepth;
+  count?: number;
+  cardStyle?: FlashcardStyle;
+  focus?: FlashcardFocus;
+  questionType?: QuizQuestionType;
+  difficulty?: Difficulty;
+  format?: ExerciseFormat;
+}
+
+/**
  * Data for AI content generation
  */
 export interface ContentGenerationData {
@@ -111,6 +143,7 @@ export interface ContentGenerationData {
   model: string;
   instructions: string;
   includeContent: boolean;
+  options: GenerationOptions;
 }
 
 /**
@@ -696,6 +729,13 @@ function CreateModeDialog({
 // Generate Mode Dialog
 // ============================================================================
 
+const DEFAULT_OPTIONS: Record<GenerationType, GenerationOptions> = {
+  theory: { depth: "standard" },
+  flashcards: { count: 10, cardStyle: "qa", focus: "mixed" },
+  quiz: { count: 8, questionType: "mixed", difficulty: "mixed" },
+  exercises: { count: 4, difficulty: "mixed", format: "mixed" },
+};
+
 function GenerateModeDialog({
   onGenerate,
   onOpenChange,
@@ -719,6 +759,10 @@ function GenerateModeDialog({
   );
   const [instructions, setInstructions] = useState("");
   const [includeContent, setIncludeContent] = useState(true);
+  const [options, setOptions] = useState<GenerationOptions>(
+    () => DEFAULT_OPTIONS[generationType]
+  );
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -756,13 +800,20 @@ function GenerateModeDialog({
     setModel(getValidModel(settings.llm.defaultModel));
   }, [settings.llm.defaultModel]);
 
+  // Reset options when generation type changes
+  useEffect(() => {
+    setOptions(DEFAULT_OPTIONS[generationType]);
+  }, [generationType]);
+
   const resetForm = useCallback(() => {
     setModel(getValidModel(settings.llm.defaultModel));
     setInstructions("");
     setIncludeContent(true);
+    setOptions(DEFAULT_OPTIONS[generationType]);
+    setAdvancedOpen(false);
     setError(null);
     enhancement.reset();
-  }, [settings.llm.defaultModel, enhancement]);
+  }, [settings.llm.defaultModel, enhancement, generationType]);
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {
@@ -814,6 +865,7 @@ function GenerateModeDialog({
         model,
         instructions: instructions.trim(),
         includeContent,
+        options,
       };
       await onGenerate(data);
       // Note: We don't reset form here - the parent handles closing the dialog on success
@@ -840,9 +892,12 @@ function GenerateModeDialog({
           : "quiz-generation";
 
   const promptVariables = useMemo(() => {
-    const additionalInstructions = instructions.trim()
-      ? `\nAdditional Instructions from user: ${instructions.trim()}`
+    const optionsBlock = formatGenerationOptions(generationType, options);
+    const userBlock = instructions.trim()
+      ? `Additional Instructions from user: ${instructions.trim()}`
       : "";
+    const combined = [optionsBlock, userBlock].filter(Boolean).join("\n\n");
+    const additionalInstructions = combined ? `\n${combined}` : "";
     const lessonContent =
       showIncludeContentToggle && includeContent
         ? "\n\nLesson Theory Content:\n---\n[lesson theory content will be included if available]\n---"
@@ -856,7 +911,14 @@ function GenerateModeDialog({
       lessonContent,
       additionalInstructions,
     };
-  }, [contentContext, instructions, showIncludeContentToggle, includeContent]);
+  }, [
+    contentContext,
+    instructions,
+    showIncludeContentToggle,
+    includeContent,
+    generationType,
+    options,
+  ]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -889,6 +951,13 @@ function GenerateModeDialog({
             />
           </div>
 
+          <TypeSpecificControls
+            generationType={generationType}
+            options={options}
+            onChange={setOptions}
+            disabled={isLoading}
+          />
+
           {showIncludeContentToggle && (
             <div className="flex items-center justify-between">
               <Label htmlFor="include-content" className="cursor-pointer">
@@ -903,66 +972,89 @@ function GenerateModeDialog({
             </div>
           )}
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="instructions">
-                Additional Instructions (Optional)
-              </Label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleEnhanceInstructions}
-                disabled={isEnhanceDisabled}
-              >
-                {enhancement.isEnhancing ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    Enhancing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles />
-                    Enhance with AI
-                  </>
+          <Collapsible
+            open={advancedOpen}
+            onOpenChange={setAdvancedOpen}
+            className="border-t pt-3"
+          >
+            <CollapsibleTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-between text-muted-foreground hover:text-foreground"
+                />
+              }
+            >
+              <span>Advanced</span>
+              <ChevronDown
+                className={cn(
+                  "transition-transform",
+                  advancedOpen && "rotate-180"
                 )}
-              </Button>
-            </div>
-            <Textarea
-              id="instructions"
-              placeholder={config.instructionsPlaceholder}
-              value={instructions}
-              onChange={(e) => {
-                setInstructions(e.target.value);
-                // Clear enhanced instruction when user edits
-                if (enhancement.enhancedInstruction) {
-                  enhancement.reject();
-                }
-              }}
-              className="h-32 resize-none"
-              disabled={isLoading || enhancement.isEnhancing}
-            />
-
-            {/* Enhancement error display */}
-            {enhancement.error && (
-              <div className="text-sm text-destructive bg-destructive/10 p-2 rounded-md border border-destructive/20">
-                {enhancement.error}
-              </div>
-            )}
-
-            {/* Enhanced instruction preview with accept/reject */}
-            {enhancement.enhancedInstruction && (
-              <EnhancedInstructionPreview
-                enhancedInstruction={enhancement.enhancedInstruction}
-                onAccept={handleAcceptEnhancement}
-                onReject={handleRejectEnhancement}
-                title="Enhanced Instructions"
-                disabled={isLoading}
               />
-            )}
-          </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4 pt-3">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="instructions">
+                    Additional Instructions (Optional)
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleEnhanceInstructions}
+                    disabled={isEnhanceDisabled}
+                  >
+                    {enhancement.isEnhancing ? (
+                      <>
+                        <Loader2 className="animate-spin" />
+                        Enhancing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles />
+                        Enhance with AI
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <Textarea
+                  id="instructions"
+                  placeholder={config.instructionsPlaceholder}
+                  value={instructions}
+                  onChange={(e) => {
+                    setInstructions(e.target.value);
+                    if (enhancement.enhancedInstruction) {
+                      enhancement.reject();
+                    }
+                  }}
+                  className="h-28 resize-none"
+                  disabled={isLoading || enhancement.isEnhancing}
+                />
 
-          <PromptPreview promptId={promptId} variables={promptVariables} />
+                {enhancement.error && (
+                  <div className="text-sm text-destructive bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                    {enhancement.error}
+                  </div>
+                )}
+
+                {enhancement.enhancedInstruction && (
+                  <EnhancedInstructionPreview
+                    enhancedInstruction={enhancement.enhancedInstruction}
+                    onAccept={handleAcceptEnhancement}
+                    onReject={handleRejectEnhancement}
+                    title="Enhanced Instructions"
+                    disabled={isLoading}
+                  />
+                )}
+              </div>
+
+              <PromptPreview promptId={promptId} variables={promptVariables} />
+            </CollapsibleContent>
+          </Collapsible>
 
           {displayError && (
             <div className="text-sm text-destructive font-medium">
@@ -991,6 +1083,366 @@ function GenerateModeDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+// ============================================================================
+// Type-specific controls
+// ============================================================================
+
+const DEPTH_OPTIONS: Array<{ value: TheoryDepth; label: string }> = [
+  { value: "short", label: "Short" },
+  { value: "standard", label: "Standard" },
+  { value: "deep", label: "Deep" },
+];
+
+const CARD_STYLE_OPTIONS: Array<{ value: FlashcardStyle; label: string }> = [
+  { value: "qa", label: "Q&A" },
+  { value: "cloze", label: "Cloze (fill-in)" },
+  { value: "definition", label: "Definition" },
+];
+
+const FOCUS_OPTIONS: Array<{ value: FlashcardFocus; label: string }> = [
+  { value: "mixed", label: "Mixed" },
+  { value: "definitions", label: "Definitions" },
+  { value: "concepts", label: "Concepts" },
+  { value: "application", label: "Application" },
+];
+
+const QUESTION_TYPE_OPTIONS: Array<{
+  value: QuizQuestionType;
+  label: string;
+}> = [
+  { value: "mixed", label: "Mixed" },
+  { value: "single", label: "Single choice" },
+  { value: "multi", label: "Multi-select" },
+  { value: "true-false", label: "True / False" },
+];
+
+const DIFFICULTY_LEVEL_OPTIONS: Array<{ value: Difficulty; label: string }> = [
+  { value: "mixed", label: "Mixed" },
+  { value: "easy", label: "Easy" },
+  { value: "medium", label: "Medium" },
+  { value: "hard", label: "Hard" },
+];
+
+const FORMAT_OPTIONS: Array<{ value: ExerciseFormat; label: string }> = [
+  { value: "mixed", label: "Mixed" },
+  { value: "coding", label: "Coding" },
+  { value: "conceptual", label: "Conceptual" },
+];
+
+interface TypeSpecificControlsProps {
+  generationType: GenerationType;
+  options: GenerationOptions;
+  onChange: (next: GenerationOptions) => void;
+  disabled?: boolean;
+}
+
+function TypeSpecificControls({
+  generationType,
+  options,
+  onChange,
+  disabled,
+}: TypeSpecificControlsProps) {
+  const update = <K extends keyof GenerationOptions>(
+    key: K,
+    value: GenerationOptions[K]
+  ) => onChange({ ...options, [key]: value });
+
+  if (generationType === "theory") {
+    return (
+      <div className="space-y-2">
+        <Label htmlFor="depth">Length / depth</Label>
+        <Select
+          value={options.depth ?? "standard"}
+          onValueChange={(v) => update("depth", v as TheoryDepth)}
+          disabled={disabled}
+        >
+          <SelectTrigger id="depth">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="p-1">
+            {DEPTH_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
+  if (generationType === "flashcards") {
+    return (
+      <div className="grid grid-cols-2 gap-3">
+        <CountField
+          label="Count"
+          value={options.count ?? 10}
+          min={3}
+          max={40}
+          onChange={(n) => update("count", n)}
+          disabled={disabled}
+        />
+        <SelectField
+          label="Card style"
+          value={options.cardStyle ?? "qa"}
+          options={CARD_STYLE_OPTIONS}
+          onChange={(v) => update("cardStyle", v as FlashcardStyle)}
+          disabled={disabled}
+        />
+        <div className="col-span-2">
+          <SelectField
+            label="Focus"
+            value={options.focus ?? "mixed"}
+            options={FOCUS_OPTIONS}
+            onChange={(v) => update("focus", v as FlashcardFocus)}
+            disabled={disabled}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (generationType === "quiz") {
+    return (
+      <div className="grid grid-cols-2 gap-3">
+        <CountField
+          label="Question count"
+          value={options.count ?? 8}
+          min={3}
+          max={30}
+          onChange={(n) => update("count", n)}
+          disabled={disabled}
+        />
+        <SelectField
+          label="Difficulty"
+          value={options.difficulty ?? "mixed"}
+          options={DIFFICULTY_LEVEL_OPTIONS}
+          onChange={(v) => update("difficulty", v as Difficulty)}
+          disabled={disabled}
+        />
+        <div className="col-span-2">
+          <SelectField
+            label="Question type"
+            value={options.questionType ?? "mixed"}
+            options={QUESTION_TYPE_OPTIONS}
+            onChange={(v) => update("questionType", v as QuizQuestionType)}
+            disabled={disabled}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // exercises
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <CountField
+        label="Count"
+        value={options.count ?? 4}
+        min={1}
+        max={15}
+        onChange={(n) => update("count", n)}
+        disabled={disabled}
+      />
+      <SelectField
+        label="Difficulty"
+        value={options.difficulty ?? "mixed"}
+        options={DIFFICULTY_LEVEL_OPTIONS}
+        onChange={(v) => update("difficulty", v as Difficulty)}
+        disabled={disabled}
+      />
+      <div className="col-span-2">
+        <SelectField
+          label="Format"
+          value={options.format ?? "mixed"}
+          options={FORMAT_OPTIONS}
+          onChange={(v) => update("format", v as ExerciseFormat)}
+          disabled={disabled}
+        />
+      </div>
+    </div>
+  );
+}
+
+interface CountFieldProps {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+  disabled?: boolean;
+}
+
+function CountField({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+  disabled,
+}: CountFieldProps) {
+  const id = `count-${label.replace(/\s+/g, "-").toLowerCase()}`;
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type="number"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => {
+          const next = Number(e.target.value);
+          if (Number.isFinite(next)) {
+            onChange(Math.min(max, Math.max(min, next)));
+          }
+        }}
+        disabled={disabled}
+      />
+    </div>
+  );
+}
+
+interface SelectFieldProps<T extends string> {
+  label: string;
+  value: T;
+  options: ReadonlyArray<{ value: T; label: string }>;
+  onChange: (value: T) => void;
+  disabled?: boolean;
+}
+
+function SelectField<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+  disabled,
+}: SelectFieldProps<T>) {
+  const id = `field-${label.replace(/\s+/g, "-").toLowerCase()}`;
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Select
+        value={value}
+        onValueChange={(v) => onChange(v as T)}
+        disabled={disabled}
+      >
+        <SelectTrigger id={id}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="p-1">
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+// ============================================================================
+// Options → text helpers
+// ============================================================================
+
+const DEPTH_INSTRUCTIONS: Record<TheoryDepth, string> = {
+  short: "Length: short (~400-700 words). Be concise; cover essentials only.",
+  standard: "Length: standard (~800-1500 words).",
+  deep: "Length: deep dive (~1800-2800 words). Include extended examples and edge cases.",
+};
+
+const CARD_STYLE_INSTRUCTIONS: Record<FlashcardStyle, string> = {
+  qa: "Card style: question-and-answer.",
+  cloze:
+    "Card style: cloze deletion (fill-in-the-blank). Phrase questions as sentences with a key term replaced by ___.",
+  definition: "Card style: term/definition pairs.",
+};
+
+const FOCUS_INSTRUCTIONS: Record<FlashcardFocus, string> = {
+  mixed: "Focus: balanced mix of definitions, concepts, and application.",
+  definitions: "Focus: prioritize definitions and terminology.",
+  concepts: "Focus: prioritize core concepts and how things relate.",
+  application: "Focus: prioritize applied/use-case questions.",
+};
+
+const QUESTION_TYPE_INSTRUCTIONS: Record<QuizQuestionType, string> = {
+  mixed: "Question types: mix of single-choice, multi-select, and true/false.",
+  single: "Question types: single-choice only (one correct option per question).",
+  multi:
+    "Question types: multi-select choice questions (2+ correct options per question).",
+  "true-false": "Question types: true/false only.",
+};
+
+const DIFFICULTY_INSTRUCTIONS: Record<Difficulty, string> = {
+  mixed: "Difficulty: spread across easy, medium, and hard.",
+  easy: "Difficulty: all easy.",
+  medium: "Difficulty: all medium.",
+  hard: "Difficulty: all hard.",
+};
+
+const FORMAT_INSTRUCTIONS: Record<ExerciseFormat, string> = {
+  mixed: "Format: mix of coding and conceptual exercises as appropriate.",
+  coding:
+    "Format: coding exercises only — hands-on programming tasks with expected output.",
+  conceptual:
+    "Format: conceptual exercises only — written analysis, scenario design, or step-by-step reasoning.",
+};
+
+/**
+ * Build the human-readable "Generation Options:" block appended to the prompt.
+ * Returns an empty string when no options apply.
+ */
+export function formatGenerationOptions(
+  type: GenerationType,
+  options: GenerationOptions
+): string {
+  const lines: string[] = [];
+
+  if (type === "theory" && options.depth) {
+    lines.push(`- ${DEPTH_INSTRUCTIONS[options.depth]}`);
+  }
+
+  if (type === "flashcards") {
+    if (typeof options.count === "number") {
+      lines.push(`- Total number of flashcards to generate: ${options.count}.`);
+    }
+    if (options.cardStyle) {
+      lines.push(`- ${CARD_STYLE_INSTRUCTIONS[options.cardStyle]}`);
+    }
+    if (options.focus) {
+      lines.push(`- ${FOCUS_INSTRUCTIONS[options.focus]}`);
+    }
+  }
+
+  if (type === "quiz") {
+    if (typeof options.count === "number") {
+      lines.push(`- Total number of quiz questions to generate: ${options.count}.`);
+    }
+    if (options.questionType) {
+      lines.push(`- ${QUESTION_TYPE_INSTRUCTIONS[options.questionType]}`);
+    }
+    if (options.difficulty) {
+      lines.push(`- ${DIFFICULTY_INSTRUCTIONS[options.difficulty]}`);
+    }
+  }
+
+  if (type === "exercises") {
+    if (typeof options.count === "number") {
+      lines.push(`- Total number of exercises to generate: ${options.count}.`);
+    }
+    if (options.difficulty) {
+      lines.push(`- ${DIFFICULTY_INSTRUCTIONS[options.difficulty]}`);
+    }
+    if (options.format) {
+      lines.push(`- ${FORMAT_INSTRUCTIONS[options.format]}`);
+    }
+  }
+
+  if (lines.length === 0) return "";
+  return ["Generation Options:", ...lines].join("\n");
 }
 
 export default ContentCreationDialog;

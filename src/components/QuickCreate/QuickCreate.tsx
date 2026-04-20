@@ -96,30 +96,18 @@ export function QuickCreate({
           ? () => generateLesson(courseId, lessonId)
           : contentType === "flashcards"
             ? () =>
-                generateLessonFlashcards(
-                  courseId,
-                  lessonId,
-                  undefined,
-                  undefined,
-                  true
-                )
+                generateLessonFlashcards(courseId, lessonId, {
+                  includeContent: true,
+                })
             : contentType === "quiz"
               ? () =>
-                  generateLessonQuiz(
-                    courseId,
-                    lessonId,
-                    undefined,
-                    undefined,
-                    true
-                  )
+                  generateLessonQuiz(courseId, lessonId, {
+                    includeContent: true,
+                  })
               : () =>
-                  generateLessonExercises(
-                    courseId,
-                    lessonId,
-                    undefined,
-                    undefined,
-                    true
-                  );
+                  generateLessonExercises(courseId, lessonId, {
+                    includeContent: true,
+                  });
 
       const result = await generateFn();
       if (result.success) {
@@ -139,41 +127,20 @@ export function QuickCreate({
       setIsGenerating(true);
       setError(null);
       try {
+        const baseOptions = {
+          additionalInstructions: data.instructions,
+          model: data.model,
+          includeContent: data.includeContent,
+        };
         const generateFn =
           contentType === "theory"
-            ? () =>
-                generateLesson(
-                  courseId,
-                  lessonId,
-                  data.instructions,
-                  data.model
-                )
+            ? () => generateLesson(courseId, lessonId, baseOptions)
             : contentType === "flashcards"
-              ? () =>
-                  generateLessonFlashcards(
-                    courseId,
-                    lessonId,
-                    data.instructions,
-                    data.model,
-                    data.includeContent
-                  )
+              ? () => generateLessonFlashcards(courseId, lessonId, baseOptions)
               : contentType === "quiz"
-                ? () =>
-                    generateLessonQuiz(
-                      courseId,
-                      lessonId,
-                      data.instructions,
-                      data.model,
-                      data.includeContent
-                    )
+                ? () => generateLessonQuiz(courseId, lessonId, baseOptions)
                 : () =>
-                    generateLessonExercises(
-                      courseId,
-                      lessonId,
-                      data.instructions,
-                      data.model,
-                      data.includeContent
-                    );
+                    generateLessonExercises(courseId, lessonId, baseOptions);
 
         const result = await generateFn();
         if (result.success) {

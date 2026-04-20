@@ -12,6 +12,7 @@ import { toErrorMessage } from "@root/server/lib/errors";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import { composeAdditionalInstructions } from "@root/server/lib/composeAdditionalInstructions";
 import type { QuizContent, Lesson, Topic } from "@modules/core";
 
 // Flat schema required because OpenAI structured outputs do not support oneOf/discriminatedUnion.
@@ -39,6 +40,7 @@ export default defineEventHandler(async (event) => {
       additionalInstructions?: string;
       model?: string;
       includeContent?: boolean;
+      generationOptions?: string;
     }>(event);
     const model = (body?.model ?? DEFAULT_MODEL).trim() as AvailableModelsId;
 
@@ -83,9 +85,10 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const additionalInstructions = body?.additionalInstructions?.trim()
-      ? `\nAdditional Instructions from user: ${body.additionalInstructions.trim()}`
-      : "";
+    const additionalInstructions = composeAdditionalInstructions(
+      body?.generationOptions,
+      body?.additionalInstructions
+    );
 
     let lessonContent = "";
     if (body?.includeContent !== false) {

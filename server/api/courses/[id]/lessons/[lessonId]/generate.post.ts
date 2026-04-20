@@ -10,6 +10,7 @@ import { toErrorMessage } from "@root/server/lib/errors";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import { composeAdditionalInstructions } from "@root/server/lib/composeAdditionalInstructions";
 import type { Lesson, Topic } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
@@ -19,6 +20,7 @@ export default defineEventHandler(async (event) => {
     const body = await readBody<{
       additionalInstructions?: string;
       model?: string;
+      generationOptions?: string;
     }>(event);
     const model = (body?.model ?? DEFAULT_MODEL).trim() as AvailableModelsId;
 
@@ -66,9 +68,10 @@ export default defineEventHandler(async (event) => {
     }
 
     // 3. Generate Content
-    const additionalInstructions = body?.additionalInstructions?.trim()
-      ? `\nAdditional Instructions from user: ${body.additionalInstructions.trim()}`
-      : "";
+    const additionalInstructions = composeAdditionalInstructions(
+      body?.generationOptions,
+      body?.additionalInstructions
+    );
 
     const prompt = await getRenderedPrompt("lesson-generation", {
       courseTitle: course.title,

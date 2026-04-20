@@ -135,12 +135,18 @@ export async function deleteLessonContent(
   }
 }
 
+export interface GenerateLessonContentOptions {
+  additionalInstructions?: string;
+  model?: string;
+  includeContent?: boolean;
+  /** Free-form, server-appended generation options text (e.g. "Generation Options:\n- Count: 12"). */
+  generationOptions?: string;
+}
+
 export async function generateLessonFlashcards(
   courseId: string,
   lessonId: string,
-  additionalInstructions?: string,
-  model?: string,
-  includeContent?: boolean
+  options: GenerateLessonContentOptions = {}
 ): Promise<{ success: boolean; content?: FlashcardsContent; error?: string }> {
   try {
     const response = await fetch(
@@ -148,7 +154,7 @@ export async function generateLessonFlashcards(
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ additionalInstructions, model, includeContent }),
+        body: JSON.stringify(options),
       }
     );
     return await response.json();
@@ -177,9 +183,7 @@ export async function deleteLessonFlashcards(
 export async function generateLessonQuiz(
   courseId: string,
   lessonId: string,
-  additionalInstructions?: string,
-  model?: string,
-  includeContent?: boolean
+  options: GenerateLessonContentOptions = {}
 ): Promise<{ success: boolean; content?: QuizContent; error?: string }> {
   try {
     const response = await fetch(
@@ -187,7 +191,7 @@ export async function generateLessonQuiz(
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ additionalInstructions, model, includeContent }),
+        body: JSON.stringify(options),
       }
     );
     return await response.json();
@@ -351,8 +355,7 @@ export async function getLessonExercises(
 export async function generateLesson(
   courseId: string,
   lessonId: string,
-  additionalInstructions?: string,
-  model?: string
+  options: GenerateLessonContentOptions = {}
 ): Promise<{ success: boolean; content?: string; error?: string }> {
   try {
     const response = await fetch(
@@ -362,10 +365,7 @@ export async function generateLesson(
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          additionalInstructions,
-          model,
-        }),
+        body: JSON.stringify(options),
       }
     );
 
@@ -379,9 +379,7 @@ export async function generateLesson(
 export async function generateLessonExercises(
   courseId: string,
   lessonId: string,
-  additionalInstructions?: string,
-  model?: string,
-  includeContent?: boolean
+  options: GenerateLessonContentOptions = {}
 ): Promise<{ success: boolean; content?: string; error?: string }> {
   try {
     const response = await fetch(
@@ -391,11 +389,7 @@ export async function generateLessonExercises(
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          additionalInstructions,
-          model,
-          includeContent,
-        }),
+        body: JSON.stringify(options),
       }
     );
 

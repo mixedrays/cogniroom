@@ -5,6 +5,7 @@ import { Zap, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   ContentCreationDialog,
+  formatGenerationOptions,
   type ContentGenerationData,
   type ContentContext,
   type GenerationType,
@@ -14,6 +15,7 @@ import {
   generateLessonFlashcards,
   generateLessonQuiz,
   generateLessonExercises,
+  type GenerateLessonContentOptions,
 } from "@/lib/courses";
 
 type ContentType = "theory" | "flashcards" | "quiz" | "exercises";
@@ -42,9 +44,7 @@ const GENERATION_TYPE_MAP: Record<ContentType, GenerationType> = {
 type GenerateFn = (
   courseId: string,
   lessonId: string,
-  instructions?: string,
-  model?: string,
-  includeContent?: boolean
+  options?: GenerateLessonContentOptions
 ) => Promise<{ success: boolean; error?: string }>;
 
 const GENERATE_FN_MAP: Record<ContentType, GenerateFn> = {
@@ -61,13 +61,12 @@ function generateContent(
   data: ContentGenerationData
 ) {
   const fn = GENERATE_FN_MAP[contentType];
-  return fn(
-    courseId,
-    lessonId,
-    data.instructions,
-    data.model,
-    data.includeContent
-  );
+  return fn(courseId, lessonId, {
+    additionalInstructions: data.instructions,
+    model: data.model,
+    includeContent: data.includeContent,
+    generationOptions: formatGenerationOptions(data.type, data.options),
+  });
 }
 
 export function ContentQuickGenerate({

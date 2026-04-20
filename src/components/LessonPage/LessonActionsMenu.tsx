@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   ContentCreationDialog,
+  formatGenerationOptions,
   type ContentContext,
   type ContentGenerationData,
   type GenerationType,
@@ -142,12 +143,12 @@ export function LessonActionsMenu({
                 ? generateLessonQuiz
                 : generateLessonExercises;
 
-        const result = await generateFn(
-          courseId,
-          lessonId,
-          data.instructions,
-          data.model
-        );
+        const result = await generateFn(courseId, lessonId, {
+          additionalInstructions: data.instructions,
+          model: data.model,
+          includeContent: data.includeContent,
+          generationOptions: formatGenerationOptions(data.type, data.options),
+        });
         if (result.success) {
           setIsRegenerateDialogOpen(false);
           await invalidateAndRefresh();
