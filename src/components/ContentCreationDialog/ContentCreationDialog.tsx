@@ -9,7 +9,8 @@ import {
   Wand2,
   ChevronDown,
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -937,52 +938,51 @@ function GenerateModeDialog({
             <Wand2 className="w-5 h-5" />
             {config.dialogTitle}
           </DialogTitle>
-          <DialogDescription>{config.dialogDescription}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="model">Model</Label>
-            <ModelSelect
-              value={model}
-              onValueChange={setModel}
-              disabled={isLoading}
-              className="p-1"
-            />
-          </div>
-
-          <TypeSpecificControls
-            generationType={generationType}
-            options={options}
-            onChange={setOptions}
-            disabled={isLoading}
-          />
-
-          {showIncludeContentToggle && (
-            <div className="flex items-center justify-between">
-              <Label htmlFor="include-content" className="cursor-pointer">
-                Include lesson theory content
-              </Label>
-              <Switch
-                id="include-content"
-                checked={includeContent}
-                onCheckedChange={setIncludeContent}
+          <div className="divide-y divide-border/60">
+            <FieldRow label="Model">
+              <ModelSelect
+                value={model}
+                onValueChange={setModel}
                 disabled={isLoading}
+                className="p-1"
+                triggerClassName="w-50"
               />
-            </div>
-          )}
+            </FieldRow>
+
+            <TypeSpecificControls
+              generationType={generationType}
+              options={options}
+              onChange={setOptions}
+              disabled={isLoading}
+            />
+
+            {showIncludeContentToggle && (
+              <FieldRow label="Use lesson theory as source">
+                <Checkbox
+                  id="include-content"
+                  checked={includeContent}
+                  onCheckedChange={(checked) =>
+                    setIncludeContent(checked === true)
+                  }
+                  disabled={isLoading}
+                />
+              </FieldRow>
+            )}
+          </div>
 
           <Collapsible
             open={advancedOpen}
             onOpenChange={setAdvancedOpen}
-            className="border-t pt-3"
+            className="pt-3"
           >
             <CollapsibleTrigger
               render={
                 <Button
                   type="button"
                   variant="ghost"
-                  size="sm"
                   className="w-full justify-between text-muted-foreground hover:text-foreground"
                 />
               }
@@ -1097,15 +1097,15 @@ const DEPTH_OPTIONS: Array<{ value: TheoryDepth; label: string }> = [
 
 const CARD_STYLE_OPTIONS: Array<{ value: FlashcardStyle; label: string }> = [
   { value: "qa", label: "Q&A" },
-  { value: "cloze", label: "Cloze (fill-in)" },
+  { value: "cloze", label: "Cloze" },
   { value: "definition", label: "Definition" },
 ];
 
 const FOCUS_OPTIONS: Array<{ value: FlashcardFocus; label: string }> = [
   { value: "mixed", label: "Mixed" },
-  { value: "definitions", label: "Definitions" },
+  { value: "definitions", label: "Defs" },
   { value: "concepts", label: "Concepts" },
-  { value: "application", label: "Application" },
+  { value: "application", label: "Applied" },
 ];
 
 const QUESTION_TYPE_OPTIONS: Array<{
@@ -1113,9 +1113,9 @@ const QUESTION_TYPE_OPTIONS: Array<{
   label: string;
 }> = [
   { value: "mixed", label: "Mixed" },
-  { value: "single", label: "Single choice" },
-  { value: "multi", label: "Multi-select" },
-  { value: "true-false", label: "True / False" },
+  { value: "single", label: "Single" },
+  { value: "multi", label: "Multi" },
+  { value: "true-false", label: "T/F" },
 ];
 
 const DIFFICULTY_LEVEL_OPTIONS: Array<{ value: Difficulty; label: string }> = [
@@ -1151,123 +1151,129 @@ function TypeSpecificControls({
 
   if (generationType === "theory") {
     return (
-      <div className="space-y-2">
-        <Label htmlFor="depth">Length / depth</Label>
-        <Select
+      <FieldRow label="Length">
+        <SegmentedField
           value={options.depth ?? "standard"}
-          onValueChange={(v) => update("depth", v as TheoryDepth)}
+          options={DEPTH_OPTIONS}
+          onChange={(v) => update("depth", v as TheoryDepth)}
           disabled={disabled}
-        >
-          <SelectTrigger id="depth">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="p-1">
-            {DEPTH_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        />
+      </FieldRow>
     );
   }
 
   if (generationType === "flashcards") {
     return (
-      <div className="grid grid-cols-2 gap-3">
-        <CountField
-          label="Count"
-          value={options.count ?? 10}
-          min={3}
-          max={40}
-          onChange={(n) => update("count", n)}
-          disabled={disabled}
-        />
-        <SelectField
-          label="Card style"
-          value={options.cardStyle ?? "qa"}
-          options={CARD_STYLE_OPTIONS}
-          onChange={(v) => update("cardStyle", v as FlashcardStyle)}
-          disabled={disabled}
-        />
-        <div className="col-span-2">
-          <SelectField
-            label="Focus"
+      <>
+        <FieldRow label="Count">
+          <CountInput
+            value={options.count ?? 10}
+            min={3}
+            max={40}
+            onChange={(n) => update("count", n)}
+            disabled={disabled}
+          />
+        </FieldRow>
+        <FieldRow label="Style">
+          <SegmentedField
+            value={options.cardStyle ?? "qa"}
+            options={CARD_STYLE_OPTIONS}
+            onChange={(v) => update("cardStyle", v as FlashcardStyle)}
+            disabled={disabled}
+          />
+        </FieldRow>
+        <FieldRow label="Focus">
+          <SegmentedField
             value={options.focus ?? "mixed"}
             options={FOCUS_OPTIONS}
             onChange={(v) => update("focus", v as FlashcardFocus)}
             disabled={disabled}
           />
-        </div>
-      </div>
+        </FieldRow>
+      </>
     );
   }
 
   if (generationType === "quiz") {
     return (
-      <div className="grid grid-cols-2 gap-3">
-        <CountField
-          label="Question count"
-          value={options.count ?? 8}
-          min={3}
-          max={30}
-          onChange={(n) => update("count", n)}
-          disabled={disabled}
-        />
-        <SelectField
-          label="Difficulty"
-          value={options.difficulty ?? "mixed"}
-          options={DIFFICULTY_LEVEL_OPTIONS}
-          onChange={(v) => update("difficulty", v as Difficulty)}
-          disabled={disabled}
-        />
-        <div className="col-span-2">
-          <SelectField
-            label="Question type"
+      <>
+        <FieldRow label="Count">
+          <CountInput
+            value={options.count ?? 8}
+            min={3}
+            max={30}
+            onChange={(n) => update("count", n)}
+            disabled={disabled}
+          />
+        </FieldRow>
+        <FieldRow label="Difficulty">
+          <SegmentedField
+            value={options.difficulty ?? "mixed"}
+            options={DIFFICULTY_LEVEL_OPTIONS}
+            onChange={(v) => update("difficulty", v as Difficulty)}
+            disabled={disabled}
+          />
+        </FieldRow>
+        <FieldRow label="Type">
+          <SegmentedField
             value={options.questionType ?? "mixed"}
             options={QUESTION_TYPE_OPTIONS}
             onChange={(v) => update("questionType", v as QuizQuestionType)}
             disabled={disabled}
           />
-        </div>
-      </div>
+        </FieldRow>
+      </>
     );
   }
 
   // exercises
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <CountField
-        label="Count"
-        value={options.count ?? 4}
-        min={1}
-        max={15}
-        onChange={(n) => update("count", n)}
-        disabled={disabled}
-      />
-      <SelectField
-        label="Difficulty"
-        value={options.difficulty ?? "mixed"}
-        options={DIFFICULTY_LEVEL_OPTIONS}
-        onChange={(v) => update("difficulty", v as Difficulty)}
-        disabled={disabled}
-      />
-      <div className="col-span-2">
-        <SelectField
-          label="Format"
+    <>
+      <FieldRow label="Count">
+        <CountInput
+          value={options.count ?? 4}
+          min={1}
+          max={15}
+          onChange={(n) => update("count", n)}
+          disabled={disabled}
+        />
+      </FieldRow>
+      <FieldRow label="Difficulty">
+        <SegmentedField
+          value={options.difficulty ?? "mixed"}
+          options={DIFFICULTY_LEVEL_OPTIONS}
+          onChange={(v) => update("difficulty", v as Difficulty)}
+          disabled={disabled}
+        />
+      </FieldRow>
+      <FieldRow label="Format">
+        <SegmentedField
           value={options.format ?? "mixed"}
           options={FORMAT_OPTIONS}
           onChange={(v) => update("format", v as ExerciseFormat)}
           disabled={disabled}
         />
-      </div>
+      </FieldRow>
+    </>
+  );
+}
+
+function FieldRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+      <p className="font-medium">{label}</p>
+      <div className="flex items-center">{children}</div>
     </div>
   );
 }
 
-interface CountFieldProps {
-  label: string;
+interface CountInputProps {
   value: number;
   min: number;
   max: number;
@@ -1275,72 +1281,55 @@ interface CountFieldProps {
   disabled?: boolean;
 }
 
-function CountField({
-  label,
-  value,
-  min,
-  max,
-  onChange,
-  disabled,
-}: CountFieldProps) {
-  const id = `count-${label.replace(/\s+/g, "-").toLowerCase()}`;
+function CountInput({ value, min, max, onChange, disabled }: CountInputProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type="number"
-        min={min}
-        max={max}
-        value={value}
-        onChange={(e) => {
-          const next = Number(e.target.value);
-          if (Number.isFinite(next)) {
-            onChange(Math.min(max, Math.max(min, next)));
-          }
-        }}
-        disabled={disabled}
-      />
-    </div>
+    <Input
+      type="number"
+      min={min}
+      max={max}
+      value={value}
+      onChange={(e) => {
+        const next = Number(e.target.value);
+        if (Number.isFinite(next)) {
+          onChange(Math.min(max, Math.max(min, next)));
+        }
+      }}
+      disabled={disabled}
+      className="w-20"
+    />
   );
 }
 
-interface SelectFieldProps<T extends string> {
-  label: string;
+interface SegmentedFieldProps<T extends string> {
   value: T;
   options: ReadonlyArray<{ value: T; label: string }>;
   onChange: (value: T) => void;
   disabled?: boolean;
 }
 
-function SelectField<T extends string>({
-  label,
+function SegmentedField<T extends string>({
   value,
   options,
   onChange,
   disabled,
-}: SelectFieldProps<T>) {
-  const id = `field-${label.replace(/\s+/g, "-").toLowerCase()}`;
+}: SegmentedFieldProps<T>) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Select
-        value={value}
-        onValueChange={(v) => onChange(v as T)}
-        disabled={disabled}
-      >
-        <SelectTrigger id={id}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="p-1">
-          {options.map((o) => (
-            <SelectItem key={o.value} value={o.value}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <ToggleGroup
+      value={[value]}
+      onValueChange={(values) => {
+        if (values.length > 0) {
+          onChange(values[values.length - 1] as T);
+        }
+      }}
+      variant="outline"
+      disabled={disabled}
+    >
+      {options.map((o) => (
+        <ToggleGroupItem key={o.value} value={o.value}>
+          {o.label}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
   );
 }
 
@@ -1370,7 +1359,8 @@ const FOCUS_INSTRUCTIONS: Record<FlashcardFocus, string> = {
 
 const QUESTION_TYPE_INSTRUCTIONS: Record<QuizQuestionType, string> = {
   mixed: "Question types: mix of single-choice, multi-select, and true/false.",
-  single: "Question types: single-choice only (one correct option per question).",
+  single:
+    "Question types: single-choice only (one correct option per question).",
   multi:
     "Question types: multi-select choice questions (2+ correct options per question).",
   "true-false": "Question types: true/false only.",
@@ -1419,7 +1409,9 @@ export function formatGenerationOptions(
 
   if (type === "quiz") {
     if (typeof options.count === "number") {
-      lines.push(`- Total number of quiz questions to generate: ${options.count}.`);
+      lines.push(
+        `- Total number of quiz questions to generate: ${options.count}.`
+      );
     }
     if (options.questionType) {
       lines.push(`- ${QUESTION_TYPE_INSTRUCTIONS[options.questionType]}`);
