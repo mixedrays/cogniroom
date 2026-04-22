@@ -979,21 +979,16 @@ function GenerateModeDialog({
             className="pt-3"
           >
             <CollapsibleTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full justify-between text-muted-foreground hover:text-foreground"
-                />
-              }
+              render={<Button type="button" variant="ghost" />}
+              className="pl-1 w-full justify-start"
             >
-              <span>Advanced</span>
               <ChevronDown
                 className={cn(
                   "transition-transform",
                   advancedOpen && "rotate-180"
                 )}
               />
+              <span>Advanced</span>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-4 pt-3">
               <div className="space-y-2">
