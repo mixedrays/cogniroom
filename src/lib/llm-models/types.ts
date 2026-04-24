@@ -5,10 +5,17 @@ export type ModelStats = {
   hint?: string;
 };
 
-export type ProviderModels = Record<string, ModelStats>;
+export type ProviderModels<ModelId extends string = string> = Record<
+  ModelId,
+  ModelStats
+>;
 
-export type ProviderConfig = {
+export type ProviderModelDefinitions<ModelId extends string = string> = {
+  [Key in ModelId]?: ModelStats;
+};
+
+export type ProviderConfig<Models extends ProviderModels = ProviderModels> = {
   id: string;
   name: string;
-  models: ProviderModels;
+  models: Models;
 };

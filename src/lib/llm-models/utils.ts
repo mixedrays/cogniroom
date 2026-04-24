@@ -45,3 +45,11 @@ export function getProviderForModel(
 ): ProviderConfig | undefined {
   return providers.find((p) => modelId in p.models);
 }
+
+export function getProviderEnvKeyName(providerId: string): string {
+  return `${providerId.toUpperCase()}_API_KEY`;
+}
+
+export function getProviderLocalStorageKeyName(providerId: string): string {
+  return `${providerId.toLowerCase()}_api_key`;
+}

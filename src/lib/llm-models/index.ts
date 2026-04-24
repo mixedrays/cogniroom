@@ -5,13 +5,20 @@ import {
   getValidModel as _getValidModel,
 } from "./utils";
 
-export type { ModelStats, ProviderConfig, ProviderModels } from "./types";
+export type {
+  ModelStats,
+  ProviderConfig,
+  ProviderModelDefinitions,
+  ProviderModels,
+} from "./types";
 export {
   getPricePerToken,
   getModelPriceLabel,
   getModelPriceFullLabel,
   formatPricePerMillion,
   getProviderForModel,
+  getProviderEnvKeyName,
+  getProviderLocalStorageKeyName,
 } from "./utils";
 export { providers, openaiProvider, anthropicProvider } from "./providers";
 
