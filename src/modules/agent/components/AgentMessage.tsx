@@ -66,7 +66,7 @@ export function AgentMessage({
     if (message.status === "dismissed")
       return (
         <div className="flex justify-end">
-          <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-destructive/10 px-4 py-2.5 text-sm text-balanced-foreground">
+          <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-destructive/10 px-4 py-2.5 text-sm text-destructive">
             Tool call dismissed
           </div>
         </div>

@@ -976,11 +976,11 @@ function GenerateModeDialog({
           <Collapsible
             open={advancedOpen}
             onOpenChange={setAdvancedOpen}
-            className="pt-3"
+            className="pt-3 border-t border-border/60"
           >
             <CollapsibleTrigger
               render={<Button type="button" variant="ghost" />}
-              className="pl-1 w-full justify-start"
+              className="px-0 w-full justify-start bg-transparent!"
             >
               <ChevronDown
                 className={cn(
@@ -990,6 +990,7 @@ function GenerateModeDialog({
               />
               <span>Advanced</span>
             </CollapsibleTrigger>
+
             <CollapsibleContent className="space-y-4 pt-3">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">

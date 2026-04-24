@@ -29,7 +29,7 @@ export function PromptPreview({ promptId, variables }: PromptPreviewProps) {
           variant="ghost"
           size="sm"
           className="ml-auto text-xs text-muted-foreground hover:text-foreground"
-          onClick={() => openSettings("prompts")}
+          onClick={() => openSettings(`prompts/${promptId}`)}
         >
           <SquarePen />
           Edit system prompt

@@ -31,6 +31,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -326,72 +328,70 @@ export default function CreateCourseModal({
             )}
 
             <TabsContent value="generate" className="space-y-4 mt-0">
-              <div className="space-y-2">
-                <Label htmlFor="topic">What skill do you want to learn?</Label>
-                <Input
-                  id="topic"
-                  placeholder="e.g., Python, SQL, React, Machine Learning"
-                  value={skillTopic}
-                  onChange={(e) => setSkillTopic(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Your current level</Label>
-                <ToggleGroup
-                  value={[skillLevel]}
-                  onValueChange={(values) => {
-                    if (values.length > 0) {
-                      setSkillLevel(
-                        values[values.length - 1] as CourseSkillLevel
-                      );
-                    }
-                  }}
-                  className="w-full"
-                  variant="outline"
-                >
-                  <ToggleGroupItem value="beginner" className="flex-1">
-                    Beginner
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="intermediate" className="flex-1">
-                    Intermediate
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="advanced" className="flex-1">
-                    Advanced
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="model">Model</Label>
-                <ModelSelect
-                  value={model}
-                  onValueChange={setModel}
-                  className="p-1"
-                />
+              <div className="divide-y divide-border/60">
+                <div className="space-y-2 py-3 first:pt-0 last:pb-0">
+                  <Label htmlFor="topic">
+                    What skill do you want to learn?
+                  </Label>
+                  <Input
+                    autoFocus
+                    id="topic"
+                    placeholder="e.g., Python, SQL, React, Machine Learning"
+                    value={skillTopic}
+                    onChange={(e) => setSkillTopic(e.target.value)}
+                  />
+                </div>
+
+                <FieldRow label="Model">
+                  <ModelSelect
+                    value={model}
+                    onValueChange={setModel}
+                    disabled={isLoading}
+                    className="p-1"
+                    triggerClassName="w-50"
+                  />
+                </FieldRow>
+
+                <FieldRow label="Your current level">
+                  <ToggleGroup
+                    value={[skillLevel]}
+                    onValueChange={(values) => {
+                      if (values.length > 0) {
+                        setSkillLevel(
+                          values[values.length - 1] as CourseSkillLevel
+                        );
+                      }
+                    }}
+                    variant="outline"
+                    disabled={isLoading}
+                  >
+                    <ToggleGroupItem value="beginner">Beginner</ToggleGroupItem>
+                    <ToggleGroupItem value="intermediate">
+                      Intermediate
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="advanced">Advanced</ToggleGroupItem>
+                  </ToggleGroup>
+                </FieldRow>
               </div>
 
               <Collapsible
                 open={advancedOpen}
                 onOpenChange={setAdvancedOpen}
-                className="border-t pt-3"
+                className="pt-3 border-t border-border/60"
               >
                 <CollapsibleTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-between text-muted-foreground hover:text-foreground"
-                    />
-                  }
+                  render={<Button type="button" variant="ghost" />}
+                  className="px-0 w-full justify-start bg-transparent!"
                 >
-                  <span>Advanced</span>
                   <ChevronDown
                     className={cn(
                       "transition-transform",
                       advancedOpen && "rotate-180"
                     )}
                   />
+                  <span>Advanced</span>
                 </CollapsibleTrigger>
+
                 <CollapsibleContent className="space-y-4 pt-3">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -456,23 +456,26 @@ export default function CreateCourseModal({
                 </CollapsibleContent>
               </Collapsible>
 
-              <Button
-                onClick={handleGenerate}
-                disabled={isLoading}
-                className="w-full"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Generate Course
-                  </>
-                )}
-              </Button>
+              <DialogFooter>
+                <DialogClose
+                  render={<Button variant="outline" disabled={isLoading} />}
+                >
+                  Cancel
+                </DialogClose>
+                <Button onClick={handleGenerate} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Generate Course
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
             </TabsContent>
 
             <TabsContent value="import" className="space-y-4 mt-0">
@@ -542,5 +545,20 @@ export default function CreateCourseModal({
         </Tabs>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function FieldRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+      <p className="font-medium">{label}</p>
+      <div className="flex items-center">{children}</div>
+    </div>
   );
 }
