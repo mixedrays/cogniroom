@@ -61,6 +61,31 @@ export async function saveSettings(
   }
 }
 
+export interface ProviderEnvKeyInfo {
+  providerId: string;
+  envName: string;
+  hasKey: boolean;
+  lastChars?: string;
+}
+
+// Get info on which provider API keys are set via environment variables
+export async function getEnvApiKeys(): Promise<{
+  success: boolean;
+  keys: ProviderEnvKeyInfo[];
+  error?: string;
+}> {
+  try {
+    const response = await fetch(`${getBaseUrl()}/api/settings/env-keys`);
+    if (!response.ok) {
+      return { success: false, keys: [], error: response.statusText };
+    }
+    return await response.json();
+  } catch (e) {
+    console.error("Error getting env API keys:", e);
+    return { success: false, keys: [], error: String(e) };
+  }
+}
+
 // Get settings history
 export async function getSettingsHistory(): Promise<{
   success: boolean;
@@ -99,6 +124,22 @@ export async function deleteHistoryEntry(
     return await response.json();
   } catch (e) {
     console.error("Error deleting history entry:", e);
+    return { success: false, error: String(e) };
+  }
+}
+
+// Delete all history entries
+export async function clearSettingsHistory(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const response = await fetch(`${getBaseUrl()}/api/settings/history`, {
+      method: "DELETE",
+    });
+    return await response.json();
+  } catch (e) {
+    console.error("Error clearing settings history:", e);
     return { success: false, error: String(e) };
   }
 }

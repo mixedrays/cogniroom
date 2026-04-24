@@ -24,6 +24,7 @@ import type { ModelStats } from "@/lib/llm-models";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { cn } from "@/lib/utils";
 import { useSettings } from "@/modules/settings/context/SettingsContext";
+import { useApiKeyAvailability } from "@/modules/settings/hooks/useApiKeyAvailability";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -53,10 +54,12 @@ export function ModelSelect({
 }: ModelSelectProps) {
   const { settings } = useSettings();
   const hiddenModels = settings.llm.hiddenModels ?? [];
+  const { availableProviderIds } = useApiKeyAvailability();
 
   const groupedItems = useMemo(
     () =>
       providers
+        .filter((provider) => availableProviderIds.has(provider.id))
         .map((provider) => ({
           value: provider.id,
           label: provider.name,
@@ -72,7 +75,7 @@ export function ModelSelect({
             ),
         }))
         .filter((group) => group.items.length > 0),
-    [hiddenModels]
+    [hiddenModels, availableProviderIds]
   );
 
   const allItems = useMemo(

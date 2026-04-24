@@ -9,13 +9,29 @@ import {
   getSettingsHistory,
   deleteHistoryEntry,
   restoreFromHistory,
+  clearSettingsHistory,
 } from "../lib/settings";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { ErrorState } from "@/components/ErrorState";
 
 export function HistorySettings() {
   const { applySettings, loadSettings } = useSettings();
   const [history, setHistory] = useState<SettingsHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const [clearError, setClearError] = useState<string | null>(null);
 
   const loadHistory = async () => {
     setIsLoading(true);
@@ -49,6 +65,24 @@ export function HistorySettings() {
     setRestoringId(null);
   };
 
+  const handleClearAll = async () => {
+    setIsClearing(true);
+    setClearError(null);
+    try {
+      const result = await clearSettingsHistory();
+      if (!result.success) {
+        setClearError(result.error || "Failed to clear history");
+        return;
+      }
+      setHistory([]);
+      setClearDialogOpen(false);
+    } catch (e) {
+      setClearError(String(e));
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString();
@@ -63,10 +97,57 @@ export function HistorySettings() {
             View and restore previous configurations
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={loadHistory}>
-          <RotateCcwIcon className="size-4 mr-1.5" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={loadHistory}>
+            <RotateCcwIcon />
+            Refresh
+          </Button>
+          <AlertDialog
+            open={clearDialogOpen}
+            onOpenChange={(open) => {
+              if (open) setClearError(null);
+              setClearDialogOpen(open);
+            }}
+          >
+            <AlertDialogTrigger
+              render={
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={history.length === 0}
+                >
+                  <TrashIcon />
+                  Clear all
+                </Button>
+              }
+            />
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear all history?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete all {history.length} history
+                  {history.length === 1 ? " entry" : " entries"}. This action
+                  cannot be undone.
+                </AlertDialogDescription>
+                {clearError && (
+                  <ErrorState variant="minimal" message={clearError} />
+                )}
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isClearing}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={handleClearAll}
+                  disabled={isClearing}
+                >
+                  {isClearing ? "Clearing…" : "Clear all"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
       {isLoading ? (
