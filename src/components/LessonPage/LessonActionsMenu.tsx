@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tooltip } from "@/components/ui/tooltip.adapter";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,7 +61,7 @@ interface LessonActionsMenuProps {
 }
 
 const CONTENT_LABELS: Record<ContentType, string> = {
-  theory: "theory content",
+  theory: "theory",
   flashcards: "flashcards",
   quiz: "quiz",
   exercises: "exercises",
@@ -173,18 +174,44 @@ export function LessonActionsMenu({
 
   return (
     <>
+      {showMarkComplete && (
+        <Tooltip
+          content={
+            isCompleted
+              ? "Mark this lesson as incomplete"
+              : "Mark this lesson as complete"
+          }
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleComplete}
+            disabled={isCompleting}
+            className="hidden md:inline-flex"
+          >
+            {isCompleted ? <CircleCheck /> : <Circle />}
+            <span className="sr-only">
+              {isCompleted ? "Mark Incomplete" : "Mark Complete"}
+            </span>
+          </Button>
+        </Tooltip>
+      )}
+
       <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="ghost" size="icon" />}>
-          <EllipsisVertical />
-          <span className="sr-only">Lesson actions</span>
-        </DropdownMenuTrigger>
+        <Tooltip content={`More actions for this ${label}`}>
+          <DropdownMenuTrigger render={<Button variant="ghost" size="icon" />}>
+            <EllipsisVertical />
+            <span className="sr-only">Lesson actions</span>
+          </DropdownMenuTrigger>
+        </Tooltip>
         <DropdownMenuContent align="end" side="bottom" className="w-auto">
           {showMarkComplete && (
             <DropdownMenuItem
               onClick={onToggleComplete}
               disabled={isCompleting}
+              className="md:hidden"
             >
-              {isCompleted ? <Circle /> : <CircleCheck />}
+              {isCompleted ? <CircleCheck /> : <Circle />}
               {isCompleted ? "Mark Incomplete" : "Mark Complete"}
             </DropdownMenuItem>
           )}
