@@ -18,7 +18,7 @@ const ratings: {
 }[] = [
   {
     label: "Hard",
-    description: "Resets review interval to tomorrow",
+    description: "Couldn't recall — review again tomorrow",
     q: 1,
     ratingKey: "hard",
     shortcut: "1",
@@ -29,7 +29,7 @@ const ratings: {
   },
   {
     label: "Good",
-    description: "Extends review interval normally",
+    description: "Recalled with effort — review on the usual schedule",
     q: 3,
     ratingKey: "good",
     shortcut: "2",
@@ -40,7 +40,7 @@ const ratings: {
   },
   {
     label: "Easy",
-    description: "Extends review interval further",
+    description: "Recalled instantly — wait longer before next review",
     q: 5,
     ratingKey: "easy",
     shortcut: "3",
