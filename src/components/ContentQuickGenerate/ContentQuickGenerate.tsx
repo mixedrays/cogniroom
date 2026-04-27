@@ -18,7 +18,7 @@ import {
   type GenerateLessonContentOptions,
 } from "@/lib/courses";
 
-type ContentType = "theory" | "flashcards" | "quiz" | "exercises";
+export type ContentType = "theory" | "flashcards" | "quiz" | "exercises";
 
 interface ContentQuickGenerateProps {
   contentType: ContentType;
@@ -131,17 +131,8 @@ export function ContentQuickGenerate({
         error={error}
         contentContext={contentContext}
         trigger={
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 text-muted-foreground"
-            disabled={isGenerating}
-          >
-            {isGenerating ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <Zap className="size-3.5" />
-            )}
+          <Button variant="secondary" disabled={isGenerating}>
+            {isGenerating ? <Loader2 className="animate-spin" /> : <Zap />}
             {isGenerating ? `Generating ${label}…` : `Quick Create ${label}`}
           </Button>
         }

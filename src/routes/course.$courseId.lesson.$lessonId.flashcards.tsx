@@ -6,8 +6,6 @@ import {
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { RotateCcw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   getLessonFlashcards,
   getCourse,
@@ -20,9 +18,9 @@ import type { Flashcard, ReviewData } from "@/lib/types";
 import {
   LessonPageShell,
   LessonPageHeader,
+  LessonContentEmptyState,
 } from "@/components/LessonPage";
-import { ContentQuickGenerate } from "@/components/ContentQuickGenerate";
-import { WizardAgentInline } from "@/modules/wizard-agent";
+import { WizardAgentSheet } from "@/modules/wizard-agent";
 
 export const Route = createFileRoute(
   "/course/$courseId/lesson/$lessonId/flashcards"
@@ -105,6 +103,7 @@ function LessonFlashcardsComponent() {
   const [isCompleted, setIsCompleted] = useState(
     lessonInfo.flashcardsCompleted ?? false
   );
+  const [agentOpen, setAgentOpen] = useState(false);
 
   useEffect(() => {
     setIsCompleted(lessonInfo.flashcardsCompleted ?? false);
@@ -118,6 +117,21 @@ function LessonFlashcardsComponent() {
       await saveFlashcardsReviews(courseId, lessonId, { ...data, lessonId });
     },
     [courseId, lessonId]
+  );
+
+  const invalidateAndRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+    router.invalidate();
+  }, [queryClient, courseId, router]);
+
+  const handleAgentOpenChange = useCallback(
+    (open: boolean) => {
+      setAgentOpen(open);
+      if (!open) {
+        invalidateAndRefresh();
+      }
+    },
+    [invalidateAndRefresh]
   );
 
   const handleToggleComplete = async () => {
@@ -175,65 +189,47 @@ function LessonFlashcardsComponent() {
 
   return (
     <LessonPageShell>
+      <LessonPageHeader
+        {...headerProps}
+        onOpenAgent={hasCards ? () => setAgentOpen(true) : undefined}
+      />
       {hasCards ? (
-        <>
-          <LessonPageHeader {...headerProps} />
-          <div className="flex-1 min-h-0">
-            <div className="max-w-4xl w-full mx-auto min-h-0 h-full">
-              <SM2UI
-                cards={cards}
-                reviewData={reviewData}
-                onSave={handleSave}
-                className="m-auto h-full"
-              />
-            </div>
+        <div className="flex-1 min-h-0">
+          <div className="max-w-4xl w-full mx-auto min-h-0 h-full">
+            <SM2UI
+              cards={cards}
+              reviewData={reviewData}
+              onSave={handleSave}
+              className="m-auto h-full"
+            />
           </div>
-        </>
+        </div>
       ) : (
-        <WizardAgentInline
-          context={{
-            contentType: "flashcards",
-            courseId,
-            lessonId,
-            topic: topicInfo?.title,
-            lessonTitle: lessonInfo.title,
-            courseTitle: course.title,
-          }}
-          welcomeTitle={lessonInfo.title}
-          welcomeDescription={
+        <LessonContentEmptyState
+          title={lessonInfo.title}
+          description={
             lessonInfo.description ||
             "No flashcards available for this lesson yet."
           }
-          placeholder="Describe the flashcards you want to create…"
-          className="max-w-3xl w-full mx-auto"
-          promptExtra={
-            <ContentQuickGenerate
-              contentType="flashcards"
-              courseId={courseId}
-              lessonId={lessonId}
-              contentContext={headerProps.contentContext}
-            />
-          }
-        >
-          {({ hasMessages, onClear }) => (
-            <LessonPageHeader
-              {...headerProps}
-              extraActions={
-                hasMessages ? (
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={onClear}
-                    aria-label="Clear conversation"
-                  >
-                    <RotateCcw />
-                  </Button>
-                ) : undefined
-              }
-            />
-          )}
-        </WizardAgentInline>
+          contentType="flashcards"
+          courseId={courseId}
+          lessonId={lessonId}
+          contentContext={headerProps.contentContext}
+          onOpenAgent={() => setAgentOpen(true)}
+        />
       )}
+      <WizardAgentSheet
+        open={agentOpen}
+        onOpenChange={handleAgentOpenChange}
+        context={{
+          contentType: "flashcards",
+          courseId,
+          lessonId,
+          topic: topicInfo?.title,
+          lessonTitle: lessonInfo.title,
+          courseTitle: course.title,
+        }}
+      />
     </LessonPageShell>
   );
 }

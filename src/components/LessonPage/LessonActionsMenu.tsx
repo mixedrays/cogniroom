@@ -8,6 +8,7 @@ import {
   Loader2,
   CircleCheck,
   Circle,
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,6 +59,7 @@ interface LessonActionsMenuProps {
   isCompleted: boolean;
   isCompleting: boolean;
   onToggleComplete: () => void;
+  onOpenAgent?: () => void;
 }
 
 const CONTENT_LABELS: Record<ContentType, string> = {
@@ -84,6 +86,7 @@ export function LessonActionsMenu({
   isCompleted,
   isCompleting,
   onToggleComplete,
+  onOpenAgent,
 }: LessonActionsMenuProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -220,6 +223,13 @@ export function LessonActionsMenu({
             <RefreshCw />
             Regenerate {label}
           </DropdownMenuItem>
+
+          {onOpenAgent && (
+            <DropdownMenuItem onClick={onOpenAgent}>
+              <Bot />
+              Ask AI
+            </DropdownMenuItem>
+          )}
 
           <DropdownMenuSeparator />
 

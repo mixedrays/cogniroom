@@ -5,9 +5,7 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState, useEffect } from "react";
-import { RotateCcw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import {
   getLessonQuiz,
   getCourse,
@@ -18,9 +16,9 @@ import type { QuizQuestion } from "@/lib/types";
 import {
   LessonPageShell,
   LessonPageHeader,
+  LessonContentEmptyState,
 } from "@/components/LessonPage";
-import { ContentQuickGenerate } from "@/components/ContentQuickGenerate";
-import { WizardAgentInline } from "@/modules/wizard-agent";
+import { WizardAgentSheet } from "@/modules/wizard-agent";
 
 export const Route = createFileRoute("/course/$courseId/lesson/$lessonId/quiz")(
   {
@@ -92,6 +90,7 @@ function LessonQuizComponent() {
   const [isCompleted, setIsCompleted] = useState(
     lessonInfo.quizCompleted ?? false
   );
+  const [agentOpen, setAgentOpen] = useState(false);
 
   useEffect(() => {
     setIsCompleted(lessonInfo.quizCompleted ?? false);
@@ -99,6 +98,21 @@ function LessonQuizComponent() {
 
   const questions = useMemo(() => parseQuizQuestions(content), [content]);
   const hasQuestions = questions.length > 0;
+
+  const invalidateAndRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
+    router.invalidate();
+  }, [queryClient, courseId, router]);
+
+  const handleAgentOpenChange = useCallback(
+    (open: boolean) => {
+      setAgentOpen(open);
+      if (!open) {
+        invalidateAndRefresh();
+      }
+    },
+    [invalidateAndRefresh]
+  );
 
   const handleToggleComplete = async () => {
     setIsCompleting(true);
@@ -155,65 +169,46 @@ function LessonQuizComponent() {
 
   return (
     <LessonPageShell>
+      <LessonPageHeader
+        {...headerProps}
+        onOpenAgent={hasQuestions ? () => setAgentOpen(true) : undefined}
+      />
       {hasQuestions ? (
-        <>
-          <LessonPageHeader {...headerProps} />
-          <div className="flex-1 min-h-0">
-            <div className="max-w-4xl w-full mx-auto min-h-0 h-full">
-              <Quiz.Container className="m-auto h-full" questions={questions}>
-                <Quiz.KeyboardShortcuts />
-                <Quiz.Topbar />
-                <Quiz.QuestionView />
-                <Quiz.Controls />
-              </Quiz.Container>
-            </div>
+        <div className="flex-1 min-h-0">
+          <div className="max-w-4xl w-full mx-auto min-h-0 h-full">
+            <Quiz.Container className="m-auto h-full" questions={questions}>
+              <Quiz.KeyboardShortcuts />
+              <Quiz.Topbar />
+              <Quiz.QuestionView />
+              <Quiz.Controls />
+            </Quiz.Container>
           </div>
-        </>
+        </div>
       ) : (
-        <WizardAgentInline
-          context={{
-            contentType: "quiz",
-            courseId,
-            lessonId,
-            topic: topicInfo?.title,
-            lessonTitle: lessonInfo.title,
-            courseTitle: course.title,
-          }}
-          welcomeTitle={lessonInfo.title}
-          welcomeDescription={
-            lessonInfo.description ||
-            "No quiz available for this lesson yet."
+        <LessonContentEmptyState
+          title={lessonInfo.title}
+          description={
+            lessonInfo.description || "No quiz available for this lesson yet."
           }
-          placeholder="Describe the quiz you want to create…"
-          className="max-w-3xl w-full mx-auto"
-          promptExtra={
-            <ContentQuickGenerate
-              contentType="quiz"
-              courseId={courseId}
-              lessonId={lessonId}
-              contentContext={headerProps.contentContext}
-            />
-          }
-        >
-          {({ hasMessages, onClear }) => (
-            <LessonPageHeader
-              {...headerProps}
-              extraActions={
-                hasMessages ? (
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={onClear}
-                    aria-label="Clear conversation"
-                  >
-                    <RotateCcw />
-                  </Button>
-                ) : undefined
-              }
-            />
-          )}
-        </WizardAgentInline>
+          contentType="quiz"
+          courseId={courseId}
+          lessonId={lessonId}
+          contentContext={headerProps.contentContext}
+          onOpenAgent={() => setAgentOpen(true)}
+        />
       )}
+      <WizardAgentSheet
+        open={agentOpen}
+        onOpenChange={handleAgentOpenChange}
+        context={{
+          contentType: "quiz",
+          courseId,
+          lessonId,
+          topic: topicInfo?.title,
+          lessonTitle: lessonInfo.title,
+          courseTitle: course.title,
+        }}
+      />
     </LessonPageShell>
   );
 }

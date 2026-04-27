@@ -77,9 +77,7 @@ export function WizardAgentInline({
                 <h1 className="text-2xl font-semibold">{welcomeTitle}</h1>
               )}
               {welcomeDescription && (
-                <p className="text-muted-foreground max-w-md">
-                  {welcomeDescription}
-                </p>
+                <p className="text-muted-foreground">{welcomeDescription}</p>
               )}
             </div>
           )}

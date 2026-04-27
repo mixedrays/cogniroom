@@ -22,6 +22,7 @@ interface LessonPageHeaderProps {
   onToggleComplete: () => void;
   contentContext?: ContentContext;
   extraActions?: ReactNode;
+  onOpenAgent?: () => void;
 }
 
 export function LessonPageHeader({
@@ -39,6 +40,7 @@ export function LessonPageHeader({
   onToggleComplete,
   contentContext,
   extraActions,
+  onOpenAgent,
 }: LessonPageHeaderProps) {
   const lessonItems = topicLessons.map((lesson, i) => ({
     title: `Lesson ${topicIndex}.${i + 1}`,
@@ -65,6 +67,7 @@ export function LessonPageHeader({
             isCompleted={isCompleted}
             isCompleting={isCompleting}
             onToggleComplete={onToggleComplete}
+            onOpenAgent={onOpenAgent}
           />
         </>
       }
