@@ -1,4 +1,5 @@
-import { Bot, RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { Bot, History, Plus } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -8,8 +9,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { PromptTextarea } from "@/components/PromptTextarea";
 import { AgentChat } from "@/modules/agent/components/AgentChat";
+import { cn } from "@/lib/utils";
 import { useWizardAgent } from "../hooks/useWizardAgent";
 import type { WizardAgentContext } from "./WizardAgentDialog";
+import { SessionHistoryPanel } from "./SessionHistoryPanel";
 
 interface WizardAgentSheetProps {
   open: boolean;
@@ -44,50 +47,77 @@ export function WizardAgentSheet({
   contextPrompt,
 }: WizardAgentSheetProps) {
   const agent = useWizardAgent({ context, contextPrompt, active: open });
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="sm:max-w-2xl w-full p-0 gap-0 flex flex-col"
-      >
-        <SheetHeader className="p-4 pr-12 shrink-0 flex-row items-center justify-between border-b">
-          <SheetTitle className="flex items-center gap-2">
-            <Bot className="size-4" />
-            {TITLE[context.contentType]}
-          </SheetTitle>
-
-          {agent.hasMessages && (
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              onClick={agent.handleClear}
-              className="absolute right-12 top-4"
-              aria-label="Clear conversation"
-            >
-              <RotateCcw />
-            </Button>
-          )}
-        </SheetHeader>
-
-        <AgentChat
-          messages={agent.messages}
-          tools={agent.tools}
-          onToolSubmit={agent.submitToolResult}
-          onToolDismiss={agent.dismissToolCall}
-          welcomeMessage={WELCOME[context.contentType]}
-          context={{ courseId: context.courseId, lessonId: context.lessonId }}
-          promptSlot={
-            <PromptTextarea
-              value={agent.input}
-              onChange={agent.setInput}
-              onSubmit={agent.handleSubmit}
-              isStreaming={agent.isStreaming}
-              onStop={agent.stopStreaming}
-              placeholder="Type a message…"
+      <SheetContent side="right" className="max-w-3/4! md:max-w-1/2! p-0">
+        <div className="flex h-full min-h-0">
+          {historyOpen && (
+            <SessionHistoryPanel
+              sessions={agent.sessions}
+              currentSessionId={agent.currentSessionId}
+              onSelect={agent.selectSession}
+              onNew={agent.newSession}
+              onDelete={agent.deleteSession}
+              className="w-64 border-r shrink-0"
             />
-          }
-        />
+          )}
+
+          <div className="flex flex-col flex-1 min-w-0">
+            <SheetHeader className="pr-12 border-b">
+              <SheetTitle className="flex items-center gap-2">
+                <Bot className="size-4" />
+                {TITLE[context.contentType]}
+              </SheetTitle>
+
+              <div className="absolute right-12 top-3 flex items-center gap-1">
+                <Button
+                  size="icon-sm"
+                  variant={historyOpen ? "secondary" : "ghost"}
+                  onClick={() => setHistoryOpen((v) => !v)}
+                  aria-label="Toggle history"
+                  aria-pressed={historyOpen}
+                >
+                  <History />
+                </Button>
+                {agent.hasMessages && (
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={agent.newSession}
+                    aria-label="New session"
+                  >
+                    <Plus />
+                  </Button>
+                )}
+              </div>
+            </SheetHeader>
+
+            <AgentChat
+              messages={agent.messages}
+              tools={agent.tools}
+              onToolSubmit={agent.submitToolResult}
+              onToolDismiss={agent.dismissToolCall}
+              welcomeMessage={WELCOME[context.contentType]}
+              context={{
+                courseId: context.courseId,
+                lessonId: context.lessonId,
+              }}
+              className={cn("flex-1 min-h-0")}
+              promptSlot={
+                <PromptTextarea
+                  value={agent.input}
+                  onChange={agent.setInput}
+                  onSubmit={agent.handleSubmit}
+                  isStreaming={agent.isStreaming}
+                  onStop={agent.stopStreaming}
+                  placeholder="Type a message…"
+                />
+              }
+            />
+          </div>
+        </div>
       </SheetContent>
     </Sheet>
   );

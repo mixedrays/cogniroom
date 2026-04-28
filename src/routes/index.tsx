@@ -1,24 +1,37 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Bot, RotateCcw, Zap } from "lucide-react";
+import { Bot, Plus, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import CreateCourseModal from "@/components/CreateCourseModal";
 import { WizardAgentInline } from "@/modules/wizard-agent";
+import { courseHistoryQueryKey } from "@/components/CourseHistory";
 
-export const Route = createFileRoute("/")({ component: App });
+interface HomeSearch {
+  session?: string;
+}
+
+export const Route = createFileRoute("/")({
+  component: App,
+  validateSearch: (search: Record<string, unknown>): HomeSearch => ({
+    session: typeof search.session === "string" ? search.session : undefined,
+  }),
+});
 
 function App() {
   const queryClient = useQueryClient();
+  const search = useSearch({ from: "/" });
 
   const handleCourseCreated = () => {
     queryClient.invalidateQueries({ queryKey: ["courses"] });
+    queryClient.invalidateQueries({ queryKey: courseHistoryQueryKey });
   };
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <WizardAgentInline
         context={{ contentType: "roadmap" }}
+        initialSessionId={search.session}
         welcomeTitle="What do you want to learn?"
         placeholder="Describe the course you want to create…"
         className="max-w-3xl w-full mx-auto"
@@ -38,17 +51,17 @@ function App() {
           />
         }
       >
-        {({ hasMessages, onClear }) => (
+        {({ hasMessages, onNewSession }) => (
           <PageHeader
             actions={
               hasMessages ? (
                 <Button
                   size="icon-sm"
                   variant="ghost"
-                  onClick={onClear}
-                  aria-label="Clear conversation"
+                  onClick={onNewSession}
+                  aria-label="New session"
                 >
-                  <RotateCcw />
+                  <Plus />
                 </Button>
               ) : undefined
             }

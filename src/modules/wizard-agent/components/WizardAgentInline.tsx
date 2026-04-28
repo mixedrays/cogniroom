@@ -3,6 +3,17 @@ import { PromptTextarea } from "@/components/PromptTextarea";
 import { AgentChat } from "@/modules/agent/components/AgentChat";
 import { useWizardAgent } from "../hooks/useWizardAgent";
 import type { WizardAgentContext } from "./WizardAgentDialog";
+import type { SessionMeta } from "../types";
+
+interface InlineRenderState {
+  hasMessages: boolean;
+  onClear: () => void;
+  sessions: SessionMeta[];
+  currentSessionId: string;
+  onSelectSession: (id: string) => void;
+  onNewSession: () => void;
+  onDeleteSession: (id: string) => void;
+}
 
 interface WizardAgentInlineProps {
   context: WizardAgentContext;
@@ -13,10 +24,8 @@ interface WizardAgentInlineProps {
   placeholder?: string;
   promptExtra?: ReactNode;
   className?: string;
-  children?: (state: {
-    hasMessages: boolean;
-    onClear: () => void;
-  }) => ReactNode;
+  initialSessionId?: string;
+  children?: (state: InlineRenderState) => ReactNode;
 }
 
 export function WizardAgentInline({
@@ -28,9 +37,10 @@ export function WizardAgentInline({
   placeholder = "Type a message…",
   promptExtra,
   className,
+  initialSessionId,
   children,
 }: WizardAgentInlineProps) {
-  const agent = useWizardAgent({ context, contextPrompt });
+  const agent = useWizardAgent({ context, contextPrompt, initialSessionId });
 
   const promptSlot = (
     <div className="flex flex-col gap-2 w-full mx-auto">
@@ -53,6 +63,11 @@ export function WizardAgentInline({
       {children?.({
         hasMessages: agent.hasMessages,
         onClear: agent.handleClear,
+        sessions: agent.sessions,
+        currentSessionId: agent.currentSessionId,
+        onSelectSession: agent.selectSession,
+        onNewSession: agent.newSession,
+        onDeleteSession: agent.deleteSession,
       })}
 
       {agent.hasMessages ? (
