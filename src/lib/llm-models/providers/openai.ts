@@ -7,8 +7,9 @@ type OpenAIResponsesModelId = Parameters<typeof openai>[0];
 export type OpenAIAvailableModelsIds = Exclude<
   OpenAIResponsesModelId,
   | object
-  | `${string}-2025-${string}`
   | `${string}-2024-${string}`
+  | `${string}-2025-${string}`
+  | `${string}-2026-${string}`
   | `gpt-3${string}`
 >;
 

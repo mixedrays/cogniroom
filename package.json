@@ -14,12 +14,12 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "format": "prettier --write .",
-    "update-ai": "npm install @ai-sdk/openai@latest ai@latest",
+    "update-ai": "npm install @ai-sdk/anthropic@latest @ai-sdk/openai@latest ai@latest",
     "validate": "npm run typecheck && npm run lint && npm run test:all"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.68",
-    "@ai-sdk/openai": "^3.0.53",
+    "@ai-sdk/anthropic": "^3.0.73",
+    "@ai-sdk/openai": "^3.0.55",
     "@base-ui/react": "^1.2.0",
     "@fontsource-variable/inter": "^5.2.8",
     "@tailwindcss/typography": "^0.5.19",
@@ -31,7 +31,7 @@
     "@tanstack/react-router-ssr-query": "^1.166.7",
     "@tanstack/react-start": "^1.166.8",
     "@tanstack/router-plugin": "^1.166.7",
-    "ai": "^6.0.168",
+    "ai": "^6.0.172",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
@@ -62,6 +62,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@rsbuild/core": "^2.0.3",
     "@tanstack/devtools-vite": "^0.5.5",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.9.1",

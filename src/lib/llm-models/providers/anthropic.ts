@@ -14,6 +14,12 @@ export type AnthropicAvailableModelsIds =
   ExtractLiteralModelId<AnthropicMessagesModelId>;
 
 const anthropicModels = {
+  "claude-opus-4-7": {
+    price: { input: getPricePerToken(5), output: getPricePerToken(25) },
+    priceRating: 4,
+    label: "Claude Opus 4.7",
+    hint: "Most capable, best for complex reasoning",
+  },
   "claude-opus-4-6": {
     price: { input: getPricePerToken(5), output: getPricePerToken(25) },
     priceRating: 4,
