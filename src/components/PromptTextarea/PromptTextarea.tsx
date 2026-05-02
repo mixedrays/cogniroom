@@ -14,6 +14,7 @@ type PromptTextareaProps = {
   disabled?: boolean;
   isStreaming?: boolean;
   onStop?: () => void;
+  autoFocus?: boolean;
 };
 
 export function PromptTextarea({
@@ -24,6 +25,7 @@ export function PromptTextarea({
   disabled = false,
   isStreaming = false,
   onStop,
+  autoFocus = false,
 }: PromptTextareaProps) {
   const { settings } = useSettings();
   const [selectedModel, setSelectedModel] = useState(() =>
@@ -60,6 +62,7 @@ export function PromptTextarea({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         disabled={isInputDisabled}
+        autoFocus={autoFocus}
       />
       <div className="flex items-center justify-between px-2 pb-2">
         <ModelSelect

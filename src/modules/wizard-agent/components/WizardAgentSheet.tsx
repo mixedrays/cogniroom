@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, History, Plus } from "lucide-react";
+import { Bot, History, Plus, XIcon } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -7,6 +7,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { PromptTextarea } from "@/components/PromptTextarea";
 import { AgentChat } from "@/modules/agent/components/AgentChat";
 import { cn } from "@/lib/utils";
@@ -51,46 +52,56 @@ export function WizardAgentSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="max-w-3/4! md:max-w-1/2! p-0">
+      <SheetContent
+        side="right"
+        showCloseButton={false}
+        className="max-w-3/4! md:max-w-1/2! p-0"
+      >
         <div className="flex h-full min-h-0">
-          {historyOpen && (
-            <SessionHistoryPanel
-              sessions={agent.sessions}
-              currentSessionId={agent.currentSessionId}
-              onSelect={agent.selectSession}
-              onNew={agent.newSession}
-              onDelete={agent.deleteSession}
-              className="w-64 border-r shrink-0"
-            />
-          )}
-
           <div className="flex flex-col flex-1 min-w-0">
-            <SheetHeader className="pr-12 border-b">
+            <SheetHeader className="pr-12 border-b h-14 relative">
               <SheetTitle className="flex items-center gap-2">
                 <Bot className="size-4" />
                 {TITLE[context.contentType]}
               </SheetTitle>
 
-              <div className="absolute right-12 top-3 flex items-center gap-1">
-                <Button
-                  size="icon-sm"
-                  variant={historyOpen ? "secondary" : "ghost"}
-                  onClick={() => setHistoryOpen((v) => !v)}
-                  aria-label="Toggle history"
-                  aria-pressed={historyOpen}
-                >
-                  <History />
-                </Button>
+              <div className="absolute right-3 top-3 flex items-center">
+                <Tooltip content={historyOpen ? "Hide history" : "Show history"}>
+                  <Button
+                    size="icon-sm"
+                    variant={historyOpen ? "secondary" : "ghost"}
+                    onClick={() => setHistoryOpen((v) => !v)}
+                    aria-label="Toggle history"
+                    aria-pressed={historyOpen}
+                  >
+                    <History />
+                  </Button>
+                </Tooltip>
+
                 {agent.hasMessages && (
+                  <Tooltip content="New session">
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      onClick={agent.newSession}
+                      aria-label="New session"
+                    >
+                      <Plus />
+                    </Button>
+                  </Tooltip>
+                )}
+
+                <Tooltip content="Close">
                   <Button
                     size="icon-sm"
                     variant="ghost"
-                    onClick={agent.newSession}
-                    aria-label="New session"
+                    onClick={onOpenChange.bind(null, false)}
+                    aria-label="Close"
                   >
-                    <Plus />
+                    <span className="sr-only">Close</span>
+                    <XIcon />
                   </Button>
-                )}
+                </Tooltip>
               </div>
             </SheetHeader>
 
@@ -117,6 +128,17 @@ export function WizardAgentSheet({
               }
             />
           </div>
+
+          {historyOpen && (
+            <SessionHistoryPanel
+              sessions={agent.sessions}
+              currentSessionId={agent.currentSessionId}
+              onSelect={agent.selectSession}
+              onNew={agent.newSession}
+              onDelete={agent.deleteSession}
+              className="w-64 border-r shrink-0"
+            />
+          )}
         </div>
       </SheetContent>
     </Sheet>

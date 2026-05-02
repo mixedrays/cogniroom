@@ -25,6 +25,8 @@ interface WizardAgentInlineProps {
   promptExtra?: ReactNode;
   className?: string;
   initialSessionId?: string;
+  startNewSession?: boolean;
+  onSessionPersisted?: (sessionId: string) => void;
   children?: (state: InlineRenderState) => ReactNode;
 }
 
@@ -38,9 +40,17 @@ export function WizardAgentInline({
   promptExtra,
   className,
   initialSessionId,
+  startNewSession,
+  onSessionPersisted,
   children,
 }: WizardAgentInlineProps) {
-  const agent = useWizardAgent({ context, contextPrompt, initialSessionId });
+  const agent = useWizardAgent({
+    context,
+    contextPrompt,
+    initialSessionId,
+    startNewSession,
+    onSessionPersisted,
+  });
 
   const promptSlot = (
     <div className="flex flex-col gap-2 w-full mx-auto">
@@ -51,6 +61,7 @@ export function WizardAgentInline({
         isStreaming={agent.isStreaming}
         onStop={agent.stopStreaming}
         placeholder={placeholder}
+        autoFocus={!agent.hasMessages}
       />
       {promptExtra && (
         <div className="flex items-center justify-center">{promptExtra}</div>
@@ -85,7 +96,10 @@ export function WizardAgentInline({
           className={className}
         />
       ) : (
-        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-16 max-w-3xl mx-auto w-full">
+        <div
+          key={agent.currentSessionId}
+          className="flex-1 flex flex-col items-center justify-center px-4 pb-16 max-w-3xl mx-auto w-full"
+        >
           {(welcomeTitle || welcomeDescription) && (
             <div className="text-center space-y-2 mb-8">
               {welcomeTitle && (

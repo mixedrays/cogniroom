@@ -4,7 +4,7 @@ import { useRouter } from "@tanstack/react-router";
 import {
   EllipsisVertical,
   Trash2,
-  RefreshCw,
+  Zap,
   Loader2,
   CircleCheck,
   Circle,
@@ -220,8 +220,8 @@ export function LessonActionsMenu({
           )}
 
           <DropdownMenuItem onClick={() => setIsRegenerateDialogOpen(true)}>
-            <RefreshCw />
-            Regenerate {label}
+            <Zap />
+            Quick Regenerate
           </DropdownMenuItem>
 
           {onOpenAgent && (

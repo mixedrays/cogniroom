@@ -401,12 +401,12 @@ function ContentPreview({
   }
 
   if (type === "lesson" || type === "exercise") {
-    const text = content as string;
-    const preview = text?.slice(0, 300);
+    const text = typeof content === "string" ? content : "";
+    const preview = text.slice(0, 300);
     return (
       <p className="text-xs text-muted-foreground whitespace-pre-wrap">
         {preview}
-        {text?.length > 300 ? "…" : ""}
+        {text.length > 300 ? "…" : ""}
       </p>
     );
   }

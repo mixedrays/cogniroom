@@ -6,6 +6,7 @@ import {
   Link as LinkIcon,
   Trash2,
   ChevronDown,
+  Plus,
 } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -94,6 +95,23 @@ export default function CourseList() {
     <div className="flex flex-col h-full">
       <div className="flex-1 min-h-0">
         <div className="h-full overflow-y-auto">
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={
+                      <Link to="/" search={{ session: undefined }}>
+                        <Plus />
+                        <span>New Course</span>
+                      </Link>
+                    }
+                  />
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
           {queryIsLoading ? (
             <LoadingState variant="skeleton" skeletonRows={3} className="p-4" />
           ) : coursesQuery.isError ? (
@@ -117,6 +135,7 @@ export default function CourseList() {
                   Create your first course to get started
                 </p>
               </div>
+
               <CourseHistory />
             </>
           ) : (
@@ -254,6 +273,7 @@ export default function CourseList() {
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
+
               <CourseHistory />
             </>
           )}

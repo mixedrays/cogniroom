@@ -1,11 +1,19 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAgent } from "@/modules/agent/hooks/useAgent";
 import { useChatBackend } from "@/modules/agent/hooks/useChatBackend";
 import { askUserTool } from "@/modules/agent/tools/ask-user";
 import { memoryTool } from "@/modules/agent/tools/memory";
 import { presentContentTool } from "@/modules/agent/tools/present-content";
-import type { AgentMessageState } from "@/modules/agent/types";
+import type {
+  AgentMessageState,
+  AgentSseEvent,
+} from "@/modules/agent/types";
+import {
+  messagesReducer,
+  initialMessagesState,
+  type MessagesAction,
+  type MessagesState,
+} from "@/modules/agent/lib/messagesReducer";
 import type { WizardAgentContext } from "../components/WizardAgentDialog";
 import type { SessionMeta } from "../types";
 
@@ -107,6 +115,8 @@ interface UseWizardAgentOptions {
   contextPrompt?: string;
   active?: boolean;
   initialSessionId?: string;
+  startNewSession?: boolean;
+  onSessionPersisted?: (sessionId: string) => void;
 }
 
 export function useWizardAgent({
@@ -114,14 +124,38 @@ export function useWizardAgent({
   contextPrompt,
   active = true,
   initialSessionId,
+  startNewSession = false,
+  onSessionPersisted,
 }: UseWizardAgentOptions) {
   const [input, setInput] = useState("");
   const [sessions, setSessions] = useState<SessionMeta[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string>(() =>
     generateSessionId()
   );
-  const sessionLoadedRef = useRef<string | null>(null);
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [sessionStates, setSessionStates] = useState<
+    Record<string, MessagesState>
+  >({});
+
+  const sessionStatesRef = useRef<Record<string, MessagesState>>({});
+  useEffect(() => {
+    sessionStatesRef.current = sessionStates;
+  }, [sessionStates]);
+
+  const streamControllersRef = useRef<Map<string, AbortController>>(new Map());
+  const saveTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map()
+  );
+  const lastSavedMessagesRef = useRef<Map<string, AgentMessageState[]>>(
+    new Map()
+  );
+  const persistedRef = useRef<Set<string>>(new Set());
+  const modelRef = useRef<string>("");
+
+  const onSessionPersistedRef = useRef(onSessionPersisted);
+  useEffect(() => {
+    onSessionPersistedRef.current = onSessionPersisted;
+  }, [onSessionPersisted]);
+
   const queryClient = useQueryClient();
 
   const invalidateSessionList = useCallback(() => {
@@ -155,24 +189,174 @@ export function useWizardAgent({
     [context, contextPrompt]
   );
 
-  const {
-    messages,
-    isStreaming,
-    sendMessage,
-    stopStreaming,
-    submitToolResult,
-    dismissToolCall,
-    loadMessages,
-  } = useAgent({
-    backend,
-    context: transportContext,
-  });
+  const sessionDispatch = useCallback(
+    (sessionId: string, action: MessagesAction) => {
+      setSessionStates((prev) => {
+        const current = prev[sessionId] ?? initialMessagesState;
+        const next = messagesReducer(current, action);
+        if (next === current) return prev;
+        return { ...prev, [sessionId]: next };
+      });
+    },
+    []
+  );
+
+  const handleEvent = useCallback(
+    (sessionId: string, assistantId: string, event: AgentSseEvent) => {
+      if (event.type === "token") {
+        sessionDispatch(sessionId, {
+          type: "APPEND_TOKEN",
+          id: assistantId,
+          delta: event.delta,
+        });
+      } else if (event.type === "tool_call_start") {
+        sessionDispatch(sessionId, {
+          type: "START_TOOL_CALL_STREAM",
+          assistantId,
+          toolCallId: event.toolCallId,
+          toolName: event.toolName,
+        });
+      } else if (event.type === "tool_call_delta") {
+        sessionDispatch(sessionId, {
+          type: "APPEND_TOOL_CALL_DELTA",
+          toolCallId: event.toolCallId,
+          delta: event.delta,
+        });
+      } else if (event.type === "tool_call") {
+        sessionDispatch(sessionId, {
+          type: "ADD_TOOL_CALL",
+          assistantId,
+          toolCallId: event.toolCallId,
+          toolName: event.toolName,
+          params: event.params,
+        });
+      } else if (event.type === "error") {
+        sessionDispatch(sessionId, {
+          type: "SET_ERROR",
+          id: assistantId,
+          message: event.message,
+        });
+      } else if (event.type === "done") {
+        sessionDispatch(sessionId, {
+          type: "COMPLETE_ASSISTANT",
+          id: assistantId,
+        });
+      }
+    },
+    [sessionDispatch]
+  );
+
+  const sendToAPI = useCallback(
+    async (sessionId: string, messages: AgentMessageState[]) => {
+      const prior = streamControllersRef.current.get(sessionId);
+      if (prior) prior.abort();
+      const controller = new AbortController();
+      streamControllersRef.current.set(sessionId, controller);
+
+      const assistantId = crypto.randomUUID();
+      sessionDispatch(sessionId, {
+        type: "ADD_STREAMING_ASSISTANT",
+        id: assistantId,
+      });
+
+      try {
+        await backend({
+          messages,
+          model: modelRef.current,
+          context: transportContext,
+          signal: controller.signal,
+          onEvent: (event) => handleEvent(sessionId, assistantId, event),
+        });
+      } catch (e) {
+        if ((e as Error).name === "AbortError") {
+          sessionDispatch(sessionId, {
+            type: "CANCEL_ASSISTANT",
+            id: assistantId,
+          });
+          return;
+        }
+        sessionDispatch(sessionId, {
+          type: "SET_ERROR",
+          id: assistantId,
+          message: (e as Error).message ?? "Something went wrong",
+        });
+      } finally {
+        if (streamControllersRef.current.get(sessionId) === controller) {
+          streamControllersRef.current.delete(sessionId);
+        }
+      }
+    },
+    [backend, handleEvent, sessionDispatch, transportContext]
+  );
+
+  const sendMessage = useCallback(
+    (text: string, model: string) => {
+      modelRef.current = model;
+      const sessionId = currentSessionId;
+      const id = crypto.randomUUID();
+      sessionDispatch(sessionId, { type: "ADD_USER_MESSAGE", id, text });
+      const existing =
+        sessionStatesRef.current[sessionId]?.messages ?? [];
+      sendToAPI(sessionId, [...existing, { id, role: "user", text }]);
+    },
+    [currentSessionId, sendToAPI, sessionDispatch]
+  );
+
+  const stopStreaming = useCallback(() => {
+    const controller = streamControllersRef.current.get(currentSessionId);
+    if (controller) {
+      controller.abort();
+      streamControllersRef.current.delete(currentSessionId);
+    }
+  }, [currentSessionId]);
+
+  const submitToolResult = useCallback(
+    (toolCallId: string, result: unknown) => {
+      const sessionId = currentSessionId;
+      sessionDispatch(sessionId, {
+        type: "SUBMIT_TOOL_RESULT",
+        toolCallId,
+        result,
+      });
+      const existing =
+        sessionStatesRef.current[sessionId]?.messages ?? [];
+      const updated = existing.map((m) =>
+        m.role === "tool_call" && m.toolCallId === toolCallId
+          ? { ...m, status: "submitted" as const, result }
+          : m
+      );
+      sendToAPI(sessionId, updated);
+    },
+    [currentSessionId, sendToAPI, sessionDispatch]
+  );
+
+  const dismissToolCall = useCallback(
+    (toolCallId: string) => {
+      sessionDispatch(currentSessionId, {
+        type: "DISMISS_TOOL_CALL",
+        toolCallId,
+      });
+    },
+    [currentSessionId, sessionDispatch]
+  );
 
   const refreshSessions = useCallback(async () => {
     const list = await fetchSessions(context);
     setSessions(list);
     return list;
   }, [context]);
+
+  const populateSessionFromDisk = useCallback(
+    async (sessionId: string) => {
+      const { messages: msgs } = await fetchSession(context, sessionId);
+      setSessionStates((prev) => ({
+        ...prev,
+        [sessionId]: { messages: msgs, isStreaming: false },
+      }));
+      lastSavedMessagesRef.current.set(sessionId, msgs);
+    },
+    [context]
+  );
 
   // Initial load: fetch session list, restore requested or most recent session
   useEffect(() => {
@@ -182,106 +366,146 @@ export function useWizardAgent({
       const list = await fetchSessions(context);
       if (cancelled) return;
       setSessions(list);
+      list.forEach((s) => persistedRef.current.add(s.id));
 
       const requested =
         initialSessionId && list.some((s) => s.id === initialSessionId)
           ? initialSessionId
           : null;
-      const target = requested ?? (list.length > 0 ? list[0].id : null);
+      const target =
+        requested ??
+        (startNewSession ? null : list.length > 0 ? list[0].id : null);
 
       if (target) {
         const { messages: msgs } = await fetchSession(context, target);
         if (cancelled) return;
+        setSessionStates((prev) => ({
+          ...prev,
+          [target]: { messages: msgs, isStreaming: false },
+        }));
+        lastSavedMessagesRef.current.set(target, msgs);
         setCurrentSessionId(target);
-        sessionLoadedRef.current = target;
-        loadMessages(msgs);
       } else {
         const fresh = generateSessionId();
+        setSessionStates((prev) => ({
+          ...prev,
+          [fresh]: initialMessagesState,
+        }));
+        lastSavedMessagesRef.current.set(fresh, []);
         setCurrentSessionId(fresh);
-        sessionLoadedRef.current = fresh;
-        loadMessages([]);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [active, context, loadMessages, initialSessionId]);
+  }, [active, context, initialSessionId, startNewSession]);
 
-  // Debounced save of current session
+  // Debounced per-session save: any session whose messages reference changed
+  // since last save gets a save scheduled.
   useEffect(() => {
     if (!active) return;
-    if (messages.length === 0) return;
-    if (sessionLoadedRef.current !== currentSessionId) return;
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(async () => {
-      const meta = await saveSession(context, currentSessionId, messages);
-      if (meta) {
-        setSessions((prev) => {
-          const others = prev.filter((s) => s.id !== meta.id);
-          return [meta, ...others].sort((a, b) => b.updatedAt - a.updatedAt);
-        });
-        invalidateSessionList();
-      }
-    }, 1000);
+    for (const [sid, state] of Object.entries(sessionStates)) {
+      if (state.messages.length === 0) continue;
+      if (lastSavedMessagesRef.current.get(sid) === state.messages) continue;
+      const existingTimer = saveTimersRef.current.get(sid);
+      if (existingTimer) clearTimeout(existingTimer);
+      const messagesSnapshot = state.messages;
+      const timer = setTimeout(async () => {
+        saveTimersRef.current.delete(sid);
+        const meta = await saveSession(context, sid, messagesSnapshot);
+        lastSavedMessagesRef.current.set(sid, messagesSnapshot);
+        if (meta) {
+          const isFirstPersist = !persistedRef.current.has(meta.id);
+          persistedRef.current.add(meta.id);
+          setSessions((prev) => {
+            const others = prev.filter((s) => s.id !== meta.id);
+            return [meta, ...others].sort(
+              (a, b) => b.createdAt - a.createdAt
+            );
+          });
+          invalidateSessionList();
+          if (isFirstPersist) onSessionPersistedRef.current?.(meta.id);
+        }
+      }, 1000);
+      saveTimersRef.current.set(sid, timer);
+    }
+  }, [sessionStates, active, context, invalidateSessionList]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    const timers = saveTimersRef.current;
     return () => {
-      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      for (const t of timers.values()) clearTimeout(t);
+      timers.clear();
     };
-  }, [messages, active, context, currentSessionId, invalidateSessionList]);
+  }, []);
 
   const selectSession = useCallback(
     async (sessionId: string) => {
       if (sessionId === currentSessionId) return;
-      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-      const { messages: msgs } = await fetchSession(context, sessionId);
       setCurrentSessionId(sessionId);
-      sessionLoadedRef.current = sessionId;
-      loadMessages(msgs);
+      if (!sessionStatesRef.current[sessionId]) {
+        await populateSessionFromDisk(sessionId);
+      }
     },
-    [context, currentSessionId, loadMessages]
+    [currentSessionId, populateSessionFromDisk]
   );
 
   const newSession = useCallback(() => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     const fresh = generateSessionId();
+    setSessionStates((prev) => ({ ...prev, [fresh]: initialMessagesState }));
+    lastSavedMessagesRef.current.set(fresh, []);
     setCurrentSessionId(fresh);
-    sessionLoadedRef.current = fresh;
-    loadMessages([]);
-  }, [loadMessages]);
+  }, []);
 
   const deleteSession = useCallback(
     async (sessionId: string) => {
+      const controller = streamControllersRef.current.get(sessionId);
+      if (controller) {
+        controller.abort();
+        streamControllersRef.current.delete(sessionId);
+      }
+      const timer = saveTimersRef.current.get(sessionId);
+      if (timer) {
+        clearTimeout(timer);
+        saveTimersRef.current.delete(sessionId);
+      }
+      lastSavedMessagesRef.current.delete(sessionId);
+      setSessionStates((prev) => {
+        if (!(sessionId in prev)) return prev;
+        const next = { ...prev };
+        delete next[sessionId];
+        return next;
+      });
+
       await removeSession(context, sessionId);
       invalidateSessionList();
       const list = await refreshSessions();
       if (sessionId === currentSessionId) {
         if (list.length > 0) {
           const next = list[0];
-          const { messages: msgs } = await fetchSession(context, next.id);
           setCurrentSessionId(next.id);
-          sessionLoadedRef.current = next.id;
-          loadMessages(msgs);
+          if (!sessionStatesRef.current[next.id]) {
+            await populateSessionFromDisk(next.id);
+          }
         } else {
           const fresh = generateSessionId();
+          setSessionStates((prev) => ({
+            ...prev,
+            [fresh]: initialMessagesState,
+          }));
+          lastSavedMessagesRef.current.set(fresh, []);
           setCurrentSessionId(fresh);
-          sessionLoadedRef.current = fresh;
-          loadMessages([]);
         }
       }
     },
     [
       context,
       currentSessionId,
-      loadMessages,
-      refreshSessions,
       invalidateSessionList,
+      populateSessionFromDisk,
+      refreshSessions,
     ]
-  );
-
-  const handleToolSubmit = useCallback(
-    (toolCallId: string, result: unknown) => {
-      submitToolResult(toolCallId, result);
-    },
-    [submitToolResult]
   );
 
   const handleSubmit = useCallback(
@@ -296,6 +520,19 @@ export function useWizardAgent({
     newSession();
   }, [newSession]);
 
+  const currentState =
+    sessionStates[currentSessionId] ?? initialMessagesState;
+  const messages = currentState.messages;
+  const isStreaming = currentState.isStreaming;
+
+  const loadMessages = useCallback(
+    (msgs: AgentMessageState[]) => {
+      sessionDispatch(currentSessionId, { type: "LOAD_MESSAGES", messages: msgs });
+      lastSavedMessagesRef.current.set(currentSessionId, msgs);
+    },
+    [currentSessionId, sessionDispatch]
+  );
+
   return {
     tools: TOOLS,
     input,
@@ -304,7 +541,7 @@ export function useWizardAgent({
     isStreaming,
     sendMessage,
     stopStreaming,
-    submitToolResult: handleToolSubmit,
+    submitToolResult,
     dismissToolCall,
     loadMessages,
     handleSubmit,

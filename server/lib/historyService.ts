@@ -87,7 +87,7 @@ export async function listSessions(
       // skip corrupt files
     }
   }
-  return metas.sort((a, b) => b.updatedAt - a.updatedAt);
+  return metas.sort((a, b) => b.createdAt - a.createdAt);
 }
 
 export async function readSession(

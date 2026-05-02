@@ -1,7 +1,9 @@
 import { Plus, Trash2, MessagesSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { cn } from "@/lib/utils";
 import type { SessionMeta } from "../types";
+import { SheetTitle } from "@/components/ui/sheet";
 
 interface SessionHistoryPanelProps {
   sessions: SessionMeta[];
@@ -34,18 +36,19 @@ export function SessionHistoryPanel({
 }: SessionHistoryPanelProps) {
   return (
     <div className={cn("flex flex-col h-full min-h-0 bg-sidebar", className)}>
-      <div className="flex items-center justify-between p-3 border-b">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          History
-        </span>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          onClick={onNew}
-          aria-label="New session"
-        >
-          <Plus />
-        </Button>
+      <div className="flex items-center justify-between p-3 border-b h-14">
+        <SheetTitle>History</SheetTitle>
+
+        <Tooltip content="New session">
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            onClick={onNew}
+            aria-label="New session"
+          >
+            <Plus />
+          </Button>
+        </Tooltip>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto p-2">

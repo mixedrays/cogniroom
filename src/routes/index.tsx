@@ -1,6 +1,10 @@
-import { createFileRoute, useSearch } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Bot, Plus, Zap } from "lucide-react";
+import { Bot, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import CreateCourseModal from "@/components/CreateCourseModal";
@@ -20,6 +24,7 @@ export const Route = createFileRoute("/")({
 
 function App() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const search = useSearch({ from: "/" });
 
   const handleCourseCreated = () => {
@@ -27,11 +32,17 @@ function App() {
     queryClient.invalidateQueries({ queryKey: courseHistoryQueryKey });
   };
 
+  const handleSessionPersisted = (sessionId: string) => {
+    navigate({ to: "/", search: { session: sessionId }, replace: true });
+  };
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <WizardAgentInline
         context={{ contentType: "roadmap" }}
         initialSessionId={search.session}
+        startNewSession
+        onSessionPersisted={handleSessionPersisted}
         welcomeTitle="What do you want to learn?"
         placeholder="Describe the course you want to create…"
         className="max-w-3xl w-full mx-auto"
@@ -51,21 +62,8 @@ function App() {
           />
         }
       >
-        {({ hasMessages, onNewSession }) => (
-          <PageHeader
-            actions={
-              hasMessages ? (
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  onClick={onNewSession}
-                  aria-label="New session"
-                >
-                  <Plus />
-                </Button>
-              ) : undefined
-            }
-          >
+        {({ hasMessages }) => (
+          <PageHeader>
             {hasMessages && (
               <div className="flex items-center gap-2">
                 <Bot className="size-4" />

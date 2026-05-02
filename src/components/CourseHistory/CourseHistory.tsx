@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { History, MessagesSquare, Trash2 } from "lucide-react";
@@ -5,11 +6,23 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuAction,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { ErrorState } from "@/components/ErrorState";
 import { cn } from "@/lib/utils";
 import type { SessionMeta } from "@/modules/wizard-agent";
 
@@ -23,10 +36,13 @@ async function fetchRoadmapSessions(): Promise<SessionMeta[]> {
 }
 
 async function deleteRoadmapSession(id: string): Promise<void> {
-  await fetch(
+  const res = await fetch(
     `/api/wizard-agent/sessions/${encodeURIComponent(id)}?${SCOPE_QUERY}`,
     { method: "DELETE" }
   );
+  if (!res.ok) {
+    throw new Error(`Failed to delete (${res.status})`);
+  }
 }
 
 export const courseHistoryQueryKey = [
@@ -45,6 +61,15 @@ export default function CourseHistory() {
     refetchInterval: 5000,
   });
 
+  const [deleteDialogOpenId, setDeleteDialogOpenId] = useState<string | null>(
+    null
+  );
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<{
+    id: string;
+    message: string;
+  } | null>(null);
+
   const sessions = sessionsQuery.data ?? [];
   if (sessions.length === 0) return null;
 
@@ -58,8 +83,20 @@ export default function CourseHistory() {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteRoadmapSession(id);
-    queryClient.invalidateQueries({ queryKey: courseHistoryQueryKey });
+    setDeletingId(id);
+    setDeleteError(null);
+    try {
+      await deleteRoadmapSession(id);
+      queryClient.invalidateQueries({ queryKey: courseHistoryQueryKey });
+      setDeleteDialogOpenId(null);
+      if (id === activeSessionId) {
+        navigate({ to: "/", search: { session: undefined } });
+      }
+    } catch (e) {
+      setDeleteError({ id, message: (e as Error).message ?? "Failed to delete" });
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -68,30 +105,72 @@ export default function CourseHistory() {
         <History className="size-3.5" />
         History
       </SidebarGroupLabel>
+
       <SidebarGroupContent>
         <SidebarMenu>
           {sessions.map((session) => (
-            <SidebarMenuItem key={session.id} className="group/history-item">
+            <SidebarMenuItem
+              key={session.id}
+              className="group/history-item relative"
+            >
               <SidebarMenuButton
                 onClick={() => handleSelect(session.id)}
                 className={cn(
-                  "pr-8",
+                  "pr-8 cursor-pointer",
                   session.id === activeSessionId && "bg-sidebar-accent"
                 )}
               >
                 <MessagesSquare />
                 <span className="truncate">{session.title}</span>
               </SidebarMenuButton>
-              <SidebarMenuAction
-                showOnHover
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(session.id);
+
+              <AlertDialog
+                open={deleteDialogOpenId === session.id}
+                onOpenChange={(open) => {
+                  if (open) setDeleteError(null);
+                  setDeleteDialogOpenId(open ? session.id : null);
                 }}
-                aria-label="Delete session"
               >
-                <Trash2 />
-              </SidebarMenuAction>
+                <AlertDialogTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="absolute top-0 right-0 opacity-0 group-hover/history-item:opacity-100 transition-opacity"
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label="Delete session"
+                    >
+                      <Trash2 />
+                    </Button>
+                  }
+                />
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete session?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete "{session.title}".
+                    </AlertDialogDescription>
+                    {deleteError?.id === session.id && (
+                      <ErrorState
+                        variant="minimal"
+                        message={deleteError.message}
+                      />
+                    )}
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={deletingId === session.id}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      variant="destructive"
+                      onClick={() => handleDelete(session.id)}
+                      disabled={deletingId === session.id}
+                    >
+                      {deletingId === session.id ? "Deleting…" : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
