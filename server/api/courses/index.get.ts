@@ -61,11 +61,11 @@ export default defineEventHandler(async () => {
       })
     );
 
-    // Filter out any nulls from failed reads and sort by updatedAt descending
+    // Filter out any nulls from failed reads and sort by createdAt descending
     const validCourses = courses.filter((c) => c !== null);
     validCourses.sort(
       (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
     return validCourses;
