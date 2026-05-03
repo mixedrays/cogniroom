@@ -41,6 +41,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import CourseHistory from "@/components/CourseHistory";
+import { CommandPaletteTrigger } from "@/modules/command-palette";
 
 export default function CourseList() {
   const [deleteDialogOpenId, setDeleteDialogOpenId] = useState<string | null>(
@@ -98,6 +99,9 @@ export default function CourseList() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarMenuItem>
+                  <CommandPaletteTrigger />
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     render={

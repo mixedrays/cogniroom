@@ -11,6 +11,10 @@ import AppSidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider } from "../components/ui/sidebar";
 import { SettingsProvider, SettingsDialog } from "@/modules/settings";
+import {
+  CommandPalette,
+  CommandPaletteProvider,
+} from "@/modules/command-palette";
 import type { RouterContext } from "@/lib/routerContext";
 import appCss from "../styles.css?url";
 import { CSS_THEMES, ThemeInitScriptElement } from "@/modules/color-themes";
@@ -52,15 +56,18 @@ function RootComponent() {
     <RootDocument>
       <QueryClientProvider client={queryClient}>
         <SettingsProvider>
-          <SidebarProvider>
-            <AppSidebar />
+          <CommandPaletteProvider>
+            <SidebarProvider>
+              <AppSidebar />
 
-            <main className="flex-1 flex flex-col min-w-0 bg-background text-foreground h-screen overflow-hidden">
-              <Outlet />
-            </main>
+              <main className="flex-1 flex flex-col min-w-0 bg-background text-foreground h-screen overflow-hidden">
+                <Outlet />
+              </main>
 
-          </SidebarProvider>
-          <SettingsDialog />
+            </SidebarProvider>
+            <SettingsDialog />
+            <CommandPalette />
+          </CommandPaletteProvider>
         </SettingsProvider>
       </QueryClientProvider>
     </RootDocument>
