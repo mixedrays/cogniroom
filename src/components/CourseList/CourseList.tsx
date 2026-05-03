@@ -94,28 +94,28 @@ export default function CourseList() {
 
   return (
     <div className="flex flex-col h-full">
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <CommandPaletteTrigger />
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                render={
+                  <Link to="/" search={{ session: undefined }}>
+                    <Plus />
+                    <span>New Course</span>
+                  </Link>
+                }
+              />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
       <div className="flex-1 min-h-0">
         <div className="h-full overflow-y-auto">
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <CommandPaletteTrigger />
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    render={
-                      <Link to="/" search={{ session: undefined }}>
-                        <Plus />
-                        <span>New Course</span>
-                      </Link>
-                    }
-                  />
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
           {queryIsLoading ? (
             <LoadingState variant="skeleton" skeletonRows={3} className="p-4" />
           ) : coursesQuery.isError ? (
