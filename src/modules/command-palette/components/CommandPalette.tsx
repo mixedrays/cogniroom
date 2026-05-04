@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   BookOpen,
+  Home,
   Plus,
   Settings as SettingsIcon,
   Sparkles,
@@ -57,6 +58,7 @@ export function CommandPalette() {
   return (
     <CommandDialog open={isOpen} onOpenChange={setOpen}>
       <Command_Inner
+        onHome={() => runCommand(() => navigate({ to: "/" }))}
         onNewCourse={() =>
           runCommand(() =>
             navigate({ to: "/", search: { session: undefined } as never })
@@ -75,6 +77,7 @@ export function CommandPalette() {
 }
 
 interface InnerProps {
+  onHome: () => void;
   onNewCourse: () => void;
   onOpenSettings: () => void;
   onSelectCourse: (courseId: string) => void;
@@ -87,6 +90,7 @@ interface InnerProps {
 }
 
 function Command_Inner({
+  onHome,
   onNewCourse,
   onOpenSettings,
   onSelectCourse,
@@ -99,6 +103,10 @@ function Command_Inner({
         <CommandEmpty>No results found.</CommandEmpty>
 
         <CommandGroup heading="Actions">
+          <CommandItem onSelect={onHome} value="home">
+            <Home />
+            <span>Home</span>
+          </CommandItem>
           <CommandItem onSelect={onNewCourse} value="new course create">
             <Plus />
             <span>New Course</span>

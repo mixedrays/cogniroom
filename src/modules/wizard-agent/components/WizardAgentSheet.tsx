@@ -55,7 +55,10 @@ export function WizardAgentSheet({
       <SheetContent
         side="right"
         showCloseButton={false}
-        className="max-w-3/4! md:max-w-1/2! p-0"
+        className={cn(
+          "max-w-full! md:max-w-1/2! p-0",
+          historyOpen && "md:max-w-2/3!"
+        )}
       >
         <div className="flex h-full min-h-0">
           <div className="flex flex-col flex-1 min-w-0">
@@ -66,7 +69,9 @@ export function WizardAgentSheet({
               </SheetTitle>
 
               <div className="absolute right-3 top-3 flex items-center">
-                <Tooltip content={historyOpen ? "Hide history" : "Show history"}>
+                <Tooltip
+                  content={historyOpen ? "Hide history" : "Show history"}
+                >
                   <Button
                     size="icon-sm"
                     variant={historyOpen ? "secondary" : "ghost"}
