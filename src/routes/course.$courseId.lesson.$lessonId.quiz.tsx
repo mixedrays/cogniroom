@@ -18,7 +18,7 @@ import {
   LessonPageHeader,
   LessonContentEmptyState,
 } from "@/components/LessonPage";
-import { WizardAgentSheet } from "@/modules/wizard-agent";
+import { WizardAgentSheet, useLessonAttachments } from "@/modules/wizard-agent";
 
 export const Route = createFileRoute("/course/$courseId/lesson/$lessonId/quiz")(
   {
@@ -98,6 +98,12 @@ function LessonQuizComponent() {
 
   const questions = useMemo(() => parseQuizQuestions(content), [content]);
   const hasQuestions = questions.length > 0;
+
+  const attachments = useLessonAttachments({
+    courseId,
+    lessonId,
+    enabled: agentOpen,
+  });
 
   const invalidateAndRefresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["course", courseId] });
@@ -208,6 +214,8 @@ function LessonQuizComponent() {
           lessonTitle: lessonInfo.title,
           courseTitle: course.title,
         }}
+        availableAttachments={attachments}
+        defaultAttachmentIds={["quiz"]}
       />
     </LessonPageShell>
   );

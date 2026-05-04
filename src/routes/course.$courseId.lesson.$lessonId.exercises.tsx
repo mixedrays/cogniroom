@@ -12,7 +12,7 @@ import {
   getCourse,
   updateLessonCompletion,
 } from "@/lib/courses";
-import { WizardAgentSheet } from "@/modules/wizard-agent";
+import { WizardAgentSheet, useLessonAttachments } from "@/modules/wizard-agent";
 import {
   LessonPageShell,
   LessonPageHeader,
@@ -129,6 +129,12 @@ function LessonExercisesComponent() {
     }
   };
 
+  const attachments = useLessonAttachments({
+    courseId,
+    lessonId,
+    enabled: agentOpen,
+  });
+
   const headerProps = {
     courseId,
     lessonId,
@@ -189,6 +195,8 @@ function LessonExercisesComponent() {
           lessonTitle: lessonInfo.title,
           courseTitle: course.title,
         }}
+        availableAttachments={attachments}
+        defaultAttachmentIds={["exercises"]}
       />
     </LessonPageShell>
   );

@@ -14,7 +14,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { Markdown } from "@/modules/markdown";
 import { Loader2 } from "lucide-react";
 import { getLesson, getCourse, updateLessonCompletion } from "@/lib/courses";
-import { WizardAgentSheet } from "@/modules/wizard-agent";
+import { WizardAgentSheet, useLessonAttachments } from "@/modules/wizard-agent";
 import {
   LessonPageShell,
   LessonPageHeader,
@@ -151,6 +151,12 @@ function LessonComponent() {
     }
   };
 
+  const attachments = useLessonAttachments({
+    courseId,
+    lessonId,
+    enabled: agentOpen,
+  });
+
   const headerProps = {
     courseId,
     lessonId,
@@ -219,6 +225,8 @@ function LessonComponent() {
           lessonTitle: lessonInfo.title,
           courseTitle: course.title,
         }}
+        availableAttachments={attachments}
+        defaultAttachmentIds={["theory"]}
       />
     </LessonPageShell>
   );

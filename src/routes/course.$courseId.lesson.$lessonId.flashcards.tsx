@@ -20,7 +20,7 @@ import {
   LessonPageHeader,
   LessonContentEmptyState,
 } from "@/components/LessonPage";
-import { WizardAgentSheet } from "@/modules/wizard-agent";
+import { WizardAgentSheet, useLessonAttachments } from "@/modules/wizard-agent";
 
 export const Route = createFileRoute(
   "/course/$courseId/lesson/$lessonId/flashcards"
@@ -111,6 +111,12 @@ function LessonFlashcardsComponent() {
 
   const cards = useMemo(() => parseFlashcards(content), [content]);
   const hasCards = cards.length > 0;
+
+  const attachments = useLessonAttachments({
+    courseId,
+    lessonId,
+    enabled: agentOpen,
+  });
 
   const handleSave = useCallback(
     async (data: ReviewData) => {
@@ -229,6 +235,8 @@ function LessonFlashcardsComponent() {
           lessonTitle: lessonInfo.title,
           courseTitle: course.title,
         }}
+        availableAttachments={attachments}
+        defaultAttachmentIds={["flashcards"]}
       />
     </LessonPageShell>
   );

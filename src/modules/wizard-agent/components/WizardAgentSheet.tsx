@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Bot, History, Plus, XIcon } from "lucide-react";
 import {
   Sheet,
@@ -14,12 +14,15 @@ import { cn } from "@/lib/utils";
 import { useWizardAgent } from "../hooks/useWizardAgent";
 import type { WizardAgentContext } from "./WizardAgentDialog";
 import { SessionHistoryPanel } from "./SessionHistoryPanel";
+import type { WizardAgentAttachment } from "../types";
 
 interface WizardAgentSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   context: WizardAgentContext;
   contextPrompt?: string;
+  availableAttachments?: WizardAgentAttachment[];
+  defaultAttachmentIds?: string[];
 }
 
 const WELCOME: Record<WizardAgentContext["contentType"], string> = {
@@ -41,14 +44,77 @@ const TITLE: Record<WizardAgentContext["contentType"], string> = {
   exercise: "Ask AI — Exercises",
 };
 
+function buildAttachmentPrompt(
+  selected: WizardAgentAttachment[],
+  base?: string
+): string | undefined {
+  const parts: string[] = [];
+  if (base && base.trim().length > 0) parts.push(base);
+  for (const a of selected) {
+    if (!a.content) continue;
+    parts.push(`<attachment label="${a.label}">\n${a.content}\n</attachment>`);
+  }
+  return parts.length > 0 ? parts.join("\n\n") : undefined;
+}
+
 export function WizardAgentSheet({
   open,
   onOpenChange,
   context,
   contextPrompt,
+  availableAttachments,
+  defaultAttachmentIds,
 }: WizardAgentSheetProps) {
-  const agent = useWizardAgent({ context, contextPrompt, active: open });
+  const available = useMemo(
+    () => availableAttachments ?? [],
+    [availableAttachments]
+  );
+  const defaultIds = useMemo(
+    () => defaultAttachmentIds ?? [],
+    [defaultAttachmentIds]
+  );
+
+  const [selectedIds, setSelectedIds] = useState<string[]>(() =>
+    defaultIds.filter((id) => available.some((a) => a.id === id))
+  );
+
+  const initializedRef = useRef(false);
+  useEffect(() => {
+    if (!open) {
+      initializedRef.current = false;
+      return;
+    }
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedIds(defaultIds.filter((id) => available.some((a) => a.id === id)));
+  }, [open, available, defaultIds]);
+
+  const selectedAttachments = useMemo(
+    () =>
+      selectedIds
+        .map((id) => available.find((a) => a.id === id))
+        .filter((a): a is WizardAgentAttachment => !!a),
+    [selectedIds, available]
+  );
+
+  const mergedContextPrompt = useMemo(
+    () => buildAttachmentPrompt(selectedAttachments, contextPrompt),
+    [selectedAttachments, contextPrompt]
+  );
+
+  const agent = useWizardAgent({
+    context,
+    contextPrompt: mergedContextPrompt,
+    active: open,
+  });
   const [historyOpen, setHistoryOpen] = useState(false);
+
+  const promptAttachments = selectedAttachments.map((a) => ({
+    id: a.id,
+    label: a.label,
+  }));
+  const promptAvailable = available.map((a) => ({ id: a.id, label: a.label }));
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -129,6 +195,16 @@ export function WizardAgentSheet({
                   isStreaming={agent.isStreaming}
                   onStop={agent.stopStreaming}
                   placeholder="Type a message…"
+                  attachments={promptAttachments}
+                  availableAttachments={promptAvailable}
+                  onAttachmentRemove={(id) =>
+                    setSelectedIds((prev) => prev.filter((x) => x !== id))
+                  }
+                  onAttachmentAdd={(id) =>
+                    setSelectedIds((prev) =>
+                      prev.includes(id) ? prev : [...prev, id]
+                    )
+                  }
                 />
               }
             />
