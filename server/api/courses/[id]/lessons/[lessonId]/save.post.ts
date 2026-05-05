@@ -13,11 +13,11 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const body = await readBody<{ content: string }>(event);
-  if (typeof body?.content !== "string") {
+  const body = await readBody<{ content: unknown }>(event);
+  if (typeof body?.content !== "string" || body.content.trim().length === 0) {
     throw new HTTPError({
       status: 400,
-      message: "content must be a string",
+      message: "content must be a non-empty string",
     });
   }
 

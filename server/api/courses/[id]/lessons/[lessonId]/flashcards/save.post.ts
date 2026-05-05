@@ -2,7 +2,7 @@ import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
-import type { FlashcardsContent } from "@modules/core";
+import { FlashcardsContentOutputSchema } from "@/modules/agent/lib/contentOutputSchemas";
 
 export default defineEventHandler(async (event) => {
   const courseId = getRouterParam(event, "id");
@@ -15,18 +15,19 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const body = await readBody<{ content: FlashcardsContent }>(event);
-  if (!body?.content) {
+  const body = await readBody<{ content: unknown }>(event);
+  const parsed = FlashcardsContentOutputSchema.safeParse(body?.content);
+  if (!parsed.success) {
     throw new HTTPError({
       status: 400,
-      message: "content is required",
+      message: `Invalid flashcards content: ${parsed.error.issues[0]?.message ?? "validation failed"}`,
     });
   }
 
   const adapter = getFormatAdapter("flashcards");
   await storageApi.post(
     storagePaths.flashcards(courseId, lessonId),
-    adapter.serialize(body.content)
+    adapter.serialize(parsed.data)
   );
   return { success: true };
 });

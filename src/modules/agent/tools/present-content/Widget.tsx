@@ -214,6 +214,33 @@ export function ContentBubble({
   }
 
   const handleSave = async () => {
+    if (
+      (type === "lesson" || type === "exercise") &&
+      (typeof content !== "string" || content.trim().length === 0)
+    ) {
+      setError("Generated content is empty — ask the assistant to regenerate.");
+      setSaveState("error");
+      return;
+    }
+
+    if (type === "flashcards") {
+      const cards = (content as FlashcardsContent | undefined)?.flashcards;
+      if (!Array.isArray(cards) || cards.length === 0) {
+        setError("Flashcard set is empty — ask the assistant to regenerate.");
+        setSaveState("error");
+        return;
+      }
+    }
+
+    if (type === "quiz") {
+      const questions = (content as QuizContent | undefined)?.quizQuestions;
+      if (!Array.isArray(questions) || questions.length === 0) {
+        setError("Quiz is empty — ask the assistant to regenerate.");
+        setSaveState("error");
+        return;
+      }
+    }
+
     setSaveState("saving");
     setError(null);
     try {
