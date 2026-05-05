@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -149,23 +149,31 @@ export function ContentBubble({
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
 
-  const lastParsedRef = useRef<Partial<PresentContentParams> | undefined>(
+  const [lastParsed, setLastParsed] = useState<
+    Partial<PresentContentParams> | undefined
+  >(undefined);
+  const [lastInputKey, setLastInputKey] = useState<string | undefined>(
     undefined
   );
 
-  const partialData = useMemo(() => {
-    if (!isStreaming || !streamingInput) {
-      lastParsedRef.current = undefined;
-      return undefined;
-    }
-    const parsed = parsePartialJson(streamingInput) as
+  const parsedNow = useMemo(() => {
+    if (!isStreaming || !streamingInput) return undefined;
+    return parsePartialJson(streamingInput) as
       | Partial<PresentContentParams>
       | undefined;
-    if (parsed !== undefined) {
-      lastParsedRef.current = parsed;
-    }
-    return lastParsedRef.current;
   }, [isStreaming, streamingInput]);
+
+  const inputKey = isStreaming ? streamingInput : undefined;
+  if (inputKey !== lastInputKey) {
+    setLastInputKey(inputKey);
+    if (!inputKey) {
+      setLastParsed(undefined);
+    } else if (parsedNow !== undefined) {
+      setLastParsed(parsedNow);
+    }
+  }
+
+  const partialData = parsedNow ?? lastParsed;
 
   const data = isStreaming
     ? (partialData as PresentContentParams | undefined)
