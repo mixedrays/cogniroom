@@ -8,6 +8,15 @@ vi.mock("@/modules/settings/context/SettingsContext", () => ({
   }),
 }));
 
+vi.mock("@/modules/settings/hooks/useApiKeyAvailability", () => ({
+  useApiKeyAvailability: () => ({
+    availability: [],
+    isLoading: false,
+    refreshLocal: vi.fn(),
+    availableProviderIds: new Set(["openai"]),
+  }),
+}));
+
 describe("PromptTextarea", () => {
   it("renders with placeholder", () => {
     render(
