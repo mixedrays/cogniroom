@@ -24,10 +24,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const content = { version: 2 as const, ...parsed.data };
+
   const adapter = getFormatAdapter("quiz");
   await storageApi.post(
     storagePaths.quiz(courseId, lessonId),
-    adapter.serialize(parsed.data)
+    adapter.serialize(content)
   );
   return { success: true };
 });

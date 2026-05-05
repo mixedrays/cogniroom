@@ -24,10 +24,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const content = { version: 2 as const, ...parsed.data };
+
   const adapter = getFormatAdapter("flashcards");
   await storageApi.post(
     storagePaths.flashcards(courseId, lessonId),
-    adapter.serialize(parsed.data)
+    adapter.serialize(content)
   );
   return { success: true };
 });
