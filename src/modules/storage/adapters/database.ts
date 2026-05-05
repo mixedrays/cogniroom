@@ -13,6 +13,7 @@ import type {
 import { StorageStatus } from "../types";
 import { StorageAdapter } from "./base";
 
+/* eslint-disable @typescript-eslint/no-unused-vars -- stub implementation; params kept to match base signatures */
 export class DatabaseAdapter extends StorageAdapter {
   constructor(config: StorageConfig = {}) {
     super({ ...config, adapter: "database" });

@@ -36,24 +36,27 @@ export function PromptsSettings({ defaultPromptId }: PromptsSettingsProps) {
   const isDirty = selected ? draft !== selected.content : false;
 
   useEffect(() => {
-    loadPrompts();
-  }, []);
-
-  const loadPrompts = async () => {
-    setIsLoading(true);
-    const result = await getPrompts();
-    if (result.success) {
-      setPrompts(result.prompts);
-      if (!selectedId && result.prompts.length > 0) {
-        const initial =
-          result.prompts.find((p) => p.id === defaultPromptId) ??
-          result.prompts[0];
-        setSelectedId(initial.id);
-        setDraft(initial.content);
+    let cancelled = false;
+    (async () => {
+      setIsLoading(true);
+      const result = await getPrompts();
+      if (cancelled) return;
+      if (result.success) {
+        setPrompts(result.prompts);
+        if (result.prompts.length > 0) {
+          const initial =
+            result.prompts.find((p) => p.id === defaultPromptId) ??
+            result.prompts[0];
+          setSelectedId(initial.id);
+          setDraft(initial.content);
+        }
       }
-    }
-    setIsLoading(false);
-  };
+      setIsLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [defaultPromptId]);
 
   const handleSelect = (id: string) => {
     setSelectedId(id);

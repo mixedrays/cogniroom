@@ -53,30 +53,28 @@ export function ModelSelect({
   triggerClassName,
 }: ModelSelectProps) {
   const { settings } = useSettings();
-  const hiddenModels = settings.llm.hiddenModels ?? [];
   const { availableProviderIds } = useApiKeyAvailability();
 
-  const groupedItems = useMemo(
-    () =>
-      providers
-        .filter((provider) => availableProviderIds.has(provider.id))
-        .map((provider) => ({
-          value: provider.id,
-          label: provider.name,
-          items: Object.entries(provider.models)
-            .filter(([key]) => !hiddenModels.includes(key))
-            .map(
-              ([key, model]): ModelItem => ({
-                id: key,
-                providerId: provider.id,
-                providerName: provider.name,
-                model,
-              })
-            ),
-        }))
-        .filter((group) => group.items.length > 0),
-    [hiddenModels, availableProviderIds]
-  );
+  const groupedItems = useMemo(() => {
+    const hiddenModels = settings.llm.hiddenModels ?? [];
+    return providers
+      .filter((provider) => availableProviderIds.has(provider.id))
+      .map((provider) => ({
+        value: provider.id,
+        label: provider.name,
+        items: Object.entries(provider.models)
+          .filter(([key]) => !hiddenModels.includes(key))
+          .map(
+            ([key, model]): ModelItem => ({
+              id: key,
+              providerId: provider.id,
+              providerName: provider.name,
+              model,
+            })
+          ),
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [settings.llm.hiddenModels, availableProviderIds]);
 
   const allItems = useMemo(
     () => groupedItems.flatMap((g) => g.items),

@@ -43,7 +43,6 @@ export function HistorySettings() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadHistory();
   }, []);
 
