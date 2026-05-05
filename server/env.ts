@@ -59,7 +59,8 @@ export const TESTS_DIR = join(DATA_PATH, "tests");
 /** @deprecated */
 export const EXERCISES_DIR = join(DATA_PATH, "exercises");
 
-// Settings directory - stored in project root
-export const SETTINGS_DIR = resolve(process.cwd(), ".settings");
+export const SETTINGS_DIR = join(DATA_PATH, "settings");
 export const SETTINGS_FILE = join(SETTINGS_DIR, "settings.json");
 export const SETTINGS_HISTORY_FILE = join(SETTINGS_DIR, "history.json");
+
+export const HISTORY_DIR = join(DATA_PATH, "history");

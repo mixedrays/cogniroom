@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import type { AgentMessageState } from "@/modules/agent/types";
+import { HISTORY_DIR } from "@root/server/env";
 
 export type ContentType =
   | "roadmap"
@@ -28,7 +29,7 @@ export interface Session extends SessionMeta {
 }
 
 function getRootDir(): string {
-  return path.resolve(process.env.HISTORY_DIR ?? ".history", "wizard-agent");
+  return path.join(HISTORY_DIR, "wizard-agent");
 }
 
 function safeSegment(segment: string): string {
