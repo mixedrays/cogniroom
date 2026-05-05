@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -221,21 +222,25 @@ export function ContentBubble({
     );
   }
 
+  const reportError = (message: string) => {
+    setError(message);
+    setSaveState("error");
+    toast.error(`Failed to save ${type}`, { description: message });
+  };
+
   const handleSave = async () => {
     if (
       (type === "lesson" || type === "exercise") &&
       (typeof content !== "string" || content.trim().length === 0)
     ) {
-      setError("Generated content is empty — ask the assistant to regenerate.");
-      setSaveState("error");
+      reportError("Generated content is empty — ask the assistant to regenerate.");
       return;
     }
 
     if (type === "flashcards") {
       const cards = (content as FlashcardsContent | undefined)?.flashcards;
       if (!Array.isArray(cards) || cards.length === 0) {
-        setError("Flashcard set is empty — ask the assistant to regenerate.");
-        setSaveState("error");
+        reportError("Flashcard set is empty — ask the assistant to regenerate.");
         return;
       }
     }
@@ -243,8 +248,7 @@ export function ContentBubble({
     if (type === "quiz") {
       const questions = (content as QuizContent | undefined)?.quizQuestions;
       if (!Array.isArray(questions) || questions.length === 0) {
-        setError("Quiz is empty — ask the assistant to regenerate.");
-        setSaveState("error");
+        reportError("Quiz is empty — ask the assistant to regenerate.");
         return;
       }
     }
@@ -259,8 +263,7 @@ export function ContentBubble({
       } else {
         const { courseId, lessonId } = context ?? {};
         if (!courseId || !lessonId) {
-          setError("Missing course or lesson context");
-          setSaveState("error");
+          reportError("Missing course or lesson context");
           return;
         }
         if (type === "lesson") {
@@ -291,26 +294,30 @@ export function ContentBubble({
           });
         }
       } else {
-        setError(result.error ?? "Save failed");
-        setSaveState("error");
+        reportError(result.error ?? "Save failed");
       }
     } catch (e) {
-      setError(String(e));
-      setSaveState("error");
+      reportError(e instanceof Error ? e.message : String(e));
     }
   };
+
+  const hasError = saveState === "error" && Boolean(error);
 
   return (
     <div
       className={cn(
         "rounded-2xl rounded-tl-sm border text-sm transition-opacity",
         superseded ? "opacity-50 pointer-events-none" : "border-border bg-card",
-        isSaved && "border-green-500/30 bg-green-500/5"
+        isSaved && "border-green-500/30 bg-green-500/5",
+        hasError && "border-destructive/50 bg-destructive/5"
       )}
     >
       <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/50">
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="capitalize text-xs">
+          <Badge
+            variant={hasError ? "destructive" : "secondary"}
+            className="capitalize text-xs"
+          >
             {type}
           </Badge>
           {summary && (
@@ -329,14 +336,32 @@ export function ContentBubble({
             Saved
           </span>
         )}
+        {!isStreaming && hasError && (
+          <span className="flex items-center gap-1 text-xs text-destructive">
+            <AlertCircle className="size-3" />
+            Save failed
+          </span>
+        )}
       </div>
 
       <div className="px-4 py-3 max-h-80 overflow-y-auto">
         <ContentPreview type={type} content={content} />
       </div>
 
+      {hasError && (
+        <div className="flex items-start gap-2 px-4 py-2 border-t border-destructive/30 bg-destructive/5 text-destructive">
+          <AlertCircle className="size-3.5 mt-0.5 shrink-0" />
+          <p className="text-xs leading-relaxed break-words">{error}</p>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 px-4 py-3 border-t border-border/50">
-        <Button size="sm" onClick={handleSave} disabled={isSaveDisabled}>
+        <Button
+          size="sm"
+          onClick={handleSave}
+          disabled={isSaveDisabled}
+          variant={hasError ? "destructive" : "default"}
+        >
           {saveState === "saving" ? (
             <>
               <Loader2 className="size-3 animate-spin mr-1.5" />
@@ -349,11 +374,12 @@ export function ContentBubble({
             </>
           ) : canResaveRoadmap ? (
             "Save again"
+          ) : hasError ? (
+            "Retry save"
           ) : (
             "Save"
           )}
         </Button>
-        {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
     </div>
   );

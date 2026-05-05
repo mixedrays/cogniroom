@@ -454,7 +454,15 @@ export async function saveLessonFlashcards(
         body: JSON.stringify({ content }),
       }
     );
-    return await response.json();
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        (body && typeof body === "object" && "message" in body
+          ? String((body as { message?: unknown }).message)
+          : null) ?? `Save failed (${response.status})`;
+      return { success: false, error: message };
+    }
+    return body ?? { success: true };
   } catch (e) {
     return { success: false, error: String(e) };
   }

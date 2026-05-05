@@ -23,7 +23,9 @@ export const RoadmapOutputSchema = z.object({
 });
 
 export const FlashcardsContentOutputSchema = z.object({
-  version: z.literal(2),
+  version: z
+    .literal(2)
+    .describe("Schema version. Must be exactly the number 2."),
   flashcards: z
     .array(
       z.object({
@@ -79,7 +81,9 @@ const TrueFalseQuestionOutputSchema = z.object({
 });
 
 export const QuizContentOutputSchema = z.object({
-  version: z.literal(2),
+  version: z
+    .literal(2)
+    .describe("Schema version. Must be exactly the number 2."),
   quizQuestions: z
     .array(
       z.discriminatedUnion("type", [

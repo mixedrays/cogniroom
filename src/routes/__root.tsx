@@ -15,6 +15,7 @@ import {
   CommandPalette,
   CommandPaletteProvider,
 } from "@/modules/command-palette";
+import { Toaster } from "@/components/ui/sonner";
 import type { RouterContext } from "@/lib/routerContext";
 import appCss from "../styles.css?url";
 import { CSS_THEMES, ThemeInitScriptElement } from "@/modules/color-themes";
@@ -69,6 +70,7 @@ function RootComponent() {
             <CommandPalette />
           </CommandPaletteProvider>
         </SettingsProvider>
+        <Toaster />
       </QueryClientProvider>
     </RootDocument>
   );
