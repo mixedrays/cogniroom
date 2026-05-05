@@ -25,8 +25,10 @@ import { Tooltip } from "@/components/ui/tooltip.adapter";
 import { cn } from "@/lib/utils";
 import { useSettings } from "@/modules/settings/context/SettingsContext";
 import { useApiKeyAvailability } from "@/modules/settings/hooks/useApiKeyAvailability";
-import { useMemo } from "react";
+import { useSettingsSearch } from "@/modules/settings";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { SettingsIcon, KeyRoundIcon } from "lucide-react";
 
 type ModelItem = {
   id: string;
@@ -54,6 +56,8 @@ export function ModelSelect({
 }: ModelSelectProps) {
   const { settings } = useSettings();
   const { availableProviderIds } = useApiKeyAvailability();
+  const { open: openSettings } = useSettingsSearch();
+  const [open, setOpen] = useState(false);
 
   const groupedItems = useMemo(() => {
     const hiddenModels = settings.llm.hiddenModels ?? [];
@@ -82,9 +86,17 @@ export function ModelSelect({
   );
 
   const selectedItem = allItems.find((item) => item.id === value) ?? null;
+  const hasProviders = availableProviderIds.size > 0;
+
+  const goToSettings = (path: string) => {
+    setOpen(false);
+    openSettings(path);
+  };
 
   return (
     <Combobox<ModelItem>
+      open={open}
+      onOpenChange={setOpen}
       value={selectedItem}
       onValueChange={(item) => {
         if (item) onValueChange(item.id);
@@ -118,7 +130,26 @@ export function ModelSelect({
       <ComboboxContent className={cn("w-auto", className)}>
         <ComboboxInput showTrigger={false} placeholder="Search models..." />
 
-        <ComboboxEmpty>No models found.</ComboboxEmpty>
+        <ComboboxEmpty>
+          {hasProviders ? (
+            "No models found."
+          ) : (
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => goToSettings("api-key")}
+              className="flex w-full flex-col items-center gap-1 px-3 py-3 text-center hover:bg-accent rounded-sm"
+            >
+              <span className="text-sm font-medium text-foreground">
+                No models available
+              </span>
+              <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                <KeyRoundIcon className="size-3" />
+                Add an API key in Settings
+              </span>
+            </button>
+          )}
+        </ComboboxEmpty>
 
         <ComboboxList>
           <ComboboxCollection>
@@ -183,6 +214,20 @@ export function ModelSelect({
             )}
           </ComboboxCollection>
         </ComboboxList>
+
+        {hasProviders && (
+          <div className="border-t p-1">
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => goToSettings("llm")}
+              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            >
+              <SettingsIcon className="size-4" />
+              <span>Manage models…</span>
+            </button>
+          </div>
+        )}
       </ComboboxContent>
     </Combobox>
   );
