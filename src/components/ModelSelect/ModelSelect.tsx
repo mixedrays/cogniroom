@@ -217,15 +217,15 @@ export function ModelSelect({
 
         {hasProviders && (
           <div className="border-t p-1">
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
+            <Button
               onClick={() => goToSettings("llm")}
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              size="sm"
+              className="w-full text-muted-foreground justify-start"
+              variant="ghost"
             >
               <SettingsIcon className="size-4" />
-              <span>Manage models…</span>
-            </button>
+              Manage models…
+            </Button>
           </div>
         )}
       </ComboboxContent>
