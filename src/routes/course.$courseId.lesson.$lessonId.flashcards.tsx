@@ -236,7 +236,7 @@ function LessonFlashcardsComponent() {
           courseTitle: course.title,
         }}
         availableAttachments={attachments}
-        defaultAttachmentIds={["flashcards"]}
+        defaultAttachmentIds={["theory", "flashcards"]}
       />
     </LessonPageShell>
   );

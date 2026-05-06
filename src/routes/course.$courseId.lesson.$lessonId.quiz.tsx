@@ -215,7 +215,7 @@ function LessonQuizComponent() {
           courseTitle: course.title,
         }}
         availableAttachments={attachments}
-        defaultAttachmentIds={["quiz"]}
+        defaultAttachmentIds={["theory", "quiz"]}
       />
     </LessonPageShell>
   );

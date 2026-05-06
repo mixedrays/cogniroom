@@ -196,7 +196,7 @@ function LessonExercisesComponent() {
           courseTitle: course.title,
         }}
         availableAttachments={attachments}
-        defaultAttachmentIds={["exercises"]}
+        defaultAttachmentIds={["theory", "exercises"]}
       />
     </LessonPageShell>
   );
