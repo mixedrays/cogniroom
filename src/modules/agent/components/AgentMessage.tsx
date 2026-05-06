@@ -3,6 +3,7 @@ import { Markdown } from "@/modules/markdown";
 import { ErrorMessage } from "@/components/ErrorMessage/ErrorMessage";
 import type { AgentMessageState, AgentTool } from "../types";
 import { AskUserParamsSchema } from "../tools/ask-user/schema";
+import { PRESENT_TOOL_NAMES } from "../tools/present/registry";
 
 interface AgentMessageProps {
   message: AgentMessageState;
@@ -101,7 +102,7 @@ export function AgentMessage({
 
     if (
       message.status === "submitted" &&
-      message.toolName === "presentContent"
+      PRESENT_TOOL_NAMES.has(message.toolName)
     ) {
       return null;
     }
@@ -128,13 +129,13 @@ export function AgentMessage({
 
     const messageIndex = messages.indexOf(message);
     const isSuperseded =
-      message.toolName === "presentContent" &&
+      PRESENT_TOOL_NAMES.has(message.toolName) &&
       message.status === "pending" &&
       messages.some(
         (m, i) =>
           i > messageIndex &&
           m.role === "tool_call" &&
-          m.toolName === "presentContent" &&
+          m.toolName === message.toolName &&
           m.status === "pending"
       );
 

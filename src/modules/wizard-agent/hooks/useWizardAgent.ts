@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useChatBackend } from "@/modules/agent/hooks/useChatBackend";
 import { askUserTool } from "@/modules/agent/tools/ask-user";
 import { memoryTool } from "@/modules/agent/tools/memory";
-import { presentContentTool } from "@/modules/agent/tools/present-content";
+import { getPresentToolForContentType } from "@/modules/agent/tools/present/registry";
 import type {
   AgentMessageState,
   AgentSseEvent,
@@ -16,8 +16,6 @@ import {
 } from "@/modules/agent/lib/messagesReducer";
 import type { WizardAgentContext } from "../components/WizardAgentDialog";
 import type { SessionMeta } from "../types";
-
-const TOOLS = [askUserTool, memoryTool, presentContentTool];
 
 function scopeQuery(context: WizardAgentContext): string {
   const params = new URLSearchParams({ contentType: context.contentType });
@@ -175,9 +173,18 @@ export function useWizardAgent({
     return data.prompt;
   }, [context, contextPrompt]);
 
+  const tools = useMemo(
+    () => [
+      askUserTool,
+      memoryTool,
+      getPresentToolForContentType(context.contentType),
+    ],
+    [context.contentType]
+  );
+
   const backend = useChatBackend(
     "/api/wizard-agent/chat",
-    TOOLS,
+    tools,
     getSystemPrompt
   );
 
@@ -534,7 +541,7 @@ export function useWizardAgent({
   );
 
   return {
-    tools: TOOLS,
+    tools,
     input,
     setInput,
     messages,

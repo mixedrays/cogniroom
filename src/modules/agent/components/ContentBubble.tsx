@@ -5,8 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { parsePartialJson } from "../../lib/parsePartialJson";
-import type { PresentContentParams } from "./schema";
+import { parsePartialJson } from "../lib/parsePartialJson";
 import type {
   Course,
   FlashcardsContent,
@@ -23,7 +22,15 @@ import {
   saveLessonExercises,
 } from "@/lib/courses";
 
+export type ContentBubbleType =
+  | "roadmap"
+  | "lesson"
+  | "quiz"
+  | "flashcards"
+  | "exercise";
+
 interface ContentBubbleProps {
+  type: ContentBubbleType;
   params: unknown;
   streamingInput?: string;
   isStreaming?: boolean;
@@ -34,6 +41,11 @@ interface ContentBubbleProps {
     lessonId?: string;
   };
   superseded?: boolean;
+}
+
+interface BubbleParams {
+  content?: unknown;
+  summary?: string;
 }
 
 type SaveState = "idle" | "saving" | "saved" | "error";
@@ -140,6 +152,7 @@ async function findMatchingSavedRoadmapId(
 }
 
 export function ContentBubble({
+  type,
   params,
   streamingInput,
   isStreaming = false,
@@ -150,18 +163,16 @@ export function ContentBubble({
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
 
-  const [lastParsed, setLastParsed] = useState<
-    Partial<PresentContentParams> | undefined
-  >(undefined);
+  const [lastParsed, setLastParsed] = useState<BubbleParams | undefined>(
+    undefined
+  );
   const [lastInputKey, setLastInputKey] = useState<string | undefined>(
     undefined
   );
 
   const parsedNow = useMemo(() => {
     if (!isStreaming || !streamingInput) return undefined;
-    return parsePartialJson(streamingInput) as
-      | Partial<PresentContentParams>
-      | undefined;
+    return parsePartialJson(streamingInput) as BubbleParams | undefined;
   }, [isStreaming, streamingInput]);
 
   const inputKey = isStreaming ? streamingInput : undefined;
@@ -177,10 +188,9 @@ export function ContentBubble({
   const partialData = parsedNow ?? lastParsed;
 
   const data = isStreaming
-    ? (partialData as PresentContentParams | undefined)
-    : (params as PresentContentParams);
+    ? partialData
+    : (params as BubbleParams | undefined);
 
-  const type = data?.type;
   const content = data?.content;
   const summary = data?.summary;
 
@@ -211,17 +221,6 @@ export function ContentBubble({
     isCheckingSavedRoadmap ||
     (!canResaveRoadmap && isSaved);
 
-  if (!type) {
-    return (
-      <div className="rounded-2xl rounded-tl-sm border border-border bg-card text-sm">
-        <div className="flex items-center gap-2 px-4 py-3">
-          <Loader2 className="size-3 animate-spin text-muted-foreground" />
-          <span className="text-muted-foreground text-xs">Generating…</span>
-        </div>
-      </div>
-    );
-  }
-
   const reportError = (message: string) => {
     setError(message);
     setSaveState("error");
@@ -233,14 +232,18 @@ export function ContentBubble({
       (type === "lesson" || type === "exercise") &&
       (typeof content !== "string" || content.trim().length === 0)
     ) {
-      reportError("Generated content is empty — ask the assistant to regenerate.");
+      reportError(
+        "Generated content is empty — ask the assistant to regenerate."
+      );
       return;
     }
 
     if (type === "flashcards") {
       const cards = (content as FlashcardsContent | undefined)?.flashcards;
       if (!Array.isArray(cards) || cards.length === 0) {
-        reportError("Flashcard set is empty — ask the assistant to regenerate.");
+        reportError(
+          "Flashcard set is empty — ask the assistant to regenerate."
+        );
         return;
       }
     }
@@ -389,7 +392,7 @@ function ContentPreview({
   type,
   content,
 }: {
-  type: PresentContentParams["type"];
+  type: ContentBubbleType;
   content: unknown;
 }) {
   if (type === "roadmap") {

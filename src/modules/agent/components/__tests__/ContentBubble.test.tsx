@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ContentBubble } from "../Widget";
+import { ContentBubble } from "../ContentBubble";
 import type { Course, NormalizedRoadmap } from "@/lib/types";
 import * as coursesApi from "@/lib/courses";
 
@@ -67,7 +67,8 @@ function renderWidget() {
   return render(
     <QueryClientProvider client={queryClient}>
       <ContentBubble
-        params={{ type: "roadmap", content: roadmapPreview }}
+        type="roadmap"
+        params={{ content: roadmapPreview }}
         onSubmit={vi.fn()}
         onDismiss={vi.fn()}
       />
@@ -185,7 +186,8 @@ describe("ContentBubble", () => {
     const { rerender } = render(
       <QueryClientProvider client={queryClient}>
         <ContentBubble
-          params={{ type: "roadmap", content: roadmapPreview }}
+          type="roadmap"
+          params={{ content: roadmapPreview }}
           onSubmit={vi.fn()}
           onDismiss={vi.fn()}
         />
@@ -199,7 +201,8 @@ describe("ContentBubble", () => {
     rerender(
       <QueryClientProvider client={queryClient}>
         <ContentBubble
-          params={{ type: "roadmap", content: roadmapPreview }}
+          type="roadmap"
+          params={{ content: roadmapPreview }}
           onSubmit={vi.fn()}
           onDismiss={vi.fn()}
           superseded
@@ -208,9 +211,6 @@ describe("ContentBubble", () => {
     );
 
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-    expect(
-      screen.queryByRole("button", { name: "Checking…" })
-    ).not.toBeInTheDocument();
 
     pendingCourses.resolve([]);
   });

@@ -9,7 +9,7 @@ describe("useAgent", () => {
       onEvent({
         type: "tool_call_start",
         toolCallId: "tool-1",
-        toolName: "presentContent",
+        toolName: "presentRoadmap",
       });
 
       await new Promise<void>((_, reject) => {

@@ -9,7 +9,7 @@ import type { AgentTool } from "@/modules/agent/types";
 import { runAgentStream } from "@/modules/agent/lib/runAgentStream";
 
 export function createAgentHandler(config: {
-  tools: AgentTool[];
+  tools: AgentTool[] | ((context: Record<string, unknown>) => AgentTool[]);
   getSystemPrompt: (
     context: Record<string, unknown>
   ) => Promise<string> | string;
@@ -25,6 +25,10 @@ export function createAgentHandler(config: {
 
     const context = body.context ?? {};
     const system = await config.getSystemPrompt(context);
+    const tools =
+      typeof config.tools === "function"
+        ? config.tools(context)
+        : config.tools;
 
     const eventStream = createEventStream(event);
 
@@ -37,7 +41,7 @@ export function createAgentHandler(config: {
           model,
           system,
           messages: body.messages,
-          tools: config.tools,
+          tools,
           onEvent: (e) => eventStream.push(JSON.stringify(e)),
         });
         await eventStream.push(JSON.stringify({ type: "done" }));
