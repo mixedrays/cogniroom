@@ -41,7 +41,15 @@ export async function saveCourse(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(course),
     });
-    return await response.json();
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        (body && typeof body === "object" && "message" in body
+          ? String((body as { message?: unknown }).message)
+          : null) ?? `Save failed (${response.status})`;
+      return { success: false, error: message };
+    }
+    return body ?? { success: true };
   } catch (e) {
     console.error("Error saving course:", e);
     return { success: false, error: String(e) };
@@ -414,7 +422,15 @@ export async function saveLessonContent(
         body: JSON.stringify({ content }),
       }
     );
-    return await response.json();
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        (body && typeof body === "object" && "message" in body
+          ? String((body as { message?: unknown }).message)
+          : null) ?? `Save failed (${response.status})`;
+      return { success: false, error: message };
+    }
+    return body ?? { success: true };
   } catch (e) {
     return { success: false, error: String(e) };
   }
@@ -434,7 +450,15 @@ export async function saveLessonQuiz(
         body: JSON.stringify({ content }),
       }
     );
-    return await response.json();
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        (body && typeof body === "object" && "message" in body
+          ? String((body as { message?: unknown }).message)
+          : null) ?? `Save failed (${response.status})`;
+      return { success: false, error: message };
+    }
+    return body ?? { success: true };
   } catch (e) {
     return { success: false, error: String(e) };
   }
@@ -482,7 +506,15 @@ export async function saveLessonExercises(
         body: JSON.stringify({ content }),
       }
     );
-    return await response.json();
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        (body && typeof body === "object" && "message" in body
+          ? String((body as { message?: unknown }).message)
+          : null) ?? `Save failed (${response.status})`;
+      return { success: false, error: message };
+    }
+    return body ?? { success: true };
   } catch (e) {
     return { success: false, error: String(e) };
   }

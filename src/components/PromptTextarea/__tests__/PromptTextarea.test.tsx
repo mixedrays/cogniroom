@@ -17,6 +17,16 @@ vi.mock("@/modules/settings/hooks/useApiKeyAvailability", () => ({
   }),
 }));
 
+vi.mock("@/modules/settings/hooks/useSettingsSearch", () => ({
+  useSettingsSearch: () => ({
+    isOpen: false,
+    tab: undefined,
+    section: undefined,
+    open: vi.fn(),
+    close: vi.fn(),
+  }),
+}));
+
 describe("PromptTextarea", () => {
   it("renders with placeholder", () => {
     render(

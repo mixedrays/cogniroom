@@ -77,14 +77,37 @@ const TrueFalseQuestionOutputSchema = z.object({
   difficulty,
 });
 
+function normalizeQuestionType(raw: string): string {
+  const lower = raw.toLowerCase();
+  const stripped = lower.replace(/[^a-z]/g, "");
+  if (stripped === "truefalse" || stripped === "tf" || stripped === "boolean") {
+    return "true-false";
+  }
+  if (stripped === "choice" || stripped === "multichoice" || stripped === "multiplechoice") {
+    return "choice";
+  }
+  return lower;
+}
+
+const QuestionInputSchema = z.preprocess((value) => {
+  if (
+    value &&
+    typeof value === "object" &&
+    "type" in value &&
+    typeof (value as { type?: unknown }).type === "string"
+  ) {
+    const rawType = (value as { type: string }).type;
+    const normalized = normalizeQuestionType(rawType);
+    if (normalized !== rawType) {
+      return { ...(value as object), type: normalized };
+    }
+  }
+  return value;
+}, z.discriminatedUnion("type", [ChoiceQuestionOutputSchema, TrueFalseQuestionOutputSchema]));
+
 export const QuizContentOutputSchema = z.object({
   quizQuestions: z
-    .array(
-      z.discriminatedUnion("type", [
-        ChoiceQuestionOutputSchema,
-        TrueFalseQuestionOutputSchema,
-      ])
-    )
+    .array(QuestionInputSchema)
     .min(5)
     .describe(
       "At least 5 questions, mixing 'choice' and 'true-false' across difficulties."

@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useChatBackend } from "@/modules/agent/hooks/useChatBackend";
 import { askUserTool } from "@/modules/agent/tools/ask-user";
 import { memoryTool } from "@/modules/agent/tools/memory";
@@ -16,6 +17,7 @@ import {
 } from "@/modules/agent/lib/messagesReducer";
 import type { WizardAgentContext } from "../components/WizardAgentDialog";
 import type { SessionMeta } from "../types";
+
 
 function scopeQuery(context: WizardAgentContext): string {
   const params = new URLSearchParams({ contentType: context.contentType });
@@ -60,6 +62,18 @@ async function fetchSession(
   }
 }
 
+async function extractErrorMessage(
+  res: Response,
+  fallback: string
+): Promise<string> {
+  const body = await res.json().catch(() => null);
+  if (body && typeof body === "object" && "message" in body) {
+    const message = (body as { message?: unknown }).message;
+    if (typeof message === "string" && message.length > 0) return message;
+  }
+  return `${fallback} (${res.status})`;
+}
+
 async function saveSession(
   context: WizardAgentContext,
   sessionId: string,
@@ -74,9 +88,18 @@ async function saveSession(
         body: JSON.stringify({ messages }),
       }
     );
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const message = await extractErrorMessage(res, "Save failed");
+      toast.error("Failed to save chat session", { description: message });
+      return null;
+    }
     const data = await res.json();
-    if (!data.session) return null;
+    if (!data.session) {
+      toast.error("Failed to save chat session", {
+        description: "Server returned an unexpected response.",
+      });
+      return null;
+    }
     const session = data.session as SessionMeta & { messages: unknown };
     return {
       id: session.id,
@@ -85,7 +108,10 @@ async function saveSession(
       updatedAt: session.updatedAt,
       scope: session.scope,
     };
-  } catch {
+  } catch (e) {
+    toast.error("Failed to save chat session", {
+      description: e instanceof Error ? e.message : String(e),
+    });
     return null;
   }
 }
@@ -95,12 +121,18 @@ async function removeSession(
   sessionId: string
 ): Promise<void> {
   try {
-    await fetch(
+    const res = await fetch(
       `/api/wizard-agent/sessions/${encodeURIComponent(sessionId)}?${scopeQuery(context)}`,
       { method: "DELETE" }
     );
-  } catch {
-    // non-critical
+    if (!res.ok) {
+      const message = await extractErrorMessage(res, "Delete failed");
+      toast.error("Failed to delete chat session", { description: message });
+    }
+  } catch (e) {
+    toast.error("Failed to delete chat session", {
+      description: e instanceof Error ? e.message : String(e),
+    });
   }
 }
 
