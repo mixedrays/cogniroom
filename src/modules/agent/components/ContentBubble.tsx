@@ -1,6 +1,12 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, AlertCircle } from "lucide-react";
+import {
+  Check,
+  Loader2,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -162,6 +168,7 @@ export function ContentBubble({
   const queryClient = useQueryClient();
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   const [lastParsed, setLastParsed] = useState<BubbleParams | undefined>(
     undefined
@@ -187,9 +194,7 @@ export function ContentBubble({
 
   const partialData = parsedNow ?? lastParsed;
 
-  const data = isStreaming
-    ? partialData
-    : (params as BubbleParams | undefined);
+  const data = isStreaming ? partialData : (params as BubbleParams | undefined);
 
   const content = data?.content;
   const summary = data?.summary;
@@ -347,9 +352,38 @@ export function ContentBubble({
         )}
       </div>
 
-      <div className="px-4 py-3 max-h-80 overflow-y-auto">
-        <ContentPreview type={type} content={content} />
+      <div
+        className={cn(
+          "px-4 py-3 overflow-y-auto",
+          expanded ? "max-h-[32rem]" : "max-h-80"
+        )}
+      >
+        <ContentPreview type={type} content={content} expanded={expanded} />
       </div>
+
+      {hasHiddenContent(type, content) && (
+        <div className="flex justify-center px-4 pb-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            onClick={() => setExpanded((v) => !v)}
+            className="text-xs text-muted-foreground"
+          >
+            {expanded ? (
+              <>
+                <ChevronUp />
+                Show less
+              </>
+            ) : (
+              <>
+                <ChevronDown />
+                Show all
+              </>
+            )}
+          </Button>
+        </div>
+      )}
 
       {hasError && (
         <div className="flex items-start gap-2 px-4 py-2 border-t border-destructive/30 bg-destructive/5 text-destructive">
@@ -388,30 +422,84 @@ export function ContentBubble({
   );
 }
 
+const LESSON_PREVIEW_CHARS = 300;
+const ITEM_PREVIEW_COUNT = 3;
+
+function countWords(text: string): number {
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).length;
+}
+
+function hasHiddenContent(type: ContentBubbleType, content: unknown): boolean {
+  if (type === "lesson" || type === "exercise") {
+    const text = typeof content === "string" ? content : "";
+    return text.length > LESSON_PREVIEW_CHARS;
+  }
+  if (type === "flashcards") {
+    const cards = (content as FlashcardsContent | undefined)?.flashcards;
+    return Array.isArray(cards) && cards.length > ITEM_PREVIEW_COUNT;
+  }
+  if (type === "quiz") {
+    const questions = (content as QuizContent | undefined)?.quizQuestions;
+    return Array.isArray(questions) && questions.length > ITEM_PREVIEW_COUNT;
+  }
+  if (type === "roadmap") {
+    const topics = (content as Course | undefined)?.topics;
+    if (!Array.isArray(topics)) return false;
+    return topics.some(
+      (t) => Array.isArray(t?.lessons) && t.lessons.length > 0
+    );
+  }
+  return false;
+}
+
 function ContentPreview({
   type,
   content,
+  expanded,
 }: {
   type: ContentBubbleType;
   content: unknown;
+  expanded: boolean;
 }) {
   if (type === "roadmap") {
     const course = content as Course;
+    const topics = Array.isArray(course?.topics) ? course.topics : [];
+    const lessonTotal = topics.reduce(
+      (sum, t) => sum + (Array.isArray(t?.lessons) ? t.lessons.length : 0),
+      0
+    );
     return (
       <div className="space-y-2">
         <p className="font-medium">{course?.title}</p>
         {course?.description && (
           <p className="text-muted-foreground text-xs">{course.description}</p>
         )}
+        <p className="text-muted-foreground text-xs">
+          {topics.length} topics · {lessonTotal} lessons
+        </p>
         <div className="space-y-1 mt-2">
-          {course?.topics?.map((topic, i) => (
-            <div key={i} className="text-xs">
-              <span className="font-medium">{topic.title}</span>
-              <span className="text-muted-foreground ml-2">
-                {topic.lessons?.length ?? 0} lessons
-              </span>
-            </div>
-          ))}
+          {topics.map((topic, i) => {
+            const lessons = Array.isArray(topic?.lessons) ? topic.lessons : [];
+            return (
+              <div key={i} className="text-xs">
+                <div>
+                  <span className="font-medium">{topic?.title}</span>
+                  <span className="text-muted-foreground ml-2">
+                    {lessons.length} lessons
+                  </span>
+                </div>
+                {expanded && lessons.length > 0 && (
+                  <ul className="mt-1 ml-3 space-y-0.5 text-muted-foreground">
+                    {lessons.map((lesson, j) => (
+                      <li key={j}>• {lesson?.title}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
@@ -419,23 +507,23 @@ function ContentPreview({
 
   if (type === "flashcards") {
     const fc = content as FlashcardsContent;
-    const cards = fc?.flashcards ?? [];
+    const cards = Array.isArray(fc?.flashcards) ? fc.flashcards : [];
+    const visibleCards = expanded ? cards : cards.slice(0, ITEM_PREVIEW_COUNT);
+    const hiddenCount = cards.length - visibleCards.length;
     return (
       <div className="space-y-2">
         <p className="text-muted-foreground text-xs">{cards.length} cards</p>
-        {cards.slice(0, 3).map((card, i) => (
+        {visibleCards.map((card, i) => (
           <div
             key={i}
             className="rounded border border-border/50 px-3 py-2 space-y-1"
           >
-            <p className="font-medium text-xs">{card.question}</p>
-            <p className="text-muted-foreground text-xs">{card.answer}</p>
+            <p className="font-medium text-xs">{card?.question}</p>
+            <p className="text-muted-foreground text-xs">{card?.answer}</p>
           </div>
         ))}
-        {cards.length > 3 && (
-          <p className="text-muted-foreground text-xs">
-            +{cards.length - 3} more…
-          </p>
+        {hiddenCount > 0 && (
+          <p className="text-muted-foreground text-xs">+{hiddenCount} more…</p>
         )}
       </div>
     );
@@ -443,22 +531,45 @@ function ContentPreview({
 
   if (type === "quiz") {
     const quiz = content as QuizContent;
-    const questions = quiz?.quizQuestions ?? [];
+    const questions = Array.isArray(quiz?.quizQuestions)
+      ? quiz.quizQuestions
+      : [];
+    const visibleQuestions = expanded
+      ? questions
+      : questions.slice(0, ITEM_PREVIEW_COUNT);
+    const hiddenCount = questions.length - visibleQuestions.length;
     return (
       <div className="space-y-2">
         <p className="text-muted-foreground text-xs">
           {questions.length} questions
         </p>
-        {questions.slice(0, 3).map((q, i) => (
-          <div key={i} className="text-xs">
-            <span className="font-medium">{i + 1}. </span>
-            {q.question}
+        {visibleQuestions.map((q, i) => (
+          <div key={i} className="text-xs space-y-1">
+            <div>
+              <span className="font-medium">{i + 1}. </span>
+              {q?.question}
+            </div>
+            {expanded && q?.type === "choice" && Array.isArray(q.options) && (
+              <ul className="ml-4 space-y-0.5 text-muted-foreground">
+                {q.options.map((opt, j) => (
+                  <li key={j}>
+                    {String.fromCharCode(65 + j)}. {opt?.text}
+                    {opt?.isCorrect && (
+                      <span className="ml-1 text-green-600">✓</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {expanded && q?.type === "true-false" && (
+              <p className="ml-4 text-muted-foreground">
+                Answer: {q.answer ? "True" : "False"}
+              </p>
+            )}
           </div>
         ))}
-        {questions.length > 3 && (
-          <p className="text-muted-foreground text-xs">
-            +{questions.length - 3} more…
-          </p>
+        {hiddenCount > 0 && (
+          <p className="text-muted-foreground text-xs">+{hiddenCount} more…</p>
         )}
       </div>
     );
@@ -466,12 +577,19 @@ function ContentPreview({
 
   if (type === "lesson" || type === "exercise") {
     const text = typeof content === "string" ? content : "";
-    const preview = text.slice(0, 300);
+    const words = countWords(text);
+    const showFull = expanded || text.length <= LESSON_PREVIEW_CHARS;
+    const body = showFull ? text : text.slice(0, LESSON_PREVIEW_CHARS);
     return (
-      <p className="text-xs text-muted-foreground whitespace-pre-wrap">
-        {preview}
-        {text.length > 300 ? "…" : ""}
-      </p>
+      <div className="space-y-2">
+        <p className="text-muted-foreground text-xs">
+          {words} {words === 1 ? "word" : "words"}
+        </p>
+        <p className="text-xs text-muted-foreground whitespace-pre-wrap">
+          {body}
+          {!showFull ? "…" : ""}
+        </p>
+      </div>
     );
   }
 

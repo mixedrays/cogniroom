@@ -34,7 +34,7 @@ export const presentLessonFlashcardsTool: AgentTool = {
   server: {
     name: "presentLessonFlashcards",
     description:
-      "Generate and present a structured flashcards set (at least 8 cards) to the user as a preview bubble. The user can save or request revisions.",
+      "Present a structured flashcards set (at least 8 cards) to the user as a preview bubble they can save. Use this for BOTH newly generated sets AND updates to an existing set — pass the FULL updated set (not just the changed cards) so the saved file is self-contained. The user can save the previewed content or request further revisions.",
     parameters: PresentLessonFlashcardsParamsSchema,
   },
   client: {

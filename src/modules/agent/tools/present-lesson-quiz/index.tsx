@@ -34,7 +34,7 @@ export const presentLessonQuizTool: AgentTool = {
   server: {
     name: "presentLessonQuiz",
     description:
-      "Generate and present a structured quiz (mix of choice and true/false questions) to the user as a preview bubble. The user can save or request revisions.",
+      "Present a structured quiz (mix of choice and true/false questions) to the user as a preview bubble they can save. Use this for BOTH newly generated quizzes AND updates to an existing quiz — pass the FULL updated quiz (not just the changed questions) so the saved file is self-contained. The user can save the previewed content or request further revisions.",
     parameters: PresentLessonQuizParamsSchema,
   },
   client: {

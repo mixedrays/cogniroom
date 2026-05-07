@@ -32,7 +32,7 @@ export const presentRoadmapTool: AgentTool = {
   server: {
     name: "presentRoadmap",
     description:
-      "Generate and present a complete course roadmap to the user as a preview bubble. The user can save or request revisions.",
+      "Present a complete course roadmap to the user as a preview bubble they can save. Use this for BOTH newly generated roadmaps AND updates to an existing roadmap — pass the FULL updated roadmap (not a diff or the changed portion) so the saved file is self-contained. The user can save the previewed content or request further revisions.",
     parameters: PresentRoadmapParamsSchema,
   },
   client: {

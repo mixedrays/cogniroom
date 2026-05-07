@@ -38,7 +38,7 @@ export const presentLessonExercisesTool: AgentTool = {
   server: {
     name: "presentLessonExercises",
     description:
-      "Generate and present a complete exercises body (Markdown, 3-5 exercises) to the user as a preview bubble. The user can save or request revisions.",
+      "Present a complete exercises body (Markdown, 3-5 exercises) to the user as a preview bubble they can save. Use this for BOTH newly generated exercises AND updates to an existing set — pass the FULL updated body (not a diff or the changed portion) so the saved file is self-contained. The user can save the previewed content or request further revisions.",
     parameters: PresentLessonExercisesParamsSchema,
   },
   client: {
