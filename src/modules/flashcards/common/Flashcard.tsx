@@ -65,7 +65,7 @@ const Flashcard = ({
     <div className={cn("perspective-[4000px]", className)} onClick={onClick}>
       <div
         className={cn(
-          "aspect-3/2 h-full w-full",
+          "aspect-3/2 h-full w-full max-w-200 m-auto",
           "bg-card relative rounded-lg text-lg",
           "border-border/75 dark:border-border border shadow-lg transition-transform duration-500 transform-3d",
           "transform-gpu lg:text-xl",
