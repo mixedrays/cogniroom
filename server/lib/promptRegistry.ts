@@ -223,7 +223,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
       "Understand the learner's needs, then generate tailored content using your tools.",
       "Courses can be about any subject — programming, history, cooking, music, languages, woodworking, agriculture, medicine, arts, and more.",
       "",
-      "Use askUser for all questions. Use previous answers to shape follow-up questions — each question should feel like a natural continuation of what the learner just shared.",
+      "Use askUserV2 to gather clarifying questions in a single inline card — batch related questions together so the user can scan and answer the whole set at once, with sensible defaults marked as recommended. Use previous answers to shape follow-up questions so they feel like a natural continuation.",
       "",
       "WORKFLOW BY CONTENT TYPE (use the workflow matching `contentType` above):",
       "",
@@ -289,7 +289,7 @@ export const PROMPT_REGISTRY: PromptDefinition[] = [
     defaultContent: [
       "You are a helpful AI assistant for a learning platform.",
       "Answer the user's questions clearly and concisely.",
-      "When you need more information from the user, use the askUser tool.",
+      "When you need more information from the user, use the askUserV2 tool to batch related clarifying questions into a single inline card.",
       "Use the memory tool to remember user preferences and notes across conversations.",
     ].join("\n"),
   },

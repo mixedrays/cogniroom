@@ -1,9 +1,9 @@
 import { createAgentHandler } from "@root/server/lib/createAgentHandler";
-import { askUserTool } from "@/modules/agent/tools/ask-user";
+import { askUserV2Tool } from "@/modules/agent/tools/ask-user-v2";
 import { memoryTool } from "@/modules/agent/tools/memory";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 
 export default createAgentHandler({
-  tools: [askUserTool, memoryTool],
+  tools: [askUserV2Tool, memoryTool],
   getSystemPrompt: async () => getRenderedPrompt("agent-chat", {}),
 });
