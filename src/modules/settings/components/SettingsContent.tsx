@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   PaletteIcon,
   BrainCircuitIcon,
+  BrainIcon,
   HistoryIcon,
   MessageSquareTextIcon,
   ChevronRightIcon,
@@ -22,12 +23,14 @@ import { LLMSettings } from "./LLMSettings";
 import { ApiKeySettings } from "./ApiKeySettings";
 import { HistorySettings } from "./HistorySettings";
 import { PromptsSettings } from "./PromptsSettings";
+import { MemorySettings } from "./MemorySettings";
 
 const NAV_ITEMS = [
   { key: "appearance", label: "Appearance", icon: PaletteIcon },
   { key: "llm", label: "LLM Models", icon: BrainCircuitIcon },
   { key: "api-key", label: "API Key", icon: KeyRoundIcon },
   { key: "prompts", label: "Prompts", icon: MessageSquareTextIcon },
+  { key: "memory", label: "Memory", icon: BrainIcon },
   { key: "history", label: "History", icon: HistoryIcon },
 ] as const;
 
@@ -116,6 +119,7 @@ export function SettingsContent({
               }
             />
           )}
+          {activeTab === "memory" && <MemorySettings />}
           {activeTab === "history" && <HistorySettings />}
         </div>
       </div>

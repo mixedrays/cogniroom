@@ -5,6 +5,7 @@ const VALID_TABS = [
   "llm",
   "api-key",
   "prompts",
+  "memory",
   "history",
 ] as const;
 

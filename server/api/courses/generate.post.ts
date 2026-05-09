@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getOpenAIClient, type AvailableModelsId } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { toErrorMessage } from "@root/server/lib/errors";
+import { getMemoryContext } from "@root/server/lib/memoryService";
 
 const RoadmapDraftSchema = z.object({
   title: z.string().min(1),
@@ -54,8 +55,16 @@ export default defineEventHandler(async (event) => {
     const topic = body?.topic?.trim();
     const level = (body?.level ?? "beginner") as SkillLevel;
     const model = (body?.model ?? "gpt-4o-mini").trim();
-    const additionalInstructions = body?.instructions?.trim()
-      ? `\nAdditional Instructions from user: ${body.instructions.trim()}`
+    const memoryContext = (await getMemoryContext()).trim();
+    const userInstr = body?.instructions?.trim();
+    const additionalInstructions = [
+      userInstr ? `Additional Instructions from user: ${userInstr}` : "",
+      memoryContext,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+    const additionalInstructionsBlock = additionalInstructions
+      ? `\n${additionalInstructions}`
       : "";
 
     if (!topic) {
@@ -65,7 +74,7 @@ export default defineEventHandler(async (event) => {
     const prompt = await getRenderedPrompt("course-generation", {
       topic,
       level,
-      additionalInstructions,
+      additionalInstructions: additionalInstructionsBlock,
     });
 
     const result = await generateText({

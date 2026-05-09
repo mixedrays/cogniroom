@@ -144,6 +144,79 @@ export async function clearSettingsHistory(): Promise<{
   }
 }
 
+// Memory entries
+export interface MemoryEntry {
+  key: string;
+  content: string;
+}
+
+export async function getMemoryEntries(): Promise<{
+  success: boolean;
+  entries: MemoryEntry[];
+  error?: string;
+}> {
+  try {
+    const response = await fetch(`${getBaseUrl()}/api/settings/memory`);
+    if (!response.ok) {
+      return { success: false, entries: [], error: response.statusText };
+    }
+    return await response.json();
+  } catch (e) {
+    console.error("Error getting memory entries:", e);
+    return { success: false, entries: [], error: String(e) };
+  }
+}
+
+export async function updateMemoryEntry(
+  key: string,
+  content: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/settings/memory/${encodeURIComponent(key)}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      }
+    );
+    return await response.json();
+  } catch (e) {
+    console.error("Error updating memory entry:", e);
+    return { success: false, error: String(e) };
+  }
+}
+
+export async function deleteMemoryEntry(
+  key: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `${getBaseUrl()}/api/settings/memory/${encodeURIComponent(key)}`,
+      { method: "DELETE" }
+    );
+    return await response.json();
+  } catch (e) {
+    console.error("Error deleting memory entry:", e);
+    return { success: false, error: String(e) };
+  }
+}
+
+export async function clearAllMemory(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const response = await fetch(`${getBaseUrl()}/api/settings/memory`, {
+      method: "DELETE",
+    });
+    return await response.json();
+  } catch (e) {
+    console.error("Error clearing memory:", e);
+    return { success: false, error: String(e) };
+  }
+}
+
 // Restore settings from history entry
 export async function restoreFromHistory(
   entry: SettingsHistoryEntry

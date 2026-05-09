@@ -7,6 +7,7 @@ import {
 } from "./llm";
 import type { AgentTool } from "@/modules/agent/types";
 import { runAgentStream } from "@/modules/agent/lib/runAgentStream";
+import { getMemoryContext } from "./memoryService";
 
 export function createAgentHandler(config: {
   tools: AgentTool[] | ((context: Record<string, unknown>) => AgentTool[]);
@@ -24,7 +25,11 @@ export function createAgentHandler(config: {
     if (!body) return new Response(null, { status: 400 });
 
     const context = body.context ?? {};
-    const system = await config.getSystemPrompt(context);
+    const baseSystem = await config.getSystemPrompt(context);
+    const memoryContext = await getMemoryContext();
+    const system = memoryContext
+      ? `${baseSystem}\n\n${memoryContext}`
+      : baseSystem;
     const tools =
       typeof config.tools === "function"
         ? config.tools(context)

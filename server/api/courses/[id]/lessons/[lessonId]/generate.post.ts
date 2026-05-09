@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // 3. Generate Content
-    const additionalInstructions = composeAdditionalInstructions(
+    const additionalInstructions = await composeAdditionalInstructions(
       body?.generationOptions,
       body?.additionalInstructions
     );
