@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/PageHeader";
 import CreateCourseModal from "@/components/CreateCourseModal";
 import { WizardAgentInline } from "@/modules/wizard-agent";
 import { courseHistoryQueryKey } from "@/components/CourseHistory";
+import { HOME_PROMPT_TEXTAREA_ID } from "@/lib/dom-ids";
 
 interface HomeSearch {
   session?: string;
@@ -46,6 +47,7 @@ function App() {
         welcomeTitle="What do you want to learn?"
         placeholder="Describe the course you want to create…"
         className="max-w-3xl w-full mx-auto"
+        promptTextareaId={HOME_PROMPT_TEXTAREA_ID}
         promptExtra={
           <CreateCourseModal
             onCreated={handleCourseCreated}

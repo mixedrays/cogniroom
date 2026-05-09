@@ -32,6 +32,7 @@ type PromptTextareaProps = {
   availableAttachments?: PromptAttachmentOption[];
   onAttachmentRemove?: (id: string) => void;
   onAttachmentAdd?: (id: string) => void;
+  textareaId?: string;
 };
 
 export function PromptTextarea({
@@ -47,6 +48,7 @@ export function PromptTextarea({
   availableAttachments,
   onAttachmentRemove,
   onAttachmentAdd,
+  textareaId,
 }: PromptTextareaProps) {
   const { settings } = useSettings();
   const [selectedModel, setSelectedModel] = useState(() =>
@@ -110,6 +112,7 @@ export function PromptTextarea({
       )}
 
       <textarea
+        id={textareaId}
         className="w-full resize-none px-3 pt-3 pb-2 text-sm outline-none placeholder:text-muted-foreground field-sizing-content focus-visible:ring-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         value={value}
         onChange={(e) => onChange(e.target.value)}

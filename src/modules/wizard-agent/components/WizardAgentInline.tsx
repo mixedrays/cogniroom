@@ -27,6 +27,7 @@ interface WizardAgentInlineProps {
   initialSessionId?: string;
   startNewSession?: boolean;
   onSessionPersisted?: (sessionId: string) => void;
+  promptTextareaId?: string;
   children?: (state: InlineRenderState) => ReactNode;
 }
 
@@ -42,6 +43,7 @@ export function WizardAgentInline({
   initialSessionId,
   startNewSession,
   onSessionPersisted,
+  promptTextareaId,
   children,
 }: WizardAgentInlineProps) {
   const agent = useWizardAgent({
@@ -62,6 +64,7 @@ export function WizardAgentInline({
         onStop={agent.stopStreaming}
         placeholder={placeholder}
         autoFocus={!agent.hasMessages}
+        textareaId={promptTextareaId}
       />
       {promptExtra && (
         <div className="flex items-center justify-center">{promptExtra}</div>

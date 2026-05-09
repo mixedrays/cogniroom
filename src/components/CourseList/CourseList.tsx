@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { deleteCourse, listCourses } from "@/lib/courses";
+import { HOME_PROMPT_TEXTAREA_ID } from "@/lib/dom-ids";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
@@ -103,7 +104,18 @@ export default function CourseList() {
             <SidebarMenuItem>
               <SidebarMenuButton
                 render={
-                  <Link to="/" search={{ session: undefined }}>
+                  <Link
+                    to="/"
+                    search={{ session: undefined }}
+                    onClick={() => {
+                      requestAnimationFrame(() => {
+                        const el = document.getElementById(
+                          HOME_PROMPT_TEXTAREA_ID
+                        );
+                        if (el instanceof HTMLTextAreaElement) el.focus();
+                      });
+                    }}
+                  >
                     <Plus />
                     <span>New Course</span>
                   </Link>
