@@ -64,3 +64,5 @@ export const SETTINGS_FILE = join(SETTINGS_DIR, "settings.json");
 export const SETTINGS_HISTORY_FILE = join(SETTINGS_DIR, "history.json");
 
 export const HISTORY_DIR = join(DATA_PATH, "history");
+
+export const MEMORY_DIR = join(DATA_PATH, "memory");
