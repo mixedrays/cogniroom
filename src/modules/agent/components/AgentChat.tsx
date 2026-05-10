@@ -1,8 +1,17 @@
-import { useRef, useEffect, type ReactNode } from "react";
-import { Loader2 } from "lucide-react";
+import {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  type ReactNode,
+} from "react";
+import { ArrowDown, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { AgentMessageState, AgentTool } from "../types";
 import { AgentMessage } from "./AgentMessage";
+
+const SCROLL_BOTTOM_THRESHOLD = 40;
 
 interface AgentChatProps {
   messages: AgentMessageState[];
@@ -28,15 +37,28 @@ export function AgentChat({
   className,
 }: AgentChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
+  }, []);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [messages]);
+    const el = scrollRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+      setIsAtBottom(distance <= SCROLL_BOTTOM_THRESHOLD);
+    };
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (isAtBottom) scrollToBottom();
+  }, [messages, isAtBottom, scrollToBottom]);
 
   const activeAbovePromptCall = [...messages]
     .reverse()
@@ -61,26 +83,44 @@ export function AgentChat({
 
   return (
     <div className={cn("flex flex-col flex-1 overflow-hidden", className)}>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-6">
-        {chatMessages.length === 0 && welcomeMessage && (
-          <div className="flex h-full items-center justify-center m-0">
-            <p className="text-muted-foreground text-center">
-              {welcomeMessage}
-            </p>
-          </div>
-        )}
+      <div className="relative flex-1 overflow-hidden">
+        <div
+          ref={scrollRef}
+          className="absolute inset-0 overflow-y-auto p-4 space-y-6"
+        >
+          {chatMessages.length === 0 && welcomeMessage && (
+            <div className="flex h-full items-center justify-center m-0">
+              <p className="text-muted-foreground text-center">
+                {welcomeMessage}
+              </p>
+            </div>
+          )}
 
-        {chatMessages.map((msg) => (
-          <AgentMessage
-            key={msg.id}
-            message={msg}
-            messages={messages}
-            tools={tools}
-            onToolSubmit={onToolSubmit}
-            onToolDismiss={onToolDismiss}
-            context={context}
-          />
-        ))}
+          {chatMessages.map((msg) => (
+            <AgentMessage
+              key={msg.id}
+              message={msg}
+              messages={messages}
+              tools={tools}
+              onToolSubmit={onToolSubmit}
+              onToolDismiss={onToolDismiss}
+              context={context}
+            />
+          ))}
+        </div>
+
+        {!isAtBottom && (
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon"
+            onClick={() => scrollToBottom()}
+            className="absolute bottom-2 cursor-pointer left-1/2 -translate-x-1/2 rounded-full shadow-md"
+            aria-label="Scroll to bottom"
+          >
+            <ArrowDown />
+          </Button>
+        )}
       </div>
 
       {activeAbovePromptCall && abovePromptTool?.client && (
