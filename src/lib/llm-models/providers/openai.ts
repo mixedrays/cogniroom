@@ -14,11 +14,17 @@ export type OpenAIAvailableModelsIds = Exclude<
 >;
 
 const openaiModels = {
+  "gpt-5.5": {
+    price: { input: getPricePerToken(5), output: getPricePerToken(30) },
+    priceRating: 3,
+    label: "GPT-5.5",
+    hint: "Most capable model, best for complex tasks",
+  },
   "gpt-5.4": {
     price: { input: getPricePerToken(2.5), output: getPricePerToken(15) },
     priceRating: 3,
     label: "GPT-5.4",
-    hint: "Most capable model, best for complex tasks",
+    hint: "Excellent performance for a wide range of tasks",
   },
   "gpt-5.4-pro": {
     price: { input: getPricePerToken(30), output: getPricePerToken(180) },

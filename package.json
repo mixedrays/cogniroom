@@ -18,8 +18,8 @@
     "validate": "npm run typecheck && npm run lint && npm run test:all"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.74",
-    "@ai-sdk/openai": "^3.0.58",
+    "@ai-sdk/anthropic": "^3.0.76",
+    "@ai-sdk/openai": "^3.0.63",
     "@base-ui/react": "^1.2.0",
     "@fontsource-variable/inter": "^5.2.8",
     "@tailwindcss/typography": "^0.5.19",
@@ -31,7 +31,7 @@
     "@tanstack/react-router-ssr-query": "^1.166.7",
     "@tanstack/react-start": "^1.166.8",
     "@tanstack/router-plugin": "^1.166.7",
-    "ai": "^6.0.174",
+    "ai": "^6.0.177",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
