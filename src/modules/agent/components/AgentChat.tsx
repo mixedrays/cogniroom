@@ -125,15 +125,17 @@ export function AgentChat({
 
       {activeAbovePromptCall && abovePromptTool?.client && (
         <div className="px-4 pt-2">
-          <div className="rounded-2xl bg-muted p-4">
-            {activeAbovePromptCall.status === "streaming" ? (
-              <div className="flex items-center gap-2">
+          {activeAbovePromptCall.status === "streaming" ? (
+            <div className="flex justify-start">
+              <div className="flex items-center gap-2 rounded-2xl rounded-tl-sm bg-muted px-4 py-2.5 text-sm">
                 <Loader2 className="size-4 animate-spin text-muted-foreground" />
-                <span className="text-muted-foreground text-sm">
+                <span className="text-muted-foreground text-xs">
                   Preparing questions…
                 </span>
               </div>
-            ) : (
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-muted p-4">
               <abovePromptTool.client.Widget
                 params={activeAbovePromptCall.params}
                 onSubmit={(result) =>
@@ -144,8 +146,8 @@ export function AgentChat({
                 }
                 context={context}
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
