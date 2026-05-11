@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -57,7 +57,9 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
   const handleToggle = useCallback((q: AskUserV2Question, label: string) => {
     if (q.multiSelect) {
       setAnswers((a) => {
-        const prev = Array.isArray(a[q.header]) ? (a[q.header] as string[]) : [];
+        const prev = Array.isArray(a[q.header])
+          ? (a[q.header] as string[])
+          : [];
         const next = prev.includes(label)
           ? prev.filter((o) => o !== label)
           : [...prev, label];
@@ -86,10 +88,7 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
     []
   );
 
-  const isOptionSelected = (
-    q: AskUserV2Question,
-    label: string
-  ): boolean => {
+  const isOptionSelected = (q: AskUserV2Question, label: string): boolean => {
     const ans = answers[q.header];
     if (q.multiSelect) {
       return Array.isArray(ans) && ans.includes(label);
@@ -218,8 +217,13 @@ export function AskUserV2Widget({
   if (!parsed.success) {
     if (isStreaming) {
       return (
-        <div className="rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground">
-          Preparing questions…
+        <div className="flex justify-start">
+          <div className="flex items-center gap-2 rounded-2xl rounded-tl-sm bg-muted px-4 py-2.5 text-sm">
+            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+            <span className="text-muted-foreground text-xs">
+              Preparing questions…
+            </span>
+          </div>
         </div>
       );
     }
