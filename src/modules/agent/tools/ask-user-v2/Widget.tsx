@@ -130,7 +130,7 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
         </button>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         {data.questions.map((q) => {
           const freeform = freeformValues[q.header] ?? "";
           return (
