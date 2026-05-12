@@ -157,7 +157,7 @@ export default function CourseList() {
           ) : (
             <>
               <SidebarGroup>
-                <SidebarGroupLabel>Your Courses</SidebarGroupLabel>
+                <SidebarGroupLabel>Courses</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {courses.map((course) => (
