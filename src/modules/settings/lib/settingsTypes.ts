@@ -16,10 +16,16 @@ export interface LLMSettings {
   hiddenModels?: string[];
 }
 
+// Sidebar UI settings
+export interface SidebarSettings {
+  collapsedSections: Record<string, boolean>;
+}
+
 // Complete settings object
 export interface Settings {
   appearance: AppearanceSettings;
   llm: LLMSettings;
+  sidebar: SidebarSettings;
   savedAt: string; // ISO timestamp
   version: number; // Settings schema version
 }
@@ -47,6 +53,9 @@ export const DEFAULT_SETTINGS: Settings = {
   },
   llm: {
     defaultModel: "gpt-4.1-mini",
+  },
+  sidebar: {
+    collapsedSections: {},
   },
   savedAt: new Date().toISOString(),
   version: 1,
@@ -91,6 +100,20 @@ export function validateSettings(settings: unknown): settings is Settings {
   const llm = s.llm as Record<string, unknown>;
   if (typeof llm.defaultModel !== "string") {
     return false;
+  }
+
+  // Check sidebar (optional for backwards compatibility)
+  if (s.sidebar !== undefined) {
+    if (typeof s.sidebar !== "object" || s.sidebar === null) {
+      return false;
+    }
+    const sidebar = s.sidebar as Record<string, unknown>;
+    if (
+      typeof sidebar.collapsedSections !== "object" ||
+      sidebar.collapsedSections === null
+    ) {
+      return false;
+    }
   }
 
   // Check metadata

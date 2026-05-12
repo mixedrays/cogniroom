@@ -11,9 +11,23 @@ import type {
   Settings,
   AppearanceSettings,
   LLMSettings,
+  SidebarSettings,
   ThemeMode,
 } from "../lib/settingsTypes";
 import { DEFAULT_SETTINGS } from "../lib/settingsTypes";
+
+// Ensure settings loaded from older caches/server have all required nested objects.
+function normalizeSettings(settings: Settings): Settings {
+  if (settings.sidebar && settings.sidebar.collapsedSections) {
+    return settings;
+  }
+  return {
+    ...settings,
+    sidebar: {
+      collapsedSections: settings.sidebar?.collapsedSections ?? {},
+    },
+  };
+}
 import { getSettings, saveSettings as apiSaveSettings } from "../lib/settings";
 import {
   CSS_THEMES,
@@ -34,7 +48,7 @@ function getCachedSettings(): Settings {
       const parsed = JSON.parse(cached);
       // Validate structure has required fields
       if (parsed.appearance && parsed.llm) {
-        return parsed;
+        return normalizeSettings(parsed);
       }
     }
   } catch {
@@ -61,6 +75,7 @@ interface SettingsContextType {
   // Update functions
   updateAppearance: (updates: Partial<AppearanceSettings>) => Promise<void>;
   updateLLM: (updates: Partial<LLMSettings>) => Promise<void>;
+  updateSidebar: (updates: Partial<SidebarSettings>) => Promise<void>;
   saveSettings: (
     description?: string,
     addToHistory?: boolean
@@ -128,9 +143,10 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     try {
       const result = await getSettings();
       if (result.success && result.settings) {
-        setSettings(result.settings);
-        applySettings(result.settings);
-        cacheSettings(result.settings);
+        const normalized = normalizeSettings(result.settings);
+        setSettings(normalized);
+        applySettings(normalized);
+        cacheSettings(normalized);
       } else {
         setSettings(DEFAULT_SETTINGS);
         applySettings(DEFAULT_SETTINGS);
@@ -225,6 +241,32 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     [settings]
   );
 
+  // Update sidebar settings
+  const updateSidebar = useCallback(
+    async (updates: Partial<SidebarSettings>) => {
+      const newSettings: Settings = {
+        ...settings,
+        sidebar: {
+          ...settings.sidebar,
+          ...updates,
+        },
+        savedAt: new Date().toISOString(),
+      };
+
+      setSettings(newSettings);
+      cacheSettings(newSettings);
+
+      const result = await apiSaveSettings(newSettings, {
+        addToHistory: false,
+      });
+
+      if (!result.success) {
+        setError(result.error || "Failed to save settings");
+      }
+    },
+    [settings]
+  );
+
   // Save current settings with optional description
   const saveSettingsToServer = useCallback(
     async (description?: string, addToHistory = true): Promise<boolean> => {
@@ -249,6 +291,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     error,
     updateAppearance,
     updateLLM,
+    updateSidebar,
     saveSettings: saveSettingsToServer,
     loadSettings,
     applySettings,

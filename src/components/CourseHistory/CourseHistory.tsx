@@ -6,10 +6,8 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
+import { CollapsibleSidebarGroup } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -100,14 +98,16 @@ export default function CourseHistory() {
   };
 
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel className="flex items-center gap-1.5">
-        <History className="size-3.5" />
-        History
-      </SidebarGroupLabel>
-
-      <SidebarGroupContent>
-        <SidebarMenu>
+    <CollapsibleSidebarGroup
+      sectionId="history"
+      label={
+        <>
+          <History className="size-4" />
+          History
+        </>
+      }
+    >
+      <SidebarMenu>
           {sessions.map((session) => (
             <SidebarMenuItem
               key={session.id}
@@ -174,7 +174,6 @@ export default function CourseHistory() {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+    </CollapsibleSidebarGroup>
   );
 }

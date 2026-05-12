@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   BookOpen,
+  Book,
   Sparkles,
   FileJson,
   Link as LinkIcon,
@@ -34,7 +35,6 @@ import {
   SidebarMenuSubItem,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
@@ -42,6 +42,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import CourseHistory from "@/components/CourseHistory";
+import { CollapsibleSidebarGroup } from "@/components/Sidebar";
 import { CommandPaletteTrigger } from "@/modules/command-palette";
 
 export default function CourseList() {
@@ -156,139 +157,141 @@ export default function CourseList() {
             </>
           ) : (
             <>
-              <SidebarGroup>
-                <SidebarGroupLabel>Your Courses</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {courses.map((course) => (
-                      <Collapsible
-                        key={course.id}
-                        className="group/collapsible"
-                      >
-                        <SidebarMenuItem>
-                          <SidebarMenuButton
-                            className="pr-0"
-                            render={
-                              <Link
-                                to="/course/$courseId"
-                                params={{ courseId: course.id }}
-                                className="relative"
-                              >
-                                {getSourceIcon(course.source)}
-                                <span className="truncate">{course.title}</span>
+              <CollapsibleSidebarGroup
+                sectionId="your-courses"
+                label={
+                  <>
+                    <Book className="size-4" />
+                    Your Courses
+                  </>
+                }
+              >
+                <SidebarMenu>
+                  {courses.map((course) => (
+                    <Collapsible key={course.id} className="group/collapsible">
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          className="pr-0"
+                          render={
+                            <Link
+                              to="/course/$courseId"
+                              params={{ courseId: course.id }}
+                              className="relative"
+                            >
+                              {getSourceIcon(course.source)}
+                              <span className="truncate">{course.title}</span>
 
-                                <CollapsibleTrigger
-                                  onClick={(e) => e.preventDefault()}
-                                  render={
-                                    <Button
-                                      size="icon-sm"
-                                      variant="secondary"
-                                      className="ml-auto"
-                                    >
-                                      <ChevronDown className="transition-transform duration-200 group-data-open/collapsible:rotate-180" />
-                                    </Button>
-                                  }
-                                />
-                              </Link>
-                            }
-                          />
+                              <CollapsibleTrigger
+                                onClick={(e) => e.preventDefault()}
+                                render={
+                                  <Button
+                                    size="icon-sm"
+                                    variant="secondary"
+                                    className="ml-auto"
+                                  >
+                                    <ChevronDown className="transition-transform duration-200 group-data-open/collapsible:rotate-180" />
+                                  </Button>
+                                }
+                              />
+                            </Link>
+                          }
+                        />
 
-                          <CollapsibleContent>
-                            <SidebarMenuSub className="mr-0 pr-0">
-                              <SidebarMenuSubItem>
-                                <div className="flex flex-col gap-2 pt-2">
-                                  <span className="text-xs text-muted-foreground">
-                                    {course.topicCount} topics ·{" "}
-                                    {course.lessonCount} lessons
-                                  </span>
+                        <CollapsibleContent>
+                          <SidebarMenuSub className="mr-0 pr-0">
+                            <SidebarMenuSubItem>
+                              <div className="flex flex-col gap-2 pt-2">
+                                <span className="text-xs text-muted-foreground">
+                                  {course.topicCount} topics ·{" "}
+                                  {course.lessonCount} lessons
+                                </span>
 
-                                  <div className="h-1.5 w-full bg-sidebar-accent rounded-full overflow-hidden">
-                                    <div
-                                      className="h-full bg-primary transition-all"
-                                      style={{ width: `${course.progress}%` }}
-                                    />
-                                  </div>
+                                <div className="h-1.5 w-full bg-sidebar-accent rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-primary transition-all"
+                                    style={{ width: `${course.progress}%` }}
+                                  />
+                                </div>
 
-                                  <div className="flex items-center justify-between gap-2">
-                                    <Button
-                                      variant="secondary"
-                                      nativeButton={false}
+                                <div className="flex items-center justify-between gap-2">
+                                  <Button
+                                    variant="secondary"
+                                    nativeButton={false}
+                                    render={
+                                      <Link
+                                        to="/course/$courseId"
+                                        params={{ courseId: course.id }}
+                                      >
+                                        View Course
+                                      </Link>
+                                    }
+                                  />
+                                  <AlertDialog
+                                    open={deleteDialogOpenId === course.id}
+                                    onOpenChange={(open) => {
+                                      if (open) setDeleteError(null);
+                                      setDeleteDialogOpenId(
+                                        open ? course.id : null
+                                      );
+                                    }}
+                                  >
+                                    <AlertDialogTrigger
                                       render={
-                                        <Link
-                                          to="/course/$courseId"
-                                          params={{ courseId: course.id }}
+                                        <Button
+                                          size="icon"
+                                          variant="destructive"
+                                          onClick={(e) => e.stopPropagation()}
                                         >
-                                          View Course
-                                        </Link>
+                                          <Trash2 />
+                                        </Button>
                                       }
                                     />
-                                    <AlertDialog
-                                      open={deleteDialogOpenId === course.id}
-                                      onOpenChange={(open) => {
-                                        if (open) setDeleteError(null);
-                                        setDeleteDialogOpenId(
-                                          open ? course.id : null
-                                        );
-                                      }}
-                                    >
-                                      <AlertDialogTrigger
-                                        render={
-                                          <Button
-                                            size="icon"
-                                            variant="destructive"
-                                            onClick={(e) => e.stopPropagation()}
-                                          >
-                                            <Trash2 />
-                                          </Button>
-                                        }
-                                      />
-                                      <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                          <AlertDialogTitle>
-                                            Delete course?
-                                          </AlertDialogTitle>
-                                          <AlertDialogDescription>
-                                            This will permanently delete "
-                                            {course.title}".
-                                          </AlertDialogDescription>
-                                          {deleteError?.id === course.id && (
-                                            <ErrorState
-                                              variant="minimal"
-                                              message={deleteError.message}
-                                            />
-                                          )}
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                          <AlertDialogCancel
-                                            disabled={deletingId === course.id}
-                                          >
-                                            Cancel
-                                          </AlertDialogCancel>
-                                          <AlertDialogAction
-                                            variant="destructive"
-                                            onClick={() =>
-                                              handleDeleteCourse(course.id)
-                                            }
-                                            disabled={deletingId === course.id}
-                                          >
-                                            {deletingId === course.id
-                                              ? "Deleting…"
-                                              : "Delete"}
-                                          </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
-                                  </div>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                          Delete course?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          This will permanently delete "
+                                          {course.title}".
+                                        </AlertDialogDescription>
+                                        {deleteError?.id === course.id && (
+                                          <ErrorState
+                                            variant="minimal"
+                                            message={deleteError.message}
+                                          />
+                                        )}
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel
+                                          disabled={deletingId === course.id}
+                                        >
+                                          Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                          variant="destructive"
+                                          onClick={() =>
+                                            handleDeleteCourse(course.id)
+                                          }
+                                          disabled={deletingId === course.id}
+                                        >
+                                          {deletingId === course.id
+                                            ? "Deleting…"
+                                            : "Delete"}
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
                                 </div>
-                              </SidebarMenuSubItem>
-                            </SidebarMenuSub>
-                          </CollapsibleContent>
-                        </SidebarMenuItem>
-                      </Collapsible>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
+                              </div>
+                            </SidebarMenuSubItem>
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  ))}
+                </SidebarMenu>
+              </CollapsibleSidebarGroup>
 
               <CourseHistory />
             </>

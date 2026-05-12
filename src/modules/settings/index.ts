@@ -5,7 +5,9 @@ export type {
   Settings,
   AppearanceSettings,
   LLMSettings,
+  SidebarSettings,
   ThemeMode,
   SettingsHistoryEntry,
   SettingsHistory,
 } from "./lib/settingsTypes";
+export { useSidebarSectionState } from "./hooks/useSidebarSectionState";

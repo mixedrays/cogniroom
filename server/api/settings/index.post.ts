@@ -14,6 +14,9 @@ interface Settings {
   llm: {
     defaultModel: string;
   };
+  sidebar?: {
+    collapsedSections: Record<string, boolean>;
+  };
   savedAt: string;
   version: number;
 }
@@ -65,6 +68,20 @@ function validateSettings(settings: unknown): settings is Settings {
   const llm = s.llm as Record<string, unknown>;
   if (typeof llm.defaultModel !== "string") {
     return false;
+  }
+
+  // Check sidebar (optional)
+  if (s.sidebar !== undefined) {
+    if (typeof s.sidebar !== "object" || s.sidebar === null) {
+      return false;
+    }
+    const sidebar = s.sidebar as Record<string, unknown>;
+    if (
+      typeof sidebar.collapsedSections !== "object" ||
+      sidebar.collapsedSections === null
+    ) {
+      return false;
+    }
   }
 
   return true;
