@@ -1,6 +1,10 @@
 import { Search } from "lucide-react";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { useCommandPalette } from "../context/CommandPaletteContext";
 
@@ -19,7 +23,7 @@ export function CommandPaletteTrigger() {
         render={
           <SidebarMenuButton onClick={open}>
             <Search />
-            <span>Search…</span>
+            <span>Search</span>
           </SidebarMenuButton>
         }
       />

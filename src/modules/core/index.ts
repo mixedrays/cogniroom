@@ -18,6 +18,10 @@ export type {
   QuizContent,
   ReviewEntry,
   ReviewData,
+  DeckKind,
+  DeckSource,
+  Deck,
+  DeckMetadata,
 } from "./types";
 
 export * from "./utils";

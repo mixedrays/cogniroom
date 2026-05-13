@@ -41,6 +41,14 @@ function getScopeDir(scope: SessionScope): string {
   if (scope.contentType === "roadmap") {
     return path.join(root, "roadmap");
   }
+  // Standalone deck creation: flashcards/quiz with no course/lesson context.
+  if (
+    (scope.contentType === "flashcards" || scope.contentType === "quiz") &&
+    !scope.courseId &&
+    !scope.lessonId
+  ) {
+    return path.join(root, "decks", scope.contentType);
+  }
   if (!scope.courseId || !scope.lessonId) {
     throw new Error(
       `Scope for contentType "${scope.contentType}" requires courseId and lessonId`

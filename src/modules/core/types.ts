@@ -148,3 +148,28 @@ export interface ReviewData {
   lessonId: string;
   entries: ReviewEntry[];
 }
+
+export type DeckKind = "flashcards" | "quiz";
+
+export type DeckSource = "llm" | "manual" | "import";
+
+export interface Deck {
+  id: string;
+  title: string;
+  description?: string;
+  kind: DeckKind;
+  createdAt: string;
+  updatedAt: string;
+  source: DeckSource;
+}
+
+export interface DeckMetadata {
+  id: string;
+  title: string;
+  description?: string;
+  kind: DeckKind;
+  createdAt: string;
+  updatedAt: string;
+  source: DeckSource;
+  itemCount: number;
+}

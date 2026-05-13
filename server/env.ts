@@ -23,6 +23,8 @@ export const COURSES_DIR = join(DATA_PATH, "courses");
 /** @deprecated Use COURSES_DIR instead */
 export const ROADMAPS_DIR = COURSES_DIR;
 
+export const DECKS_DIR = join(DATA_PATH, "decks");
+
 // Helper functions for nested course structure paths
 export function getCoursePath(courseId: string): string {
   return join(COURSES_DIR, courseId);

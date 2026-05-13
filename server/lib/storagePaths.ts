@@ -28,4 +28,24 @@ export const storagePaths = {
   reviews(courseId: string, lessonId: string): string {
     return `courses/${courseId}/lessons/${lessonId}/reviews.json`;
   },
+
+  deckDir(deckId: string): string {
+    return `decks/${deckId}`;
+  },
+
+  deck(deckId: string): string {
+    return `decks/${deckId}/deck.json`;
+  },
+
+  deckFlashcards(deckId: string): string {
+    return `decks/${deckId}/flashcards${getFormatAdapter("flashcards").extension}`;
+  },
+
+  deckQuiz(deckId: string): string {
+    return `decks/${deckId}/quiz${getFormatAdapter("quiz").extension}`;
+  },
+
+  deckReviews(deckId: string): string {
+    return `decks/${deckId}/reviews.json`;
+  },
 };

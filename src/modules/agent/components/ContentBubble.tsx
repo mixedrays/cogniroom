@@ -27,6 +27,7 @@ import {
   saveLessonFlashcards,
   saveLessonExercises,
 } from "@/lib/courses";
+import { useContentSaveOverride } from "./ContentSaveContext";
 
 export type ContentBubbleType =
   | "roadmap"
@@ -166,6 +167,7 @@ export function ContentBubble({
   superseded = false,
 }: ContentBubbleProps) {
   const queryClient = useQueryClient();
+  const saveOverride = useContentSaveOverride();
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -266,7 +268,9 @@ export function ContentBubble({
     try {
       let result: { success: boolean; error?: string; id?: string };
 
-      if (type === "roadmap") {
+      if (saveOverride) {
+        result = await saveOverride({ type, content, summary });
+      } else if (type === "roadmap") {
         result = await saveCourse(content as Course);
       } else {
         const { courseId, lessonId } = context ?? {};

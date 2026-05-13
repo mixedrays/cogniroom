@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import {
   BookOpen,
   Home,
+  Layers,
+  ListChecks,
   Plus,
   Settings as SettingsIcon,
   Sparkles,
@@ -19,6 +21,8 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { listCourses } from "@/lib/courses";
+import { listDecks } from "@/lib/decks";
+import type { DeckKind } from "@/lib/types";
 import { useSettingsSearch } from "@/modules/settings";
 import { useCommandPalette } from "../context/CommandPaletteContext";
 import { useCommandPaletteHotkey } from "../hooks/useCommandPaletteHotkey";
@@ -48,7 +52,14 @@ export function CommandPalette() {
     enabled: isOpen,
   });
 
+  const decksQuery = useQuery({
+    queryKey: ["decks"],
+    queryFn: listDecks,
+    enabled: isOpen,
+  });
+
   const courses = coursesQuery.data ?? [];
+  const decks = decksQuery.data ?? [];
 
   const runCommand = (action: () => void) => {
     close();
@@ -64,13 +75,20 @@ export function CommandPalette() {
             navigate({ to: "/", search: { session: undefined } as never })
           )
         }
+        onOpenDecks={() => runCommand(() => navigate({ to: "/decks" }))}
         onOpenSettings={() => runCommand(() => openSettings())}
         onSelectCourse={(courseId) =>
           runCommand(() =>
             navigate({ to: "/course/$courseId", params: { courseId } })
           )
         }
+        onSelectDeck={(deckId) =>
+          runCommand(() =>
+            navigate({ to: "/decks/$deckId", params: { deckId } })
+          )
+        }
         courses={courses}
+        decks={decks}
       />
     </CommandDialog>
   );
@@ -79,22 +97,37 @@ export function CommandPalette() {
 interface InnerProps {
   onHome: () => void;
   onNewCourse: () => void;
+  onOpenDecks: () => void;
   onOpenSettings: () => void;
   onSelectCourse: (courseId: string) => void;
+  onSelectDeck: (deckId: string) => void;
   courses: Array<{
     id: string;
     title: string;
     source: string;
     description?: string;
   }>;
+  decks: Array<{
+    id: string;
+    title: string;
+    kind: DeckKind;
+    description?: string;
+  }>;
+}
+
+function deckIcon(kind: DeckKind) {
+  return kind === "flashcards" ? <Layers /> : <ListChecks />;
 }
 
 function Command_Inner({
   onHome,
   onNewCourse,
+  onOpenDecks,
   onOpenSettings,
   onSelectCourse,
+  onSelectDeck,
   courses,
+  decks,
 }: InnerProps) {
   return (
     <>
@@ -107,9 +140,13 @@ function Command_Inner({
             <Home />
             <span>Home</span>
           </CommandItem>
-          <CommandItem onSelect={onNewCourse} value="new course create">
+          <CommandItem onSelect={onNewCourse} value="create new">
             <Plus />
-            <span>New Course</span>
+            <span>Create</span>
+          </CommandItem>
+          <CommandItem onSelect={onOpenDecks} value="decks flashcards quiz">
+            <Layers />
+            <span>Decks</span>
           </CommandItem>
           <CommandItem onSelect={onOpenSettings} value="settings preferences">
             <SettingsIcon />
@@ -124,11 +161,29 @@ function Command_Inner({
               {courses.map((course) => (
                 <CommandItem
                   key={course.id}
-                  value={`${course.title} ${course.description ?? ""}`}
+                  value={`course ${course.title} ${course.description ?? ""}`}
                   onSelect={() => onSelectCourse(course.id)}
                 >
                   {getSourceIcon(course.source)}
                   <span className="truncate">{course.title}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </>
+        )}
+
+        {decks.length > 0 && (
+          <>
+            <CommandSeparator />
+            <CommandGroup heading="Decks">
+              {decks.map((deck) => (
+                <CommandItem
+                  key={deck.id}
+                  value={`deck ${deck.kind} ${deck.title} ${deck.description ?? ""}`}
+                  onSelect={() => onSelectDeck(deck.id)}
+                >
+                  {deckIcon(deck.kind)}
+                  <span className="truncate">{deck.title}</span>
                 </CommandItem>
               ))}
             </CommandGroup>

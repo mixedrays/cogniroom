@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 import { PromptTextarea } from "@/components/PromptTextarea";
 import { AgentChat } from "@/modules/agent/components/AgentChat";
+import {
+  ContentSaveProvider,
+  type ContentSaveOverride,
+} from "@/modules/agent/components/ContentSaveContext";
 import { useWizardAgent } from "../hooks/useWizardAgent";
 import type { WizardAgentContext } from "./WizardAgentDialog";
 import type { SessionMeta } from "../types";
@@ -23,11 +27,13 @@ interface WizardAgentInlineProps {
   welcomeMessage?: string;
   placeholder?: string;
   promptExtra?: ReactNode;
+  promptBefore?: ReactNode;
   className?: string;
   initialSessionId?: string;
   startNewSession?: boolean;
   onSessionPersisted?: (sessionId: string) => void;
   promptTextareaId?: string;
+  saveOverride?: ContentSaveOverride;
   children?: (state: InlineRenderState) => ReactNode;
 }
 
@@ -39,11 +45,13 @@ export function WizardAgentInline({
   welcomeMessage,
   placeholder = "Type a message…",
   promptExtra,
+  promptBefore,
   className,
   initialSessionId,
   startNewSession,
   onSessionPersisted,
   promptTextareaId,
+  saveOverride,
   children,
 }: WizardAgentInlineProps) {
   const agent = useWizardAgent({
@@ -55,7 +63,9 @@ export function WizardAgentInline({
   });
 
   const promptSlot = (
-    <div className="flex flex-col gap-2 w-full mx-auto">
+    <div className="flex flex-col gap-3 w-full mx-auto">
+      {promptBefore}
+
       <PromptTextarea
         value={agent.input}
         onChange={agent.setInput}
@@ -66,13 +76,14 @@ export function WizardAgentInline({
         autoFocus={!agent.hasMessages}
         textareaId={promptTextareaId}
       />
+
       {promptExtra && (
         <div className="flex items-center justify-center">{promptExtra}</div>
       )}
     </div>
   );
 
-  return (
+  const content = (
     <>
       {children?.({
         hasMessages: agent.hasMessages,
@@ -118,4 +129,13 @@ export function WizardAgentInline({
       )}
     </>
   );
+
+  if (saveOverride) {
+    return (
+      <ContentSaveProvider override={saveOverride}>
+        {content}
+      </ContentSaveProvider>
+    );
+  }
+  return content;
 }

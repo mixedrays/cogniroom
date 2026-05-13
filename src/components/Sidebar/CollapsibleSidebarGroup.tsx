@@ -18,12 +18,14 @@ interface CollapsibleSidebarGroupProps {
   label: ReactNode;
   labelClassName?: string;
   children: ReactNode;
+  groupClassName?: string;
 }
 
 export function CollapsibleSidebarGroup({
   sectionId,
   label,
   labelClassName,
+  groupClassName,
   children,
 }: CollapsibleSidebarGroupProps) {
   const { open, setOpen } = useSidebarSectionState(sectionId);
@@ -34,12 +36,12 @@ export function CollapsibleSidebarGroup({
       onOpenChange={setOpen}
       className="group/collapsible"
     >
-      <SidebarGroup>
+      <SidebarGroup className={groupClassName}>
         <SidebarGroupLabel
           render={
             <CollapsibleTrigger
               className={cn(
-                "w-full flex items-center gap-1.5 cursor-pointer hover:text-sidebar-foreground",
+                "w-full flex items-center gap-2 cursor-pointer hover:text-sidebar-foreground hover:bg-sidebar-accent",
                 labelClassName
               )}
             />

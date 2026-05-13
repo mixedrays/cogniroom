@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import {
-  BookOpen,
   Book,
   Sparkles,
   FileJson,
@@ -44,6 +43,7 @@ import {
 import CourseHistory from "@/components/CourseHistory";
 import { CollapsibleSidebarGroup } from "@/components/Sidebar";
 import { CommandPaletteTrigger } from "@/modules/command-palette";
+import DeckList from "@/components/DeckList";
 
 export default function CourseList() {
   const [deleteDialogOpenId, setDeleteDialogOpenId] = useState<string | null>(
@@ -118,7 +118,7 @@ export default function CourseList() {
                     }}
                   >
                     <Plus />
-                    <span>New Course</span>
+                    <span>Create</span>
                   </Link>
                 }
               />
@@ -143,32 +143,32 @@ export default function CourseList() {
               showRetry
               className="m-4"
             />
-          ) : courses.length === 0 ? (
-            <>
-              <div className="p-4 text-center text-muted-foreground">
-                <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">No courses yet</p>
-                <p className="text-xs mt-1">
-                  Create your first course to get started
-                </p>
-              </div>
-
-              <CourseHistory />
-            </>
           ) : (
             <>
               <CollapsibleSidebarGroup
-                sectionId="your-courses"
+                sectionId="courses"
                 label={
                   <>
                     <Book className="size-4" />
-                    Your Courses
+                    Courses
                   </>
                 }
               >
+                {courses.length === 0 ? (
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                        No courses yet
+                      </div>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                ) : (
                 <SidebarMenu>
                   {courses.map((course) => (
-                    <Collapsible key={course.id} className="group/collapsible">
+                    <Collapsible
+                      key={course.id}
+                      className="group/course-item"
+                    >
                       <SidebarMenuItem>
                         <SidebarMenuButton
                           className="pr-0"
@@ -189,7 +189,7 @@ export default function CourseList() {
                                     variant="secondary"
                                     className="ml-auto"
                                   >
-                                    <ChevronDown className="transition-transform duration-200 group-data-open/collapsible:rotate-180" />
+                                    <ChevronDown className="transition-transform duration-200 group-data-open/course-item:rotate-180" />
                                   </Button>
                                 }
                               />
@@ -291,7 +291,10 @@ export default function CourseList() {
                     </Collapsible>
                   ))}
                 </SidebarMenu>
+                )}
               </CollapsibleSidebarGroup>
+
+              <DeckList />
 
               <CourseHistory />
             </>

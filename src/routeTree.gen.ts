@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DecksIndexRouteImport } from './routes/decks.index'
+import { Route as DecksDeckIdRouteImport } from './routes/decks.$deckId'
 import { Route as CourseCourseIdRouteImport } from './routes/course.$courseId'
 import { Route as CourseCourseIdIndexRouteImport } from './routes/course.$courseId.index'
 import { Route as CourseCourseIdLessonLessonIdRouteImport } from './routes/course.$courseId.lesson.$lessonId'
@@ -27,6 +29,16 @@ const SettingsRoute = SettingsRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DecksIndexRoute = DecksIndexRouteImport.update({
+  id: '/decks/',
+  path: '/decks/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DecksDeckIdRoute = DecksDeckIdRouteImport.update({
+  id: '/decks/$deckId',
+  path: '/decks/$deckId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CourseCourseIdRoute = CourseCourseIdRouteImport.update({
@@ -74,6 +86,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/settings': typeof SettingsRoute
   '/course/$courseId': typeof CourseCourseIdRouteWithChildren
+  '/decks/$deckId': typeof DecksDeckIdRoute
+  '/decks/': typeof DecksIndexRoute
   '/course/$courseId/': typeof CourseCourseIdIndexRoute
   '/course/$courseId/lesson/$lessonId': typeof CourseCourseIdLessonLessonIdRouteWithChildren
   '/course/$courseId/lesson/$lessonId/exercises': typeof CourseCourseIdLessonLessonIdExercisesRoute
@@ -84,6 +98,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/settings': typeof SettingsRoute
+  '/decks/$deckId': typeof DecksDeckIdRoute
+  '/decks': typeof DecksIndexRoute
   '/course/$courseId': typeof CourseCourseIdIndexRoute
   '/course/$courseId/lesson/$lessonId/exercises': typeof CourseCourseIdLessonLessonIdExercisesRoute
   '/course/$courseId/lesson/$lessonId/flashcards': typeof CourseCourseIdLessonLessonIdFlashcardsRoute
@@ -95,6 +111,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/settings': typeof SettingsRoute
   '/course/$courseId': typeof CourseCourseIdRouteWithChildren
+  '/decks/$deckId': typeof DecksDeckIdRoute
+  '/decks/': typeof DecksIndexRoute
   '/course/$courseId/': typeof CourseCourseIdIndexRoute
   '/course/$courseId/lesson/$lessonId': typeof CourseCourseIdLessonLessonIdRouteWithChildren
   '/course/$courseId/lesson/$lessonId/exercises': typeof CourseCourseIdLessonLessonIdExercisesRoute
@@ -108,6 +126,8 @@ export interface FileRouteTypes {
     | '/'
     | '/settings'
     | '/course/$courseId'
+    | '/decks/$deckId'
+    | '/decks/'
     | '/course/$courseId/'
     | '/course/$courseId/lesson/$lessonId'
     | '/course/$courseId/lesson/$lessonId/exercises'
@@ -118,6 +138,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/settings'
+    | '/decks/$deckId'
+    | '/decks'
     | '/course/$courseId'
     | '/course/$courseId/lesson/$lessonId/exercises'
     | '/course/$courseId/lesson/$lessonId/flashcards'
@@ -128,6 +150,8 @@ export interface FileRouteTypes {
     | '/'
     | '/settings'
     | '/course/$courseId'
+    | '/decks/$deckId'
+    | '/decks/'
     | '/course/$courseId/'
     | '/course/$courseId/lesson/$lessonId'
     | '/course/$courseId/lesson/$lessonId/exercises'
@@ -140,6 +164,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SettingsRoute: typeof SettingsRoute
   CourseCourseIdRoute: typeof CourseCourseIdRouteWithChildren
+  DecksDeckIdRoute: typeof DecksDeckIdRoute
+  DecksIndexRoute: typeof DecksIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -156,6 +182,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/decks/': {
+      id: '/decks/'
+      path: '/decks'
+      fullPath: '/decks/'
+      preLoaderRoute: typeof DecksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/decks/$deckId': {
+      id: '/decks/$deckId'
+      path: '/decks/$deckId'
+      fullPath: '/decks/$deckId'
+      preLoaderRoute: typeof DecksDeckIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/course/$courseId': {
@@ -253,6 +293,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SettingsRoute: SettingsRoute,
   CourseCourseIdRoute: CourseCourseIdRouteWithChildren,
+  DecksDeckIdRoute: DecksDeckIdRoute,
+  DecksIndexRoute: DecksIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -26,6 +26,17 @@ export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
+export function generateUniqueDeckId(
+  title: string,
+  existingIds: string[]
+): string {
+  const slug = toSlug(title) || `deck-${Date.now()}`;
+  if (!existingIds.includes(slug)) return slug;
+  let n = 2;
+  while (existingIds.includes(`${slug}-${n}`)) n++;
+  return `${slug}-${n}`;
+}
+
 export function isLessonSectionCompleted(
   lesson: Lesson,
   section: LessonSection
