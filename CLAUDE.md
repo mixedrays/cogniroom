@@ -4,6 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: This file is auto-generated from INSTRUCTIONS.md. Edit INSTRUCTIONS.md and run `scripts/sync-instructions.sh` to update.
 
+
 ## Project Overview
 
 CogniRoom - A platform for creating, managing, and tracking skill learning roadmaps. Users can generate roadmaps via LLM, import them (e.g., from roadmap.sh), or extract from external sources (video URLs, documentation pages), then generate lessons, tests, exercises content and track learning progress.
@@ -25,6 +26,7 @@ CogniRoom - A platform for creating, managing, and tracking skill learning roadm
 - Do not hardcode any API keys or sensitive information in the codebase. Use environment variables instead.
 - Do not add comments to the code unless necessary for clarity. The code should be self-explanatory and follow best practices for readability.
 - After making changes, run `npm run validate` to run all checks (typecheck, lint, unit tests, e2e tests).
+- Do not use git worktrees unless the user explicitly requests them. Work directly in the current checkout.
 
 ## Core Domain Modeling
 
