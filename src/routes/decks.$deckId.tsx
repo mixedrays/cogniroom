@@ -207,9 +207,7 @@ function DeckViewer() {
         {!hasContent ? (
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="rounded-xl border bg-card p-10 text-center max-w-md">
-              <h2 className="text-lg font-medium mb-1">
-                This deck is empty
-              </h2>
+              <h2 className="text-lg font-medium mb-1">This deck is empty</h2>
               <p className="text-sm text-muted-foreground">
                 {deck.kind === "flashcards"
                   ? "No flashcards yet. Phase 2 will add agent-based generation."
@@ -241,7 +239,6 @@ function DeckViewer() {
           </div>
         )}
       </div>
-
     </div>
   );
 }

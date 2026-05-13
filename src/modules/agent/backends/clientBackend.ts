@@ -26,7 +26,9 @@ function getClientModel(model: string) {
 
   const apiKey = localStorage.getItem(OPENAI_API_KEY_STORAGE) ?? "";
   if (!apiKey.trim()) {
-    throw new Error("OpenAI API key is not set. Please add it in [settings:api-key].");
+    throw new Error(
+      "OpenAI API key is not set. Please add it in [settings:api-key]."
+    );
   }
   const openai = createOpenAI({ apiKey });
   return openai(model);

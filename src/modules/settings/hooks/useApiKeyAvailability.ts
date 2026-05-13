@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  providers,
-  getProviderLocalStorageKeyName,
-} from "@/lib/llm-models";
+import { providers, getProviderLocalStorageKeyName } from "@/lib/llm-models";
 import { getEnvApiKeys, type ProviderEnvKeyInfo } from "../lib/settings";
 
 export type ApiKeySource = "local" | "env" | "none";
@@ -81,7 +78,9 @@ export function useApiKeyAvailability() {
         refreshLocal();
         return;
       }
-      if (providers.some((p) => getProviderLocalStorageKeyName(p.id) === e.key)) {
+      if (
+        providers.some((p) => getProviderLocalStorageKeyName(p.id) === e.key)
+      ) {
         refreshLocal();
       }
     };
@@ -89,14 +88,11 @@ export function useApiKeyAvailability() {
     return () => window.removeEventListener("storage", onStorage);
   }, [refreshLocal]);
 
-  const availability = useMemo(
-    () => {
-      // localTick is read so changes to it re-trigger the localStorage read
-      void localTick;
-      return buildAvailability(envKeys);
-    },
-    [envKeys, localTick]
-  );
+  const availability = useMemo(() => {
+    // localTick is read so changes to it re-trigger the localStorage read
+    void localTick;
+    return buildAvailability(envKeys);
+  }, [envKeys, localTick]);
 
   const availableProviderIds = useMemo(
     () =>

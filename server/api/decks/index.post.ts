@@ -92,10 +92,7 @@ export default defineEventHandler(async (event) => {
     }
     if (quiz) {
       const adapter = getFormatAdapter("quiz");
-      await storageApi.post(
-        storagePaths.deckQuiz(id),
-        adapter.serialize(quiz)
-      );
+      await storageApi.post(storagePaths.deckQuiz(id), adapter.serialize(quiz));
     }
 
     return { success: true, id };

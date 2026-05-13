@@ -12,7 +12,10 @@ export type PresentContentType =
   | "flashcards"
   | "exercise";
 
-export const PRESENT_TOOL_BY_CONTENT_TYPE: Record<PresentContentType, AgentTool> = {
+export const PRESENT_TOOL_BY_CONTENT_TYPE: Record<
+  PresentContentType,
+  AgentTool
+> = {
   roadmap: presentRoadmapTool,
   lesson: presentLessonContentTool,
   quiz: presentLessonQuizTool,

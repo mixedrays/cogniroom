@@ -69,7 +69,6 @@ function RootComponent() {
               <main className="flex-1 flex flex-col min-w-0 bg-background text-foreground h-screen overflow-hidden">
                 <Outlet />
               </main>
-
             </SidebarProvider>
             <SettingsDialog />
             <CommandPalette />
@@ -110,7 +109,11 @@ function RootNotFound() {
         <p className="text-sm leading-6 text-muted-foreground">
           The route you requested does not exist or is no longer available.
         </p>
-        <Button variant="outline" nativeButton={false} render={<Link to="/">Back to home</Link>} />
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={<Link to="/">Back to home</Link>}
+        />
       </div>
     </div>
   );

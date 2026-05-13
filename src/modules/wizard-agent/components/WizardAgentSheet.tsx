@@ -87,7 +87,9 @@ export function WizardAgentSheet({
     if (initializedRef.current) return;
     initializedRef.current = true;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSelectedIds(defaultIds.filter((id) => available.some((a) => a.id === id)));
+    setSelectedIds(
+      defaultIds.filter((id) => available.some((a) => a.id === id))
+    );
   }, [open, available, defaultIds]);
 
   const selectedAttachments = useMemo(

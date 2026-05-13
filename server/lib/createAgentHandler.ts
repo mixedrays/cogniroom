@@ -31,9 +31,7 @@ export function createAgentHandler(config: {
       ? `${baseSystem}\n\n${memoryContext}`
       : baseSystem;
     const tools =
-      typeof config.tools === "function"
-        ? config.tools(context)
-        : config.tools;
+      typeof config.tools === "function" ? config.tools(context) : config.tools;
 
     const eventStream = createEventStream(event);
 

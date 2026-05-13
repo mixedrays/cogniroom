@@ -83,27 +83,37 @@ function normalizeQuestionType(raw: string): string {
   if (stripped === "truefalse" || stripped === "tf" || stripped === "boolean") {
     return "true-false";
   }
-  if (stripped === "choice" || stripped === "multichoice" || stripped === "multiplechoice") {
+  if (
+    stripped === "choice" ||
+    stripped === "multichoice" ||
+    stripped === "multiplechoice"
+  ) {
     return "choice";
   }
   return lower;
 }
 
-const QuestionInputSchema = z.preprocess((value) => {
-  if (
-    value &&
-    typeof value === "object" &&
-    "type" in value &&
-    typeof (value as { type?: unknown }).type === "string"
-  ) {
-    const rawType = (value as { type: string }).type;
-    const normalized = normalizeQuestionType(rawType);
-    if (normalized !== rawType) {
-      return { ...(value as object), type: normalized };
+const QuestionInputSchema = z.preprocess(
+  (value) => {
+    if (
+      value &&
+      typeof value === "object" &&
+      "type" in value &&
+      typeof (value as { type?: unknown }).type === "string"
+    ) {
+      const rawType = (value as { type: string }).type;
+      const normalized = normalizeQuestionType(rawType);
+      if (normalized !== rawType) {
+        return { ...(value as object), type: normalized };
+      }
     }
-  }
-  return value;
-}, z.discriminatedUnion("type", [ChoiceQuestionOutputSchema, TrueFalseQuestionOutputSchema]));
+    return value;
+  },
+  z.discriminatedUnion("type", [
+    ChoiceQuestionOutputSchema,
+    TrueFalseQuestionOutputSchema,
+  ])
+);
 
 export const QuizContentOutputSchema = z.object({
   quizQuestions: z

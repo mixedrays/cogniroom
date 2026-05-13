@@ -65,17 +65,15 @@ export async function listMemoryEntries(): Promise<
         return { key, content: content.trim() };
       })
   );
-  return entries.filter((e) => e.content.length > 0).sort((a, b) =>
-    a.key.localeCompare(b.key)
-  );
+  return entries
+    .filter((e) => e.content.length > 0)
+    .sort((a, b) => a.key.localeCompare(b.key));
 }
 
 export async function getMemoryContext(): Promise<string> {
   const entries = await listMemoryEntries();
   if (entries.length === 0) return "";
-  const body = entries
-    .map((e) => `### ${e.key}\n${e.content}`)
-    .join("\n\n");
+  const body = entries.map((e) => `### ${e.key}\n${e.content}`).join("\n\n");
   return [
     "USER MEMORY (persisted notes about the user — consider these when responding):",
     body,

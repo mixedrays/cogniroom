@@ -1,11 +1,10 @@
 ---
-applyTo: '**'
+applyTo: "**"
 ---
 
 # Copilot Instructions
 
 > **Note**: This file is auto-generated from INSTRUCTIONS.md. Edit INSTRUCTIONS.md and run `scripts/sync-instructions.sh` to update.
-
 
 ## Project Overview
 

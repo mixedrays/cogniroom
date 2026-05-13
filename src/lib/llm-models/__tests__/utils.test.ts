@@ -54,9 +54,7 @@ describe("getModelPriceFullLabel", () => {
   it("returns exact dollar signs for any rating", () => {
     expect(getModelPriceFullLabel(makeModel({ priceRating: 1 }))).toBe("$");
     expect(getModelPriceFullLabel(makeModel({ priceRating: 4 }))).toBe("$$$$");
-    expect(getModelPriceFullLabel(makeModel({ priceRating: 5 }))).toBe(
-      "$$$$$",
-    );
+    expect(getModelPriceFullLabel(makeModel({ priceRating: 5 }))).toBe("$$$$$");
   });
 });
 
@@ -94,7 +92,7 @@ describe("getValidModel", () => {
 
   it("returns the model if it exists", () => {
     expect(getValidModel("model-b", sampleModels, defaultModel)).toBe(
-      "model-b",
+      "model-b"
     );
   });
 
@@ -105,7 +103,7 @@ describe("getValidModel", () => {
   it("returns default for null/undefined", () => {
     expect(getValidModel(null, sampleModels, defaultModel)).toBe("model-a");
     expect(getValidModel(undefined, sampleModels, defaultModel)).toBe(
-      "model-a",
+      "model-a"
     );
   });
 });

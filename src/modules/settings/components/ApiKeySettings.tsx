@@ -33,7 +33,10 @@ import {
   FieldTitle,
 } from "@/components/ui/field";
 import { providers, getProviderLocalStorageKeyName } from "@/lib/llm-models";
-import { useApiKeyAvailability, type ProviderApiKeyAvailability } from "../hooks/useApiKeyAvailability";
+import {
+  useApiKeyAvailability,
+  type ProviderApiKeyAvailability,
+} from "../hooks/useApiKeyAvailability";
 
 function ApiKeyField({
   label,
@@ -229,9 +232,8 @@ function BrowserKeyDisclaimer() {
                   <h3 className="font-medium mb-1">How keys are stored</h3>
                   <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                     <li>
-                      Saved in this browser's <code>localStorage</code> in
-                      plain text under keys like{" "}
-                      <code>openai_api_key</code>.
+                      Saved in this browser's <code>localStorage</code> in plain
+                      text under keys like <code>openai_api_key</code>.
                     </li>
                     <li>
                       Never sent to this app's server — requests go directly
@@ -279,16 +281,16 @@ function BrowserKeyDisclaimer() {
                       app — don't reuse a production key.
                     </li>
                     <li>
-                      Restrict the key to the minimum permissions / models
-                      your provider supports.
+                      Restrict the key to the minimum permissions / models your
+                      provider supports.
                     </li>
                     <li>
                       <strong>Rotate</strong> the key regularly, and revoke
                       immediately if you suspect exposure.
                     </li>
                     <li>
-                      Use this mode only on a trusted device and browser
-                      profile — avoid shared or public machines.
+                      Use this mode only on a trusted device and browser profile
+                      — avoid shared or public machines.
                     </li>
                     <li>
                       Audit installed browser extensions; remove anything you
@@ -299,20 +301,22 @@ function BrowserKeyDisclaimer() {
                       whenever possible — keys never reach the browser there.
                     </li>
                     <li>
-                      When done, click the trash icon next to a key to remove
-                      it from this browser.
+                      When done, click the trash icon next to a key to remove it
+                      from this browser.
                     </li>
                   </ul>
                 </section>
 
                 <p className="sm:col-span-2 text-xs text-muted-foreground">
-                  You are responsible for charges incurred by any key you
-                  enter here.
+                  You are responsible for charges incurred by any key you enter
+                  here.
                 </p>
               </div>
 
               <DialogFooter>
-                <DialogClose render={<Button variant="outline">Close</Button>} />
+                <DialogClose
+                  render={<Button variant="outline">Close</Button>}
+                />
               </DialogFooter>
             </DialogContent>
           </Dialog>

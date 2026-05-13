@@ -91,7 +91,10 @@ export default function CourseHistory() {
         navigate({ to: "/", search: { session: undefined } });
       }
     } catch (e) {
-      setDeleteError({ id, message: (e as Error).message ?? "Failed to delete" });
+      setDeleteError({
+        id,
+        message: (e as Error).message ?? "Failed to delete",
+      });
     } finally {
       setDeletingId(null);
     }
@@ -108,72 +111,72 @@ export default function CourseHistory() {
       }
     >
       <SidebarMenu>
-          {sessions.map((session) => (
-            <SidebarMenuItem
-              key={session.id}
-              className="group/history-item relative"
+        {sessions.map((session) => (
+          <SidebarMenuItem
+            key={session.id}
+            className="group/history-item relative"
+          >
+            <SidebarMenuButton
+              onClick={() => handleSelect(session.id)}
+              className={cn(
+                "pr-8 cursor-pointer",
+                session.id === activeSessionId && "bg-sidebar-accent"
+              )}
             >
-              <SidebarMenuButton
-                onClick={() => handleSelect(session.id)}
-                className={cn(
-                  "pr-8 cursor-pointer",
-                  session.id === activeSessionId && "bg-sidebar-accent"
-                )}
-              >
-                <MessagesSquare />
-                <span className="truncate">{session.title}</span>
-              </SidebarMenuButton>
+              <MessagesSquare />
+              <span className="truncate">{session.title}</span>
+            </SidebarMenuButton>
 
-              <AlertDialog
-                open={deleteDialogOpenId === session.id}
-                onOpenChange={(open) => {
-                  if (open) setDeleteError(null);
-                  setDeleteDialogOpenId(open ? session.id : null);
-                }}
-              >
-                <AlertDialogTrigger
-                  render={
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="absolute top-0 right-0 opacity-0 group-hover/history-item:opacity-100 transition-opacity"
-                      onClick={(e) => e.stopPropagation()}
-                      aria-label="Delete session"
-                    >
-                      <Trash2 />
-                    </Button>
-                  }
-                />
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete session?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will permanently delete "{session.title}".
-                    </AlertDialogDescription>
-                    {deleteError?.id === session.id && (
-                      <ErrorState
-                        variant="minimal"
-                        message={deleteError.message}
-                      />
-                    )}
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel disabled={deletingId === session.id}>
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      variant="destructive"
-                      onClick={() => handleDelete(session.id)}
-                      disabled={deletingId === session.id}
-                    >
-                      {deletingId === session.id ? "Deleting…" : "Delete"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+            <AlertDialog
+              open={deleteDialogOpenId === session.id}
+              onOpenChange={(open) => {
+                if (open) setDeleteError(null);
+                setDeleteDialogOpenId(open ? session.id : null);
+              }}
+            >
+              <AlertDialogTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="absolute top-0 right-0 opacity-0 group-hover/history-item:opacity-100 transition-opacity"
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="Delete session"
+                  >
+                    <Trash2 />
+                  </Button>
+                }
+              />
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete session?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete "{session.title}".
+                  </AlertDialogDescription>
+                  {deleteError?.id === session.id && (
+                    <ErrorState
+                      variant="minimal"
+                      message={deleteError.message}
+                    />
+                  )}
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deletingId === session.id}>
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={() => handleDelete(session.id)}
+                    disabled={deletingId === session.id}
+                  >
+                    {deletingId === session.id ? "Deleting…" : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
     </CollapsibleSidebarGroup>
   );
 }

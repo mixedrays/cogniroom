@@ -22,7 +22,7 @@ export function formatPricePerMillion(pricePerToken: number): string {
 
 export function getModelLabel(
   modelId: string | undefined | null,
-  allModels: ProviderModels,
+  allModels: ProviderModels
 ): string {
   const model = allModels[modelId as keyof typeof allModels];
   return model ? model.label : modelId || "Unknown model";
@@ -31,7 +31,7 @@ export function getModelLabel(
 export function getValidModel(
   model: string | undefined | null,
   allModels: ProviderModels,
-  defaultModel: string,
+  defaultModel: string
 ): string {
   if (model && model in allModels) {
     return model;
@@ -41,7 +41,7 @@ export function getValidModel(
 
 export function getProviderForModel(
   modelId: string,
-  providers: ProviderConfig[],
+  providers: ProviderConfig[]
 ): ProviderConfig | undefined {
   return providers.find((p) => modelId in p.models);
 }

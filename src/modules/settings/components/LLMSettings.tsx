@@ -57,7 +57,8 @@ export function LLMSettings() {
         {!isLoading && visibleProviders.length === 0 ? (
           <div className="text-center py-8 text-sm text-muted-foreground border border-dashed rounded-md">
             <KeyRound className="size-5 mx-auto mb-2 opacity-50" />
-            No API keys detected. Add a key in the API Keys tab to enable models.
+            No API keys detected. Add a key in the API Keys tab to enable
+            models.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -85,7 +86,13 @@ export function LLMSettings() {
                     return (
                       <tr key={key} className="border-b border-border/50">
                         <td className="py-1.5 pr-2">
-                          <Tooltip content={isHidden ? "Show in selector" : "Hide from selector"}>
+                          <Tooltip
+                            content={
+                              isHidden
+                                ? "Show in selector"
+                                : "Hide from selector"
+                            }
+                          >
                             <Button
                               variant="ghost"
                               size="icon"
@@ -119,8 +126,7 @@ export function LLMSettings() {
         )}
         {hiddenProviders.length > 0 && (
           <p className="text-xs text-muted-foreground mt-3">
-            Hidden (no API key):{" "}
-            {hiddenProviders.map((p) => p.name).join(", ")}
+            Hidden (no API key): {hiddenProviders.map((p) => p.name).join(", ")}
           </p>
         )}
       </div>

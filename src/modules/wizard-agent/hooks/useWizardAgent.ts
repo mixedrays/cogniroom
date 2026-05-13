@@ -5,10 +5,7 @@ import { useChatBackend } from "@/modules/agent/hooks/useChatBackend";
 import { askUserV2Tool } from "@/modules/agent/tools/ask-user-v2";
 import { memoryTool } from "@/modules/agent/tools/memory";
 import { getPresentToolForContentType } from "@/modules/agent/tools/present/registry";
-import type {
-  AgentMessageState,
-  AgentSseEvent,
-} from "@/modules/agent/types";
+import type { AgentMessageState, AgentSseEvent } from "@/modules/agent/types";
 import {
   messagesReducer,
   initialMessagesState,
@@ -17,7 +14,6 @@ import {
 } from "@/modules/agent/lib/messagesReducer";
 import type { WizardAgentContext } from "../components/WizardAgentDialog";
 import type { SessionMeta } from "../types";
-
 
 function scopeQuery(context: WizardAgentContext): string {
   const params = new URLSearchParams({ contentType: context.contentType });
@@ -334,8 +330,7 @@ export function useWizardAgent({
       const sessionId = currentSessionId;
       const id = crypto.randomUUID();
       sessionDispatch(sessionId, { type: "ADD_USER_MESSAGE", id, text });
-      const existing =
-        sessionStatesRef.current[sessionId]?.messages ?? [];
+      const existing = sessionStatesRef.current[sessionId]?.messages ?? [];
       sendToAPI(sessionId, [...existing, { id, role: "user", text }]);
     },
     [currentSessionId, sendToAPI, sessionDispatch]
@@ -357,8 +352,7 @@ export function useWizardAgent({
         toolCallId,
         result,
       });
-      const existing =
-        sessionStatesRef.current[sessionId]?.messages ?? [];
+      const existing = sessionStatesRef.current[sessionId]?.messages ?? [];
       const updated = existing.map((m) =>
         m.role === "tool_call" && m.toolCallId === toolCallId
           ? { ...m, status: "submitted" as const, result }
@@ -458,9 +452,7 @@ export function useWizardAgent({
           persistedRef.current.add(meta.id);
           setSessions((prev) => {
             const others = prev.filter((s) => s.id !== meta.id);
-            return [meta, ...others].sort(
-              (a, b) => b.createdAt - a.createdAt
-            );
+            return [meta, ...others].sort((a, b) => b.createdAt - a.createdAt);
           });
           invalidateSessionList();
           if (isFirstPersist) onSessionPersistedRef.current?.(meta.id);
@@ -559,14 +551,16 @@ export function useWizardAgent({
     newSession();
   }, [newSession]);
 
-  const currentState =
-    sessionStates[currentSessionId] ?? initialMessagesState;
+  const currentState = sessionStates[currentSessionId] ?? initialMessagesState;
   const messages = currentState.messages;
   const isStreaming = currentState.isStreaming;
 
   const loadMessages = useCallback(
     (msgs: AgentMessageState[]) => {
-      sessionDispatch(currentSessionId, { type: "LOAD_MESSAGES", messages: msgs });
+      sessionDispatch(currentSessionId, {
+        type: "LOAD_MESSAGES",
+        messages: msgs,
+      });
       lastSavedMessagesRef.current.set(currentSessionId, msgs);
     },
     [currentSessionId, sessionDispatch]

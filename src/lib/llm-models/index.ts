@@ -30,7 +30,7 @@ export const DEFAULT_MODEL = "gpt-5-mini";
  */
 export const ALL_MODELS: ProviderModels = providers.reduce<ProviderModels>(
   (acc, provider) => ({ ...acc, ...provider.models }),
-  {},
+  {}
 );
 
 /**
@@ -41,13 +41,13 @@ export const ALL_MODELS: ProviderModels = providers.reduce<ProviderModels>(
  * const models = getAvailableModels(new Set(["openai"]));
  */
 export function getAvailableModels(
-  enabledProviderIds: Set<string>,
+  enabledProviderIds: Set<string>
 ): ProviderModels {
   return providers
     .filter((p) => enabledProviderIds.has(p.id))
     .reduce<ProviderModels>(
       (acc, provider) => ({ ...acc, ...provider.models }),
-      {},
+      {}
     );
 }
 

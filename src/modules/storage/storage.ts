@@ -196,7 +196,11 @@ export function createStorageApi(config: StorageConfig): StorageApi {
       storage<T>(path, { method: "PUT", body }, adapter),
 
     delete: (path: string, recursive = false) =>
-      storage<void>(path, { method: "DELETE", options: { recursive } }, adapter),
+      storage<void>(
+        path,
+        { method: "DELETE", options: { recursive } },
+        adapter
+      ),
 
     exists: async (path: string) => {
       const response = await storage(path, { method: "HEAD" }, adapter);

@@ -93,9 +93,7 @@ export async function getDeckFlashcards(
   id: string
 ): Promise<{ content: FlashcardsContent } | null> {
   try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/decks/${id}/flashcards`
-    );
+    const response = await fetch(`${getBaseUrl()}/api/decks/${id}/flashcards`);
     if (!response.ok) {
       if (response.status === 404) return null;
       throw new Error(response.statusText);

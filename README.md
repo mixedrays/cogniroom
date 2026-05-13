@@ -44,29 +44,29 @@ The app runs at `http://localhost:3000`.
 
 Environment variables (see `.env.example`):
 
-| Variable            | Required | Description                                                       |
-| ------------------- | -------- | ----------------------------------------------------------------- |
-| `OPENAI_API_KEY`    | One of   | OpenAI API key — used for LLM features.                           |
-| `ANTHROPIC_API_KEY` | One of   | Anthropic API key — alternative LLM provider.                     |
-| `DATA_PATH`         | No       | Directory for persisted data. Defaults to `./data`.               |
-| `APP_NAME`          | No       | Display name shown in the UI. Defaults to `CogniRoom`.            |
+| Variable            | Required | Description                                            |
+| ------------------- | -------- | ------------------------------------------------------ |
+| `OPENAI_API_KEY`    | One of   | OpenAI API key — used for LLM features.                |
+| `ANTHROPIC_API_KEY` | One of   | Anthropic API key — alternative LLM provider.          |
+| `DATA_PATH`         | No       | Directory for persisted data. Defaults to `./data`.    |
+| `APP_NAME`          | No       | Display name shown in the UI. Defaults to `CogniRoom`. |
 
 Keys can also be supplied at runtime from the in-app **Settings** page (stored in `localStorage`) when `useOwnKey` is enabled.
 
 ## Scripts
 
-| Command             | Description                                          |
-| ------------------- | ---------------------------------------------------- |
-| `npm run dev`       | Start the development server on port 3000.          |
-| `npm run build`     | Production build.                                    |
-| `npm run preview`   | Preview the production build locally.                |
-| `npm run test`      | Run unit tests (Vitest).                             |
-| `npm run test:e2e`  | Run end-to-end tests (Puppeteer).                    |
-| `npm run test:all`  | Run unit and e2e tests.                              |
-| `npm run typecheck` | TypeScript type-check (no emit).                     |
-| `npm run lint`      | Run ESLint on `src/`.                                |
-| `npm run format`    | Format the project with Prettier.                    |
-| `npm run validate`  | Typecheck + lint + unit + e2e tests.                 |
+| Command             | Description                                |
+| ------------------- | ------------------------------------------ |
+| `npm run dev`       | Start the development server on port 3000. |
+| `npm run build`     | Production build.                          |
+| `npm run preview`   | Preview the production build locally.      |
+| `npm run test`      | Run unit tests (Vitest).                   |
+| `npm run test:e2e`  | Run end-to-end tests (Puppeteer).          |
+| `npm run test:all`  | Run unit and e2e tests.                    |
+| `npm run typecheck` | TypeScript type-check (no emit).           |
+| `npm run lint`      | Run ESLint on `src/`.                      |
+| `npm run format`    | Format the project with Prettier.          |
+| `npm run validate`  | Typecheck + lint + unit + e2e tests.       |
 
 ## Project Structure
 
