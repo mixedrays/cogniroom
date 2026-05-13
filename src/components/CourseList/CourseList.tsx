@@ -117,7 +117,7 @@ export default function CourseList() {
                     }}
                   >
                     <Plus />
-                    <span>New Course</span>
+                    <span>Create</span>
                   </Link>
                 }
               />

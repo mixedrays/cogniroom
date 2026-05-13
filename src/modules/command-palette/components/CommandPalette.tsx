@@ -107,9 +107,9 @@ function Command_Inner({
             <Home />
             <span>Home</span>
           </CommandItem>
-          <CommandItem onSelect={onNewCourse} value="new course create">
+          <CommandItem onSelect={onNewCourse} value="create">
             <Plus />
-            <span>New Course</span>
+            <span>Create</span>
           </CommandItem>
           <CommandItem onSelect={onOpenSettings} value="settings preferences">
             <SettingsIcon />
