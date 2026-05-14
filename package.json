@@ -39,7 +39,7 @@
     "embla-carousel-react": "^8.6.0",
     "h3": "^2.0.1-rc.7",
     "katex": "^0.16.28",
-    "lucide-react": "^0.561.0",
+    "lucide-react": "^1.14.0",
     "mermaid": "^11.12.2",
     "next-themes": "^0.4.6",
     "nitro": "latest",
