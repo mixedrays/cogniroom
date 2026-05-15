@@ -155,9 +155,7 @@ export default function HomeAgentTabs({
       welcomeTitle={config.welcomeTitle}
       placeholder={config.placeholder}
       className="max-w-3xl w-full mx-auto"
-      promptTextareaId={
-        mode === "roadmap" ? HOME_PROMPT_TEXTAREA_ID : undefined
-      }
+      promptTextareaId={HOME_PROMPT_TEXTAREA_ID}
       saveOverride={saveOverride}
       promptBefore={tabs}
       promptExtra={
