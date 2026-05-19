@@ -13,6 +13,7 @@ import { useSettings } from "@/modules/settings/context/SettingsContext";
 import { getValidModel } from "@/lib/llm-models";
 import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { cn } from "@/lib/utils";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 export type PromptAttachmentOption = {
   id: string;
@@ -51,13 +52,14 @@ export function PromptTextarea({
   textareaId,
 }: PromptTextareaProps) {
   const { settings } = useSettings();
+  const online = useOnlineStatus();
   const [selectedModel, setSelectedModel] = useState(() =>
     getValidModel(settings.llm.defaultModel)
   );
 
   const handleSubmit = () => {
     const text = value.trim();
-    if (!text || disabled) return;
+    if (!text || disabled || !online) return;
     onSubmit(text, selectedModel);
   };
 
@@ -68,7 +70,7 @@ export function PromptTextarea({
     }
   };
 
-  const isSendDisabled = disabled || !value.trim();
+  const isSendDisabled = disabled || !value.trim() || !online;
   const isInputDisabled = disabled || isStreaming;
 
   const activeAttachments = attachments ?? [];
@@ -167,18 +169,29 @@ export function PromptTextarea({
               <Square className="size-3 fill-current" />
             </Button>
           ) : (
-            <Button
-              size="icon"
-              onClick={handleSubmit}
-              disabled={isSendDisabled}
-              aria-label={disabled ? "Sending..." : "Send"}
-            >
-              {disabled ? (
-                <Loader2 className="size-4 animate-spin" />
+            (() => {
+              const sendButton = (
+                <Button
+                  size="icon"
+                  onClick={handleSubmit}
+                  disabled={isSendDisabled}
+                  aria-label={
+                    !online ? "Offline" : disabled ? "Sending..." : "Send"
+                  }
+                >
+                  {disabled ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <ArrowUp className="size-4" />
+                  )}
+                </Button>
+              );
+              return !online ? (
+                <Tooltip content="You are offline">{sendButton}</Tooltip>
               ) : (
-                <ArrowUp className="size-4" />
-              )}
-            </Button>
+                sendButton
+              );
+            })()
           )}
         </div>
       </div>

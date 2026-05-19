@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { decksQueryKey } from "@/components/DeckList";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 interface CreateDeckDialogProps {
   trigger?: React.ReactElement;
@@ -39,6 +40,7 @@ export default function CreateDeckDialog({
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const online = useOnlineStatus();
 
   const resetForm = () => {
     setTitle("");
@@ -172,7 +174,11 @@ export default function CreateDeckDialog({
           >
             Cancel
           </DialogClose>
-          <Button onClick={handleSubmit} disabled={isLoading}>
+          <Button
+            onClick={handleSubmit}
+            disabled={isLoading || !online}
+            title={!online ? "You are offline" : undefined}
+          >
             {isLoading ? (
               <>
                 <Loader2 className="animate-spin" />

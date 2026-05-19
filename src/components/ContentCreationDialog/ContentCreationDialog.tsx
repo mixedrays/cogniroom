@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { getValidModel } from "@/lib/llm-models";
 import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { useSettings } from "@/modules/settings";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { ErrorMessage } from "@/components/ErrorMessage/ErrorMessage";
 
 import {
@@ -410,6 +411,7 @@ function CreateModeDialog({
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const online = useOnlineStatus();
 
   // Enhancement hook for description
   const enhancement = useInstructionEnhancement();
@@ -419,7 +421,8 @@ function CreateModeDialog({
   const isEnhanceDisabled =
     isLoading ||
     enhancement.isEnhancing ||
-    !enhancement.canEnhance(description);
+    !enhancement.canEnhance(description) ||
+    !online;
 
   const resetForm = useCallback(() => {
     setTitle("");
@@ -706,7 +709,11 @@ function CreateModeDialog({
             >
               Cancel
             </DialogClose>
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading || !online}
+              title={!online ? "You are offline" : undefined}
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -748,6 +755,7 @@ function GenerateModeDialog({
   contentContext,
 }: GenerateModeProps) {
   const { settings } = useSettings();
+  const online = useOnlineStatus();
 
   const showIncludeContentToggle =
     generationType === "flashcards" ||
@@ -777,7 +785,8 @@ function GenerateModeDialog({
   const isEnhanceDisabled =
     isLoading ||
     enhancement.isEnhancing ||
-    !enhancement.canEnhance(instructions);
+    !enhancement.canEnhance(instructions) ||
+    !online;
 
   // Map generation type to enhancement content type
   const getEnhancementContentType = (
@@ -1064,7 +1073,11 @@ function GenerateModeDialog({
             >
               Cancel
             </DialogClose>
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading || !online}
+              title={!online ? "You are offline" : undefined}
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

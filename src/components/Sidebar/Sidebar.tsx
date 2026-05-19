@@ -12,6 +12,7 @@ import { BookOpen as IconApp, Settings } from "lucide-react";
 import { useSettingsSearch } from "@/modules/settings";
 import CourseList from "@/components/CourseList";
 import CourseTree from "@/components/CourseTree";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { Tooltip, TooltipContent } from "../ui/tooltip";
 import { TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
@@ -22,7 +23,7 @@ export default function AppSidebar() {
   const { open: openSettings } = useSettingsSearch();
   return (
     <Sidebar>
-      <SidebarHeader className="flex-row border-b items-center">
+      <SidebarHeader className="flex-row border-b items-center justify-between">
         <Tooltip>
           <TooltipTrigger
             render={
@@ -39,6 +40,7 @@ export default function AppSidebar() {
 
           <TooltipContent side="right">v{APP_VERSION}</TooltipContent>
         </Tooltip>
+        <OfflineIndicator />
       </SidebarHeader>
 
       <SidebarContent className="overflow-xhidden relative p-0">

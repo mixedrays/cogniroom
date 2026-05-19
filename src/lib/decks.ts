@@ -7,40 +7,56 @@ import type {
   QuizContent,
   ReviewData,
 } from "./types";
+import { withReadMirror, writeCache, deleteCache } from "./clientStorage";
+import { enqueueDeckReview } from "./syncQueue";
 
 function getBaseUrl() {
   if (typeof window !== "undefined") return "";
   return "http://localhost:3000";
 }
 
+const DECK_LIST_KEY = "cache/decks/index";
+const deckKey = (id: string) => `cache/decks/${id}`;
+const deckFlashcardsKey = (id: string) => `cache/decks/${id}/flashcards`;
+const deckQuizKey = (id: string) => `cache/decks/${id}/quiz`;
+const deckReviewsKey = (id: string) => `cache/decks/${id}/reviews`;
+
 export async function listDecks(): Promise<DeckMetadata[]> {
-  try {
-    const response = await fetch(`${getBaseUrl()}/api/decks`);
-    if (!response.ok) {
-      console.error("Failed to list decks:", response.statusText);
-      return [];
+  const cached = await withReadMirror<DeckMetadata[]>(
+    DECK_LIST_KEY,
+    async () => {
+      try {
+        const response = await fetch(`${getBaseUrl()}/api/decks`);
+        if (!response.ok) {
+          console.error("Failed to list decks:", response.statusText);
+          return null;
+        }
+        return (await response.json()) as DeckMetadata[];
+      } catch (e) {
+        console.error("Error listing decks:", e);
+        return null;
+      }
     }
-    return await response.json();
-  } catch (e) {
-    console.error("Error listing decks:", e);
-    return [];
-  }
+  );
+  return cached ?? [];
 }
 
 export async function getDeck(id: string): Promise<Deck | null> {
-  try {
-    const response = await fetch(`${getBaseUrl()}/api/decks/${id}`);
-    if (!response.ok) {
-      if (response.status !== 404) {
-        console.error(`Failed to fetch deck ${id}: ${response.statusText}`);
+  return withReadMirror<Deck>(deckKey(id), async () => {
+    try {
+      const response = await fetch(`${getBaseUrl()}/api/decks/${id}`);
+      if (!response.ok) {
+        if (response.status !== 404) {
+          console.error(`Failed to fetch deck ${id}: ${response.statusText}`);
+        }
+        return null;
       }
+      return (await response.json()) as Deck;
+    } catch (e) {
+      console.error(`Error getting deck ${id}:`, e);
       return null;
     }
-    return await response.json();
-  } catch (e) {
-    console.error(`Error getting deck ${id}:`, e);
-    return null;
-  }
+  });
 }
 
 export interface CreateDeckInput {
@@ -82,7 +98,13 @@ export async function deleteDeck(
     const response = await fetch(`${getBaseUrl()}/api/decks/${id}`, {
       method: "DELETE",
     });
-    return await response.json();
+    const result = await response.json();
+    if (response.ok) {
+      void deleteCache(deckKey(id));
+      void deleteCache(`cache/decks/${id}`, true);
+      void deleteCache(DECK_LIST_KEY);
+    }
+    return result;
   } catch (e) {
     console.error(`Error deleting deck ${id}:`, e);
     return { success: false, error: String(e) };
@@ -92,47 +114,61 @@ export async function deleteDeck(
 export async function getDeckFlashcards(
   id: string
 ): Promise<{ content: FlashcardsContent } | null> {
-  try {
-    const response = await fetch(`${getBaseUrl()}/api/decks/${id}/flashcards`);
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(response.statusText);
+  return withReadMirror<{ content: FlashcardsContent }>(
+    deckFlashcardsKey(id),
+    async () => {
+      try {
+        const response = await fetch(
+          `${getBaseUrl()}/api/decks/${id}/flashcards`
+        );
+        if (!response.ok) {
+          if (response.status === 404) return null;
+          throw new Error(response.statusText);
+        }
+        return (await response.json()) as { content: FlashcardsContent };
+      } catch (e) {
+        console.error(`Error getting deck flashcards ${id}:`, e);
+        return null;
+      }
     }
-    return await response.json();
-  } catch (e) {
-    console.error(`Error getting deck flashcards ${id}:`, e);
-    return null;
-  }
+  );
 }
 
 export async function getDeckQuiz(
   id: string
 ): Promise<{ content: QuizContent } | null> {
-  try {
-    const response = await fetch(`${getBaseUrl()}/api/decks/${id}/quiz`);
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(response.statusText);
+  return withReadMirror<{ content: QuizContent }>(
+    deckQuizKey(id),
+    async () => {
+      try {
+        const response = await fetch(`${getBaseUrl()}/api/decks/${id}/quiz`);
+        if (!response.ok) {
+          if (response.status === 404) return null;
+          throw new Error(response.statusText);
+        }
+        return (await response.json()) as { content: QuizContent };
+      } catch (e) {
+        console.error(`Error getting deck quiz ${id}:`, e);
+        return null;
+      }
     }
-    return await response.json();
-  } catch (e) {
-    console.error(`Error getting deck quiz ${id}:`, e);
-    return null;
-  }
+  );
 }
 
 export async function getDeckReviews(id: string): Promise<ReviewData | null> {
-  try {
-    const response = await fetch(`${getBaseUrl()}/api/decks/${id}/reviews`);
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(response.statusText);
+  return withReadMirror<ReviewData>(deckReviewsKey(id), async () => {
+    try {
+      const response = await fetch(`${getBaseUrl()}/api/decks/${id}/reviews`);
+      if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error(response.statusText);
+      }
+      return (await response.json()) as ReviewData;
+    } catch (e) {
+      console.error(`Error getting deck reviews ${id}:`, e);
+      return null;
     }
-    return await response.json();
-  } catch (e) {
-    console.error(`Error getting deck reviews ${id}:`, e);
-    return null;
-  }
+  });
 }
 
 export interface GenerateDeckOptions {
@@ -205,16 +241,21 @@ export async function generateQuizDeck(
 export async function saveDeckReviews(
   id: string,
   data: ReviewData
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; queued?: boolean }> {
+  void writeCache(deckReviewsKey(id), data);
   try {
     const response = await fetch(`${getBaseUrl()}/api/decks/${id}/reviews`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+    if (!response.ok) {
+      await enqueueDeckReview(id, data);
+      return { success: true, queued: true };
+    }
     return await response.json();
-  } catch (e) {
-    console.error("Error saving deck reviews:", e);
-    return { success: false, error: String(e) };
+  } catch {
+    await enqueueDeckReview(id, data);
+    return { success: true, queued: true };
   }
 }

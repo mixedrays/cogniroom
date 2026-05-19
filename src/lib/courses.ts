@@ -6,6 +6,21 @@ import type {
   ReviewData,
   LessonSection,
 } from "./types";
+import { withReadMirror, writeCache, deleteCache } from "./clientStorage";
+import { enqueueFlashcardsReview } from "./syncQueue";
+
+const COURSE_LIST_KEY = "cache/courses/index";
+const courseKey = (id: string) => `cache/courses/${id}`;
+const lessonKey = (cid: string, lid: string) =>
+  `cache/courses/${cid}/lessons/${lid}`;
+const flashcardsKey = (cid: string, lid: string) =>
+  `cache/courses/${cid}/lessons/${lid}/flashcards`;
+const quizKey = (cid: string, lid: string) =>
+  `cache/courses/${cid}/lessons/${lid}/quiz`;
+const exercisesKey = (cid: string, lid: string) =>
+  `cache/courses/${cid}/lessons/${lid}/exercises`;
+const reviewsKey = (cid: string, lid: string) =>
+  `cache/courses/${cid}/lessons/${lid}/reviews`;
 
 export type CourseSkillLevel = "beginner" | "intermediate" | "advanced";
 
@@ -18,17 +33,23 @@ function getBaseUrl() {
 
 // List all courses
 export async function listCourses(): Promise<CourseMetadata[]> {
-  try {
-    const response = await fetch(`${getBaseUrl()}/api/courses`);
-    if (!response.ok) {
-      console.error("Failed to list courses:", response.statusText);
-      return [];
+  const cached = await withReadMirror<CourseMetadata[]>(
+    COURSE_LIST_KEY,
+    async () => {
+      try {
+        const response = await fetch(`${getBaseUrl()}/api/courses`);
+        if (!response.ok) {
+          console.error("Failed to list courses:", response.statusText);
+          return null;
+        }
+        return (await response.json()) as CourseMetadata[];
+      } catch (e) {
+        console.error("Error listing courses:", e);
+        return null;
+      }
     }
-    return await response.json();
-  } catch (e) {
-    console.error("Error listing courses:", e);
-    return [];
-  }
+  );
+  return cached ?? [];
 }
 
 // Save a course
@@ -93,22 +114,24 @@ export async function generateCourse(params: {
 
 // Get a single course
 export async function getCourse(id: string): Promise<Course | null> {
-  try {
-    const url = `${getBaseUrl()}/api/courses/${id}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-      console.error(
-        `Failed to fetch course ${id}: ${response.status} ${response.statusText}`
-      );
-      const text = await response.text();
-      console.error(`Response body: ${text}`);
+  return withReadMirror<Course>(courseKey(id), async () => {
+    try {
+      const url = `${getBaseUrl()}/api/courses/${id}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.error(
+          `Failed to fetch course ${id}: ${response.status} ${response.statusText}`
+        );
+        const text = await response.text();
+        console.error(`Response body: ${text}`);
+        return null;
+      }
+      return (await response.json()) as Course;
+    } catch (e) {
+      console.error(`Error getting course ${id}:`, e);
       return null;
     }
-    return await response.json();
-  } catch (e) {
-    console.error(`Error getting course ${id}:`, e);
-    return null;
-  }
+  });
 }
 
 // Delete a course
@@ -119,7 +142,13 @@ export async function deleteCourse(
     const response = await fetch(`${getBaseUrl()}/api/courses/${id}`, {
       method: "DELETE",
     });
-    return await response.json();
+    const result = await response.json();
+    if (response.ok) {
+      void deleteCache(courseKey(id));
+      void deleteCache(`cache/courses/${id}`, true);
+      void deleteCache(COURSE_LIST_KEY);
+    }
+    return result;
   } catch (e) {
     console.error(`Error deleting course ${id}:`, e);
     return { success: false, error: String(e) };
@@ -247,83 +276,104 @@ export async function getLesson(
   courseId: string,
   lessonId: string
 ): Promise<{ content: string } | null> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}`
-    );
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(response.statusText);
+  return withReadMirror<{ content: string }>(
+    lessonKey(courseId, lessonId),
+    async () => {
+      try {
+        const response = await fetch(
+          `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}`
+        );
+        if (!response.ok) {
+          if (response.status === 404) return null;
+          throw new Error(response.statusText);
+        }
+        return (await response.json()) as { content: string };
+      } catch (e) {
+        console.error(`Error getting lesson ${lessonId}:`, e);
+        return null;
+      }
     }
-    return await response.json();
-  } catch (e) {
-    console.error(`Error getting lesson ${lessonId}:`, e);
-    return null;
-  }
+  );
 }
 
 export async function getLessonFlashcards(
   courseId: string,
   lessonId: string
 ): Promise<{ content: FlashcardsContent } | null> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards`
-    );
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(response.statusText);
+  return withReadMirror<{ content: FlashcardsContent }>(
+    flashcardsKey(courseId, lessonId),
+    async () => {
+      try {
+        const response = await fetch(
+          `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards`
+        );
+        if (!response.ok) {
+          if (response.status === 404) return null;
+          throw new Error(response.statusText);
+        }
+        return (await response.json()) as { content: FlashcardsContent };
+      } catch (e) {
+        console.error(`Error getting flashcards ${lessonId}:`, e);
+        return null;
+      }
     }
-    return await response.json();
-  } catch (e) {
-    console.error(`Error getting flashcards ${lessonId}:`, e);
-    return null;
-  }
+  );
 }
 
 export async function getLessonQuiz(
   courseId: string,
   lessonId: string
 ): Promise<{ content: QuizContent } | null> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz`
-    );
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(response.statusText);
+  return withReadMirror<{ content: QuizContent }>(
+    quizKey(courseId, lessonId),
+    async () => {
+      try {
+        const response = await fetch(
+          `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz`
+        );
+        if (!response.ok) {
+          if (response.status === 404) return null;
+          throw new Error(response.statusText);
+        }
+        return (await response.json()) as { content: QuizContent };
+      } catch (e) {
+        console.error(`Error getting quiz ${lessonId}:`, e);
+        return null;
+      }
     }
-    return await response.json();
-  } catch (e) {
-    console.error(`Error getting quiz ${lessonId}:`, e);
-    return null;
-  }
+  );
 }
 
 export async function getFlashcardsReviews(
   courseId: string,
   lessonId: string
 ): Promise<ReviewData | null> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/reviews`
-    );
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(response.statusText);
+  return withReadMirror<ReviewData>(
+    reviewsKey(courseId, lessonId),
+    async () => {
+      try {
+        const response = await fetch(
+          `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/reviews`
+        );
+        if (!response.ok) {
+          if (response.status === 404) return null;
+          throw new Error(response.statusText);
+        }
+        return (await response.json()) as ReviewData;
+      } catch (e) {
+        console.error(`Error getting reviews ${lessonId}:`, e);
+        return null;
+      }
     }
-    return await response.json();
-  } catch (e) {
-    console.error(`Error getting reviews ${lessonId}:`, e);
-    return null;
-  }
+  );
 }
 
 export async function saveFlashcardsReviews(
   courseId: string,
   lessonId: string,
   data: ReviewData
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; queued?: boolean }> {
+  void writeCache(reviewsKey(courseId, lessonId), data);
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/reviews`,
@@ -333,10 +383,14 @@ export async function saveFlashcardsReviews(
         body: JSON.stringify(data),
       }
     );
+    if (!response.ok) {
+      await enqueueFlashcardsReview(courseId, lessonId, data);
+      return { success: true, queued: true };
+    }
     return await response.json();
-  } catch (e) {
-    console.error("Error saving reviews:", e);
-    return { success: false, error: String(e) };
+  } catch {
+    await enqueueFlashcardsReview(courseId, lessonId, data);
+    return { success: true, queued: true };
   }
 }
 
@@ -344,19 +398,24 @@ export async function getLessonExercises(
   courseId: string,
   lessonId: string
 ): Promise<{ content: string } | null> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises`
-    );
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(response.statusText);
+  return withReadMirror<{ content: string }>(
+    exercisesKey(courseId, lessonId),
+    async () => {
+      try {
+        const response = await fetch(
+          `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises`
+        );
+        if (!response.ok) {
+          if (response.status === 404) return null;
+          throw new Error(response.statusText);
+        }
+        return (await response.json()) as { content: string };
+      } catch (e) {
+        console.error(`Error getting lesson exercises ${lessonId}:`, e);
+        return null;
+      }
     }
-    return await response.json();
-  } catch (e) {
-    console.error(`Error getting lesson exercises ${lessonId}:`, e);
-    return null;
-  }
+  );
 }
 
 // Generate lesson content

@@ -24,6 +24,7 @@ import { getValidModel } from "@/lib/llm-models";
 import { ModelSelect } from "@/components/ModelSelect/ModelSelect";
 import { useSettings } from "@/modules/settings";
 import { useInstructionEnhancement } from "@/hooks/use-instruction-enhancement";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 import {
   Dialog,
@@ -67,11 +68,13 @@ export default function CreateCourseModal({
   );
 
   const enhancement = useInstructionEnhancement();
+  const online = useOnlineStatus();
 
   const isEnhanceDisabled =
     isLoading ||
     enhancement.isEnhancing ||
-    !enhancement.canEnhance(instructions);
+    !enhancement.canEnhance(instructions) ||
+    !online;
 
   useEffect(() => {
     setModel(getValidModel(settings.llm.defaultModel));
@@ -462,7 +465,11 @@ export default function CreateCourseModal({
                 >
                   Cancel
                 </DialogClose>
-                <Button onClick={handleGenerate} disabled={isLoading}>
+                <Button
+                  onClick={handleGenerate}
+                  disabled={isLoading || !online}
+                  title={!online ? "You are offline" : undefined}
+                >
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -491,7 +498,8 @@ export default function CreateCourseModal({
               </div>
               <Button
                 onClick={handleImport}
-                disabled={isLoading}
+                disabled={isLoading || !online}
+                title={!online ? "You are offline" : undefined}
                 className="w-full"
               >
                 {isLoading ? (
@@ -525,7 +533,8 @@ export default function CreateCourseModal({
               </div>
               <Button
                 onClick={handleExtract}
-                disabled={isLoading}
+                disabled={isLoading || !online}
+                title={!online ? "You are offline" : undefined}
                 className="w-full"
               >
                 {isLoading ? (

@@ -54,7 +54,11 @@ export interface StorageConfig {
   /** Default encoding for text files */
   defaultEncoding?: BufferEncoding;
   /** Adapter type identifier */
-  adapter?: "filesystem" | "database" | "localstorage";
+  adapter?: "filesystem" | "database" | "localstorage" | "indexeddb";
+  /** IndexedDB database name (indexeddb adapter only) */
+  databaseName?: string;
+  /** IndexedDB object store name (indexeddb adapter only) */
+  storeName?: string;
 }
 
 // Options for listing directory contents

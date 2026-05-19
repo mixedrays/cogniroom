@@ -17,6 +17,7 @@ import {
   generateLessonExercises,
   type GenerateLessonContentOptions,
 } from "@/lib/courses";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 export type ContentType = "theory" | "flashcards" | "quiz" | "exercises";
 
@@ -77,6 +78,7 @@ export function ContentQuickGenerate({
 }: ContentQuickGenerateProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const online = useOnlineStatus();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -131,7 +133,11 @@ export function ContentQuickGenerate({
         error={error}
         contentContext={contentContext}
         trigger={
-          <Button variant="secondary" disabled={isGenerating}>
+          <Button
+            variant="secondary"
+            disabled={isGenerating || !online}
+            title={!online ? "You are offline" : undefined}
+          >
             {isGenerating ? <Loader2 className="animate-spin" /> : <Zap />}
             {isGenerating ? `Generating ${label}…` : `Quick Create ${label}`}
           </Button>

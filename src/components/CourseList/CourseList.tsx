@@ -44,6 +44,7 @@ import CourseHistory from "@/components/CourseHistory";
 import { CollapsibleSidebarGroup } from "@/components/Sidebar";
 import { CommandPaletteTrigger } from "@/modules/command-palette";
 import DeckList from "@/components/DeckList";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 export default function CourseList() {
   const [deleteDialogOpenId, setDeleteDialogOpenId] = useState<string | null>(
@@ -54,6 +55,7 @@ export default function CourseList() {
     id: string;
     message: string;
   } | null>(null);
+  const online = useOnlineStatus();
 
   const coursesQuery = useQuery({
     queryKey: ["courses"],
@@ -273,7 +275,12 @@ export default function CourseList() {
                                             onClick={() =>
                                               handleDeleteCourse(course.id)
                                             }
-                                            disabled={deletingId === course.id}
+                                            disabled={
+                                              deletingId === course.id || !online
+                                            }
+                                            title={
+                                              !online ? "You are offline" : undefined
+                                            }
                                           >
                                             {deletingId === course.id
                                               ? "Deleting…"

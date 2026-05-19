@@ -16,6 +16,8 @@ import {
   CommandPaletteProvider,
 } from "@/modules/command-palette";
 import { Toaster } from "@/components/ui/sonner";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
+import { useSyncQueue } from "@/hooks/useSyncQueue";
 import type { RouterContext } from "@/lib/routerContext";
 import appCss from "../styles.css?url";
 import { CSS_THEMES, ThemeInitScriptElement } from "@/modules/color-themes";
@@ -39,6 +41,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         rel: "icon",
         type: "image/svg+xml",
         href: "/favicon.svg",
+      },
+      {
+        rel: "manifest",
+        href: "/manifest.webmanifest",
       },
       {
         rel: "stylesheet",
@@ -75,9 +81,16 @@ function RootComponent() {
           </CommandPaletteProvider>
         </SettingsProvider>
         <Toaster />
+        <ServiceWorkerRegistrar />
+        <SyncQueueRunner />
       </QueryClientProvider>
     </RootDocument>
   );
+}
+
+function SyncQueueRunner() {
+  useSyncQueue();
+  return null;
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {

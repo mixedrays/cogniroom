@@ -15,6 +15,7 @@ import {
 } from "@/lib/decks";
 import { decksQueryKey } from "@/components/DeckList";
 import type { DeckKind } from "@/lib/types";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 interface DeckQuickGenerateProps {
   kind: DeckKind;
@@ -38,6 +39,7 @@ export default function DeckQuickGenerate({
 }: DeckQuickGenerateProps) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const online = useOnlineStatus();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -77,7 +79,8 @@ export default function DeckQuickGenerate({
       variant="ghost"
       size="sm"
       className="gap-1.5 text-muted-foreground"
-      disabled={isGenerating}
+      disabled={isGenerating || !online}
+      title={!online ? "You are offline" : undefined}
     >
       {isGenerating ? <Loader2 className="animate-spin" /> : <Zap />}
       {isGenerating ? `Generating ${label}…` : "Quick Create"}

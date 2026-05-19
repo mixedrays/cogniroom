@@ -46,6 +46,7 @@ import {
   generateLessonQuiz,
   generateLessonExercises,
 } from "@/lib/courses";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 type ContentType = "theory" | "flashcards" | "quiz" | "exercises";
 
@@ -90,6 +91,7 @@ export function LessonActionsMenu({
 }: LessonActionsMenuProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const online = useOnlineStatus();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false);
@@ -219,13 +221,16 @@ export function LessonActionsMenu({
             </DropdownMenuItem>
           )}
 
-          <DropdownMenuItem onClick={() => setIsRegenerateDialogOpen(true)}>
+          <DropdownMenuItem
+            onClick={() => setIsRegenerateDialogOpen(true)}
+            disabled={!online}
+          >
             <Zap />
             Quick Regenerate
           </DropdownMenuItem>
 
           {onOpenAgent && (
-            <DropdownMenuItem onClick={onOpenAgent}>
+            <DropdownMenuItem onClick={onOpenAgent} disabled={!online}>
               <Bot />
               Ask AI
             </DropdownMenuItem>
@@ -236,6 +241,7 @@ export function LessonActionsMenu({
           <DropdownMenuItem
             variant="destructive"
             onClick={() => setIsDeleteDialogOpen(true)}
+            disabled={!online}
           >
             <Trash2 />
             Delete {label}
@@ -272,7 +278,8 @@ export function LessonActionsMenu({
             <AlertDialogAction
               variant="destructive"
               onClick={handleDelete}
-              disabled={isDeleting}
+              disabled={isDeleting || !online}
+              title={!online ? "You are offline" : undefined}
             >
               {isDeleting ? (
                 <>

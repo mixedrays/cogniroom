@@ -4,7 +4,11 @@
  */
 
 import { resolve } from "node:path";
-import { FileSystemAdapter, StorageAdapter } from "./adapters";
+import {
+  FileSystemAdapter,
+  IndexedDBAdapter,
+  StorageAdapter,
+} from "./adapters";
 import type {
   FileMetadata,
   ListOptions,
@@ -47,6 +51,8 @@ export function createStorage(config: StorageConfig = {}): StorageAdapter {
   switch (adapterType) {
     case "filesystem":
       return new FileSystemAdapter(config);
+    case "indexeddb":
+      return new IndexedDBAdapter(config);
     case "database":
       throw new Error("Database adapter not yet implemented");
     case "localstorage":
