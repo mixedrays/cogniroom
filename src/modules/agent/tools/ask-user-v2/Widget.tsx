@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -19,6 +19,8 @@ import {
 } from "./schema";
 
 type Answers = Record<string, string | string[]>;
+
+const DECIDE_FOR_ME = "Decide for me";
 
 interface AskUserV2WidgetProps {
   params: unknown;
@@ -60,9 +62,10 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
         const prev = Array.isArray(a[q.header])
           ? (a[q.header] as string[])
           : [];
-        const next = prev.includes(label)
-          ? prev.filter((o) => o !== label)
-          : [...prev, label];
+        const filtered = prev.filter((o) => o !== DECIDE_FOR_ME);
+        const next = filtered.includes(label)
+          ? filtered.filter((o) => o !== label)
+          : [...filtered, label];
         return { ...a, [q.header]: next };
       });
     } else {
@@ -71,10 +74,39 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
     }
   }, []);
 
+  const handleDecideForMe = useCallback((q: AskUserV2Question) => {
+    setFreeformValues((f) => ({ ...f, [q.header]: "" }));
+    setAnswers((a) => ({
+      ...a,
+      [q.header]: q.multiSelect ? [DECIDE_FOR_ME] : DECIDE_FOR_ME,
+    }));
+  }, []);
+
+  const isDecideForMeSelected = (q: AskUserV2Question): boolean => {
+    const ans = answers[q.header];
+    if (q.multiSelect) {
+      return Array.isArray(ans) && ans.includes(DECIDE_FOR_ME);
+    }
+    return ans === DECIDE_FOR_ME;
+  };
+
   const handleFreeformChange = useCallback(
     (q: AskUserV2Question, value: string) => {
       setFreeformValues((f) => ({ ...f, [q.header]: value }));
-      if (q.multiSelect) return;
+      if (q.multiSelect) {
+        if (!value) return;
+        setAnswers((a) => {
+          const prev = Array.isArray(a[q.header])
+            ? (a[q.header] as string[])
+            : [];
+          if (!prev.includes(DECIDE_FOR_ME)) return a;
+          return {
+            ...a,
+            [q.header]: prev.filter((o) => o !== DECIDE_FOR_ME),
+          };
+        });
+        return;
+      }
       setAnswers((a) => {
         const next = { ...a };
         if (value) {
@@ -179,6 +211,20 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
                     />
                   </div>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => handleDecideForMe(q)}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full border border-dashed px-3.5 py-1.5 text-sm transition-colors cursor-pointer",
+                    isDecideForMeSelected(q)
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-accent hover:text-foreground"
+                  )}
+                >
+                  <Sparkles className="size-3.5" />
+                  Decide for me
+                </button>
               </div>
             </div>
           );

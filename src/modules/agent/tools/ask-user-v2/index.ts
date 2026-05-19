@@ -18,6 +18,10 @@ export const askUserV2Tool: AgentTool<typeof AskUserV2ParamsSchema> = {
         - allowFreeformInput: true to render an inline "Other…" input alongside the options
       Mark the most likely default option with recommended: true so it is preselected.
       Provide an optional top-level title (e.g. "Quick questions about <product>").
+      Every question automatically includes a "Decide for me" affordance — the user does not
+      need it spelled out as an option. When an answer comes back as the string "Decide for me"
+      (or contains it in a multiSelect array), the user is deferring that choice: pick a
+      sensible default yourself based on the surrounding context.
     `,
     parameters: AskUserV2ParamsSchema,
   },
