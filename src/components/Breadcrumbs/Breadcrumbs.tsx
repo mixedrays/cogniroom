@@ -105,6 +105,10 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
           const dropdownCurrent = dropdownItems
             ? (dropdownItems.find((entry) => entry.current) ?? dropdownItems[0])
             : null;
+          const isIconOnly =
+            !isDropdown &&
+            !!(item as BreadcrumbItemConfig).icon &&
+            !(item as BreadcrumbItemConfig).title;
 
           return (
             <Fragment key={`breadcrumb-${index}`}>
@@ -113,7 +117,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
                   <IconSeparator />
                 </BreadcrumbSeparator>
               )}
-              <BreadcrumbItem className="min-w-0">
+              <BreadcrumbItem className={cn("min-w-0", isIconOnly && "shrink-0")}>
                 {isDropdown ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-1 min-w-0 hover:text-black">
