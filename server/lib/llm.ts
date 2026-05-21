@@ -1,10 +1,14 @@
 import { createOpenAI } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import type { LanguageModel } from "ai";
 import { getRequiredEnv } from "../env";
 
 import {
   AVAILABLE_MODELS,
   DEFAULT_MODEL as DEFAULT_MODEL_ID,
+  providers,
+  getProviderForModel,
+  getProviderEnvKeyName,
 } from "@/lib/llm-models";
 import type { OpenAIAvailableModelsIds as AvailableModelsId } from "@/lib/llm-models/providers/openai";
 
@@ -13,12 +17,20 @@ export { AVAILABLE_MODELS };
 
 export const DEFAULT_MODEL: AvailableModelsId = DEFAULT_MODEL_ID;
 
-export function getOpenAIClient(model: AvailableModelsId = DEFAULT_MODEL) {
-  const apiKey = getRequiredEnv("OPENAI_API_KEY");
+export function getLanguageModel(model: string = DEFAULT_MODEL): LanguageModel {
+  const provider = getProviderForModel(model, providers);
+  const providerId = provider?.id ?? "openai";
+  const apiKey = getRequiredEnv(getProviderEnvKeyName(providerId));
+
+  if (providerId === "anthropic") {
+    const anthropic = createAnthropic({ apiKey });
+    return anthropic(model);
+  }
+
   const openai = createOpenAI({ apiKey });
   return openai(model);
 }
 
 export function getDefaultModel(): LanguageModel {
-  return getOpenAIClient(DEFAULT_MODEL);
+  return getLanguageModel(DEFAULT_MODEL);
 }

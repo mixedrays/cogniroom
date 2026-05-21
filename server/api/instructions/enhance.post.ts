@@ -1,7 +1,7 @@
 import { defineEventHandler, readBody, HTTPError } from "h3";
 import { generateText } from "ai";
 import {
-  getOpenAIClient,
+  getLanguageModel,
   type AvailableModelsId,
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
@@ -79,7 +79,7 @@ export default defineEventHandler(
 
       // Call LLM to enhance the instruction
       const result = await generateText({
-        model: getOpenAIClient(model),
+        model: getLanguageModel(model),
         prompt,
       });
 

@@ -3,7 +3,7 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 
-import { getOpenAIClient, type AvailableModelsId } from "@root/server/lib/llm";
+import { getLanguageModel, type AvailableModelsId } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { toErrorMessage } from "@root/server/lib/errors";
 import { getMemoryContext } from "@root/server/lib/memoryService";
@@ -78,7 +78,7 @@ export default defineEventHandler(async (event) => {
     });
 
     const result = await generateText({
-      model: getOpenAIClient(model as AvailableModelsId),
+      model: getLanguageModel(model as AvailableModelsId),
       prompt,
       output: Output.object({
         schema: RoadmapDraftSchema,

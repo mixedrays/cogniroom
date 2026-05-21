@@ -2,7 +2,7 @@ import { defineEventHandler, readBody, createEventStream } from "h3";
 import type { ModelMessage } from "ai";
 import {
   getDefaultModel,
-  getOpenAIClient,
+  getLanguageModel,
   type AvailableModelsId,
 } from "./llm";
 import type { AgentTool } from "@/modules/agent/types";
@@ -38,7 +38,7 @@ export function createAgentHandler(config: {
     void (async () => {
       try {
         const model = body.model
-          ? getOpenAIClient(body.model as AvailableModelsId)
+          ? getLanguageModel(body.model as AvailableModelsId)
           : getDefaultModel();
         await runAgentStream({
           model,

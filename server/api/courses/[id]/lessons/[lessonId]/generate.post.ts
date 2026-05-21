@@ -1,7 +1,7 @@
 import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { generateText } from "ai";
 import {
-  getOpenAIClient,
+  getLanguageModel,
   type AvailableModelsId,
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
@@ -83,7 +83,7 @@ export default defineEventHandler(async (event) => {
     });
 
     const result = await generateText({
-      model: getOpenAIClient(model),
+      model: getLanguageModel(model),
       prompt,
     });
 

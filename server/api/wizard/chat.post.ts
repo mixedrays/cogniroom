@@ -1,6 +1,6 @@
 import { defineEventHandler, readBody, HTTPError } from "h3";
 import { generateText } from "ai";
-import { getOpenAIClient, DEFAULT_MODEL } from "@root/server/lib/llm";
+import { getLanguageModel, DEFAULT_MODEL } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { toErrorMessage } from "@root/server/lib/errors";
 
@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const result = await generateText({
-      model: getOpenAIClient(DEFAULT_MODEL),
+      model: getLanguageModel(DEFAULT_MODEL),
       system,
       messages,
     });

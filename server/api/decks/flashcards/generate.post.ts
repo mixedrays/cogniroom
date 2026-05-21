@@ -4,7 +4,7 @@ import { defineEventHandler, readBody, HTTPError } from "h3";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import {
-  getOpenAIClient,
+  getLanguageModel,
   type AvailableModelsId,
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
     });
 
     const result = await generateText({
-      model: getOpenAIClient(model),
+      model: getLanguageModel(model),
       prompt,
       output: Output.object({
         schema: FlashcardsDraftSchema,
