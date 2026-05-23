@@ -1,38 +1,13 @@
-import { createOpenAI } from "@ai-sdk/openai";
-import { createAnthropic } from "@ai-sdk/anthropic";
 import { APICallError } from "ai";
 import type { AgentTool, ChatBackend } from "../types";
 import { runAgentStream } from "../lib/runAgentStream";
 import { serializeMessages } from "../hooks/useAgent";
-import { providers, getProviderForModel } from "@/lib/llm-models";
+import { getBrowserLanguageModel } from "@/lib/llm-models/browserClient";
+import { getProviderLocalStorageKeyName } from "@/lib/llm-models";
 
-export const OPENAI_API_KEY_STORAGE = "openai_api_key";
-export const ANTHROPIC_API_KEY_STORAGE = "anthropic_api_key";
-
-function getClientModel(model: string) {
-  const provider = getProviderForModel(model, providers);
-  const providerId = provider?.id ?? "openai";
-
-  if (providerId === "anthropic") {
-    const apiKey = localStorage.getItem(ANTHROPIC_API_KEY_STORAGE) ?? "";
-    if (!apiKey.trim()) {
-      throw new Error(
-        "Anthropic API key is not set. Please add it in [settings:api-key]."
-      );
-    }
-    const anthropic = createAnthropic({ apiKey });
-    return anthropic(model);
-  }
-
-  const apiKey = localStorage.getItem(OPENAI_API_KEY_STORAGE) ?? "";
-  if (!apiKey.trim()) {
-    throw new Error(
-      "OpenAI API key is not set. Please add it in [settings:api-key]."
-    );
-  }
-  const openai = createOpenAI({ apiKey });
-  return openai(model);
-}
+export const OPENAI_API_KEY_STORAGE = getProviderLocalStorageKeyName("openai");
+export const ANTHROPIC_API_KEY_STORAGE =
+  getProviderLocalStorageKeyName("anthropic");
 
 export function createClientBackend(
   tools: AgentTool[],
@@ -43,7 +18,7 @@ export function createClientBackend(
   return async ({ messages, model, signal, onEvent }) => {
     let languageModel;
     try {
-      languageModel = getClientModel(model);
+      languageModel = getBrowserLanguageModel(model);
     } catch (e) {
       onEvent({ type: "error", message: (e as Error).message });
       return;

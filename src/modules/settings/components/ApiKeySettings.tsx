@@ -197,11 +197,16 @@ function BrowserKeyDisclaimer() {
         <ShieldAlert className="size-4 mt-0.5 text-amber-600 dark:text-amber-400 shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
-            Browser-stored keys carry risk
+            Browser-stored keys carry real risk
           </p>
           <p className="text-xs text-amber-900/80 dark:text-amber-200/80 mt-0.5">
-            Keys are saved in this browser's localStorage. Tool actions that
-            require server access (e.g. memory) are skipped in this mode.
+            Your key is saved in plain text in this browser's localStorage and
+            sent directly from this tab to the provider's API. For Anthropic
+            this requires opting out of browser CORS protection — any XSS,
+            malicious extension, or third-party script on this origin can read
+            and exfiltrate the key. Use only on a trusted device with a
+            spend-limited, dedicated key. Server-only tools (e.g. memory) are
+            skipped in this mode.
           </p>
           <Dialog>
             <DialogTrigger
@@ -229,15 +234,23 @@ function BrowserKeyDisclaimer() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                 <section>
-                  <h3 className="font-medium mb-1">How keys are stored</h3>
+                  <h3 className="font-medium mb-1">How keys are stored & used</h3>
                   <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                     <li>
                       Saved in this browser's <code>localStorage</code> in plain
-                      text under keys like <code>openai_api_key</code>.
+                      text under keys like <code>openai_api_key</code> and{" "}
+                      <code>anthropic_api_key</code>.
                     </li>
                     <li>
                       Never sent to this app's server — requests go directly
-                      from your browser to the provider's API.
+                      from this tab to the provider's API.
+                    </li>
+                    <li>
+                      For Anthropic, this app sends the{" "}
+                      <code>anthropic-dangerous-direct-browser-access</code>{" "}
+                      header to bypass the CORS block that normally prevents
+                      browser-origin calls. The header name is Anthropic's own
+                      warning that this mode is unsafe for shared deployments.
                     </li>
                     <li>
                       Persisted across reloads on this device and browser
@@ -250,21 +263,32 @@ function BrowserKeyDisclaimer() {
                   <h3 className="font-medium mb-1">Risks</h3>
                   <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                     <li>
-                      Any script on this origin (including malicious browser
-                      extensions) can read <code>localStorage</code>.
+                      Any script running on this origin — including third-party
+                      libraries, ads, and browser extensions — can read{" "}
+                      <code>localStorage</code> and the in-flight Authorization
+                      header.
                     </li>
-                    <li>A successful XSS on this app would expose the key.</li>
                     <li>
-                      Anyone with physical access to this browser profile can
-                      read or exfiltrate the key.
+                      A successful XSS on this app would immediately exfiltrate
+                      every key stored here.
+                    </li>
+                    <li>
+                      Anyone with physical or remote access to this browser
+                      profile (shared machine, screen share, malware) can read
+                      or copy the key.
                     </li>
                     <li>
                       Syncing/backup tools that copy browser profiles may
-                      replicate the key elsewhere.
+                      replicate the key to other devices.
                     </li>
                     <li>
-                      A leaked key can be used until you rotate it — billing
-                      goes to your provider account.
+                      A leaked key can be used until you revoke it — every
+                      request and dollar is billed to your provider account.
+                    </li>
+                    <li>
+                      Do <strong>not</strong> use this mode if this app is
+                      hosted on a domain you don't fully control, or if other
+                      users share the same browser profile.
                     </li>
                   </ul>
                 </section>
