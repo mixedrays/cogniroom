@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { providers, getProviderLocalStorageKeyName } from "@/lib/llm-models";
 import { getEnvApiKeys, type ProviderEnvKeyInfo } from "../lib/settings";
 
@@ -15,6 +16,64 @@ export interface ProviderApiKeyAvailability {
   effectiveSource: ApiKeySource;
 }
 
+type LocalKeys = Record<string, string>;
+
+const SERVER_LOCAL_KEYS: LocalKeys = Object.freeze({}) as LocalKeys;
+
+function readLocalKeys(): LocalKeys {
+  const next: LocalKeys = {};
+  for (const p of providers) {
+    next[p.id] =
+      localStorage.getItem(getProviderLocalStorageKeyName(p.id)) ?? "";
+  }
+  return next;
+}
+
+function localKeysEqual(a: LocalKeys, b: LocalKeys): boolean {
+  if (a === b) return true;
+  for (const p of providers) {
+    if ((a[p.id] ?? "") !== (b[p.id] ?? "")) return false;
+  }
+  return true;
+}
+
+const localKeyListeners = new Set<() => void>();
+let cachedLocalKeys: LocalKeys | null = null;
+
+function getClientLocalKeysSnapshot(): LocalKeys {
+  if (cachedLocalKeys === null) cachedLocalKeys = readLocalKeys();
+  return cachedLocalKeys;
+}
+
+function getServerLocalKeysSnapshot(): LocalKeys {
+  return SERVER_LOCAL_KEYS;
+}
+
+function invalidateLocalKeys(): void {
+  if (typeof window === "undefined") return;
+  const next = readLocalKeys();
+  if (cachedLocalKeys && localKeysEqual(cachedLocalKeys, next)) return;
+  cachedLocalKeys = next;
+  for (const listener of localKeyListeners) listener();
+}
+
+function subscribeLocalKeys(callback: () => void): () => void {
+  localKeyListeners.add(callback);
+  const onStorage = (e: StorageEvent) => {
+    if (
+      !e.key ||
+      providers.some((p) => getProviderLocalStorageKeyName(p.id) === e.key)
+    ) {
+      invalidateLocalKeys();
+    }
+  };
+  window.addEventListener("storage", onStorage);
+  return () => {
+    localKeyListeners.delete(callback);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
 function maskLocal(value: string): string | undefined {
   const trimmed = value.trim();
   if (!trimmed) return undefined;
@@ -22,19 +81,15 @@ function maskLocal(value: string): string | undefined {
   return trimmed.slice(-4);
 }
 
-function readLocalKey(providerId: string): string {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem(getProviderLocalStorageKeyName(providerId)) ?? "";
-}
-
 function buildAvailability(
-  envKeys: ProviderEnvKeyInfo[]
+  envKeys: ProviderEnvKeyInfo[],
+  localKeys: LocalKeys
 ): ProviderApiKeyAvailability[] {
   const envByProvider = new Map(envKeys.map((k) => [k.providerId, k]));
 
   return providers.map((provider) => {
     const env = envByProvider.get(provider.id);
-    const localValue = readLocalKey(provider.id);
+    const localValue = localKeys[provider.id] ?? "";
     const hasLocalKey = localValue.trim().length > 0;
     const hasEnvKey = env?.hasKey ?? false;
 
@@ -52,11 +107,15 @@ function buildAvailability(
 }
 
 export function useApiKeyAvailability() {
+  const localKeys = useSyncExternalStore(
+    subscribeLocalKeys,
+    getClientLocalKeysSnapshot,
+    getServerLocalKeysSnapshot
+  );
   const [envKeys, setEnvKeys] = useState<ProviderEnvKeyInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [localTick, setLocalTick] = useState(0);
 
-  const refreshLocal = useCallback(() => setLocalTick((n) => n + 1), []);
+  const refreshLocal = useCallback(() => invalidateLocalKeys(), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,27 +131,10 @@ export function useApiKeyAvailability() {
     };
   }, []);
 
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (!e.key) {
-        refreshLocal();
-        return;
-      }
-      if (
-        providers.some((p) => getProviderLocalStorageKeyName(p.id) === e.key)
-      ) {
-        refreshLocal();
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, [refreshLocal]);
-
-  const availability = useMemo(() => {
-    // localTick is read so changes to it re-trigger the localStorage read
-    void localTick;
-    return buildAvailability(envKeys);
-  }, [envKeys, localTick]);
+  const availability = useMemo(
+    () => buildAvailability(envKeys, localKeys),
+    [envKeys, localKeys]
+  );
 
   const availableProviderIds = useMemo(
     () =>
