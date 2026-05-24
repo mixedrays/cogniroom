@@ -20,7 +20,12 @@ export {
   getProviderEnvKeyName,
   getProviderLocalStorageKeyName,
 } from "./utils";
-export { providers, openaiProvider, anthropicProvider } from "./providers";
+export {
+  providers,
+  openaiProvider,
+  anthropicProvider,
+  openrouterProvider,
+} from "./providers";
 
 export const DEFAULT_MODEL = "gpt-5-mini";
 

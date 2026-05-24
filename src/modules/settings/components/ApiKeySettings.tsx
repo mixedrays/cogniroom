@@ -353,6 +353,7 @@ function BrowserKeyDisclaimer() {
 const PROVIDER_PLACEHOLDERS: Record<string, string> = {
   openai: "sk-...",
   anthropic: "sk-ant-...",
+  openrouter: "sk-or-...",
 };
 
 export function ApiKeySettings() {

@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import type { LanguageModel } from "ai";
 import { providers, getProviderForModel } from "./index";
 import { getProviderLocalStorageKeyName } from "./utils";
@@ -52,6 +53,12 @@ export function getBrowserLanguageModel(model: string): LanguageModel {
       headers: ANTHROPIC_BROWSER_HEADER,
     });
     return anthropic(model);
+  }
+
+  if (providerId === "openrouter") {
+    const apiKey = requireApiKey("openrouter", "OpenRouter");
+    const openrouter = createOpenRouter({ apiKey });
+    return openrouter(model);
   }
 
   const apiKey = requireApiKey("openai", "OpenAI");

@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import type { LanguageModel } from "ai";
 import { getRequiredEnv } from "../env";
 
@@ -25,6 +26,11 @@ export function getLanguageModel(model: string = DEFAULT_MODEL): LanguageModel {
   if (providerId === "anthropic") {
     const anthropic = createAnthropic({ apiKey });
     return anthropic(model);
+  }
+
+  if (providerId === "openrouter") {
+    const openrouter = createOpenRouter({ apiKey });
+    return openrouter(model);
   }
 
   const openai = createOpenAI({ apiKey });
