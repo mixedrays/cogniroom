@@ -161,7 +161,7 @@ function Command_Inner({
               {courses.map((course) => (
                 <CommandItem
                   key={course.id}
-                  value={`course ${course.title} ${course.description ?? ""}`}
+                  value={`${course.title} ${course.description ?? ""} ${course.id}`}
                   onSelect={() => onSelectCourse(course.id)}
                 >
                   {getSourceIcon(course.source)}
@@ -179,7 +179,7 @@ function Command_Inner({
               {decks.map((deck) => (
                 <CommandItem
                   key={deck.id}
-                  value={`deck ${deck.kind} ${deck.title} ${deck.description ?? ""}`}
+                  value={`${deck.title} ${deck.description ?? ""} ${deck.id}`}
                   onSelect={() => onSelectDeck(deck.id)}
                 >
                   {deckIcon(deck.kind)}
