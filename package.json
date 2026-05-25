@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "format": "prettier --write .",
-    "update-ai": "npm install @ai-sdk/anthropic@latest @ai-sdk/openai@latest ai@latest",
+    "update-ai": "npm install @ai-sdk/anthropic@latest @ai-sdk/openai@latest ai@latest @openrouter/ai-sdk-provider@latest",
     "validate": "npm run typecheck && npm run lint && npm run test:all"
   },
   "dependencies": {
