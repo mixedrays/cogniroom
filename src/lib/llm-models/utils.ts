@@ -4,15 +4,21 @@ export function getPricePerToken(pricePerMillion: number): number {
   return pricePerMillion / 1_000_000;
 }
 
-export function getModelPriceLabel({ priceRating }: ModelStats): string {
-  if (!priceRating) return "";
-  if (priceRating > 3) return "$$$+";
-  return "$".repeat(priceRating);
+export function isFreeModel(model: ModelStats): boolean {
+  return model.price.input === 0 && model.price.output === 0;
 }
 
-export function getModelPriceFullLabel({ priceRating }: ModelStats): string {
-  if (!priceRating) return "";
-  return "$".repeat(priceRating);
+export function getModelPriceLabel(model: ModelStats): string {
+  if (isFreeModel(model)) return "FREE";
+  if (!model.priceRating) return "";
+  if (model.priceRating > 3) return "$$$+";
+  return "$".repeat(model.priceRating);
+}
+
+export function getModelPriceFullLabel(model: ModelStats): string {
+  if (isFreeModel(model)) return "FREE";
+  if (!model.priceRating) return "";
+  return "$".repeat(model.priceRating);
 }
 
 export function formatPricePerMillion(pricePerToken: number): string {

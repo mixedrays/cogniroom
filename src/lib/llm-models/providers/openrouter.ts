@@ -15,6 +15,9 @@ const POPULAR_MODEL_IDS = [
   "deepseek/deepseek-v4-pro",
   "x-ai/grok-4.3",
   "meta-llama/llama-3.3-70b-instruct",
+  "meta-llama/llama-3.3-70b-instruct:free",
+  "deepseek/deepseek-v4-flash:free",
+  "qwen/qwen3-coder:free",
 ] as const;
 
 export type OpenRouterAvailableModelsIds = (typeof POPULAR_MODEL_IDS)[number];
@@ -31,6 +34,7 @@ const catalogById = new Map<string, CatalogEntry>(
 
 function priceRating(pricePerToken: number): number {
   const perMillion = pricePerToken * 1_000_000;
+  if (perMillion === 0) return 0;
   if (perMillion < 0.5) return 1;
   if (perMillion < 2) return 2;
   if (perMillion < 5) return 3;

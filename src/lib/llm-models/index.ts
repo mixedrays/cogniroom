@@ -13,6 +13,7 @@ export type {
 } from "./types";
 export {
   getPricePerToken,
+  isFreeModel,
   getModelPriceLabel,
   getModelPriceFullLabel,
   formatPricePerMillion,

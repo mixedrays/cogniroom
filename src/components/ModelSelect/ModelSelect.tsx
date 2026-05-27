@@ -15,6 +15,7 @@ import {
 import {
   DEFAULT_MODEL,
   providers,
+  isFreeModel,
   getModelPriceLabel,
   getModelPriceFullLabel,
   formatPricePerMillion,
@@ -163,35 +164,44 @@ export function ModelSelect({
                       <div className="flex flex-col gap-1">
                         <span>
                           {item.model.label}{" "}
-                          {item.model.priceRating && (
+                          {(item.model.priceRating ||
+                            isFreeModel(item.model)) && (
                             <Tooltip
                               content={
                                 <div className="space-y-1">
                                   <div className="font-medium text-green-500">
                                     {getModelPriceFullLabel(item.model)}
                                   </div>
-                                  {item.model.price && (
-                                    <>
-                                      <div>
-                                        Input:{" "}
-                                        {formatPricePerMillion(
-                                          item.model.price.input
-                                        )}{" "}
-                                        / 1M tokens
-                                      </div>
-                                      <div>
-                                        Output:{" "}
-                                        {formatPricePerMillion(
-                                          item.model.price.output
-                                        )}{" "}
-                                        / 1M tokens
-                                      </div>
-                                    </>
-                                  )}
+                                  {item.model.price &&
+                                    !isFreeModel(item.model) && (
+                                      <>
+                                        <div>
+                                          Input:{" "}
+                                          {formatPricePerMillion(
+                                            item.model.price.input
+                                          )}{" "}
+                                          / 1M tokens
+                                        </div>
+                                        <div>
+                                          Output:{" "}
+                                          {formatPricePerMillion(
+                                            item.model.price.output
+                                          )}{" "}
+                                          / 1M tokens
+                                        </div>
+                                      </>
+                                    )}
                                 </div>
                               }
                             >
-                              <span className="text-xs text-green-600 dark:text-green-400 cursor-help underline decoration-dotted underline-offset-2">
+                              <span
+                                className={cn(
+                                  "text-xs cursor-help underline decoration-dotted underline-offset-2",
+                                  isFreeModel(item.model)
+                                    ? "text-emerald-600 dark:text-emerald-400 font-semibold"
+                                    : "text-green-600 dark:text-green-400"
+                                )}
+                              >
                                 {getModelPriceLabel(item.model)}
                               </span>
                             </Tooltip>

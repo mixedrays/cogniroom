@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   getPricePerToken,
+  isFreeModel,
   getModelPriceLabel,
   getModelPriceFullLabel,
   formatPricePerMillion,
@@ -29,9 +30,34 @@ describe("getPricePerToken", () => {
   });
 });
 
+describe("isFreeModel", () => {
+  it("returns true when both input and output are zero", () => {
+    expect(
+      isFreeModel(makeModel({ price: { input: 0, output: 0 } }))
+    ).toBe(true);
+  });
+
+  it("returns false when either price is non-zero", () => {
+    expect(
+      isFreeModel(makeModel({ price: { input: 0, output: 0.0000001 } }))
+    ).toBe(false);
+    expect(
+      isFreeModel(makeModel({ price: { input: 0.0000001, output: 0 } }))
+    ).toBe(false);
+  });
+});
+
 describe("getModelPriceLabel", () => {
-  it("returns empty string for priceRating 0", () => {
+  it("returns empty string for priceRating 0 (paid model)", () => {
     expect(getModelPriceLabel(makeModel({ priceRating: 0 }))).toBe("");
+  });
+
+  it("returns FREE for zero-priced models", () => {
+    expect(
+      getModelPriceLabel(
+        makeModel({ priceRating: 0, price: { input: 0, output: 0 } })
+      )
+    ).toBe("FREE");
   });
 
   it("returns dollar signs for rating 1-3", () => {
@@ -47,8 +73,16 @@ describe("getModelPriceLabel", () => {
 });
 
 describe("getModelPriceFullLabel", () => {
-  it("returns empty string for priceRating 0", () => {
+  it("returns empty string for priceRating 0 (paid model)", () => {
     expect(getModelPriceFullLabel(makeModel({ priceRating: 0 }))).toBe("");
+  });
+
+  it("returns FREE for zero-priced models", () => {
+    expect(
+      getModelPriceFullLabel(
+        makeModel({ priceRating: 0, price: { input: 0, output: 0 } })
+      )
+    ).toBe("FREE");
   });
 
   it("returns exact dollar signs for any rating", () => {
