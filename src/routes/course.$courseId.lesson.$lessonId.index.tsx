@@ -9,7 +9,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import { Markdown } from "@/modules/markdown";
 import { Loader2 } from "lucide-react";
@@ -20,6 +20,7 @@ import {
   LessonPageHeader,
   LessonContentArea,
   LessonContentEmptyState,
+  LessonTableOfContents,
 } from "@/components/LessonPage";
 
 const lessonQueryOptions = (courseId: string, lessonId: string) =>
@@ -97,6 +98,7 @@ function LessonComponent() {
     lessonInfo.theoryCompleted ?? lessonInfo.completed ?? false
   );
   const [agentOpen, setAgentOpen] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsCompleted(lessonInfo.theoryCompleted ?? lessonInfo.completed ?? false);
@@ -193,12 +195,20 @@ function LessonComponent() {
             </div>
           }
         >
-          <LessonContentArea
-            title={lessonInfo.title}
-            description={lessonInfo.description}
-          >
-            <Markdown content={content} variant="lesson" />
-          </LessonContentArea>
+          <div className="flex w-full justify-center gap-8">
+            <div ref={contentRef} className="w-full min-w-0 max-w-4xl">
+              <LessonContentArea
+                title={lessonInfo.title}
+                description={lessonInfo.description}
+              >
+                <Markdown content={content} variant="lesson" />
+              </LessonContentArea>
+            </div>
+
+            <aside className="hidden xl:block w-56 shrink-0">
+              <LessonTableOfContents contentRef={contentRef} />
+            </aside>
+          </div>
         </Suspense>
       ) : (
         <LessonContentEmptyState
