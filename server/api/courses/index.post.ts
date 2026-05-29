@@ -5,16 +5,17 @@ import { COURSES_DIR } from "@root/server/env";
 import { getFormatAdapter } from "@modules/content-formats";
 import { toErrorMessage } from "@root/server/lib/errors";
 import { storagePaths } from "@root/server/lib/storagePaths";
-import { toSlug, generateUniqueCourseId } from "@modules/core";
+import { toSlug, generateUniqueCourseId, courseCreateSchema } from "@modules/core";
 import type { Course } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
   try {
-    const body = await readBody<Partial<Course>>(event);
+    const parsed = courseCreateSchema.safeParse(await readBody(event));
 
-    if (!body || !body.title) {
+    if (!parsed.success) {
       return { success: false, error: "Invalid course data" };
     }
+    const body = parsed.data;
 
     let existingIds: string[] = [];
     try {

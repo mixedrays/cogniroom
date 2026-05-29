@@ -1,7 +1,7 @@
 import { defineEventHandler, getRouterParam, readBody, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
 import { storagePaths } from "@root/server/lib/storagePaths";
-import type { ReviewData } from "@modules/core";
+import { reviewDataSchema } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -9,11 +9,14 @@ export default defineEventHandler(async (event) => {
     if (!id) {
       throw new HTTPError({ status: 400, message: "Missing deck ID" });
     }
-    const body = await readBody<ReviewData>(event);
-    if (!body) {
-      throw new HTTPError({ status: 400, message: "Missing body" });
+    const parsed = reviewDataSchema.safeParse(await readBody(event));
+    if (!parsed.success) {
+      throw new HTTPError({
+        status: 400,
+        message: `Invalid review data: ${parsed.error.issues[0]?.message ?? "validation failed"}`,
+      });
     }
-    await storageApi.put(storagePaths.deckReviews(id), body);
+    await storageApi.put(storagePaths.deckReviews(id), parsed.data);
     return { success: true };
   } catch (error) {
     if (error instanceof HTTPError) throw error;

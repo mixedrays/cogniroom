@@ -2,19 +2,13 @@ import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
-import { findLessonInCourse } from "@modules/core";
+import { findLessonInCourse, lessonCompletionUpdateSchema } from "@modules/core";
 import type { LessonSection } from "@modules/core";
-
-interface UpdateLessonBody {
-  completed?: boolean;
-  section?: LessonSection;
-}
 
 export default defineEventHandler(async (event) => {
   try {
     const courseId = getRouterParam(event, "id");
     const lessonId = getRouterParam(event, "lessonId");
-    const body = await readBody<UpdateLessonBody>(event);
 
     if (!courseId || !lessonId) {
       throw new HTTPError({
@@ -23,8 +17,19 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    const parsed = lessonCompletionUpdateSchema.safeParse(
+      (await readBody(event)) ?? {}
+    );
+    if (!parsed.success) {
+      throw new HTTPError({
+        status: 400,
+        message: `Invalid request body: ${parsed.error.issues[0]?.message ?? "validation failed"}`,
+      });
+    }
+    const body = parsed.data;
+
     const courseAdapter = getFormatAdapter("course");
-    const section: LessonSection = body?.section ?? "theory";
+    const section: LessonSection = body.section ?? "theory";
     const coursePath = storagePaths.course(courseId);
     const response = await storageApi.get<string>(coursePath);
 
@@ -65,7 +70,7 @@ export default defineEventHandler(async (event) => {
         : ((lessonRecord[completedField] as boolean | undefined) ?? false);
 
     const nextCompleted =
-      typeof body?.completed === "boolean" ? body.completed : !currentValue;
+      typeof body.completed === "boolean" ? body.completed : !currentValue;
 
     // Update the section-specific fields
     lessonRecord[completedField] = nextCompleted;

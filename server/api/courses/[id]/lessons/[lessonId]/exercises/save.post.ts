@@ -1,6 +1,7 @@
 import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import { lessonContentSchema } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
   const courseId = getRouterParam(event, "id");
@@ -13,17 +14,17 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const body = await readBody<{ content: unknown }>(event);
-  if (typeof body?.content !== "string" || body.content.trim().length === 0) {
+  const parsed = lessonContentSchema.safeParse(await readBody(event));
+  if (!parsed.success) {
     throw new HTTPError({
       status: 400,
-      message: "content must be a non-empty string",
+      message: parsed.error.issues[0]?.message ?? "Invalid content",
     });
   }
 
   await storageApi.post(
     storagePaths.exercise(courseId, lessonId),
-    body.content
+    parsed.data.content
   );
   return { success: true };
 });
