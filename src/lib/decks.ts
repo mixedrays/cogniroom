@@ -9,6 +9,7 @@ import type {
 } from "./types";
 import { withReadMirror, writeCache, deleteCache } from "./clientStorage";
 import { enqueueDeckReview } from "./syncQueue";
+import { postJson, getJson } from "./apiClient";
 
 function getBaseUrl() {
   if (typeof window !== "undefined") return "";
@@ -70,25 +71,11 @@ export interface CreateDeckInput {
 export async function createDeck(
   input: CreateDeckInput
 ): Promise<{ success: boolean; id?: string; error?: string }> {
-  try {
-    const response = await fetch(`${getBaseUrl()}/api/decks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
-    const body = await response.json().catch(() => null);
-    if (!response.ok) {
-      const message =
-        (body && typeof body === "object" && "message" in body
-          ? String((body as { message?: unknown }).message)
-          : null) ?? `Create failed (${response.status})`;
-      return { success: false, error: message };
-    }
-    return body ?? { success: true };
-  } catch (e) {
-    console.error("Error creating deck:", e);
-    return { success: false, error: String(e) };
-  }
+  return postJson<{ success: boolean; id?: string; error?: string }>(
+    `${getBaseUrl()}/api/decks`,
+    input,
+    "Create failed"
+  );
 }
 
 export async function deleteDeck(
@@ -116,21 +103,11 @@ export async function getDeckFlashcards(
 ): Promise<{ content: FlashcardsContent } | null> {
   return withReadMirror<{ content: FlashcardsContent }>(
     deckFlashcardsKey(id),
-    async () => {
-      try {
-        const response = await fetch(
-          `${getBaseUrl()}/api/decks/${id}/flashcards`
-        );
-        if (!response.ok) {
-          if (response.status === 404) return null;
-          throw new Error(response.statusText);
-        }
-        return (await response.json()) as { content: FlashcardsContent };
-      } catch (e) {
-        console.error(`Error getting deck flashcards ${id}:`, e);
-        return null;
-      }
-    }
+    () =>
+      getJson<{ content: FlashcardsContent }>(
+        `${getBaseUrl()}/api/decks/${id}/flashcards`,
+        `Error getting deck flashcards ${id}:`
+      )
   );
 }
 
@@ -139,36 +116,21 @@ export async function getDeckQuiz(
 ): Promise<{ content: QuizContent } | null> {
   return withReadMirror<{ content: QuizContent }>(
     deckQuizKey(id),
-    async () => {
-      try {
-        const response = await fetch(`${getBaseUrl()}/api/decks/${id}/quiz`);
-        if (!response.ok) {
-          if (response.status === 404) return null;
-          throw new Error(response.statusText);
-        }
-        return (await response.json()) as { content: QuizContent };
-      } catch (e) {
-        console.error(`Error getting deck quiz ${id}:`, e);
-        return null;
-      }
-    }
+    () =>
+      getJson<{ content: QuizContent }>(
+        `${getBaseUrl()}/api/decks/${id}/quiz`,
+        `Error getting deck quiz ${id}:`
+      )
   );
 }
 
 export async function getDeckReviews(id: string): Promise<ReviewData | null> {
-  return withReadMirror<ReviewData>(deckReviewsKey(id), async () => {
-    try {
-      const response = await fetch(`${getBaseUrl()}/api/decks/${id}/reviews`);
-      if (!response.ok) {
-        if (response.status === 404) return null;
-        throw new Error(response.statusText);
-      }
-      return (await response.json()) as ReviewData;
-    } catch (e) {
-      console.error(`Error getting deck reviews ${id}:`, e);
-      return null;
-    }
-  });
+  return withReadMirror<ReviewData>(deckReviewsKey(id), () =>
+    getJson<ReviewData>(
+      `${getBaseUrl()}/api/decks/${id}/reviews`,
+      `Error getting deck reviews ${id}:`
+    )
+  );
 }
 
 export interface GenerateDeckOptions {
@@ -185,28 +147,12 @@ export async function generateFlashcardsDeck(
   content?: FlashcardsContent;
   error?: string;
 }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/decks/flashcards/generate`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(options),
-      }
-    );
-    const body = await response.json().catch(() => null);
-    if (!response.ok) {
-      const message =
-        (body && typeof body === "object" && "message" in body
-          ? String((body as { message?: unknown }).message)
-          : null) ?? `Generate failed (${response.status})`;
-      return { success: false, error: message };
-    }
-    return body ?? { success: true };
-  } catch (e) {
-    console.error("Error generating flashcards deck:", e);
-    return { success: false, error: String(e) };
-  }
+  return postJson<{
+    success: boolean;
+    id?: string;
+    content?: FlashcardsContent;
+    error?: string;
+  }>(`${getBaseUrl()}/api/decks/flashcards/generate`, options, "Generate failed");
 }
 
 export async function generateQuizDeck(
@@ -217,25 +163,12 @@ export async function generateQuizDeck(
   content?: QuizContent;
   error?: string;
 }> {
-  try {
-    const response = await fetch(`${getBaseUrl()}/api/decks/quiz/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(options),
-    });
-    const body = await response.json().catch(() => null);
-    if (!response.ok) {
-      const message =
-        (body && typeof body === "object" && "message" in body
-          ? String((body as { message?: unknown }).message)
-          : null) ?? `Generate failed (${response.status})`;
-      return { success: false, error: message };
-    }
-    return body ?? { success: true };
-  } catch (e) {
-    console.error("Error generating quiz deck:", e);
-    return { success: false, error: String(e) };
-  }
+  return postJson<{
+    success: boolean;
+    id?: string;
+    content?: QuizContent;
+    error?: string;
+  }>(`${getBaseUrl()}/api/decks/quiz/generate`, options, "Generate failed");
 }
 
 export async function saveDeckReviews(

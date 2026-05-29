@@ -8,6 +8,7 @@ import type {
 } from "./types";
 import { withReadMirror, writeCache, deleteCache } from "./clientStorage";
 import { enqueueFlashcardsReview } from "./syncQueue";
+import { postJson, getJson } from "./apiClient";
 
 const COURSE_LIST_KEY = "cache/courses/index";
 const courseKey = (id: string) => `cache/courses/${id}`;
@@ -56,25 +57,11 @@ export async function listCourses(): Promise<CourseMetadata[]> {
 export async function saveCourse(
   course: Course
 ): Promise<{ success: boolean; id?: string; error?: string }> {
-  try {
-    const response = await fetch(`${getBaseUrl()}/api/courses`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(course),
-    });
-    const body = await response.json().catch(() => null);
-    if (!response.ok) {
-      const message =
-        (body && typeof body === "object" && "message" in body
-          ? String((body as { message?: unknown }).message)
-          : null) ?? `Save failed (${response.status})`;
-      return { success: false, error: message };
-    }
-    return body ?? { success: true };
-  } catch (e) {
-    console.error("Error saving course:", e);
-    return { success: false, error: String(e) };
-  }
+  return postJson<{ success: boolean; id?: string; error?: string }>(
+    `${getBaseUrl()}/api/courses`,
+    course,
+    "Save failed"
+  );
 }
 
 export async function generateCourse(params: {
@@ -278,21 +265,11 @@ export async function getLesson(
 ): Promise<{ content: string } | null> {
   return withReadMirror<{ content: string }>(
     lessonKey(courseId, lessonId),
-    async () => {
-      try {
-        const response = await fetch(
-          `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}`
-        );
-        if (!response.ok) {
-          if (response.status === 404) return null;
-          throw new Error(response.statusText);
-        }
-        return (await response.json()) as { content: string };
-      } catch (e) {
-        console.error(`Error getting lesson ${lessonId}:`, e);
-        return null;
-      }
-    }
+    () =>
+      getJson<{ content: string }>(
+        `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}`,
+        `Error getting lesson ${lessonId}:`
+      )
   );
 }
 
@@ -302,21 +279,11 @@ export async function getLessonFlashcards(
 ): Promise<{ content: FlashcardsContent } | null> {
   return withReadMirror<{ content: FlashcardsContent }>(
     flashcardsKey(courseId, lessonId),
-    async () => {
-      try {
-        const response = await fetch(
-          `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards`
-        );
-        if (!response.ok) {
-          if (response.status === 404) return null;
-          throw new Error(response.statusText);
-        }
-        return (await response.json()) as { content: FlashcardsContent };
-      } catch (e) {
-        console.error(`Error getting flashcards ${lessonId}:`, e);
-        return null;
-      }
-    }
+    () =>
+      getJson<{ content: FlashcardsContent }>(
+        `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards`,
+        `Error getting flashcards ${lessonId}:`
+      )
   );
 }
 
@@ -326,21 +293,11 @@ export async function getLessonQuiz(
 ): Promise<{ content: QuizContent } | null> {
   return withReadMirror<{ content: QuizContent }>(
     quizKey(courseId, lessonId),
-    async () => {
-      try {
-        const response = await fetch(
-          `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz`
-        );
-        if (!response.ok) {
-          if (response.status === 404) return null;
-          throw new Error(response.statusText);
-        }
-        return (await response.json()) as { content: QuizContent };
-      } catch (e) {
-        console.error(`Error getting quiz ${lessonId}:`, e);
-        return null;
-      }
-    }
+    () =>
+      getJson<{ content: QuizContent }>(
+        `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz`,
+        `Error getting quiz ${lessonId}:`
+      )
   );
 }
 
@@ -350,21 +307,11 @@ export async function getFlashcardsReviews(
 ): Promise<ReviewData | null> {
   return withReadMirror<ReviewData>(
     reviewsKey(courseId, lessonId),
-    async () => {
-      try {
-        const response = await fetch(
-          `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/reviews`
-        );
-        if (!response.ok) {
-          if (response.status === 404) return null;
-          throw new Error(response.statusText);
-        }
-        return (await response.json()) as ReviewData;
-      } catch (e) {
-        console.error(`Error getting reviews ${lessonId}:`, e);
-        return null;
-      }
-    }
+    () =>
+      getJson<ReviewData>(
+        `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/reviews`,
+        `Error getting reviews ${lessonId}:`
+      )
   );
 }
 
@@ -400,21 +347,11 @@ export async function getLessonExercises(
 ): Promise<{ content: string } | null> {
   return withReadMirror<{ content: string }>(
     exercisesKey(courseId, lessonId),
-    async () => {
-      try {
-        const response = await fetch(
-          `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises`
-        );
-        if (!response.ok) {
-          if (response.status === 404) return null;
-          throw new Error(response.statusText);
-        }
-        return (await response.json()) as { content: string };
-      } catch (e) {
-        console.error(`Error getting lesson exercises ${lessonId}:`, e);
-        return null;
-      }
-    }
+    () =>
+      getJson<{ content: string }>(
+        `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises`,
+        `Error getting lesson exercises ${lessonId}:`
+      )
   );
 }
 
@@ -472,27 +409,11 @@ export async function saveLessonContent(
   lessonId: string,
   content: string
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/save`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      }
-    );
-    const body = await response.json().catch(() => null);
-    if (!response.ok) {
-      const message =
-        (body && typeof body === "object" && "message" in body
-          ? String((body as { message?: unknown }).message)
-          : null) ?? `Save failed (${response.status})`;
-      return { success: false, error: message };
-    }
-    return body ?? { success: true };
-  } catch (e) {
-    return { success: false, error: String(e) };
-  }
+  return postJson(
+    `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/save`,
+    { content },
+    "Save failed"
+  );
 }
 
 export async function saveLessonQuiz(
@@ -500,27 +421,11 @@ export async function saveLessonQuiz(
   lessonId: string,
   content: unknown
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz/save`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      }
-    );
-    const body = await response.json().catch(() => null);
-    if (!response.ok) {
-      const message =
-        (body && typeof body === "object" && "message" in body
-          ? String((body as { message?: unknown }).message)
-          : null) ?? `Save failed (${response.status})`;
-      return { success: false, error: message };
-    }
-    return body ?? { success: true };
-  } catch (e) {
-    return { success: false, error: String(e) };
-  }
+  return postJson(
+    `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz/save`,
+    { content },
+    "Save failed"
+  );
 }
 
 export async function saveLessonFlashcards(
@@ -528,27 +433,11 @@ export async function saveLessonFlashcards(
   lessonId: string,
   content: unknown
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards/save`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      }
-    );
-    const body = await response.json().catch(() => null);
-    if (!response.ok) {
-      const message =
-        (body && typeof body === "object" && "message" in body
-          ? String((body as { message?: unknown }).message)
-          : null) ?? `Save failed (${response.status})`;
-      return { success: false, error: message };
-    }
-    return body ?? { success: true };
-  } catch (e) {
-    return { success: false, error: String(e) };
-  }
+  return postJson(
+    `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards/save`,
+    { content },
+    "Save failed"
+  );
 }
 
 export async function saveLessonExercises(
@@ -556,27 +445,11 @@ export async function saveLessonExercises(
   lessonId: string,
   content: string
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises/save`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      }
-    );
-    const body = await response.json().catch(() => null);
-    if (!response.ok) {
-      const message =
-        (body && typeof body === "object" && "message" in body
-          ? String((body as { message?: unknown }).message)
-          : null) ?? `Save failed (${response.status})`;
-      return { success: false, error: message };
-    }
-    return body ?? { success: true };
-  } catch (e) {
-    return { success: false, error: String(e) };
-  }
+  return postJson(
+    `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises/save`,
+    { content },
+    "Save failed"
+  );
 }
 
 export async function updateLessonCompletion(
