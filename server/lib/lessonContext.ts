@@ -1,6 +1,7 @@
 import { HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
+import { findLessonInCourse } from "@modules/core";
 import type { Course, Lesson, Topic } from "@modules/core";
 import { storagePaths } from "./storagePaths";
 
@@ -35,14 +36,12 @@ export async function loadLessonContext(
 
   const course = courseAdapter.deserialize(await courseResponse.text());
 
-  for (const topic of course.topics) {
-    const lesson = topic.lessons?.find((l) => l.id === lessonId);
-    if (lesson) {
-      return { course, topic, lesson };
-    }
+  const found = findLessonInCourse(course, lessonId);
+  if (!found) {
+    throw new HTTPError({ status: 404, message: "Lesson not found in course" });
   }
 
-  throw new HTTPError({ status: 404, message: "Lesson not found in course" });
+  return { course, topic: found.topic, lesson: found.lesson };
 }
 
 /**

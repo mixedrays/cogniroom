@@ -3,6 +3,7 @@ import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
 import { toErrorMessage } from "@root/server/lib/errors";
+import { findLessonInCourse } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -29,13 +30,10 @@ export default defineEventHandler(async (event) => {
       const text = await courseResponse.text();
       const course = courseAdapter.deserialize(text);
 
-      for (const topic of course.topics ?? []) {
-        const lesson = topic.lessons?.find((l) => l.id === lessonId);
-        if (lesson) {
-          lesson.exercisesCompleted = false;
-          delete lesson.exercisesCompletedAt;
-          break;
-        }
+      const found = findLessonInCourse(course, lessonId);
+      if (found) {
+        found.lesson.exercisesCompleted = false;
+        delete found.lesson.exercisesCompletedAt;
       }
 
       course.updatedAt = new Date().toISOString();

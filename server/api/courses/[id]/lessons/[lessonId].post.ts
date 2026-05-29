@@ -2,7 +2,8 @@ import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
-import type { Lesson, LessonSection } from "@modules/core";
+import { findLessonInCourse } from "@modules/core";
+import type { LessonSection } from "@modules/core";
 
 interface UpdateLessonBody {
   completed?: boolean;
@@ -37,22 +38,16 @@ export default defineEventHandler(async (event) => {
 
     const course = courseAdapter.deserialize(await response.text());
 
-    let targetLesson: Lesson | null = null;
+    const found = findLessonInCourse(course, lessonId);
 
-    for (const topic of course.topics ?? []) {
-      const lesson = topic.lessons?.find((l) => l.id === lessonId);
-      if (lesson) {
-        targetLesson = lesson;
-        break;
-      }
-    }
-
-    if (!targetLesson) {
+    if (!found) {
       throw new HTTPError({
         status: 404,
         message: "Lesson not found in course",
       });
     }
+
+    const targetLesson = found.lesson;
 
     const now = new Date().toISOString();
 

@@ -1,4 +1,26 @@
-import type { Course, CourseMetadata, Lesson, LessonSection } from "./types";
+import type {
+  Course,
+  CourseMetadata,
+  Lesson,
+  LessonSection,
+  Topic,
+} from "./types";
+
+/**
+ * Locate a lesson and its containing topic within a course. Returns the first
+ * match (live references, so callers may mutate the lesson in place), or null
+ * when no topic contains the lesson id.
+ */
+export function findLessonInCourse(
+  course: Course,
+  lessonId: string
+): { topic: Topic; lesson: Lesson } | null {
+  for (const topic of course.topics ?? []) {
+    const lesson = topic.lessons?.find((l) => l.id === lessonId);
+    if (lesson) return { topic, lesson };
+  }
+  return null;
+}
 
 export function toSlug(title: string): string {
   return title
