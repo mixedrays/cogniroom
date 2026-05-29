@@ -8,12 +8,17 @@ import {
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { toErrorMessage } from "@root/server/lib/errors";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
 import { composeAdditionalInstructions } from "@root/server/lib/composeAdditionalInstructions";
-import type { QuizContent, Lesson, Topic } from "@modules/core";
+import {
+  loadLessonContext,
+  loadLessonTheoryBlock,
+  buildLessonPromptVars,
+} from "@root/server/lib/lessonContext";
+import { withErrorGuard } from "@root/server/lib/withErrorGuard";
+import type { QuizContent } from "@modules/core";
 
 // Flat schema required because OpenAI structured outputs do not support oneOf/discriminatedUnion.
 // Fields that belong only to one type are nullable; type is reconstructed after parsing.
@@ -32,8 +37,8 @@ const QuizDraftSchema = z.object({
   ),
 });
 
-export default defineEventHandler(async (event) => {
-  try {
+export default defineEventHandler(
+  withErrorGuard("Failed to generate quiz", async (event) => {
     const courseId = getRouterParam(event, "id");
     const lessonId = getRouterParam(event, "lessonId");
     const body = await readBody<{
@@ -51,67 +56,23 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const courseAdapter = getFormatAdapter("course");
-    const courseResponse = await storageApi.get<string>(
-      storagePaths.course(courseId)
-    );
-    if (!courseResponse.ok) {
-      throw new HTTPError({
-        status: courseResponse.status,
-        message:
-          courseResponse.status === 404
-            ? "Course not found"
-            : courseResponse.statusText,
-      });
-    }
-    const course = courseAdapter.deserialize(await courseResponse.text());
-
-    let targetLesson: Lesson | null = null;
-    let targetTopic: Topic | null = null;
-
-    for (const topic of course.topics) {
-      const lesson = topic.lessons?.find((l) => l.id === lessonId);
-      if (lesson) {
-        targetLesson = lesson;
-        targetTopic = topic;
-        break;
-      }
-    }
-
-    if (!targetLesson || !targetTopic) {
-      throw new HTTPError({
-        status: 404,
-        message: "Lesson not found in course",
-      });
-    }
+    const ctx = await loadLessonContext(courseId, lessonId);
 
     const additionalInstructions = await composeAdditionalInstructions(
       body?.generationOptions,
       body?.additionalInstructions
     );
 
-    let lessonContent = "";
-    if (body?.includeContent !== false) {
-      const lessonResponse = await storageApi.get<string>(
-        storagePaths.lesson(courseId, lessonId)
-      );
-      if (lessonResponse.ok) {
-        const text = await lessonResponse.text();
-        if (text?.trim()) {
-          lessonContent = `\n\nLesson Theory Content:\n---\n${text.trim()}\n---`;
-        }
-      }
-    }
+    const lessonContent = await loadLessonTheoryBlock(
+      courseId,
+      lessonId,
+      body?.includeContent !== false
+    );
 
-    const prompt = await getRenderedPrompt("quiz-generation", {
-      courseTitle: course.title,
-      topicTitle: targetTopic.title,
-      topicDescription: targetTopic.description ?? "",
-      lessonTitle: targetLesson.title,
-      lessonDescription: targetLesson.description ?? "",
-      lessonContent,
-      additionalInstructions,
-    });
+    const prompt = await getRenderedPrompt(
+      "quiz-generation",
+      buildLessonPromptVars(ctx, additionalInstructions, lessonContent)
+    );
 
     const result = await generateText({
       model: getLanguageModel(model),
@@ -159,14 +120,5 @@ export default defineEventHandler(async (event) => {
     );
 
     return { success: true, content };
-  } catch (error: unknown) {
-    if (error instanceof HTTPError) {
-      throw error;
-    }
-    console.error("Error generating quiz:", error);
-    throw new HTTPError({
-      status: 500,
-      message: `Failed to generate quiz: ${toErrorMessage(error)}`,
-    });
-  }
-});
+  })
+);

@@ -6,15 +6,17 @@ import {
   DEFAULT_MODEL,
 } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { toErrorMessage } from "@root/server/lib/errors";
 import { storageApi } from "@modules/storage";
-import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
 import { composeAdditionalInstructions } from "@root/server/lib/composeAdditionalInstructions";
-import type { Lesson, Topic } from "@modules/core";
+import {
+  loadLessonContext,
+  buildLessonPromptVars,
+} from "@root/server/lib/lessonContext";
+import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
-export default defineEventHandler(async (event) => {
-  try {
+export default defineEventHandler(
+  withErrorGuard("Failed to generate lesson", async (event) => {
     const courseId = getRouterParam(event, "id");
     const lessonId = getRouterParam(event, "lessonId");
     const body = await readBody<{
@@ -31,56 +33,17 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // 1. Load Course
-    const courseAdapter = getFormatAdapter("course");
-    const courseResponse = await storageApi.get<string>(
-      storagePaths.course(courseId)
-    );
-    if (!courseResponse.ok) {
-      throw new HTTPError({
-        status: courseResponse.status,
-        message:
-          courseResponse.status === 404
-            ? "Course not found"
-            : courseResponse.statusText,
-      });
-    }
-    const course = courseAdapter.deserialize(await courseResponse.text());
+    const ctx = await loadLessonContext(courseId, lessonId);
 
-    // 2. Find Lesson and Context
-    let targetLesson: Lesson | null = null;
-    let targetTopic: Topic | null = null;
-
-    for (const topic of course.topics) {
-      const lesson = topic.lessons?.find((l) => l.id === lessonId);
-      if (lesson) {
-        targetLesson = lesson;
-        targetTopic = topic;
-        break;
-      }
-    }
-
-    if (!targetLesson || !targetTopic) {
-      throw new HTTPError({
-        status: 404,
-        message: "Lesson not found in course",
-      });
-    }
-
-    // 3. Generate Content
     const additionalInstructions = await composeAdditionalInstructions(
       body?.generationOptions,
       body?.additionalInstructions
     );
 
-    const prompt = await getRenderedPrompt("lesson-generation", {
-      courseTitle: course.title,
-      topicTitle: targetTopic.title,
-      topicDescription: targetTopic.description ?? "",
-      lessonTitle: targetLesson.title,
-      lessonDescription: targetLesson.description ?? "",
-      additionalInstructions,
-    });
+    const prompt = await getRenderedPrompt(
+      "lesson-generation",
+      buildLessonPromptVars(ctx, additionalInstructions)
+    );
 
     const result = await generateText({
       model: getLanguageModel(model),
@@ -89,19 +52,8 @@ export default defineEventHandler(async (event) => {
 
     const content = result.text;
 
-    // 4. Save Content (auto-creates parent directories)
     await storageApi.post(storagePaths.lesson(courseId, lessonId), content);
 
     return { success: true, content };
-  } catch (error: unknown) {
-    if (error instanceof HTTPError) {
-      throw error;
-    }
-
-    console.error("Error generating lesson:", error);
-    throw new HTTPError({
-      status: 500,
-      message: `Failed to generate lesson: ${toErrorMessage(error)}`,
-    });
-  }
-});
+  })
+);
