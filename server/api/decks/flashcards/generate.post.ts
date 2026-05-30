@@ -1,15 +1,15 @@
 import { randomUUID } from "node:crypto";
 import { readdirSync } from "node:fs";
-import { defineEventHandler, readBody, HTTPError } from "h3";
+import { defineEventHandler, readBody } from "h3";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { getLanguageModel, resolveModelId } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { toErrorMessage } from "@root/server/lib/errors";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
 import { composeAdditionalInstructions } from "@root/server/lib/composeAdditionalInstructions";
+import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 import { DECKS_DIR } from "@root/server/env";
 import { generateUniqueDeckId } from "@modules/core";
 import type { Deck, FlashcardsContent } from "@modules/core";
@@ -28,7 +28,6 @@ const FlashcardsDraftSchema = z.object({
 function timestampTitle(): string {
   return new Date().toISOString().slice(0, 16).replace("T", " ");
 }
-import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
 export default defineEventHandler(
   withErrorGuard("Failed to generate flashcards deck", async (event) => {

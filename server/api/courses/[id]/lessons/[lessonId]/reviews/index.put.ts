@@ -25,10 +25,7 @@ export default defineEventHandler(
       });
     }
 
-    await storageApi.put(
-      storagePaths.reviews(courseId, lessonId),
-      parsed.data
-    );
+    await storageApi.put(storagePaths.reviews(courseId, lessonId), parsed.data);
 
     return { success: true };
   })

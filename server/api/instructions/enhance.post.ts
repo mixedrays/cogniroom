@@ -7,7 +7,7 @@ import {
   type InstructionEnhancementContext,
 } from "@root/server/lib/instructionEnhancementPrompt";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { toErrorMessage } from "@root/server/lib/errors";
+import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
 interface EnhanceInstructionRequest extends InstructionEnhancementContext {
   model?: string;
@@ -20,8 +20,9 @@ interface EnhanceInstructionResponse {
 }
 
 export default defineEventHandler(
-  async (event): Promise<EnhanceInstructionResponse> => {
-    try {
+  withErrorGuard(
+    "Failed to enhance instruction",
+    async (event): Promise<EnhanceInstructionResponse> => {
       const body = await readBody<EnhanceInstructionRequest>(event);
 
       // Validate required fields
@@ -83,17 +84,6 @@ export default defineEventHandler(
         success: true,
         enhancedInstruction: result.text.trim(),
       };
-    } catch (error: unknown) {
-      console.error("Error enhancing instruction:", error);
-
-      if (error instanceof HTTPError) {
-        throw error;
-      }
-
-      throw new HTTPError({
-        status: 500,
-        message: `Failed to enhance instruction: ${toErrorMessage(error)}`,
-      });
     }
-  }
+  )
 );
