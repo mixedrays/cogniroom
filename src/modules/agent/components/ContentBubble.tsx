@@ -15,7 +15,7 @@ import { parsePartialJson } from "../lib/parsePartialJson";
 import type {
   Course,
   FlashcardsContent,
-  NormalizedRoadmap,
+  NormalizedCourse,
   QuizContent,
 } from "@/lib/types";
 import {
@@ -61,7 +61,7 @@ function normalizeText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function normalizeRoadmap(content: unknown): NormalizedRoadmap | null {
+function normalizeRoadmap(content: unknown): NormalizedCourse | null {
   if (!content || typeof content !== "object") return null;
 
   const roadmap = content as {
@@ -121,7 +121,7 @@ function getRoadmapSignature(content: unknown): string | null {
   return roadmap ? JSON.stringify(roadmap) : null;
 }
 
-function getLessonCount(roadmap: NormalizedRoadmap): number {
+function getLessonCount(roadmap: NormalizedCourse): number {
   return roadmap.topics.reduce(
     (count, topic) => count + topic.lessons.length,
     0

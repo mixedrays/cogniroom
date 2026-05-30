@@ -145,6 +145,3 @@ export function getCourseMetadata(course: Course): CourseMetadata {
       lessonCount === 0 ? 0 : Math.round((completedCount / lessonCount) * 100),
   };
 }
-
-/** @deprecated Use getCourseMetadata instead */
-export const getRoadmapMetadata = getCourseMetadata;

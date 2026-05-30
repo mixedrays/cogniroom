@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ContentBubble } from "../ContentBubble";
-import type { Course, NormalizedRoadmap } from "@/lib/types";
+import type { Course, NormalizedCourse } from "@/lib/types";
 import * as coursesApi from "@/lib/courses";
 
 vi.mock("@/lib/courses", () => ({
@@ -15,7 +15,7 @@ vi.mock("@/lib/courses", () => ({
   saveLessonExercises: vi.fn(),
 }));
 
-const roadmapPreview: NormalizedRoadmap = {
+const roadmapPreview: NormalizedCourse = {
   title: "React Fundamentals",
   description: "Build a strong foundation in React.",
   topics: [

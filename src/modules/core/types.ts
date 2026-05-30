@@ -39,9 +39,6 @@ export interface Course {
   topics: Topic[];
 }
 
-/** @deprecated Use Course instead */
-export type Roadmap = Course;
-
 export interface CourseMetadata {
   id: string;
   title: string;
@@ -54,9 +51,6 @@ export interface CourseMetadata {
   completedCount: number;
   progress: number;
 }
-
-/** @deprecated Use CourseMetadata instead */
-export type RoadmapMetadata = CourseMetadata;
 
 /**
  * Normalized lesson snapshot used for shape-based comparisons between generated
@@ -89,11 +83,6 @@ export interface NormalizedCourse extends Pick<
   description: string;
   topics: NormalizedTopic[];
 }
-
-/**
- * Backward-compatible alias for roadmap terminology in agent-facing code.
- */
-export type NormalizedRoadmap = NormalizedCourse;
 
 export interface Flashcard {
   id: string;
