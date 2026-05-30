@@ -188,7 +188,6 @@ export default function CreateCourseModal({
                     id: lesson.id || generateId(),
                     title: lesson.title || "Untitled Lesson",
                     description: lesson.description || "",
-                    completed: false,
                   }))
                 : [],
             }))
@@ -249,7 +248,6 @@ export default function CreateCourseModal({
                 id: generateId(),
                 title: "Overview",
                 description: "Content overview from the source",
-                completed: false,
               },
             ],
           },

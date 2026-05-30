@@ -107,7 +107,6 @@ export default defineEventHandler(async (event) => {
           id: uuidv4(),
           title: lessonDraft.title,
           description: lessonDraft.description ?? "",
-          completed: false,
         })),
       })),
     };

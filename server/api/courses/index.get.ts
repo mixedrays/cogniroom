@@ -2,6 +2,7 @@ import { defineEventHandler } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import { isLessonSectionCompleted } from "@modules/core";
 import type { Topic, Lesson } from "@modules/core";
 
 export default defineEventHandler(async () => {
@@ -33,8 +34,9 @@ export default defineEventHandler(async () => {
             course.topics?.reduce(
               (acc: number, topic: Topic) =>
                 acc +
-                (topic.lessons?.filter((l: Lesson) => l.completed)?.length ||
-                  0),
+                (topic.lessons?.filter((l: Lesson) =>
+                  isLessonSectionCompleted(l, "theory")
+                )?.length || 0),
               0
             ) || 0;
           const progress =

@@ -1,6 +1,7 @@
 export type {
   Lesson,
   LessonSection,
+  LessonSectionProgress,
   Topic,
   Course,
   Roadmap,

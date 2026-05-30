@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
+import { isLessonSectionCompleted } from "@/lib/types";
 import type { Course } from "@/lib/types";
 import { getCourse } from "@/lib/courses";
 
@@ -28,8 +29,8 @@ export function calculateCourseStats(course: Course): CourseStats {
 
   for (const topic of course.topics) {
     totalLessons += topic.lessons.length;
-    completedLessons += topic.lessons.filter(
-      (l) => l.theoryCompleted ?? l.completed ?? false
+    completedLessons += topic.lessons.filter((l) =>
+      isLessonSectionCompleted(l, "theory")
     ).length;
   }
 

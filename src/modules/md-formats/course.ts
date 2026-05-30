@@ -28,7 +28,14 @@
  * ---
  */
 
-import type { Course, Lesson, Topic } from "@modules/core";
+import type {
+  Course,
+  Lesson,
+  LessonSection,
+  LessonSectionProgress,
+  Topic,
+} from "@modules/core";
+import { LESSON_SECTIONS } from "@modules/core";
 import { parseFrontmatter, splitOnBoundaries } from "./parser";
 
 export function courseToMd(course: Course): string {
@@ -60,25 +67,13 @@ export function courseToMd(course: Course): string {
       lines.push("---");
       lines.push(`id: ${lesson.id}`);
       if (lesson.description) lines.push(`description: ${lesson.description}`);
-      if (lesson.theoryCompleted !== undefined)
-        lines.push(`theoryCompleted: ${lesson.theoryCompleted}`);
-      if (lesson.theoryCompletedAt)
-        lines.push(`theoryCompletedAt: ${lesson.theoryCompletedAt}`);
-      if (lesson.flashcardsCompleted !== undefined)
-        lines.push(`flashcardsCompleted: ${lesson.flashcardsCompleted}`);
-      if (lesson.flashcardsCompletedAt)
-        lines.push(`flashcardsCompletedAt: ${lesson.flashcardsCompletedAt}`);
-      if (lesson.quizCompleted !== undefined)
-        lines.push(`quizCompleted: ${lesson.quizCompleted}`);
-      if (lesson.quizCompletedAt)
-        lines.push(`quizCompletedAt: ${lesson.quizCompletedAt}`);
-      if (lesson.exercisesCompleted !== undefined)
-        lines.push(`exercisesCompleted: ${lesson.exercisesCompleted}`);
-      if (lesson.exercisesCompletedAt)
-        lines.push(`exercisesCompletedAt: ${lesson.exercisesCompletedAt}`);
-      if (lesson.completed !== undefined)
-        lines.push(`completed: ${lesson.completed}`);
-      if (lesson.completedAt) lines.push(`completedAt: ${lesson.completedAt}`);
+      for (const section of LESSON_SECTIONS) {
+        const sectionProgress = lesson.progress?.[section];
+        if (!sectionProgress) continue;
+        lines.push(`${section}Completed: ${sectionProgress.completed}`);
+        if (sectionProgress.completedAt)
+          lines.push(`${section}CompletedAt: ${sectionProgress.completedAt}`);
+      }
       lines.push("---");
     }
   }
@@ -125,25 +120,27 @@ export function mdToCourse(text: string): Course {
         ...(fm.description ? { description: fm.description as string } : {}),
       };
 
-      if (fm.theoryCompleted !== undefined)
-        lesson.theoryCompleted = fm.theoryCompleted as boolean;
-      if (fm.theoryCompletedAt)
-        lesson.theoryCompletedAt = fm.theoryCompletedAt as string;
-      if (fm.flashcardsCompleted !== undefined)
-        lesson.flashcardsCompleted = fm.flashcardsCompleted as boolean;
-      if (fm.flashcardsCompletedAt)
-        lesson.flashcardsCompletedAt = fm.flashcardsCompletedAt as string;
-      if (fm.quizCompleted !== undefined)
-        lesson.quizCompleted = fm.quizCompleted as boolean;
-      if (fm.quizCompletedAt)
-        lesson.quizCompletedAt = fm.quizCompletedAt as string;
-      if (fm.exercisesCompleted !== undefined)
-        lesson.exercisesCompleted = fm.exercisesCompleted as boolean;
-      if (fm.exercisesCompletedAt)
-        lesson.exercisesCompletedAt = fm.exercisesCompletedAt as string;
-      if (fm.completed !== undefined)
-        lesson.completed = fm.completed as boolean;
-      if (fm.completedAt) lesson.completedAt = fm.completedAt as string;
+      const progress: Partial<Record<LessonSection, LessonSectionProgress>> =
+        {};
+      for (const section of LESSON_SECTIONS) {
+        const completed = fm[`${section}Completed`];
+        if (completed === undefined) continue;
+        const completedAt = fm[`${section}CompletedAt`];
+        progress[section] = {
+          completed: completed as boolean,
+          ...(completedAt ? { completedAt: completedAt as string } : {}),
+        };
+      }
+      // Legacy theory completion (pre-section migration) maps to the theory key.
+      if (progress.theory === undefined && fm.completed !== undefined) {
+        progress.theory = {
+          completed: fm.completed as boolean,
+          ...(fm.completedAt
+            ? { completedAt: fm.completedAt as string }
+            : {}),
+        };
+      }
+      if (Object.keys(progress).length > 0) lesson.progress = progress;
 
       currentTopic.lessons.push(lesson);
     }

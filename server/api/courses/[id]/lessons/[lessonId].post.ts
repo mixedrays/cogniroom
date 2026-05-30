@@ -2,7 +2,12 @@ import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
-import { findLessonInCourse, lessonCompletionUpdateSchema } from "@modules/core";
+import {
+  findLessonInCourse,
+  isLessonSectionCompleted,
+  setLessonSectionCompletion,
+  lessonCompletionUpdateSchema,
+} from "@modules/core";
 import type { LessonSection } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
@@ -56,39 +61,16 @@ export default defineEventHandler(async (event) => {
 
     const now = new Date().toISOString();
 
-    // Get the field names based on section
-    const completedField = `${section}Completed`;
-    const completedAtField = `${section}CompletedAt`;
-    const lessonRecord = targetLesson as unknown as Record<string, unknown>;
-
-    // Determine the current value (handle legacy 'completed' field for theory)
-    const currentValue =
-      section === "theory"
-        ? ((lessonRecord[completedField] as boolean | undefined) ??
-          targetLesson.completed ??
-          false)
-        : ((lessonRecord[completedField] as boolean | undefined) ?? false);
-
+    const currentValue = isLessonSectionCompleted(targetLesson, section);
     const nextCompleted =
       typeof body.completed === "boolean" ? body.completed : !currentValue;
 
-    // Update the section-specific fields
-    lessonRecord[completedField] = nextCompleted;
-    if (nextCompleted) {
-      lessonRecord[completedAtField] = now;
-    } else {
-      delete lessonRecord[completedAtField];
-    }
-
-    // For backwards compatibility, also update legacy fields for theory
-    if (section === "theory") {
-      targetLesson.completed = nextCompleted;
-      if (nextCompleted) {
-        targetLesson.completedAt = now;
-      } else {
-        delete targetLesson.completedAt;
-      }
-    }
+    setLessonSectionCompletion(
+      targetLesson,
+      section,
+      nextCompleted,
+      nextCompleted ? now : undefined
+    );
 
     course.updatedAt = now;
 

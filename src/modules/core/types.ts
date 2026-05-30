@@ -1,3 +1,10 @@
+export type LessonSection = "theory" | "flashcards" | "quiz" | "exercises";
+
+export interface LessonSectionProgress {
+  completed: boolean;
+  completedAt?: string;
+}
+
 export interface Lesson {
   id: string;
   title: string;
@@ -7,21 +14,12 @@ export interface Lesson {
   hasFlashcards?: boolean;
   hasQuiz?: boolean;
   hasExercises?: boolean;
-  theoryCompleted?: boolean;
-  theoryCompletedAt?: string;
-  flashcardsCompleted?: boolean;
-  flashcardsCompletedAt?: string;
-  quizCompleted?: boolean;
-  quizCompletedAt?: string;
-  exercisesCompleted?: boolean;
-  exercisesCompletedAt?: string;
-  /** @deprecated Use theoryCompleted instead */
-  completed?: boolean;
-  /** @deprecated Use theoryCompletedAt instead */
-  completedAt?: string;
+  /**
+   * Per-section completion state, keyed by {@link LessonSection}. A missing
+   * section entry means that section has not been completed.
+   */
+  progress?: Partial<Record<LessonSection, LessonSectionProgress>>;
 }
-
-export type LessonSection = "theory" | "flashcards" | "quiz" | "exercises";
 
 export interface Topic {
   id: string;

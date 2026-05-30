@@ -15,6 +15,19 @@ export const lessonSectionSchema = z.enum([
 
 export const courseSourceSchema = z.enum(["llm", "import", "extract"]);
 
+export const lessonSectionProgressSchema = z.object({
+  completed: z.boolean(),
+  completedAt: z.string().optional(),
+});
+
+/** Per-section completion state, keyed by `LessonSection`. */
+export const lessonProgressSchema = z.object({
+  theory: lessonSectionProgressSchema.optional(),
+  flashcards: lessonSectionProgressSchema.optional(),
+  quiz: lessonSectionProgressSchema.optional(),
+  exercises: lessonSectionProgressSchema.optional(),
+});
+
 /**
  * Inbound lesson shape for course writes. `id` is optional because generated
  * roadmap previews omit it; the server derives a stable id from the title.
@@ -28,16 +41,7 @@ export const lessonInputSchema = z.object({
   hasFlashcards: z.boolean().optional(),
   hasQuiz: z.boolean().optional(),
   hasExercises: z.boolean().optional(),
-  theoryCompleted: z.boolean().optional(),
-  theoryCompletedAt: z.string().optional(),
-  flashcardsCompleted: z.boolean().optional(),
-  flashcardsCompletedAt: z.string().optional(),
-  quizCompleted: z.boolean().optional(),
-  quizCompletedAt: z.string().optional(),
-  exercisesCompleted: z.boolean().optional(),
-  exercisesCompletedAt: z.string().optional(),
-  completed: z.boolean().optional(),
-  completedAt: z.string().optional(),
+  progress: lessonProgressSchema.optional(),
 });
 
 export const topicInputSchema = z.object({

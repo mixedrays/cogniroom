@@ -3,7 +3,7 @@ import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
 import { toErrorMessage } from "@root/server/lib/errors";
-import { findLessonInCourse } from "@modules/core";
+import { findLessonInCourse, setLessonSectionCompletion } from "@modules/core";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -34,8 +34,7 @@ export default defineEventHandler(async (event) => {
 
       const found = findLessonInCourse(course, lessonId);
       if (found) {
-        found.lesson.quizCompleted = false;
-        delete found.lesson.quizCompletedAt;
+        setLessonSectionCompletion(found.lesson, "quiz", false);
       }
 
       course.updatedAt = new Date().toISOString();

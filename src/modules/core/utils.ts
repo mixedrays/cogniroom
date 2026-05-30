@@ -6,6 +6,13 @@ import type {
   Topic,
 } from "./types";
 
+export const LESSON_SECTIONS: readonly LessonSection[] = [
+  "theory",
+  "flashcards",
+  "quiz",
+  "exercises",
+];
+
 /**
  * Locate a lesson and its containing topic within a course. Returns the first
  * match (live references, so callers may mutate the lesson in place), or null
@@ -63,16 +70,31 @@ export function isLessonSectionCompleted(
   lesson: Lesson,
   section: LessonSection
 ): boolean {
-  switch (section) {
-    case "theory":
-      return lesson.theoryCompleted ?? lesson.completed ?? false;
-    case "flashcards":
-      return lesson.flashcardsCompleted ?? false;
-    case "quiz":
-      return lesson.quizCompleted ?? false;
-    case "exercises":
-      return lesson.exercisesCompleted ?? false;
-  }
+  return lesson.progress?.[section]?.completed ?? false;
+}
+
+export function getLessonSectionCompletedAt(
+  lesson: Lesson,
+  section: LessonSection
+): string | undefined {
+  return lesson.progress?.[section]?.completedAt;
+}
+
+/**
+ * Set a lesson section's completion state in place. When `completed` is true an
+ * optional `completedAt` timestamp is recorded; when false the timestamp is
+ * cleared.
+ */
+export function setLessonSectionCompletion(
+  lesson: Lesson,
+  section: LessonSection,
+  completed: boolean,
+  completedAt?: string
+): void {
+  const progress = (lesson.progress ??= {});
+  progress[section] = completed
+    ? { completed: true, ...(completedAt ? { completedAt } : {}) }
+    : { completed: false };
 }
 
 export function isLessonFullyCompleted(lesson: Lesson): boolean {
@@ -89,8 +111,8 @@ export function calculateProgress(course: Course): number {
 
   for (const topic of course.topics) {
     totalLessons += topic.lessons.length;
-    completedLessons += topic.lessons.filter(
-      (l) => l.theoryCompleted ?? l.completed ?? false
+    completedLessons += topic.lessons.filter((l) =>
+      isLessonSectionCompleted(l, "theory")
     ).length;
   }
 
@@ -104,8 +126,8 @@ export function getCourseMetadata(course: Course): CourseMetadata {
 
   for (const topic of course.topics) {
     lessonCount += topic.lessons.length;
-    completedCount += topic.lessons.filter(
-      (l) => l.theoryCompleted ?? l.completed ?? false
+    completedCount += topic.lessons.filter((l) =>
+      isLessonSectionCompleted(l, "theory")
     ).length;
   }
 

@@ -1,5 +1,6 @@
 import { useParams, useLocation, useNavigate } from "@tanstack/react-router";
 import { BookOpen, Layers, ListChecks, Code } from "lucide-react";
+import { isLessonSectionCompleted } from "@/lib/types";
 import type { Lesson } from "@/lib/types";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -71,8 +72,7 @@ export function LessonItem({
           <ContentBadge
             hasContent={lesson.hasContent ?? false}
             completed={
-              lesson.hasContent &&
-              (lesson.theoryCompleted ?? lesson.completed ?? false)
+              lesson.hasContent && isLessonSectionCompleted(lesson, "theory")
             }
             isActive={isActive}
             isActiveSection={activeSection === "theory"}
@@ -87,7 +87,8 @@ export function LessonItem({
             isActive={isActive}
             isActiveSection={activeSection === "flashcards"}
             completed={
-              lesson.hasFlashcards && (lesson.flashcardsCompleted ?? false)
+              lesson.hasFlashcards &&
+              isLessonSectionCompleted(lesson, "flashcards")
             }
             icon={<Layers />}
             label="Flashcards"
@@ -99,7 +100,9 @@ export function LessonItem({
             hasContent={lesson.hasQuiz ?? false}
             isActive={isActive}
             isActiveSection={activeSection === "quiz"}
-            completed={lesson.hasQuiz && (lesson.quizCompleted ?? false)}
+            completed={
+              lesson.hasQuiz && isLessonSectionCompleted(lesson, "quiz")
+            }
             icon={<ListChecks />}
             label="Quiz"
             to="/course/$courseId/lesson/$lessonId/quiz"
@@ -111,7 +114,8 @@ export function LessonItem({
             isActive={isActive}
             isActiveSection={activeSection === "exercises"}
             completed={
-              lesson.hasExercises && (lesson.exercisesCompleted ?? false)
+              lesson.hasExercises &&
+              isLessonSectionCompleted(lesson, "exercises")
             }
             icon={<Code />}
             label="Exercises"
