@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   generateId,
   isLessonSectionCompleted,
+  getLessonSectionCompletedAt,
+  setLessonSectionCompletion,
   isLessonFullyCompleted,
   calculateProgress,
   getCourseMetadata,
@@ -21,6 +23,13 @@ const baseLesson: Lesson = {
   id: "l1",
   title: "Lesson 1",
 };
+
+function withProgress(
+  overrides: Partial<Lesson>,
+  progress: NonNullable<Lesson["progress"]>
+): Lesson {
+  return { ...baseLesson, ...overrides, progress };
+}
 
 describe("generateId", () => {
   it("returns a non-empty string", () => {
@@ -42,52 +51,87 @@ describe("isLessonSectionCompleted", () => {
     expect(isLessonSectionCompleted(baseLesson, "exercises")).toBe(false);
   });
 
-  it("returns true for theory when theoryCompleted is true", () => {
+  it("reads completion from the progress map per section", () => {
     expect(
       isLessonSectionCompleted(
-        { ...baseLesson, theoryCompleted: true },
+        withProgress({}, { theory: { completed: true } }),
         "theory"
+      )
+    ).toBe(true);
+    expect(
+      isLessonSectionCompleted(
+        withProgress({}, { flashcards: { completed: true } }),
+        "flashcards"
+      )
+    ).toBe(true);
+    expect(
+      isLessonSectionCompleted(
+        withProgress({}, { quiz: { completed: true } }),
+        "quiz"
+      )
+    ).toBe(true);
+    expect(
+      isLessonSectionCompleted(
+        withProgress({}, { exercises: { completed: true } }),
+        "exercises"
       )
     ).toBe(true);
   });
 
-  it("falls back to deprecated completed field for theory", () => {
-    expect(
-      isLessonSectionCompleted({ ...baseLesson, completed: true }, "theory")
-    ).toBe(true);
-  });
-
-  it("theoryCompleted takes precedence over deprecated completed", () => {
+  it("returns false when a section is explicitly marked not completed", () => {
     expect(
       isLessonSectionCompleted(
-        { ...baseLesson, theoryCompleted: false, completed: true },
+        withProgress({}, { theory: { completed: false } }),
         "theory"
       )
     ).toBe(false);
   });
+});
 
-  it("returns true for flashcards when flashcardsCompleted is true", () => {
-    expect(
-      isLessonSectionCompleted(
-        { ...baseLesson, flashcardsCompleted: true },
-        "flashcards"
-      )
-    ).toBe(true);
+describe("getLessonSectionCompletedAt", () => {
+  it("returns the recorded timestamp for a completed section", () => {
+    const lesson = withProgress(
+      {},
+      { quiz: { completed: true, completedAt: "2024-02-02" } }
+    );
+    expect(getLessonSectionCompletedAt(lesson, "quiz")).toBe("2024-02-02");
   });
 
-  it("returns true for quiz when quizCompleted is true", () => {
-    expect(
-      isLessonSectionCompleted({ ...baseLesson, quizCompleted: true }, "quiz")
-    ).toBe(true);
+  it("returns undefined when the section is absent", () => {
+    expect(getLessonSectionCompletedAt(baseLesson, "quiz")).toBeUndefined();
+  });
+});
+
+describe("setLessonSectionCompletion", () => {
+  it("marks a section completed with a timestamp", () => {
+    const lesson: Lesson = { ...baseLesson };
+    setLessonSectionCompletion(lesson, "theory", true, "2024-03-03");
+    expect(lesson.progress?.theory).toEqual({
+      completed: true,
+      completedAt: "2024-03-03",
+    });
   });
 
-  it("returns true for exercises when exercisesCompleted is true", () => {
-    expect(
-      isLessonSectionCompleted(
-        { ...baseLesson, exercisesCompleted: true },
-        "exercises"
-      )
-    ).toBe(true);
+  it("omits the timestamp when none is provided", () => {
+    const lesson: Lesson = { ...baseLesson };
+    setLessonSectionCompletion(lesson, "flashcards", true);
+    expect(lesson.progress?.flashcards).toEqual({ completed: true });
+  });
+
+  it("clears the timestamp when marking not completed", () => {
+    const lesson = withProgress(
+      {},
+      { exercises: { completed: true, completedAt: "2024-03-03" } }
+    );
+    setLessonSectionCompletion(lesson, "exercises", false);
+    expect(lesson.progress?.exercises).toEqual({ completed: false });
+  });
+
+  it("does not affect other sections", () => {
+    const lesson = withProgress({}, { theory: { completed: true } });
+    setLessonSectionCompletion(lesson, "quiz", true);
+    expect(lesson.progress?.theory).toEqual({ completed: true });
+    expect(lesson.progress?.quiz).toEqual({ completed: true });
   });
 });
 
@@ -110,25 +154,23 @@ describe("isLessonFullyCompleted", () => {
 
   it("returns true when both content and exercises are completed", () => {
     expect(
-      isLessonFullyCompleted({
-        ...baseLesson,
-        hasContent: true,
-        theoryCompleted: true,
-        hasExercises: true,
-        exercisesCompleted: true,
-      })
+      isLessonFullyCompleted(
+        withProgress(
+          { hasContent: true, hasExercises: true },
+          { theory: { completed: true }, exercises: { completed: true } }
+        )
+      )
     ).toBe(true);
   });
 
   it("returns false when only theory is completed but exercises are not", () => {
     expect(
-      isLessonFullyCompleted({
-        ...baseLesson,
-        hasContent: true,
-        theoryCompleted: true,
-        hasExercises: true,
-        exercisesCompleted: false,
-      })
+      isLessonFullyCompleted(
+        withProgress(
+          { hasContent: true, hasExercises: true },
+          { theory: { completed: true }, exercises: { completed: false } }
+        )
+      )
     ).toBe(false);
   });
 });
@@ -152,7 +194,7 @@ describe("calculateProgress", () => {
     expect(calculateProgress(course)).toBe(0);
   });
 
-  it("returns 100 when all lessons are completed", () => {
+  it("returns 100 when all lessons have theory completed", () => {
     const course: Course = {
       ...baseCourse,
       topics: [
@@ -160,8 +202,8 @@ describe("calculateProgress", () => {
           id: "t1",
           title: "T1",
           lessons: [
-            { ...baseLesson, theoryCompleted: true },
-            { ...baseLesson, id: "l2", theoryCompleted: true },
+            withProgress({}, { theory: { completed: true } }),
+            withProgress({ id: "l2" }, { theory: { completed: true } }),
           ],
         },
       ],
@@ -177,7 +219,7 @@ describe("calculateProgress", () => {
           id: "t1",
           title: "T1",
           lessons: [
-            { ...baseLesson, theoryCompleted: true },
+            withProgress({}, { theory: { completed: true } }),
             { ...baseLesson, id: "l2" },
             { ...baseLesson, id: "l3" },
           ],
@@ -187,18 +229,18 @@ describe("calculateProgress", () => {
     expect(calculateProgress(course)).toBe(33);
   });
 
-  it("counts deprecated completed field", () => {
+  it("only counts theory completion toward progress", () => {
     const course: Course = {
       ...baseCourse,
       topics: [
         {
           id: "t1",
           title: "T1",
-          lessons: [{ ...baseLesson, completed: true }],
+          lessons: [withProgress({}, { quiz: { completed: true } })],
         },
       ],
     };
-    expect(calculateProgress(course)).toBe(100);
+    expect(calculateProgress(course)).toBe(0);
   });
 });
 
@@ -224,8 +266,8 @@ describe("getCourseMetadata", () => {
           id: "t2",
           title: "T2",
           lessons: [
-            { ...baseLesson, id: "l2", theoryCompleted: true },
-            { ...baseLesson, id: "l3", theoryCompleted: true },
+            withProgress({ id: "l2" }, { theory: { completed: true } }),
+            withProgress({ id: "l3" }, { theory: { completed: true } }),
           ],
         },
       ],

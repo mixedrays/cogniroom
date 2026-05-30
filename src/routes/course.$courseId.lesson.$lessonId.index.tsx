@@ -14,6 +14,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Markdown } from "@/modules/markdown";
 import { Loader2 } from "lucide-react";
 import { getLesson, getCourse, updateLessonCompletion } from "@/lib/courses";
+import { isLessonSectionCompleted } from "@/lib/types";
 import { WizardAgentSheet, useLessonAttachments } from "@/modules/wizard-agent";
 import {
   LessonPageShell,
@@ -94,15 +95,14 @@ function LessonComponent() {
   const router = useRouter();
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
-  const [isCompleted, setIsCompleted] = useState(
-    lessonInfo.theoryCompleted ?? lessonInfo.completed ?? false
-  );
+  const theoryCompleted = isLessonSectionCompleted(lessonInfo, "theory");
+  const [isCompleted, setIsCompleted] = useState(theoryCompleted);
   const [agentOpen, setAgentOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setIsCompleted(lessonInfo.theoryCompleted ?? lessonInfo.completed ?? false);
-  }, [lessonInfo.theoryCompleted, lessonInfo.completed]);
+    setIsCompleted(theoryCompleted);
+  }, [theoryCompleted]);
 
   const invalidateAndRefresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["course", courseId] });

@@ -12,6 +12,7 @@ import {
   updateLessonCompletion,
 } from "@/lib/courses";
 import { Quiz } from "@/modules/quiz";
+import { isLessonSectionCompleted } from "@/lib/types";
 import type { QuizQuestion } from "@/lib/types";
 import {
   LessonPageShell,
@@ -87,14 +88,13 @@ function LessonQuizComponent() {
   const queryClient = useQueryClient();
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
-  const [isCompleted, setIsCompleted] = useState(
-    lessonInfo.quizCompleted ?? false
-  );
+  const quizCompleted = isLessonSectionCompleted(lessonInfo, "quiz");
+  const [isCompleted, setIsCompleted] = useState(quizCompleted);
   const [agentOpen, setAgentOpen] = useState(false);
 
   useEffect(() => {
-    setIsCompleted(lessonInfo.quizCompleted ?? false);
-  }, [lessonInfo.quizCompleted]);
+    setIsCompleted(quizCompleted);
+  }, [quizCompleted]);
 
   const questions = useMemo(() => parseQuizQuestions(content), [content]);
   const hasQuestions = questions.length > 0;

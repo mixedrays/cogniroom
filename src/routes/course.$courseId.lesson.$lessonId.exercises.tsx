@@ -12,6 +12,7 @@ import {
   getCourse,
   updateLessonCompletion,
 } from "@/lib/courses";
+import { isLessonSectionCompleted } from "@/lib/types";
 import { WizardAgentSheet, useLessonAttachments } from "@/modules/wizard-agent";
 import {
   LessonPageShell,
@@ -74,14 +75,13 @@ function LessonExercisesComponent() {
   const queryClient = useQueryClient();
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
-  const [isCompleted, setIsCompleted] = useState(
-    lessonInfo.exercisesCompleted ?? false
-  );
+  const exercisesCompleted = isLessonSectionCompleted(lessonInfo, "exercises");
+  const [isCompleted, setIsCompleted] = useState(exercisesCompleted);
   const [agentOpen, setAgentOpen] = useState(false);
 
   useEffect(() => {
-    setIsCompleted(lessonInfo.exercisesCompleted ?? false);
-  }, [lessonInfo.exercisesCompleted]);
+    setIsCompleted(exercisesCompleted);
+  }, [exercisesCompleted]);
 
   const invalidateAndRefresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["course", courseId] });

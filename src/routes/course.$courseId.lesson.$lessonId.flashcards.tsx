@@ -14,6 +14,7 @@ import {
   saveFlashcardsReviews,
 } from "@/lib/courses";
 import { SM2UI } from "@/modules/flashcards/strategies/SM2/SM2UI";
+import { isLessonSectionCompleted } from "@/lib/types";
 import type { Flashcard, ReviewData } from "@/lib/types";
 import {
   LessonPageShell,
@@ -100,14 +101,16 @@ function LessonFlashcardsComponent() {
   const queryClient = useQueryClient();
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
-  const [isCompleted, setIsCompleted] = useState(
-    lessonInfo.flashcardsCompleted ?? false
+  const flashcardsCompleted = isLessonSectionCompleted(
+    lessonInfo,
+    "flashcards"
   );
+  const [isCompleted, setIsCompleted] = useState(flashcardsCompleted);
   const [agentOpen, setAgentOpen] = useState(false);
 
   useEffect(() => {
-    setIsCompleted(lessonInfo.flashcardsCompleted ?? false);
-  }, [lessonInfo.flashcardsCompleted]);
+    setIsCompleted(flashcardsCompleted);
+  }, [flashcardsCompleted]);
 
   const cards = useMemo(() => parseFlashcards(content), [content]);
   const hasCards = cards.length > 0;
