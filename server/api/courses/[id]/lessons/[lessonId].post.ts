@@ -9,9 +9,10 @@ import {
   lessonCompletionUpdateSchema,
 } from "@modules/core";
 import type { LessonSection } from "@modules/core";
+import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
-export default defineEventHandler(async (event) => {
-  try {
+export default defineEventHandler(
+  withErrorGuard("Failed to update lesson completion", async (event) => {
     const courseId = getRouterParam(event, "id");
     const lessonId = getRouterParam(event, "lessonId");
 
@@ -82,15 +83,5 @@ export default defineEventHandler(async (event) => {
       completed: nextCompleted,
       completedAt: nextCompleted ? now : null,
     };
-  } catch (error: unknown) {
-    if (error instanceof HTTPError) {
-      throw error;
-    }
-
-    console.error("Error updating lesson completion:", error);
-    throw new HTTPError({
-      status: 500,
-      message: "Internal server error",
-    });
-  }
-});
+  })
+);

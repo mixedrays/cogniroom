@@ -3,9 +3,10 @@ import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
 import type { Topic, Lesson } from "@modules/core";
+import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
-export default defineEventHandler(async (event) => {
-  try {
+export default defineEventHandler(
+  withErrorGuard("Failed to load course", async (event) => {
     const id = getRouterParam(event, "id");
 
     if (!id) {
@@ -82,14 +83,5 @@ export default defineEventHandler(async (event) => {
     );
 
     return { ...course, topics };
-  } catch (error: unknown) {
-    if (error instanceof HTTPError) {
-      throw error;
-    }
-    console.error("Error getting course:", error);
-    throw new HTTPError({
-      status: 500,
-      message: "Internal server error",
-    });
-  }
-});
+  })
+);

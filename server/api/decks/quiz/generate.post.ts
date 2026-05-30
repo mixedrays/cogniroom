@@ -32,9 +32,10 @@ const QuizDraftSchema = z.object({
 function timestampTitle(): string {
   return new Date().toISOString().slice(0, 16).replace("T", " ");
 }
+import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
-export default defineEventHandler(async (event) => {
-  try {
+export default defineEventHandler(
+  withErrorGuard("Failed to generate quiz deck", async (event) => {
     const body = await readBody<{
       additionalInstructions?: string;
       model?: string;
@@ -115,12 +116,5 @@ export default defineEventHandler(async (event) => {
     );
 
     return { success: true, id, content };
-  } catch (error: unknown) {
-    if (error instanceof HTTPError) throw error;
-    console.error("Error generating quiz deck:", error);
-    throw new HTTPError({
-      status: 500,
-      message: `Failed to generate quiz deck: ${toErrorMessage(error)}`,
-    });
-  }
-});
+  })
+);

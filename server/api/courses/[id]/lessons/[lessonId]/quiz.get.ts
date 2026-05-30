@@ -2,9 +2,10 @@ import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
+import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
-export default defineEventHandler(async (event) => {
-  try {
+export default defineEventHandler(
+  withErrorGuard("Failed to load quiz", async (event) => {
     const courseId = getRouterParam(event, "id");
     const lessonId = getRouterParam(event, "lessonId");
 
@@ -29,13 +30,5 @@ export default defineEventHandler(async (event) => {
       status: 404,
       message: "Quiz not found",
     });
-  } catch (error: unknown) {
-    if (error instanceof HTTPError) {
-      throw error;
-    }
-    throw new HTTPError({
-      status: 500,
-      message: "Failed to load quiz",
-    });
-  }
-});
+  })
+);

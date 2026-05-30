@@ -2,9 +2,10 @@ import { defineEventHandler, getRouterParam, readBody, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
 import { storagePaths } from "@root/server/lib/storagePaths";
 import { reviewDataSchema } from "@modules/core";
+import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
-export default defineEventHandler(async (event) => {
-  try {
+export default defineEventHandler(
+  withErrorGuard("Failed to save reviews", async (event) => {
     const id = getRouterParam(event, "id");
     if (!id) {
       throw new HTTPError({ status: 400, message: "Missing deck ID" });
@@ -18,8 +19,5 @@ export default defineEventHandler(async (event) => {
     }
     await storageApi.put(storagePaths.deckReviews(id), parsed.data);
     return { success: true };
-  } catch (error) {
-    if (error instanceof HTTPError) throw error;
-    throw new HTTPError({ status: 500, message: "Failed to save reviews" });
-  }
-});
+  })
+);
