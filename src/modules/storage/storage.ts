@@ -103,80 +103,91 @@ export async function storage<T = unknown>(
 }
 
 /**
- * Convenience methods for common operations
+ * Build a convenience API over an adapter. When `customAdapter` is omitted the
+ * default adapter is resolved lazily on each call (via `getAdapter()`), so
+ * `initStorage` can still configure the backend after this object is created.
+ * Every method — including `list`/`stat` — honors `customAdapter`, so a scoped
+ * API never silently falls back to the default backend.
  */
-export const storageApi = {
-  /**
-   * GET a file
-   * @example
-   * const response = await storageApi.get<Course>("courses/123/course.json");
-   * const course = await response.json();
-   */
-  get: <T = unknown>(path: string): Promise<StorageResponse<T>> => {
-    return storage<T>(path, { method: "GET" });
-  },
+function buildStorageApi(customAdapter?: StorageAdapter) {
+  const resolveAdapter = () => customAdapter ?? getAdapter();
 
-  /**
-   * POST (create) a new file
-   * @example
-   * await storageApi.post("courses/123/course.json", courseData);
-   */
-  post: <T = unknown>(
-    path: string,
-    body: string | object
-  ): Promise<StorageResponse<T>> => {
-    return storage<T>(path, { method: "POST", body });
-  },
+  return {
+    /**
+     * GET a file
+     * @example
+     * const response = await storageApi.get<Course>("courses/123/course.json");
+     * const course = await response.json();
+     */
+    get: <T = unknown>(path: string): Promise<StorageResponse<T>> =>
+      storage<T>(path, { method: "GET" }, customAdapter),
 
-  /**
-   * PUT (update) an existing file
-   * @example
-   * await storageApi.put("courses/123/course.json", updatedCourse);
-   */
-  put: <T = unknown>(
-    path: string,
-    body: string | object
-  ): Promise<StorageResponse<T>> => {
-    return storage<T>(path, { method: "PUT", body });
-  },
+    /**
+     * POST (create) a new file
+     * @example
+     * await storageApi.post("courses/123/course.json", courseData);
+     */
+    post: <T = unknown>(
+      path: string,
+      body: string | object
+    ): Promise<StorageResponse<T>> =>
+      storage<T>(path, { method: "POST", body }, customAdapter),
 
-  /**
-   * DELETE a file or directory
-   * @example
-   * await storageApi.delete("courses/123", true); // recursive
-   */
-  delete: (path: string, recursive = false): Promise<StorageResponse<void>> => {
-    return storage<void>(path, { method: "DELETE", options: { recursive } });
-  },
+    /**
+     * PUT (update) an existing file
+     * @example
+     * await storageApi.put("courses/123/course.json", updatedCourse);
+     */
+    put: <T = unknown>(
+      path: string,
+      body: string | object
+    ): Promise<StorageResponse<T>> =>
+      storage<T>(path, { method: "PUT", body }, customAdapter),
 
-  /**
-   * Check if a path exists
-   * @example
-   * if (await storageApi.exists("courses/123/course.json")) { ... }
-   */
-  exists: async (path: string): Promise<boolean> => {
-    const response = await storage(path, { method: "HEAD" });
-    return response.ok;
-  },
+    /**
+     * DELETE a file or directory
+     * @example
+     * await storageApi.delete("courses/123", true); // recursive
+     */
+    delete: (path: string, recursive = false): Promise<StorageResponse<void>> =>
+      storage<void>(
+        path,
+        { method: "DELETE", options: { recursive } },
+        customAdapter
+      ),
 
-  /**
-   * List directory contents
-   * @example
-   * const files = await storageApi.list("courses", { extension: ".json" });
-   */
-  list: (path: string, options?: ListOptions): Promise<FileMetadata[]> => {
-    return getAdapter().list(path, options);
-  },
+    /**
+     * Check if a path exists
+     * @example
+     * if (await storageApi.exists("courses/123/course.json")) { ... }
+     */
+    exists: async (path: string): Promise<boolean> => {
+      const response = await storage(path, { method: "HEAD" }, customAdapter);
+      return response.ok;
+    },
 
-  /**
-   * Get file/directory metadata
-   * @example
-   * const meta = await storageApi.stat("courses/123/course.json");
-   */
-  stat: (path: string): Promise<FileMetadata | null> => {
-    return getAdapter().stat(path);
-  },
-};
+    /**
+     * List directory contents
+     * @example
+     * const files = await storageApi.list("courses", { extension: ".json" });
+     */
+    list: (path: string, options?: ListOptions): Promise<FileMetadata[]> =>
+      resolveAdapter().list(path, options),
+
+    /**
+     * Get file/directory metadata
+     * @example
+     * const meta = await storageApi.stat("courses/123/course.json");
+     */
+    stat: (path: string): Promise<FileMetadata | null> =>
+      resolveAdapter().stat(path),
+  };
+}
+
+/**
+ * Convenience methods for common operations against the default adapter.
+ */
+export const storageApi = buildStorageApi();
 
 export type StorageApi = typeof storageApi;
 
@@ -189,32 +200,5 @@ export type StorageApi = typeof storageApi;
  * const response = await settingsStorage.get<Settings>("settings.json");
  */
 export function createStorageApi(config: StorageConfig): StorageApi {
-  const adapter = createStorage(config);
-
-  return {
-    get: <T = unknown>(path: string) =>
-      storage<T>(path, { method: "GET" }, adapter),
-
-    post: <T = unknown>(path: string, body: string | object) =>
-      storage<T>(path, { method: "POST", body }, adapter),
-
-    put: <T = unknown>(path: string, body: string | object) =>
-      storage<T>(path, { method: "PUT", body }, adapter),
-
-    delete: (path: string, recursive = false) =>
-      storage<void>(
-        path,
-        { method: "DELETE", options: { recursive } },
-        adapter
-      ),
-
-    exists: async (path: string) => {
-      const response = await storage(path, { method: "HEAD" }, adapter);
-      return response.ok;
-    },
-
-    list: (path: string, options?: ListOptions) => adapter.list(path, options),
-
-    stat: (path: string) => adapter.stat(path),
-  };
+  return buildStorageApi(createStorage(config));
 }
