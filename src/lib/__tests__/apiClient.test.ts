@@ -59,10 +59,13 @@ describe("postJson", () => {
 
   it("extracts the server message on a failed response", async () => {
     fetchMock.mockResolvedValueOnce(
-      jsonResponse({ message: "Course already exists" }, {
-        ok: false,
-        status: 409,
-      })
+      jsonResponse(
+        { message: "Course already exists" },
+        {
+          ok: false,
+          status: 409,
+        }
+      )
     );
     expect(await postJson("/api/thing", {})).toEqual({
       success: false,
@@ -71,7 +74,9 @@ describe("postJson", () => {
   });
 
   it("falls back to the failure label and status when no message is present", async () => {
-    fetchMock.mockResolvedValueOnce(jsonResponse({}, { ok: false, status: 500 }));
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({}, { ok: false, status: 500 })
+    );
     expect(await postJson("/api/thing", {}, "Save failed")).toEqual({
       success: false,
       error: "Save failed (500)",

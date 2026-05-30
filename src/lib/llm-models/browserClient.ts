@@ -19,9 +19,7 @@ const ANTHROPIC_BROWSER_HEADER = {
 };
 
 function readApiKey(providerId: string): string {
-  return (
-    localStorage.getItem(getProviderLocalStorageKeyName(providerId)) ?? ""
-  );
+  return localStorage.getItem(getProviderLocalStorageKeyName(providerId)) ?? "";
 }
 
 function requireApiKey(providerId: string, providerName: string): string {

@@ -23,7 +23,10 @@ describe("withErrorGuard", () => {
   });
 
   it("rethrows an HTTPError unchanged", async () => {
-    const original = new HTTPError({ status: 404, message: "Course not found" });
+    const original = new HTTPError({
+      status: 404,
+      message: "Course not found",
+    });
     const guarded = withErrorGuard("Failed to generate lesson", async () => {
       throw original;
     });
@@ -42,9 +45,7 @@ describe("withErrorGuard", () => {
   });
 
   it("logs the failure with the provided label", async () => {
-    const errorSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const guarded = withErrorGuard("Failed to generate quiz", async () => {
       throw new Error("nope");
     });

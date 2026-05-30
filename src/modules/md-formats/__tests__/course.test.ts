@@ -20,7 +20,10 @@ const course: Course = {
           title: "Lesson 1",
           description: "Intro",
           progress: {
-            theory: { completed: true, completedAt: "2024-01-03T00:00:00.000Z" },
+            theory: {
+              completed: true,
+              completedAt: "2024-01-03T00:00:00.000Z",
+            },
             quiz: { completed: false },
           },
         },

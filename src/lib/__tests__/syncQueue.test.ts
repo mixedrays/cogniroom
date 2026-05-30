@@ -9,10 +9,7 @@ const reset = async () => {
   vi.resetModules();
 };
 
-const sample = (
-  lessonId = "lesson-1",
-  itemId = "card-1"
-): ReviewData => ({
+const sample = (lessonId = "lesson-1", itemId = "card-1"): ReviewData => ({
   lessonId,
   entries: [
     {
@@ -33,9 +30,8 @@ afterEach(() => {
 
 describe("syncQueue", () => {
   it("enqueues a flashcards review and reads it back", async () => {
-    const { enqueueFlashcardsReview, getPendingReviews } = await import(
-      "@/lib/syncQueue"
-    );
+    const { enqueueFlashcardsReview, getPendingReviews } =
+      await import("@/lib/syncQueue");
     await enqueueFlashcardsReview("c1", "l1", sample("l1"));
     const pending = await getPendingReviews();
     expect(pending).toHaveLength(1);
@@ -47,9 +43,8 @@ describe("syncQueue", () => {
   });
 
   it("collapses repeated enqueues for the same target to the latest payload", async () => {
-    const { enqueueFlashcardsReview, getPendingReviews } = await import(
-      "@/lib/syncQueue"
-    );
+    const { enqueueFlashcardsReview, getPendingReviews } =
+      await import("@/lib/syncQueue");
     await enqueueFlashcardsReview("c1", "l1", sample("l1", "card-1"));
     await enqueueFlashcardsReview("c1", "l1", sample("l1", "card-2"));
     const pending = await getPendingReviews();
@@ -65,8 +60,12 @@ describe("syncQueue", () => {
     vi.stubGlobal("fetch", fetchMock);
     vi.stubGlobal("navigator", { onLine: true });
 
-    const { enqueueFlashcardsReview, enqueueDeckReview, flushSyncQueue, getPendingReviews } =
-      await import("@/lib/syncQueue");
+    const {
+      enqueueFlashcardsReview,
+      enqueueDeckReview,
+      flushSyncQueue,
+      getPendingReviews,
+    } = await import("@/lib/syncQueue");
 
     await enqueueFlashcardsReview("c1", "l1", sample("l1"));
     await enqueueDeckReview("d1", sample("d1"));
@@ -96,9 +95,8 @@ describe("syncQueue", () => {
     vi.stubGlobal("fetch", fetchMock);
     vi.stubGlobal("navigator", { onLine: false });
 
-    const { enqueueDeckReview, flushSyncQueue } = await import(
-      "@/lib/syncQueue"
-    );
+    const { enqueueDeckReview, flushSyncQueue } =
+      await import("@/lib/syncQueue");
     await enqueueDeckReview("d1", sample("d1"));
     const result = await flushSyncQueue();
     expect(result).toEqual({ synced: 0, failed: 0 });

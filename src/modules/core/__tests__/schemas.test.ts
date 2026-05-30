@@ -28,7 +28,9 @@ describe("courseCreateSchema", () => {
             {
               id: "l1",
               title: "Lesson 1",
-              progress: { theory: { completed: true, completedAt: "2024-01-02" } },
+              progress: {
+                theory: { completed: true, completedAt: "2024-01-02" },
+              },
             },
             { title: "Lesson 2" },
           ],

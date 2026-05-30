@@ -5,7 +5,11 @@ import { COURSES_DIR } from "@root/server/env";
 import { getFormatAdapter } from "@modules/content-formats";
 import { toErrorMessage } from "@root/server/lib/errors";
 import { storagePaths } from "@root/server/lib/storagePaths";
-import { toSlug, generateUniqueCourseId, courseCreateSchema } from "@modules/core";
+import {
+  toSlug,
+  generateUniqueCourseId,
+  courseCreateSchema,
+} from "@modules/core";
 import type { Course } from "@modules/core";
 
 export default defineEventHandler(async (event) => {

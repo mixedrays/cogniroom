@@ -114,13 +114,11 @@ export async function getDeckFlashcards(
 export async function getDeckQuiz(
   id: string
 ): Promise<{ content: QuizContent } | null> {
-  return withReadMirror<{ content: QuizContent }>(
-    deckQuizKey(id),
-    () =>
-      getJson<{ content: QuizContent }>(
-        `${getBaseUrl()}/api/decks/${id}/quiz`,
-        `Error getting deck quiz ${id}:`
-      )
+  return withReadMirror<{ content: QuizContent }>(deckQuizKey(id), () =>
+    getJson<{ content: QuizContent }>(
+      `${getBaseUrl()}/api/decks/${id}/quiz`,
+      `Error getting deck quiz ${id}:`
+    )
   );
 }
 
@@ -152,7 +150,11 @@ export async function generateFlashcardsDeck(
     id?: string;
     content?: FlashcardsContent;
     error?: string;
-  }>(`${getBaseUrl()}/api/decks/flashcards/generate`, options, "Generate failed");
+  }>(
+    `${getBaseUrl()}/api/decks/flashcards/generate`,
+    options,
+    "Generate failed"
+  );
 }
 
 export async function generateQuizDeck(

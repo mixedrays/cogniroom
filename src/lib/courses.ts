@@ -305,13 +305,11 @@ export async function getFlashcardsReviews(
   courseId: string,
   lessonId: string
 ): Promise<ReviewData | null> {
-  return withReadMirror<ReviewData>(
-    reviewsKey(courseId, lessonId),
-    () =>
-      getJson<ReviewData>(
-        `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/reviews`,
-        `Error getting reviews ${lessonId}:`
-      )
+  return withReadMirror<ReviewData>(reviewsKey(courseId, lessonId), () =>
+    getJson<ReviewData>(
+      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/reviews`,
+      `Error getting reviews ${lessonId}:`
+    )
   );
 }
 

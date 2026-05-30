@@ -134,9 +134,9 @@ export class IndexedDBAdapter extends StorageAdapter {
   }
 
   private async handleGet<T>(path: string): Promise<StorageResponse<T>> {
-    const record = await this.run("readonly", (store) =>
-      store.get(path)
-    ) as StoredRecord | undefined;
+    const record = (await this.run("readonly", (store) => store.get(path))) as
+      | StoredRecord
+      | undefined;
 
     if (!record) {
       return this.createErrorResponse(StorageStatus.NOT_FOUND);
@@ -179,9 +179,9 @@ export class IndexedDBAdapter extends StorageAdapter {
     }
 
     const now = Date.now();
-    const existing = await this.run("readonly", (store) =>
+    const existing = (await this.run("readonly", (store) =>
       store.get(path)
-    ) as StoredRecord | undefined;
+    )) as StoredRecord | undefined;
 
     const record: StoredRecord = {
       path,
@@ -204,9 +204,9 @@ export class IndexedDBAdapter extends StorageAdapter {
     request: StorageRequest
   ): Promise<StorageResponse<T>> {
     const recursive = request.options.recursive ?? false;
-    const existing = await this.run("readonly", (store) =>
+    const existing = (await this.run("readonly", (store) =>
       store.get(path)
-    ) as StoredRecord | undefined;
+    )) as StoredRecord | undefined;
 
     if (recursive) {
       const prefix = parentPrefix(path);
@@ -280,9 +280,9 @@ export class IndexedDBAdapter extends StorageAdapter {
       if (firstSlash === -1) {
         if (!files) continue;
         if (extension && !key.endsWith(extension)) continue;
-        const record = await this.run("readonly", (store) =>
+        const record = (await this.run("readonly", (store) =>
           store.get(key)
-        ) as StoredRecord | undefined;
+        )) as StoredRecord | undefined;
         if (record) filesMap.set(key, record);
       } else {
         const dirName = relative.slice(0, firstSlash);
@@ -293,9 +293,9 @@ export class IndexedDBAdapter extends StorageAdapter {
           // and the deeper file (will be picked up below)
           if (files) {
             if (extension && !key.endsWith(extension)) continue;
-            const record = await this.run("readonly", (store) =>
+            const record = (await this.run("readonly", (store) =>
               store.get(key)
-            ) as StoredRecord | undefined;
+            )) as StoredRecord | undefined;
             if (record) filesMap.set(key, record);
           }
         } else {
@@ -332,9 +332,9 @@ export class IndexedDBAdapter extends StorageAdapter {
 
   async stat(path: string): Promise<FileMetadata | null> {
     const normalized = normalizePath(path);
-    const record = await this.run("readonly", (store) =>
+    const record = (await this.run("readonly", (store) =>
       store.get(normalized)
-    ) as StoredRecord | undefined;
+    )) as StoredRecord | undefined;
 
     if (record) {
       const name = normalized.split("/").pop() ?? normalized;

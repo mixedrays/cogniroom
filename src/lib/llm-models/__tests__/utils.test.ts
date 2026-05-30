@@ -32,9 +32,9 @@ describe("getPricePerToken", () => {
 
 describe("isFreeModel", () => {
   it("returns true when both input and output are zero", () => {
-    expect(
-      isFreeModel(makeModel({ price: { input: 0, output: 0 } }))
-    ).toBe(true);
+    expect(isFreeModel(makeModel({ price: { input: 0, output: 0 } }))).toBe(
+      true
+    );
   });
 
   it("returns false when either price is non-zero", () => {

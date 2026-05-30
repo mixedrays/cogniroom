@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  ALL_MODELS,
-  DEFAULT_MODEL,
-  resolveModelId,
-  providers,
-} from "../index";
+import { ALL_MODELS, DEFAULT_MODEL, resolveModelId, providers } from "../index";
 import type { AvailableModelsId } from "../index";
 
 describe("DEFAULT_MODEL", () => {

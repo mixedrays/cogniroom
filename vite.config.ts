@@ -67,8 +67,7 @@ const config = defineConfig({
           },
           {
             urlPattern: ({ request, url }) =>
-              request.method === "GET" &&
-              /^\/api\//.test(url.pathname),
+              request.method === "GET" && /^\/api\//.test(url.pathname),
             handler: "NetworkFirst",
             options: {
               cacheName: "api-other",

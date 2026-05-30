@@ -234,7 +234,9 @@ function BrowserKeyDisclaimer() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                 <section>
-                  <h3 className="font-medium mb-1">How keys are stored & used</h3>
+                  <h3 className="font-medium mb-1">
+                    How keys are stored & used
+                  </h3>
                   <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                     <li>
                       Saved in this browser's <code>localStorage</code> in plain

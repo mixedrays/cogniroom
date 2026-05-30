@@ -276,10 +276,13 @@ export default function CourseList() {
                                               handleDeleteCourse(course.id)
                                             }
                                             disabled={
-                                              deletingId === course.id || !online
+                                              deletingId === course.id ||
+                                              !online
                                             }
                                             title={
-                                              !online ? "You are offline" : undefined
+                                              !online
+                                                ? "You are offline"
+                                                : undefined
                                             }
                                           >
                                             {deletingId === course.id

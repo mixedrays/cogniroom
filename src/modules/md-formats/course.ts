@@ -135,9 +135,7 @@ export function mdToCourse(text: string): Course {
       if (progress.theory === undefined && fm.completed !== undefined) {
         progress.theory = {
           completed: fm.completed as boolean,
-          ...(fm.completedAt
-            ? { completedAt: fm.completedAt as string }
-            : {}),
+          ...(fm.completedAt ? { completedAt: fm.completedAt as string } : {}),
         };
       }
       if (Object.keys(progress).length > 0) lesson.progress = progress;
