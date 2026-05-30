@@ -3,7 +3,7 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 
-import { getLanguageModel, type AvailableModelsId } from "@root/server/lib/llm";
+import { getLanguageModel, resolveModelId } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { toErrorMessage } from "@root/server/lib/errors";
 import { getMemoryContext } from "@root/server/lib/memoryService";
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
 
     const topic = body?.topic?.trim();
     const level = (body?.level ?? "beginner") as SkillLevel;
-    const model = (body?.model ?? "gpt-4o-mini").trim();
+    const model = resolveModelId(body?.model);
     const memoryContext = (await getMemoryContext()).trim();
     const userInstr = body?.instructions?.trim();
     const additionalInstructions = [
@@ -78,7 +78,7 @@ export default defineEventHandler(async (event) => {
     });
 
     const result = await generateText({
-      model: getLanguageModel(model as AvailableModelsId),
+      model: getLanguageModel(model),
       prompt,
       output: Output.object({
         schema: RoadmapDraftSchema,

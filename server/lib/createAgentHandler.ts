@@ -1,10 +1,6 @@
 import { defineEventHandler, readBody, createEventStream } from "h3";
 import type { ModelMessage } from "ai";
-import {
-  getDefaultModel,
-  getLanguageModel,
-  type AvailableModelsId,
-} from "./llm";
+import { getDefaultModel, getLanguageModel, resolveModelId } from "./llm";
 import type { AgentTool } from "@/modules/agent/types";
 import { runAgentStream } from "@/modules/agent/lib/runAgentStream";
 import { getMemoryContext } from "./memoryService";
@@ -38,7 +34,7 @@ export function createAgentHandler(config: {
     void (async () => {
       try {
         const model = body.model
-          ? getLanguageModel(body.model as AvailableModelsId)
+          ? getLanguageModel(resolveModelId(body.model))
           : getDefaultModel();
         await runAgentStream({
           model,

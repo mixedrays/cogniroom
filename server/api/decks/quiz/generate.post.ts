@@ -3,11 +3,7 @@ import { readdirSync } from "node:fs";
 import { defineEventHandler, readBody, HTTPError } from "h3";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import {
-  getLanguageModel,
-  type AvailableModelsId,
-  DEFAULT_MODEL,
-} from "@root/server/lib/llm";
+import { getLanguageModel, resolveModelId } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { toErrorMessage } from "@root/server/lib/errors";
 import { storageApi } from "@modules/storage";
@@ -44,7 +40,7 @@ export default defineEventHandler(async (event) => {
       model?: string;
       generationOptions?: string;
     }>(event);
-    const model = (body?.model ?? DEFAULT_MODEL).trim() as AvailableModelsId;
+    const model = resolveModelId(body?.model);
 
     const additionalInstructions = await composeAdditionalInstructions(
       body?.generationOptions,

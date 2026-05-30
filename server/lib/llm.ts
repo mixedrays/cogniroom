@@ -10,15 +10,18 @@ import {
   providers,
   getProviderForModel,
   getProviderEnvKeyName,
+  resolveModelId,
+  type AvailableModelsId,
 } from "@/lib/llm-models";
-import type { OpenAIAvailableModelsIds as AvailableModelsId } from "@/lib/llm-models/providers/openai";
 
 export type { AvailableModelsId };
-export { AVAILABLE_MODELS };
+export { AVAILABLE_MODELS, resolveModelId };
 
 export const DEFAULT_MODEL: AvailableModelsId = DEFAULT_MODEL_ID;
 
-export function getLanguageModel(model: string = DEFAULT_MODEL): LanguageModel {
+export function getLanguageModel(
+  model: AvailableModelsId = DEFAULT_MODEL
+): LanguageModel {
   const provider = getProviderForModel(model, providers);
   const providerId = provider?.id ?? "openai";
   const apiKey = getRequiredEnv(getProviderEnvKeyName(providerId));

@@ -2,11 +2,7 @@ import { randomUUID } from "node:crypto";
 import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import {
-  getLanguageModel,
-  type AvailableModelsId,
-  DEFAULT_MODEL,
-} from "@root/server/lib/llm";
+import { getLanguageModel, resolveModelId } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
@@ -40,7 +36,7 @@ export default defineEventHandler(
       includeContent?: boolean;
       generationOptions?: string;
     }>(event);
-    const model = (body?.model ?? DEFAULT_MODEL).trim() as AvailableModelsId;
+    const model = resolveModelId(body?.model);
 
     if (!courseId || !lessonId) {
       throw new HTTPError({

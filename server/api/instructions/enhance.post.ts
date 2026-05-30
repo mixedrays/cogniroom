@@ -1,10 +1,6 @@
 import { defineEventHandler, readBody, HTTPError } from "h3";
 import { generateText } from "ai";
-import {
-  getLanguageModel,
-  type AvailableModelsId,
-  DEFAULT_MODEL,
-} from "@root/server/lib/llm";
+import { getLanguageModel, resolveModelId } from "@root/server/lib/llm";
 import {
   validateInstructionForEnhancement,
   getContentTypeGuidelines,
@@ -64,7 +60,7 @@ export default defineEventHandler(
       }
 
       // Get model from request or use default
-      const model = (body?.model ?? DEFAULT_MODEL).trim() as AvailableModelsId;
+      const model = resolveModelId(body?.model);
 
       // Build the enhancement prompt
       const prompt = await getRenderedPrompt("instruction-enhancement", {

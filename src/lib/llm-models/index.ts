@@ -1,4 +1,5 @@
 import type { ProviderConfig, ProviderModels } from "./types";
+import type { AvailableModelsId } from "./providers";
 import { providers } from "./providers";
 import {
   getModelLabel as _getModelLabel,
@@ -11,6 +12,12 @@ export type {
   ProviderModelDefinitions,
   ProviderModels,
 } from "./types";
+export type {
+  AvailableModelsId,
+  OpenAIAvailableModelsIds,
+  AnthropicAvailableModelsIds,
+  OpenRouterAvailableModelsIds,
+} from "./providers";
 export {
   getPricePerToken,
   isFreeModel,
@@ -28,7 +35,7 @@ export {
   openrouterProvider,
 } from "./providers";
 
-export const DEFAULT_MODEL = "gpt-5-mini";
+export const DEFAULT_MODEL = "gpt-5-mini" satisfies AvailableModelsId;
 
 /**
  * All models from all registered providers, merged into a single record.
@@ -73,4 +80,17 @@ export function getModelLabel(modelId: string | undefined | null): string {
 
 export function getValidModel(model: string | undefined | null): string {
   return _getValidModel(model, ALL_MODELS, DEFAULT_MODEL);
+}
+
+/**
+ * Validate an arbitrary (possibly untrusted) model string against the registry
+ * and narrow it to {@link AvailableModelsId}, falling back to
+ * {@link DEFAULT_MODEL} when it is unknown. Use this at API boundaries instead
+ * of casting `body.model as AvailableModelsId`.
+ */
+export function resolveModelId(
+  model: string | undefined | null
+): AvailableModelsId {
+  const trimmed = typeof model === "string" ? model.trim() : model;
+  return getValidModel(trimmed) as AvailableModelsId;
 }
