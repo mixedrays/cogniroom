@@ -8,253 +8,253 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as SettingsRouteImport } from "./routes/settings";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as DecksIndexRouteImport } from "./routes/decks.index";
-import { Route as DecksDeckIdRouteImport } from "./routes/decks.$deckId";
-import { Route as CourseCourseIdRouteImport } from "./routes/course.$courseId";
-import { Route as CourseCourseIdIndexRouteImport } from "./routes/course.$courseId.index";
-import { Route as CourseCourseIdLessonLessonIdRouteImport } from "./routes/course.$courseId.lesson.$lessonId";
-import { Route as CourseCourseIdLessonLessonIdIndexRouteImport } from "./routes/course.$courseId.lesson.$lessonId.index";
-import { Route as CourseCourseIdLessonLessonIdQuizRouteImport } from "./routes/course.$courseId.lesson.$lessonId.quiz";
-import { Route as CourseCourseIdLessonLessonIdFlashcardsRouteImport } from "./routes/course.$courseId.lesson.$lessonId.flashcards";
-import { Route as CourseCourseIdLessonLessonIdExercisesRouteImport } from "./routes/course.$courseId.lesson.$lessonId.exercises";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as DecksIndexRouteImport } from './routes/decks.index'
+import { Route as DecksDeckIdRouteImport } from './routes/decks.$deckId'
+import { Route as CourseCourseIdRouteImport } from './routes/course.$courseId'
+import { Route as CourseCourseIdIndexRouteImport } from './routes/course.$courseId.index'
+import { Route as CourseCourseIdLessonLessonIdRouteImport } from './routes/course.$courseId.lesson.$lessonId'
+import { Route as CourseCourseIdLessonLessonIdIndexRouteImport } from './routes/course.$courseId.lesson.$lessonId.index'
+import { Route as CourseCourseIdLessonLessonIdQuizRouteImport } from './routes/course.$courseId.lesson.$lessonId.quiz'
+import { Route as CourseCourseIdLessonLessonIdFlashcardsRouteImport } from './routes/course.$courseId.lesson.$lessonId.flashcards'
+import { Route as CourseCourseIdLessonLessonIdExercisesRouteImport } from './routes/course.$courseId.lesson.$lessonId.exercises'
 
 const SettingsRoute = SettingsRouteImport.update({
-  id: "/settings",
-  path: "/settings",
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const DecksIndexRoute = DecksIndexRouteImport.update({
-  id: "/decks/",
-  path: "/decks/",
+  id: '/decks/',
+  path: '/decks/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const DecksDeckIdRoute = DecksDeckIdRouteImport.update({
-  id: "/decks/$deckId",
-  path: "/decks/$deckId",
+  id: '/decks/$deckId',
+  path: '/decks/$deckId',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const CourseCourseIdRoute = CourseCourseIdRouteImport.update({
-  id: "/course/$courseId",
-  path: "/course/$courseId",
+  id: '/course/$courseId',
+  path: '/course/$courseId',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const CourseCourseIdIndexRoute = CourseCourseIdIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => CourseCourseIdRoute,
-} as any);
+} as any)
 const CourseCourseIdLessonLessonIdRoute =
   CourseCourseIdLessonLessonIdRouteImport.update({
-    id: "/lesson/$lessonId",
-    path: "/lesson/$lessonId",
+    id: '/lesson/$lessonId',
+    path: '/lesson/$lessonId',
     getParentRoute: () => CourseCourseIdRoute,
-  } as any);
+  } as any)
 const CourseCourseIdLessonLessonIdIndexRoute =
   CourseCourseIdLessonLessonIdIndexRouteImport.update({
-    id: "/",
-    path: "/",
+    id: '/',
+    path: '/',
     getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
-  } as any);
+  } as any)
 const CourseCourseIdLessonLessonIdQuizRoute =
   CourseCourseIdLessonLessonIdQuizRouteImport.update({
-    id: "/quiz",
-    path: "/quiz",
+    id: '/quiz',
+    path: '/quiz',
     getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
-  } as any);
+  } as any)
 const CourseCourseIdLessonLessonIdFlashcardsRoute =
   CourseCourseIdLessonLessonIdFlashcardsRouteImport.update({
-    id: "/flashcards",
-    path: "/flashcards",
+    id: '/flashcards',
+    path: '/flashcards',
     getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
-  } as any);
+  } as any)
 const CourseCourseIdLessonLessonIdExercisesRoute =
   CourseCourseIdLessonLessonIdExercisesRouteImport.update({
-    id: "/exercises",
-    path: "/exercises",
+    id: '/exercises',
+    path: '/exercises',
     getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
-  } as any);
+  } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/settings": typeof SettingsRoute;
-  "/course/$courseId": typeof CourseCourseIdRouteWithChildren;
-  "/decks/$deckId": typeof DecksDeckIdRoute;
-  "/decks/": typeof DecksIndexRoute;
-  "/course/$courseId/": typeof CourseCourseIdIndexRoute;
-  "/course/$courseId/lesson/$lessonId": typeof CourseCourseIdLessonLessonIdRouteWithChildren;
-  "/course/$courseId/lesson/$lessonId/exercises": typeof CourseCourseIdLessonLessonIdExercisesRoute;
-  "/course/$courseId/lesson/$lessonId/flashcards": typeof CourseCourseIdLessonLessonIdFlashcardsRoute;
-  "/course/$courseId/lesson/$lessonId/quiz": typeof CourseCourseIdLessonLessonIdQuizRoute;
-  "/course/$courseId/lesson/$lessonId/": typeof CourseCourseIdLessonLessonIdIndexRoute;
+  '/': typeof IndexRoute
+  '/settings': typeof SettingsRoute
+  '/course/$courseId': typeof CourseCourseIdRouteWithChildren
+  '/decks/$deckId': typeof DecksDeckIdRoute
+  '/decks/': typeof DecksIndexRoute
+  '/course/$courseId/': typeof CourseCourseIdIndexRoute
+  '/course/$courseId/lesson/$lessonId': typeof CourseCourseIdLessonLessonIdRouteWithChildren
+  '/course/$courseId/lesson/$lessonId/exercises': typeof CourseCourseIdLessonLessonIdExercisesRoute
+  '/course/$courseId/lesson/$lessonId/flashcards': typeof CourseCourseIdLessonLessonIdFlashcardsRoute
+  '/course/$courseId/lesson/$lessonId/quiz': typeof CourseCourseIdLessonLessonIdQuizRoute
+  '/course/$courseId/lesson/$lessonId/': typeof CourseCourseIdLessonLessonIdIndexRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/settings": typeof SettingsRoute;
-  "/decks/$deckId": typeof DecksDeckIdRoute;
-  "/decks": typeof DecksIndexRoute;
-  "/course/$courseId": typeof CourseCourseIdIndexRoute;
-  "/course/$courseId/lesson/$lessonId/exercises": typeof CourseCourseIdLessonLessonIdExercisesRoute;
-  "/course/$courseId/lesson/$lessonId/flashcards": typeof CourseCourseIdLessonLessonIdFlashcardsRoute;
-  "/course/$courseId/lesson/$lessonId/quiz": typeof CourseCourseIdLessonLessonIdQuizRoute;
-  "/course/$courseId/lesson/$lessonId": typeof CourseCourseIdLessonLessonIdIndexRoute;
+  '/': typeof IndexRoute
+  '/settings': typeof SettingsRoute
+  '/decks/$deckId': typeof DecksDeckIdRoute
+  '/decks': typeof DecksIndexRoute
+  '/course/$courseId': typeof CourseCourseIdIndexRoute
+  '/course/$courseId/lesson/$lessonId/exercises': typeof CourseCourseIdLessonLessonIdExercisesRoute
+  '/course/$courseId/lesson/$lessonId/flashcards': typeof CourseCourseIdLessonLessonIdFlashcardsRoute
+  '/course/$courseId/lesson/$lessonId/quiz': typeof CourseCourseIdLessonLessonIdQuizRoute
+  '/course/$courseId/lesson/$lessonId': typeof CourseCourseIdLessonLessonIdIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/settings": typeof SettingsRoute;
-  "/course/$courseId": typeof CourseCourseIdRouteWithChildren;
-  "/decks/$deckId": typeof DecksDeckIdRoute;
-  "/decks/": typeof DecksIndexRoute;
-  "/course/$courseId/": typeof CourseCourseIdIndexRoute;
-  "/course/$courseId/lesson/$lessonId": typeof CourseCourseIdLessonLessonIdRouteWithChildren;
-  "/course/$courseId/lesson/$lessonId/exercises": typeof CourseCourseIdLessonLessonIdExercisesRoute;
-  "/course/$courseId/lesson/$lessonId/flashcards": typeof CourseCourseIdLessonLessonIdFlashcardsRoute;
-  "/course/$courseId/lesson/$lessonId/quiz": typeof CourseCourseIdLessonLessonIdQuizRoute;
-  "/course/$courseId/lesson/$lessonId/": typeof CourseCourseIdLessonLessonIdIndexRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/settings': typeof SettingsRoute
+  '/course/$courseId': typeof CourseCourseIdRouteWithChildren
+  '/decks/$deckId': typeof DecksDeckIdRoute
+  '/decks/': typeof DecksIndexRoute
+  '/course/$courseId/': typeof CourseCourseIdIndexRoute
+  '/course/$courseId/lesson/$lessonId': typeof CourseCourseIdLessonLessonIdRouteWithChildren
+  '/course/$courseId/lesson/$lessonId/exercises': typeof CourseCourseIdLessonLessonIdExercisesRoute
+  '/course/$courseId/lesson/$lessonId/flashcards': typeof CourseCourseIdLessonLessonIdFlashcardsRoute
+  '/course/$courseId/lesson/$lessonId/quiz': typeof CourseCourseIdLessonLessonIdQuizRoute
+  '/course/$courseId/lesson/$lessonId/': typeof CourseCourseIdLessonLessonIdIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/settings"
-    | "/course/$courseId"
-    | "/decks/$deckId"
-    | "/decks/"
-    | "/course/$courseId/"
-    | "/course/$courseId/lesson/$lessonId"
-    | "/course/$courseId/lesson/$lessonId/exercises"
-    | "/course/$courseId/lesson/$lessonId/flashcards"
-    | "/course/$courseId/lesson/$lessonId/quiz"
-    | "/course/$courseId/lesson/$lessonId/";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/settings'
+    | '/course/$courseId'
+    | '/decks/$deckId'
+    | '/decks/'
+    | '/course/$courseId/'
+    | '/course/$courseId/lesson/$lessonId'
+    | '/course/$courseId/lesson/$lessonId/exercises'
+    | '/course/$courseId/lesson/$lessonId/flashcards'
+    | '/course/$courseId/lesson/$lessonId/quiz'
+    | '/course/$courseId/lesson/$lessonId/'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/settings"
-    | "/decks/$deckId"
-    | "/decks"
-    | "/course/$courseId"
-    | "/course/$courseId/lesson/$lessonId/exercises"
-    | "/course/$courseId/lesson/$lessonId/flashcards"
-    | "/course/$courseId/lesson/$lessonId/quiz"
-    | "/course/$courseId/lesson/$lessonId";
+    | '/'
+    | '/settings'
+    | '/decks/$deckId'
+    | '/decks'
+    | '/course/$courseId'
+    | '/course/$courseId/lesson/$lessonId/exercises'
+    | '/course/$courseId/lesson/$lessonId/flashcards'
+    | '/course/$courseId/lesson/$lessonId/quiz'
+    | '/course/$courseId/lesson/$lessonId'
   id:
-    | "__root__"
-    | "/"
-    | "/settings"
-    | "/course/$courseId"
-    | "/decks/$deckId"
-    | "/decks/"
-    | "/course/$courseId/"
-    | "/course/$courseId/lesson/$lessonId"
-    | "/course/$courseId/lesson/$lessonId/exercises"
-    | "/course/$courseId/lesson/$lessonId/flashcards"
-    | "/course/$courseId/lesson/$lessonId/quiz"
-    | "/course/$courseId/lesson/$lessonId/";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/settings'
+    | '/course/$courseId'
+    | '/decks/$deckId'
+    | '/decks/'
+    | '/course/$courseId/'
+    | '/course/$courseId/lesson/$lessonId'
+    | '/course/$courseId/lesson/$lessonId/exercises'
+    | '/course/$courseId/lesson/$lessonId/flashcards'
+    | '/course/$courseId/lesson/$lessonId/quiz'
+    | '/course/$courseId/lesson/$lessonId/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  SettingsRoute: typeof SettingsRoute;
-  CourseCourseIdRoute: typeof CourseCourseIdRouteWithChildren;
-  DecksDeckIdRoute: typeof DecksDeckIdRoute;
-  DecksIndexRoute: typeof DecksIndexRoute;
+  IndexRoute: typeof IndexRoute
+  SettingsRoute: typeof SettingsRoute
+  CourseCourseIdRoute: typeof CourseCourseIdRouteWithChildren
+  DecksDeckIdRoute: typeof DecksDeckIdRoute
+  DecksIndexRoute: typeof DecksIndexRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/settings": {
-      id: "/settings";
-      path: "/settings";
-      fullPath: "/settings";
-      preLoaderRoute: typeof SettingsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/decks/": {
-      id: "/decks/";
-      path: "/decks";
-      fullPath: "/decks/";
-      preLoaderRoute: typeof DecksIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/decks/$deckId": {
-      id: "/decks/$deckId";
-      path: "/decks/$deckId";
-      fullPath: "/decks/$deckId";
-      preLoaderRoute: typeof DecksDeckIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/course/$courseId": {
-      id: "/course/$courseId";
-      path: "/course/$courseId";
-      fullPath: "/course/$courseId";
-      preLoaderRoute: typeof CourseCourseIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/course/$courseId/": {
-      id: "/course/$courseId/";
-      path: "/";
-      fullPath: "/course/$courseId/";
-      preLoaderRoute: typeof CourseCourseIdIndexRouteImport;
-      parentRoute: typeof CourseCourseIdRoute;
-    };
-    "/course/$courseId/lesson/$lessonId": {
-      id: "/course/$courseId/lesson/$lessonId";
-      path: "/lesson/$lessonId";
-      fullPath: "/course/$courseId/lesson/$lessonId";
-      preLoaderRoute: typeof CourseCourseIdLessonLessonIdRouteImport;
-      parentRoute: typeof CourseCourseIdRoute;
-    };
-    "/course/$courseId/lesson/$lessonId/": {
-      id: "/course/$courseId/lesson/$lessonId/";
-      path: "/";
-      fullPath: "/course/$courseId/lesson/$lessonId/";
-      preLoaderRoute: typeof CourseCourseIdLessonLessonIdIndexRouteImport;
-      parentRoute: typeof CourseCourseIdLessonLessonIdRoute;
-    };
-    "/course/$courseId/lesson/$lessonId/quiz": {
-      id: "/course/$courseId/lesson/$lessonId/quiz";
-      path: "/quiz";
-      fullPath: "/course/$courseId/lesson/$lessonId/quiz";
-      preLoaderRoute: typeof CourseCourseIdLessonLessonIdQuizRouteImport;
-      parentRoute: typeof CourseCourseIdLessonLessonIdRoute;
-    };
-    "/course/$courseId/lesson/$lessonId/flashcards": {
-      id: "/course/$courseId/lesson/$lessonId/flashcards";
-      path: "/flashcards";
-      fullPath: "/course/$courseId/lesson/$lessonId/flashcards";
-      preLoaderRoute: typeof CourseCourseIdLessonLessonIdFlashcardsRouteImport;
-      parentRoute: typeof CourseCourseIdLessonLessonIdRoute;
-    };
-    "/course/$courseId/lesson/$lessonId/exercises": {
-      id: "/course/$courseId/lesson/$lessonId/exercises";
-      path: "/exercises";
-      fullPath: "/course/$courseId/lesson/$lessonId/exercises";
-      preLoaderRoute: typeof CourseCourseIdLessonLessonIdExercisesRouteImport;
-      parentRoute: typeof CourseCourseIdLessonLessonIdRoute;
-    };
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/decks/': {
+      id: '/decks/'
+      path: '/decks'
+      fullPath: '/decks/'
+      preLoaderRoute: typeof DecksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/decks/$deckId': {
+      id: '/decks/$deckId'
+      path: '/decks/$deckId'
+      fullPath: '/decks/$deckId'
+      preLoaderRoute: typeof DecksDeckIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course/$courseId': {
+      id: '/course/$courseId'
+      path: '/course/$courseId'
+      fullPath: '/course/$courseId'
+      preLoaderRoute: typeof CourseCourseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course/$courseId/': {
+      id: '/course/$courseId/'
+      path: '/'
+      fullPath: '/course/$courseId/'
+      preLoaderRoute: typeof CourseCourseIdIndexRouteImport
+      parentRoute: typeof CourseCourseIdRoute
+    }
+    '/course/$courseId/lesson/$lessonId': {
+      id: '/course/$courseId/lesson/$lessonId'
+      path: '/lesson/$lessonId'
+      fullPath: '/course/$courseId/lesson/$lessonId'
+      preLoaderRoute: typeof CourseCourseIdLessonLessonIdRouteImport
+      parentRoute: typeof CourseCourseIdRoute
+    }
+    '/course/$courseId/lesson/$lessonId/': {
+      id: '/course/$courseId/lesson/$lessonId/'
+      path: '/'
+      fullPath: '/course/$courseId/lesson/$lessonId/'
+      preLoaderRoute: typeof CourseCourseIdLessonLessonIdIndexRouteImport
+      parentRoute: typeof CourseCourseIdLessonLessonIdRoute
+    }
+    '/course/$courseId/lesson/$lessonId/quiz': {
+      id: '/course/$courseId/lesson/$lessonId/quiz'
+      path: '/quiz'
+      fullPath: '/course/$courseId/lesson/$lessonId/quiz'
+      preLoaderRoute: typeof CourseCourseIdLessonLessonIdQuizRouteImport
+      parentRoute: typeof CourseCourseIdLessonLessonIdRoute
+    }
+    '/course/$courseId/lesson/$lessonId/flashcards': {
+      id: '/course/$courseId/lesson/$lessonId/flashcards'
+      path: '/flashcards'
+      fullPath: '/course/$courseId/lesson/$lessonId/flashcards'
+      preLoaderRoute: typeof CourseCourseIdLessonLessonIdFlashcardsRouteImport
+      parentRoute: typeof CourseCourseIdLessonLessonIdRoute
+    }
+    '/course/$courseId/lesson/$lessonId/exercises': {
+      id: '/course/$courseId/lesson/$lessonId/exercises'
+      path: '/exercises'
+      fullPath: '/course/$courseId/lesson/$lessonId/exercises'
+      preLoaderRoute: typeof CourseCourseIdLessonLessonIdExercisesRouteImport
+      parentRoute: typeof CourseCourseIdLessonLessonIdRoute
+    }
   }
 }
 
 interface CourseCourseIdLessonLessonIdRouteChildren {
-  CourseCourseIdLessonLessonIdExercisesRoute: typeof CourseCourseIdLessonLessonIdExercisesRoute;
-  CourseCourseIdLessonLessonIdFlashcardsRoute: typeof CourseCourseIdLessonLessonIdFlashcardsRoute;
-  CourseCourseIdLessonLessonIdQuizRoute: typeof CourseCourseIdLessonLessonIdQuizRoute;
-  CourseCourseIdLessonLessonIdIndexRoute: typeof CourseCourseIdLessonLessonIdIndexRoute;
+  CourseCourseIdLessonLessonIdExercisesRoute: typeof CourseCourseIdLessonLessonIdExercisesRoute
+  CourseCourseIdLessonLessonIdFlashcardsRoute: typeof CourseCourseIdLessonLessonIdFlashcardsRoute
+  CourseCourseIdLessonLessonIdQuizRoute: typeof CourseCourseIdLessonLessonIdQuizRoute
+  CourseCourseIdLessonLessonIdIndexRoute: typeof CourseCourseIdLessonLessonIdIndexRoute
 }
 
 const CourseCourseIdLessonLessonIdRouteChildren: CourseCourseIdLessonLessonIdRouteChildren =
@@ -267,27 +267,27 @@ const CourseCourseIdLessonLessonIdRouteChildren: CourseCourseIdLessonLessonIdRou
       CourseCourseIdLessonLessonIdQuizRoute,
     CourseCourseIdLessonLessonIdIndexRoute:
       CourseCourseIdLessonLessonIdIndexRoute,
-  };
+  }
 
 const CourseCourseIdLessonLessonIdRouteWithChildren =
   CourseCourseIdLessonLessonIdRoute._addFileChildren(
-    CourseCourseIdLessonLessonIdRouteChildren
-  );
+    CourseCourseIdLessonLessonIdRouteChildren,
+  )
 
 interface CourseCourseIdRouteChildren {
-  CourseCourseIdIndexRoute: typeof CourseCourseIdIndexRoute;
-  CourseCourseIdLessonLessonIdRoute: typeof CourseCourseIdLessonLessonIdRouteWithChildren;
+  CourseCourseIdIndexRoute: typeof CourseCourseIdIndexRoute
+  CourseCourseIdLessonLessonIdRoute: typeof CourseCourseIdLessonLessonIdRouteWithChildren
 }
 
 const CourseCourseIdRouteChildren: CourseCourseIdRouteChildren = {
   CourseCourseIdIndexRoute: CourseCourseIdIndexRoute,
   CourseCourseIdLessonLessonIdRoute:
     CourseCourseIdLessonLessonIdRouteWithChildren,
-};
+}
 
 const CourseCourseIdRouteWithChildren = CourseCourseIdRoute._addFileChildren(
-  CourseCourseIdRouteChildren
-);
+  CourseCourseIdRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -295,16 +295,16 @@ const rootRouteChildren: RootRouteChildren = {
   CourseCourseIdRoute: CourseCourseIdRouteWithChildren,
   DecksDeckIdRoute: DecksDeckIdRoute,
   DecksIndexRoute: DecksIndexRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from "./router.tsx";
-import type { createStart } from "@tanstack/react-start";
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
   interface Register {
-    ssr: true;
-    router: Awaited<ReturnType<typeof getRouter>>;
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
   }
 }
