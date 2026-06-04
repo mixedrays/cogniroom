@@ -6,9 +6,12 @@
  * AI agent skill) is guaranteed to load correctly in the app.
  *
  * Usage:
+ *   npm run validate:content                       # validates the configured DATA_PATH
  *   npm run validate:content -- <path> [<path> ...]
- *   npx tsx scripts/validate-content.ts data/courses/python-for-beginners
- *   npx tsx scripts/validate-content.ts data           # recurse everything
+ *   npx tsx scripts/validate-content.ts "$DATA_PATH/courses/python-for-beginners"
+ *
+ * With no argument it validates the app's configured content root (the DATA_PATH
+ * env var, default ./data), so it follows a custom data directory automatically.
  *
  * A <path> may be:
  *   - a course.md / flashcards.md / quiz.md / deck.json / lesson.md / exercise.md file
@@ -40,6 +43,8 @@ import {
   FlashcardsContentOutputSchema,
   QuizContentOutputSchema,
 } from "@/modules/agent/lib/contentOutputSchemas";
+// Resolves the configured content root (DATA_PATH env, default ./data).
+import { DATA_PATH } from "@root/server/env";
 
 type Kind = "course" | "flashcards" | "quiz" | "deck" | "prose";
 type Target = { file: string; kind: Kind };
@@ -384,10 +389,17 @@ function collectTargets(path: string): Target[] {
   if (existsSync(join(path, "course.md")))
     return [{ file: join(path, "course.md"), kind: "course" }, ...collectLessonContent(path)];
 
+  // Otherwise pick up any recognized files directly inside (e.g. a lone lesson
+  // directory) and recurse into subdirectories.
   const out: Target[] = [];
   for (const entry of readdirSync(path)) {
     const child = join(path, entry);
-    if (statSync(child).isDirectory()) out.push(...collectTargets(child));
+    if (statSync(child).isDirectory()) {
+      out.push(...collectTargets(child));
+    } else {
+      const kind = classify(child);
+      if (kind) out.push({ file: child, kind });
+    }
   }
   return out;
 }
@@ -408,10 +420,11 @@ function validateTarget({ file, kind }: Target): Issue[] {
 }
 
 function main() {
+  // Default to the app's configured content root (DATA_PATH) when no path given.
   const paths = process.argv.slice(2);
   if (paths.length === 0) {
-    console.error("Usage: npm run validate:content -- <path> [<path> ...]");
-    process.exit(2);
+    console.log(`No path given — validating configured DATA_PATH: ${DATA_PATH}`);
+    paths.push(DATA_PATH);
   }
 
   const targets = paths.flatMap(collectTargets);
