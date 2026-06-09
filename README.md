@@ -31,7 +31,7 @@ A local-first platform for creating, managing, and tracking skill learning roadm
 
 ```bash
 git clone <repo-url>
-cd learning-platform
+cd cogniroom
 npm install
 cp .env.example .env
 # edit .env and add your API key(s)
