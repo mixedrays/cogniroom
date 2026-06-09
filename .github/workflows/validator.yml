@@ -1,0 +1,23 @@
+name: Validator
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-validator:
+    name: Validator bundle is fresh & tested
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Rebuild skills/bin/validate-content.mjs from app source and fail if the
+      # committed bundle differs — i.e. parsers/schemas changed without
+      # regenerating the standalone validator the skills rely on.
+      - run: npm run check:validator
+      - run: npx vitest run src/modules/md-formats

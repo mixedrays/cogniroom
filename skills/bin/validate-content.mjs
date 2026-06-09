@@ -15066,10 +15066,7 @@ function quizToMd(content) {
     lines.push("");
     const questionLines = q.question.split("\n");
     lines.push(`## ${questionLines[0]}`);
-    if (questionLines.length > 1) {
-      lines.push("");
-      lines.push(...questionLines.slice(1));
-    }
+    lines.push(...questionLines.slice(1));
     lines.push("");
     if (q.type === "choice") {
       for (const opt of q.options) {
@@ -15444,6 +15441,10 @@ function flattenZodIssues(error51, file2) {
     (i) => asError(file2, `${i.path.join(".") || "<root>"}: ${i.message}`)
   );
 }
+function countAuthoredBlocks(text) {
+  const parts = splitOnBoundaries(text.trim());
+  return Math.max(0, Math.ceil((parts.length - 2) / 2));
+}
 function findDuplicates(ids) {
   const seen = /* @__PURE__ */ new Set();
   const dupes = /* @__PURE__ */ new Set();
@@ -15528,6 +15529,22 @@ function validateCourse(file2) {
   );
   if (dupeLessons.length)
     issues.push(asError(file2, `duplicate lesson ids: ${dupeLessons.join(", ")}`));
+  const lessonsDir = join(dirname(file2), "lessons");
+  if (existsSync(lessonsDir)) {
+    const lessonIds = new Set(
+      course.topics.flatMap((t) => t.lessons.map((l) => l.id))
+    );
+    for (const entry of readdirSync(lessonsDir)) {
+      if (!statSync(join(lessonsDir, entry)).isDirectory()) continue;
+      if (!lessonIds.has(entry))
+        issues.push(
+          asError(
+            file2,
+            `lessons/${entry}/ does not match any lesson id in course.md \u2014 its content will never appear in the app`
+          )
+        );
+    }
+  }
   assertParseStable(file2, course, () => mdToCourse(courseToMd(course)), issues);
   return issues;
 }
@@ -15544,6 +15561,14 @@ function validateFlashcards(file2) {
   if (!parsed.success) issues.push(...flattenZodIssues(parsed.error, file2));
   const dupes = findDuplicates(content.flashcards.map((c) => c.id));
   if (dupes.length) issues.push(asError(file2, `duplicate card ids: ${dupes.join(", ")}`));
+  const authored = countAuthoredBlocks(text);
+  if (authored > content.flashcards.length)
+    issues.push(
+      asError(
+        file2,
+        `${authored - content.flashcards.length} of ${authored} card blocks failed to parse and would be silently dropped \u2014 check each block has id and question fields and the file ends with '---'`
+      )
+    );
   if (content.flashcards.length < RECOMMENDED_MIN.flashcards)
     issues.push(
       asWarning(
@@ -15575,6 +15600,14 @@ function validateQuiz(file2) {
   }
   const dupes = findDuplicates(content.quizQuestions.map((q) => q.id));
   if (dupes.length) issues.push(asError(file2, `duplicate question ids: ${dupes.join(", ")}`));
+  const authored = countAuthoredBlocks(text);
+  if (authored > content.quizQuestions.length)
+    issues.push(
+      asError(
+        file2,
+        `${authored - content.quizQuestions.length} of ${authored} question blocks failed to parse and would be silently dropped \u2014 check id/type fields, the '## ' question line, options on choice questions, and the trailing '---'`
+      )
+    );
   if (content.quizQuestions.length < RECOMMENDED_MIN.quiz)
     issues.push(
       asWarning(
@@ -15587,6 +15620,19 @@ function validateQuiz(file2) {
 }
 function validateDeck(file2) {
   const issues = [];
+  if (!existsSync(file2)) {
+    issues.push(
+      asError(file2, "deck.json is missing \u2014 the app only registers decks that have one")
+    );
+    for (const kind of ["flashcards", "quiz"]) {
+      const contentFile2 = join(dirname(file2), `${kind}.md`);
+      if (existsSync(contentFile2))
+        issues.push(
+          ...kind === "flashcards" ? validateFlashcards(contentFile2) : validateQuiz(contentFile2)
+        );
+    }
+    return issues;
+  }
   let raw;
   try {
     raw = JSON.parse(readFileSync(file2, "utf-8"));
@@ -15655,6 +15701,8 @@ function collectTargets(path) {
     return [{ file: path, kind }];
   }
   if (existsSync(join(path, "deck.json")))
+    return [{ file: join(path, "deck.json"), kind: "deck" }];
+  if (resolve(dirname(path)) === join(DATA_PATH, "decks"))
     return [{ file: join(path, "deck.json"), kind: "deck" }];
   if (existsSync(join(path, "course.md")))
     return [{ file: join(path, "course.md"), kind: "course" }, ...collectLessonContent(path)];

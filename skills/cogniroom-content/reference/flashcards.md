@@ -66,6 +66,8 @@ The answer to the second card.
   answer.
 - Per card frontmatter: `id` (unique in file), `question` (one line), `difficulty`
   ∈ `easy|medium|hard`, and optional `hint` (one line). Omit `hint` if absent.
+  Exception: a `question` may continue onto more lines to include a fenced code
+  block — the parser keeps fenced lines as part of the value.
 - The answer is the markdown between the closing `---` of the card and the next
   `---`. It must be non-empty.
 - Never put a bare `---` line inside a question or answer (use `***` for a rule, or

@@ -74,7 +74,9 @@ explanation: <optional one-line explanation>
 - Frontmatter: `id` (unique), `type` ∈ `choice|true-false`, `difficulty` ∈
   `easy|medium|hard`, optional one-line `explanation`. For `true-false`, also
   `answer: true` or `answer: false`.
-- The question text is a single `## ` line right after the frontmatter.
+- The question text starts on a `## ` line right after the frontmatter. It may
+  continue on following lines — e.g. a fenced code block under the heading —
+  everything up to the options list (or the closing `---`) is the question.
 - Choice options are `- [ ] wrong` and `- [x] correct`. A choice question needs
   **2–6 options and at least one `[x]` correct** option.
 - True/false questions have no option list — just the `## ` statement.

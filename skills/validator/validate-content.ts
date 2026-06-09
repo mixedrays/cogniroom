@@ -45,6 +45,7 @@ import {
   flashcardsToMd,
   mdToQuiz,
   quizToMd,
+  splitOnBoundaries,
 } from "@modules/md-formats";
 import { courseCreateSchema } from "@modules/core";
 import type { Course, Deck } from "@modules/core";
@@ -128,6 +129,17 @@ function flattenZodIssues(error: z.ZodError, file: string): Issue[] {
   return error.issues.map((i) =>
     asError(file, `${i.path.join(".") || "<root>"}: ${i.message}`)
   );
+}
+
+/**
+ * How many item blocks the author wrote, regardless of whether they parse.
+ * The parsers silently skip blocks with missing/invalid fields (and choice
+ * questions with no options), so comparing this against the parsed count
+ * exposes items the app would silently drop.
+ */
+function countAuthoredBlocks(text: string): number {
+  const parts = splitOnBoundaries(text.trim());
+  return Math.max(0, Math.ceil((parts.length - 2) / 2));
 }
 
 function findDuplicates(ids: string[]): string[] {
@@ -236,6 +248,25 @@ function validateCourse(file: string): Issue[] {
   if (dupeLessons.length)
     issues.push(asError(file, `duplicate lesson ids: ${dupeLessons.join(", ")}`));
 
+  // The app locates per-lesson content by folder name === lesson id, so a
+  // folder that matches no lesson id holds content the app will never show.
+  const lessonsDir = join(dirname(file), "lessons");
+  if (existsSync(lessonsDir)) {
+    const lessonIds = new Set(
+      course.topics.flatMap((t) => t.lessons.map((l) => l.id))
+    );
+    for (const entry of readdirSync(lessonsDir)) {
+      if (!statSync(join(lessonsDir, entry)).isDirectory()) continue;
+      if (!lessonIds.has(entry))
+        issues.push(
+          asError(
+            file,
+            `lessons/${entry}/ does not match any lesson id in course.md — its content will never appear in the app`
+          )
+        );
+    }
+  }
+
   assertParseStable(file, course, () => mdToCourse(courseToMd(course)), issues);
   return issues;
 }
@@ -256,6 +287,15 @@ function validateFlashcards(file: string): Issue[] {
 
   const dupes = findDuplicates(content.flashcards.map((c) => c.id));
   if (dupes.length) issues.push(asError(file, `duplicate card ids: ${dupes.join(", ")}`));
+
+  const authored = countAuthoredBlocks(text);
+  if (authored > content.flashcards.length)
+    issues.push(
+      asError(
+        file,
+        `${authored - content.flashcards.length} of ${authored} card blocks failed to parse and would be silently dropped — check each block has id and question fields and the file ends with '---'`
+      )
+    );
 
   if (content.flashcards.length < RECOMMENDED_MIN.flashcards)
     issues.push(
@@ -295,6 +335,15 @@ function validateQuiz(file: string): Issue[] {
   const dupes = findDuplicates(content.quizQuestions.map((q) => q.id));
   if (dupes.length) issues.push(asError(file, `duplicate question ids: ${dupes.join(", ")}`));
 
+  const authored = countAuthoredBlocks(text);
+  if (authored > content.quizQuestions.length)
+    issues.push(
+      asError(
+        file,
+        `${authored - content.quizQuestions.length} of ${authored} question blocks failed to parse and would be silently dropped — check id/type fields, the '## ' question line, options on choice questions, and the trailing '---'`
+      )
+    );
+
   if (content.quizQuestions.length < RECOMMENDED_MIN.quiz)
     issues.push(
       asWarning(
@@ -309,6 +358,26 @@ function validateQuiz(file: string): Issue[] {
 
 function validateDeck(file: string): Issue[] {
   const issues: Issue[] = [];
+
+  // A deck folder without deck.json never registers in the app, even if its
+  // markdown is perfect. Still validate any content files so all problems
+  // surface in one run.
+  if (!existsSync(file)) {
+    issues.push(
+      asError(file, "deck.json is missing — the app only registers decks that have one")
+    );
+    for (const kind of ["flashcards", "quiz"] as const) {
+      const contentFile = join(dirname(file), `${kind}.md`);
+      if (existsSync(contentFile))
+        issues.push(
+          ...(kind === "flashcards"
+            ? validateFlashcards(contentFile)
+            : validateQuiz(contentFile))
+        );
+    }
+    return issues;
+  }
+
   let raw: unknown;
   try {
     raw = JSON.parse(readFileSync(file, "utf-8"));
@@ -398,6 +467,11 @@ function collectTargets(path: string): Target[] {
 
   // Directory: a deck dir, a course dir, or a parent to recurse.
   if (existsSync(join(path, "deck.json")))
+    return [{ file: join(path, "deck.json"), kind: "deck" }];
+  // A folder directly under the app's deck root must have a deck.json (other
+  // "decks" dirs, e.g. under history/, are not loaded by the app); hand the
+  // missing file to validateDeck so the error shows up in the normal report.
+  if (resolve(dirname(path)) === join(DATA_PATH, "decks"))
     return [{ file: join(path, "deck.json"), kind: "deck" }];
   if (existsSync(join(path, "course.md")))
     return [{ file: join(path, "course.md"), kind: "course" }, ...collectLessonContent(path)];

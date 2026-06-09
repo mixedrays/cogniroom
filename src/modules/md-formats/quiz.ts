@@ -29,22 +29,9 @@
  *
  * ---
  *
- * Multi choice questions:
- * ---
- * id: <uuid>
- * type: multi-choice
- * difficulty: easy|medium|hard
- * explanation: <optional>
- * ---
- *
- * ## <question statement>
- *
- * ---
- * - [ ] <wrong option>
- * - [x] <correct option>
- * - [x] <correct option>
- *
- * ---
+ * The question may continue on lines after the `## ` heading (e.g. a fenced
+ * code block) — everything up to the options list (or the next boundary) is
+ * part of the question text.
  */
 
 import type {
@@ -67,12 +54,12 @@ export function quizToMd(content: QuizContent): string {
     if (q.explanation) lines.push(`explanation: ${q.explanation}`);
     lines.push("---");
     lines.push("");
+    // Emit the question verbatim after the heading marker — inserting a blank
+    // separator line would feed an extra line back into the question on
+    // re-parse, so serialize→parse would not round-trip.
     const questionLines = q.question.split("\n");
     lines.push(`## ${questionLines[0]}`);
-    if (questionLines.length > 1) {
-      lines.push("");
-      lines.push(...questionLines.slice(1));
-    }
+    lines.push(...questionLines.slice(1));
     lines.push("");
 
     if (q.type === "choice") {

@@ -15,8 +15,8 @@ Generate a course roadmap and write it to disk; the app picks it up from `data/`
 
 1. Confirm the **subject**, **level**, and rough **number of lessons** if unclear.
 2. Read the format references in the sibling skill:
-   - `.claude/skills/cogniroom-content/reference/conventions.md`
-   - `.claude/skills/cogniroom-content/reference/roadmap.md`
+   - `skills/cogniroom-content/reference/conventions.md`
+   - `skills/cogniroom-content/reference/roadmap.md`
 3. Write `<data>/courses/<course-id>/course.md` per that spec (`<course-id>` is the
    slug of the title and equals the folder name).
 4. Validate and fix any errors before reporting done:

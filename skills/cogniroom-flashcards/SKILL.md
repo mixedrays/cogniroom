@@ -15,8 +15,8 @@ Generate a standalone flashcard deck and write it to disk.
 
 1. Confirm the **subject**, **level**, and desired **number of cards** (aim ≥ 8).
 2. Read the format references in the sibling skill:
-   - `.claude/skills/cogniroom-content/reference/conventions.md`
-   - `.claude/skills/cogniroom-content/reference/flashcards.md` (section A,
+   - `skills/cogniroom-content/reference/conventions.md`
+   - `skills/cogniroom-content/reference/flashcards.md` (section A,
      "Standalone flashcard deck")
 3. Write both files:
    - `<data>/decks/<deck-id>/deck.json` (`kind: "flashcards"`)
