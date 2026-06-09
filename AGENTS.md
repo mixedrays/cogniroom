@@ -1,10 +1,11 @@
----
-applyTo: "**"
----
+# AGENTS.md
 
-# Copilot Instructions
-
-> **Note**: This file is auto-generated from INSTRUCTIONS.md. Edit INSTRUCTIONS.md and run `scripts/sync-instructions.sh` to update.
+Single source of truth for AI coding agents working in this repository. This is
+the vendor-neutral instructions file read directly by agents that follow the
+`AGENTS.md` convention (Cursor, Codex, Copilot, etc.). Claude Code and GitHub
+Copilot read it too, via `CLAUDE.md` and `.github/copilot-instructions.md`, which
+are symlinks pointing here — there are no separate maintained copies to keep in
+sync. Edit this file only.
 
 ## Project Overview
 
@@ -86,15 +87,17 @@ CogniRoom - A platform for creating, managing, and tracking skill learning roadm
 
 ## Development Commands
 
-| Command             | Description                                      |
-| ------------------- | ------------------------------------------------ |
-| `npm run dev`       | Start development server                         |
-| `npm run test`      | Run unit tests (vitest)                          |
-| `npm run test:e2e`  | Run e2e tests (puppeteer)                        |
-| `npm run typecheck` | Check TypeScript types (no emit)                 |
-| `npm run lint`      | Run ESLint on `src/`                             |
-| `npm run format`    | Format code with Prettier                        |
-| `npm run validate`  | Run all checks (typecheck, lint, test, test:e2e) |
+| Command                   | Description                                          |
+| ------------------------- | ---------------------------------------------------- |
+| `npm run dev`             | Start development server                             |
+| `npm run test`            | Run unit tests (vitest)                              |
+| `npm run test:e2e`        | Run e2e tests (puppeteer)                            |
+| `npm run typecheck`       | Check TypeScript types (no emit)                     |
+| `npm run lint`            | Run ESLint on `src/`                                 |
+| `npm run format`          | Format code with Prettier                            |
+| `npm run validate:content`| Validate generated content (bundled validator)       |
+| `npm run build:validator` | Rebuild the standalone content-validator bundle      |
+| `npm run validate`        | Run all checks (typecheck, lint, validator, tests)   |
 
 ## Layout and Design
 
@@ -108,3 +111,49 @@ CogniRoom - A platform for creating, managing, and tracking skill learning roadm
 - Polished UI matching design specifications
 - All features work end-to-end through the UI
 - Fast, responsive, professional
+
+## Content-Authoring Skills (bundled)
+
+CogniRoom reads all learning content from files under `DATA_PATH` (see `.env`,
+default `./data`). Content can therefore be authored directly on disk — by an
+agent, a CLI, or by hand — and the app picks it up with no API call and no code
+change. The skills that describe how to do this correctly ship in `skills/` and
+are bundled with the app:
+
+| Skill | Read | Purpose |
+| --- | --- | --- |
+| Pick what to generate | `skills/cogniroom-content/SKILL.md` | Entry point: choose a whole course, roadmap, flashcards, or quiz. Start here if unsure. |
+| Roadmap only | `skills/cogniroom-roadmap/SKILL.md` | Course structure (topics + lessons), no lesson content yet. |
+| Flashcards deck | `skills/cogniroom-flashcards/SKILL.md` | Standalone flashcard deck under `<data>/decks/`. |
+| Quiz deck | `skills/cogniroom-quiz/SKILL.md` | Standalone quiz deck under `<data>/decks/`. |
+
+Shared on-disk formats and conventions: `skills/cogniroom-content/reference/`.
+Claude Code also auto-discovers these via `.claude/skills/cogniroom-*` (symlinks
+into `skills/`).
+
+### Authoring workflow
+
+1. Read the relevant `SKILL.md` (and any `reference/*.md` it points to).
+2. Write the content files into `DATA_PATH` following those formats.
+3. **Validate** — required. The validator parses your files with the app's real
+   parsers and schemas, so anything it accepts is guaranteed to load in the app.
+
+### Validating content (provider-agnostic)
+
+The validator ships as a standalone, dependency-free bundle. Run it with bare
+`node` — no install, no npm, works from any agent or directory:
+
+```bash
+node skills/bin/validate-content.mjs                 # validate the whole DATA_PATH
+node skills/bin/validate-content.mjs <path> [<path>] # validate just what you wrote
+```
+
+Inside the app repo, `npm run validate:content [-- <path>]` is an equivalent alias.
+
+- **Errors** block loading in the app — fix and re-run until clean.
+- **Warnings** load fine but fall short of recommended counts — advisory.
+
+> Maintainers: the bundle is generated from app source by
+> `skills/validator/build.ts` (`npm run build:validator`). Do not edit
+> `skills/bin/validate-content.mjs` by hand. `npm run check:validator` fails if
+> the committed bundle is stale relative to the parsers.

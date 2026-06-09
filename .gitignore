@@ -12,8 +12,13 @@ dist-ssr
 .output
 .vinxi
 .agents
-.github/skills
-.claude/skills
+# Ignore local-only skills, but ship the bundled CogniRoom content skills
+# (symlinks into the committed, vendor-neutral skills/ directory).
+.claude/skills/*
+!.claude/skills/cogniroom-content
+!.claude/skills/cogniroom-roadmap
+!.claude/skills/cogniroom-flashcards
+!.claude/skills/cogniroom-quiz
 .vscode
 .features
 .plans

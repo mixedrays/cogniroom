@@ -5,10 +5,18 @@
  * app uses at its write boundary, so externally-generated content (e.g. by an
  * AI agent skill) is guaranteed to load correctly in the app.
  *
- * Usage:
- *   npm run validate:content                       # validates the configured DATA_PATH
+ * This is the skills-owned validator harness. It is bundled into a standalone,
+ * dependency-free artifact (skills/bin/validate-content.mjs) by
+ * skills/validator/build.ts, so any agent can run it with bare `node`.
+ *
+ * Usage (provider-agnostic, no npm needed):
+ *   node skills/bin/validate-content.mjs                 # validates the configured DATA_PATH
+ *   node skills/bin/validate-content.mjs <path> [<path> ...]
+ *   node skills/bin/validate-content.mjs "$DATA_PATH/courses/python-for-beginners"
+ *
+ * In-repo convenience aliases (same artifact under the hood):
+ *   npm run validate:content
  *   npm run validate:content -- <path> [<path> ...]
- *   npx tsx scripts/validate-content.ts "$DATA_PATH/courses/python-for-beginners"
  *
  * With no argument it validates the app's configured content root (the DATA_PATH
  * env var, default ./data), so it follows a custom data directory automatically.
@@ -27,7 +35,8 @@
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
+import { config as loadEnv } from "dotenv";
 import { z } from "zod";
 import {
   mdToCourse,
@@ -43,8 +52,12 @@ import {
   FlashcardsContentOutputSchema,
   QuizContentOutputSchema,
 } from "@/modules/agent/lib/contentOutputSchemas";
-// Resolves the configured content root (DATA_PATH env, default ./data).
-import { DATA_PATH } from "@root/server/env";
+
+// Self-contained content-root resolution (mirrors server/env.ts) so the bundled
+// validator carries no app-env coupling. Reads DATA_PATH from .env / process.env,
+// defaulting to ./data relative to the current working directory.
+loadEnv();
+const DATA_PATH = resolve(process.cwd(), process.env.DATA_PATH || "./data");
 
 type Kind = "course" | "flashcards" | "quiz" | "deck" | "prose";
 type Target = { file: string; kind: Kind };

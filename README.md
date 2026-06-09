@@ -114,7 +114,7 @@ Contributions are welcome.
 
 When adding new entities or shared shapes, add the canonical types to `src/modules/core` first.
 
-> `INSTRUCTIONS.md` and `CLAUDE.md` are guidance for AI coding assistants working in this repo, not contribution rules for humans.
+> `AGENTS.md` is the single source of guidance for AI coding assistants working in this repo (Claude Code and Copilot read it via the `CLAUDE.md` / `.github/copilot-instructions.md` symlinks), not contribution rules for humans.
 
 ## License
 
