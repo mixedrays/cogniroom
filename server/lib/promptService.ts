@@ -25,7 +25,7 @@ export async function savePrompt(id: string, content: string): Promise<void> {
   const def = getPromptDefinition(id);
   if (!def) throw new Error(`Unknown prompt id: ${id}`);
 
-  await storageApi.post(promptPath(id), content);
+  await storageApi.put(promptPath(id), content);
 }
 
 /** Delete the override file, reverting to the default content. */

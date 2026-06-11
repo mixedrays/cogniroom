@@ -42,6 +42,12 @@ function parentPrefix(path: string): string {
   return normalized + "/";
 }
 
+/** Key range matching every key that starts with `prefix` ("" matches all) */
+function prefixRange(prefix: string): IDBKeyRange | undefined {
+  if (!prefix) return undefined;
+  return IDBKeyRange.bound(prefix, prefix + "￿");
+}
+
 export class IndexedDBAdapter extends StorageAdapter {
   private readonly databaseName: string;
   private readonly storeName: string;
@@ -148,10 +154,9 @@ export class IndexedDBAdapter extends StorageAdapter {
         const parsed = JSON.parse(record.content) as T;
         return this.createResponse(StorageStatus.OK, parsed, record.content);
       } catch {
-        return this.createResponse(
-          StorageStatus.OK,
-          record.content as unknown as T,
-          record.content
+        return this.createErrorResponse(
+          StorageStatus.INTERNAL_ERROR,
+          `Stored content at ${path} is not valid JSON`
         );
       }
     }
@@ -168,7 +173,8 @@ export class IndexedDBAdapter extends StorageAdapter {
   ): Promise<StorageResponse<T>> {
     let content: string;
     if (typeof request.body === "object" && request.body !== null) {
-      content = JSON.stringify(request.body);
+      // Match FileSystemAdapter's serialization so backends are interchangeable
+      content = JSON.stringify(request.body, null, 2);
     } else if (typeof request.body === "string") {
       content = request.body;
     } else {
@@ -182,6 +188,14 @@ export class IndexedDBAdapter extends StorageAdapter {
     const existing = (await this.run("readonly", (store) =>
       store.get(path)
     )) as StoredRecord | undefined;
+
+    // POST creates; refuse to silently overwrite an existing entry
+    if (request.method === "POST" && existing) {
+      return this.createErrorResponse(
+        StorageStatus.CONFLICT,
+        `Path already exists: ${path}. Use PUT to update.`
+      );
+    }
 
     const record: StoredRecord = {
       path,
@@ -209,8 +223,7 @@ export class IndexedDBAdapter extends StorageAdapter {
     )) as StoredRecord | undefined;
 
     if (recursive) {
-      const prefix = parentPrefix(path);
-      const keysToDelete = await this.getKeysWithPrefix(prefix);
+      const keysToDelete = await this.getKeysWithPrefix(parentPrefix(path));
       const allKeys = existing ? [path, ...keysToDelete] : keysToDelete;
       if (allKeys.length === 0) {
         return this.createErrorResponse(StorageStatus.NOT_FOUND);
@@ -220,6 +233,15 @@ export class IndexedDBAdapter extends StorageAdapter {
     }
 
     if (!existing) {
+      // Match filesystem semantics: deleting a directory without
+      // `recursive` is a bad request, not a missing path.
+      const children = await this.getKeysWithPrefix(parentPrefix(path));
+      if (children.length > 0) {
+        return this.createErrorResponse(
+          StorageStatus.BAD_REQUEST,
+          `${path} is a directory; pass options.recursive to delete it`
+        );
+      }
       return this.createErrorResponse(StorageStatus.NOT_FOUND);
     }
     await this.run("readwrite", (store) => store.delete(path));
@@ -247,15 +269,18 @@ export class IndexedDBAdapter extends StorageAdapter {
     });
   }
 
-  private async getAllKeys(): Promise<string[]> {
+  private async getKeysWithPrefix(prefix: string): Promise<string[]> {
+    const range = prefixRange(prefix);
     return (await this.run("readonly", (store) =>
-      store.getAllKeys()
+      range ? store.getAllKeys(range) : store.getAllKeys()
     )) as unknown as string[];
   }
 
-  private async getKeysWithPrefix(prefix: string): Promise<string[]> {
-    const keys = await this.getAllKeys();
-    return keys.filter((k) => k.startsWith(prefix));
+  private async getRecordsWithPrefix(prefix: string): Promise<StoredRecord[]> {
+    const range = prefixRange(prefix);
+    return (await this.run("readonly", (store) =>
+      range ? store.getAll(range) : store.getAll()
+    )) as unknown as StoredRecord[];
   }
 
   async list(path: string, options: ListOptions = {}): Promise<FileMetadata[]> {
@@ -267,40 +292,24 @@ export class IndexedDBAdapter extends StorageAdapter {
     } = options;
 
     const prefix = parentPrefix(path);
-    const allKeys = await this.getAllKeys();
-    const children = allKeys.filter((k) => k.startsWith(prefix));
+    const records = await this.getRecordsWithPrefix(prefix);
 
     const filesMap = new Map<string, StoredRecord>();
     const dirSet = new Set<string>();
 
-    for (const key of children) {
+    for (const record of records) {
+      const key = record.path;
       const relative = key.slice(prefix.length);
       if (!relative) continue;
       const firstSlash = relative.indexOf("/");
-      if (firstSlash === -1) {
-        if (!files) continue;
+      const isDirectChild = firstSlash === -1;
+
+      if (!isDirectChild && directories) {
+        dirSet.add(prefix + relative.slice(0, firstSlash));
+      }
+      if ((isDirectChild || recursive) && files) {
         if (extension && !key.endsWith(extension)) continue;
-        const record = (await this.run("readonly", (store) =>
-          store.get(key)
-        )) as StoredRecord | undefined;
-        if (record) filesMap.set(key, record);
-      } else {
-        const dirName = relative.slice(0, firstSlash);
-        const dirPath = prefix + dirName;
-        if (recursive) {
-          // include the direct child directory entry too
-          if (directories) dirSet.add(dirPath);
-          // and the deeper file (will be picked up below)
-          if (files) {
-            if (extension && !key.endsWith(extension)) continue;
-            const record = (await this.run("readonly", (store) =>
-              store.get(key)
-            )) as StoredRecord | undefined;
-            if (record) filesMap.set(key, record);
-          }
-        } else {
-          if (directories) dirSet.add(dirPath);
-        }
+        filesMap.set(key, record);
       }
     }
 
@@ -348,10 +357,8 @@ export class IndexedDBAdapter extends StorageAdapter {
       };
     }
 
-    const prefix = parentPrefix(normalized);
-    const allKeys = await this.getAllKeys();
-    const hasChildren = allKeys.some((k) => k.startsWith(prefix));
-    if (!hasChildren) return null;
+    const children = await this.getKeysWithPrefix(parentPrefix(normalized));
+    if (children.length === 0) return null;
 
     const name = normalized.split("/").pop() ?? normalized;
     return {

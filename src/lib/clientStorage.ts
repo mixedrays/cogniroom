@@ -1,32 +1,35 @@
-import { IndexedDBAdapter } from "@/modules/storage/adapters/indexeddb";
+/**
+ * Browser-side JSON cache backed by the storage module's IndexedDB adapter.
+ *
+ * Cache keys are extensionless (e.g. "cache/courses/123"), so values are
+ * explicitly JSON-encoded here rather than relying on the adapter's
+ * extension-based auto-parsing. This also lets non-object values (strings,
+ * numbers) round-trip safely.
+ */
+
+import { createClientStorageApi } from "@/modules/storage/client";
+import type { StorageApi } from "@/modules/storage/client";
 import { StorageStatus } from "@/modules/storage/types";
 
-let adapter: IndexedDBAdapter | null = null;
+let api: StorageApi | null = null;
 
-function getClientAdapter(): IndexedDBAdapter | null {
+function getClientApi(): StorageApi | null {
   if (typeof window === "undefined") return null;
   if (typeof indexedDB === "undefined") return null;
-  if (!adapter) {
-    adapter = new IndexedDBAdapter({
-      adapter: "indexeddb",
-      basePath: "/",
+  if (!api) {
+    api = createClientStorageApi({
       databaseName: "cogniroom-cache",
       storeName: "entries",
     });
   }
-  return adapter;
+  return api;
 }
 
 export async function readCache<T>(path: string): Promise<T | null> {
-  const a = getClientAdapter();
+  const a = getClientApi();
   if (!a) return null;
   try {
-    const response = await a.execute<string>({
-      path,
-      method: "GET",
-      headers: {},
-      options: {},
-    });
+    const response = await a.get(path);
     if (!response.ok) return null;
     const text = await response.text();
     if (!text) return null;
@@ -37,23 +40,17 @@ export async function readCache<T>(path: string): Promise<T | null> {
 }
 
 export async function writeCache(path: string, value: unknown): Promise<void> {
-  const a = getClientAdapter();
+  const a = getClientApi();
   if (!a) return;
   try {
-    await a.execute({
-      path,
-      method: "PUT",
-      body: JSON.stringify(value),
-      headers: {},
-      options: {},
-    });
+    await a.put(path, JSON.stringify(value));
   } catch {
     // Cache write failures are non-fatal.
   }
 }
 
 export async function listCachePaths(prefix: string): Promise<string[]> {
-  const a = getClientAdapter();
+  const a = getClientApi();
   if (!a) return [];
   try {
     const entries = await a.list(prefix, {
@@ -71,15 +68,10 @@ export async function deleteCache(
   path: string,
   recursive = false
 ): Promise<void> {
-  const a = getClientAdapter();
+  const a = getClientApi();
   if (!a) return;
   try {
-    await a.execute({
-      path,
-      method: "DELETE",
-      headers: {},
-      options: { recursive },
-    });
+    await a.delete(path, recursive);
   } catch {
     // Non-fatal.
   }

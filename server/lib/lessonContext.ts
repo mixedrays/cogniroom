@@ -30,7 +30,7 @@ export async function loadLessonContext(
       message:
         courseResponse.status === 404
           ? "Course not found"
-          : courseResponse.statusText,
+          : (courseResponse.error ?? courseResponse.statusText),
     });
   }
 

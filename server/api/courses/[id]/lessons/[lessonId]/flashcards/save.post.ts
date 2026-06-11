@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   const content = { version: 2 as const, ...parsed.data };
 
   const adapter = getFormatAdapter("flashcards");
-  await storageApi.post(
+  await storageApi.put(
     storagePaths.flashcards(courseId, lessonId),
     adapter.serialize(content)
   );

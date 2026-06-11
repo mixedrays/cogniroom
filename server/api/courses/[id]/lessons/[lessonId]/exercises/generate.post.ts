@@ -56,7 +56,7 @@ export default defineEventHandler(
 
     const content = result.text;
 
-    await storageApi.post(storagePaths.exercise(courseId, lessonId), content);
+    await storageApi.put(storagePaths.exercise(courseId, lessonId), content);
 
     return { success: true, content };
   })

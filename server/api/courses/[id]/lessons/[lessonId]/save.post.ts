@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  await storageApi.post(
+  await storageApi.put(
     storagePaths.lesson(courseId, lessonId),
     parsed.data.content
   );

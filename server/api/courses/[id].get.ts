@@ -24,7 +24,7 @@ export default defineEventHandler(
       throw new HTTPError({
         status: response.status,
         message:
-          response.status === 404 ? "Course not found" : response.statusText,
+          response.status === 404 ? "Course not found" : (response.error ?? response.statusText),
       });
     }
 

@@ -11,7 +11,7 @@ import {
   stat,
   writeFile,
 } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import type {
   FileMetadata,
   ListOptions,
@@ -23,26 +23,40 @@ import { StorageStatus } from "../types";
 import { StorageAdapter } from "./base";
 
 export class FileSystemAdapter extends StorageAdapter {
+  /** Absolute root directory all paths are resolved against */
+  private readonly root: string;
+
   constructor(config: StorageConfig = {}) {
     super(config);
+    this.root = resolve(config.basePath ?? process.cwd());
   }
 
   /**
-   * Resolve a relative path to an absolute path
+   * Resolve a relative path to an absolute path inside the storage root.
+   * Throws if the path escapes the root (e.g. via "..").
    */
   private resolvePath(relativePath: string): string {
-    // Remove leading slash if present
-    const cleanPath = relativePath.startsWith("/")
-      ? relativePath.slice(1)
-      : relativePath;
-    return join(this.config.basePath!, cleanPath);
+    const cleanPath = relativePath.replace(/^\/+/, "");
+    const fullPath = resolve(this.root, cleanPath);
+    if (fullPath !== this.root && !fullPath.startsWith(this.root + sep)) {
+      throw new Error(`Path escapes storage root: ${relativePath}`);
+    }
+    return fullPath;
   }
 
   /**
    * Execute a storage request
    */
   async execute<T>(request: StorageRequest): Promise<StorageResponse<T>> {
-    const fullPath = this.resolvePath(request.path);
+    let fullPath: string;
+    try {
+      fullPath = this.resolvePath(request.path);
+    } catch (error) {
+      return this.createErrorResponse(
+        StorageStatus.BAD_REQUEST,
+        (error as Error).message
+      );
+    }
 
     try {
       switch (request.method) {
@@ -54,7 +68,7 @@ export class FileSystemAdapter extends StorageAdapter {
         case "DELETE":
           return await this.handleDelete<T>(fullPath, request);
         case "HEAD":
-          return await this.handleHead<T>(fullPath);
+          return await this.handleHead<T>(request.path);
         default:
           return this.createErrorResponse(
             StorageStatus.BAD_REQUEST,
@@ -100,6 +114,14 @@ export class FileSystemAdapter extends StorageAdapter {
     fullPath: string,
     request: StorageRequest
   ): Promise<StorageResponse<T>> {
+    // POST creates; refuse to silently overwrite an existing file
+    if (request.method === "POST" && (await this.pathExists(fullPath))) {
+      return this.createErrorResponse(
+        StorageStatus.CONFLICT,
+        `Path already exists: ${request.path}. Use PUT to update.`
+      );
+    }
+
     // Create parent directories if needed (default: true)
     const createParents = request.options.createParents ?? true;
     if (createParents) {
@@ -123,9 +145,6 @@ export class FileSystemAdapter extends StorageAdapter {
       request.options.encoding ?? this.config.defaultEncoding ?? "utf-8";
     await writeFile(fullPath, content, { encoding });
 
-    // Check if file existed before (for status code)
-    // POST creates new (201), PUT updates (200)
-    // For simplicity, we return 201 for POST and 200 for PUT
     const status =
       request.method === "POST" ? StorageStatus.CREATED : StorageStatus.OK;
     return this.createResponse(status);
@@ -146,17 +165,10 @@ export class FileSystemAdapter extends StorageAdapter {
   /**
    * Handle HEAD requests - check existence
    */
-  private async handleHead<T>(fullPath: string): Promise<StorageResponse<T>> {
-    try {
-      await stat(fullPath);
-      return this.createResponse(StorageStatus.OK);
-    } catch (error) {
-      const nodeError = error as NodeJS.ErrnoException;
-      if (nodeError.code === "ENOENT") {
-        return this.createErrorResponse(StorageStatus.NOT_FOUND);
-      }
-      throw error;
-    }
+  private async handleHead<T>(path: string): Promise<StorageResponse<T>> {
+    return (await this.exists(path))
+      ? this.createResponse<T>(StorageStatus.OK)
+      : this.createErrorResponse<T>(StorageStatus.NOT_FOUND);
   }
 
   /**
@@ -241,8 +253,10 @@ export class FileSystemAdapter extends StorageAdapter {
    * Check if path exists
    */
   async exists(path: string): Promise<boolean> {
-    const fullPath = this.resolvePath(path);
+    return this.pathExists(this.resolvePath(path));
+  }
 
+  private async pathExists(fullPath: string): Promise<boolean> {
     try {
       await stat(fullPath);
       return true;

@@ -1,6 +1,11 @@
 /**
  * Storage module - fetch()-compatible storage abstraction
  *
+ * This index is the SERVER entry: it can construct the filesystem adapter and
+ * therefore pulls in Node built-ins. Browser code must import from
+ * `@/modules/storage/client` instead, which exposes the same API surface
+ * backed by IndexedDB.
+ *
  * @example
  * import { storage, storageApi } from "@/modules/storage";
  *
@@ -29,7 +34,7 @@ export {
   storageApi,
 } from "./storage";
 
-export type { StorageApi } from "./storage";
+export type { StorageApi } from "./api";
 
 // Types
 export type {

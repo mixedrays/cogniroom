@@ -17,8 +17,9 @@ export abstract class StorageAdapter {
   protected config: StorageConfig;
 
   constructor(config: StorageConfig = {}) {
+    // No process.cwd() default here: this class is shared with browser
+    // adapters. Filesystem-specific defaults live in FileSystemAdapter.
     this.config = {
-      basePath: config.basePath ?? process.cwd(),
       defaultEncoding: config.defaultEncoding ?? "utf-8",
       ...config,
     };
@@ -88,7 +89,8 @@ export abstract class StorageAdapter {
     return {
       ok: false,
       status,
-      statusText: message ?? StorageStatusText[status] ?? "Unknown Error",
+      statusText: StorageStatusText[status] ?? "Unknown Error",
+      error: message,
       async json<R>(): Promise<R> {
         throw new Error(message ?? "Request failed");
       },

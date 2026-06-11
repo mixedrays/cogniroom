@@ -29,7 +29,6 @@ describe("IndexedDBAdapter", () => {
       path: "courses/abc/course.md",
       method: "POST",
       body: "# Hello",
-      headers: {},
       options: {},
     });
     expect(write.ok).toBe(true);
@@ -38,7 +37,6 @@ describe("IndexedDBAdapter", () => {
     const read = await adapter.execute<string>({
       path: "courses/abc/course.md",
       method: "GET",
-      headers: {},
       options: {},
     });
     expect(read.ok).toBe(true);
@@ -52,14 +50,12 @@ describe("IndexedDBAdapter", () => {
       path: "courses/abc/course.json",
       method: "POST",
       body: data,
-      headers: {},
       options: {},
     });
 
     const read = await adapter.execute<Course>({
       path: "courses/abc/course.json",
       method: "GET",
-      headers: {},
       options: {},
     });
     expect(read.ok).toBe(true);
@@ -71,7 +67,6 @@ describe("IndexedDBAdapter", () => {
     const read = await adapter.execute({
       path: "nope.json",
       method: "GET",
-      headers: {},
       options: {},
     });
     expect(read.ok).toBe(false);
@@ -84,13 +79,11 @@ describe("IndexedDBAdapter", () => {
       path: "a.txt",
       method: "PUT",
       body: "x",
-      headers: {},
       options: {},
     });
     const present = await adapter.execute({
       path: "a.txt",
       method: "HEAD",
-      headers: {},
       options: {},
     });
     expect(present.ok).toBe(true);
@@ -98,7 +91,6 @@ describe("IndexedDBAdapter", () => {
     const missing = await adapter.execute({
       path: "b.txt",
       method: "HEAD",
-      headers: {},
       options: {},
     });
     expect(missing.ok).toBe(false);
@@ -111,13 +103,11 @@ describe("IndexedDBAdapter", () => {
       path: "x.md",
       method: "POST",
       body: "x",
-      headers: {},
       options: {},
     });
     const del = await adapter.execute({
       path: "x.md",
       method: "DELETE",
-      headers: {},
       options: {},
     });
     expect(del.ok).toBe(true);
@@ -132,28 +122,24 @@ describe("IndexedDBAdapter", () => {
       path: "courses/abc/course.md",
       method: "POST",
       body: "a",
-      headers: {},
       options: {},
     });
     await adapter.execute({
       path: "courses/abc/lessons/l1.md",
       method: "POST",
       body: "b",
-      headers: {},
       options: {},
     });
     await adapter.execute({
       path: "courses/other/c.md",
       method: "POST",
       body: "c",
-      headers: {},
       options: {},
     });
 
     const del = await adapter.execute({
       path: "courses/abc",
       method: "DELETE",
-      headers: {},
       options: { recursive: true },
     });
     expect(del.ok).toBe(true);
@@ -169,21 +155,18 @@ describe("IndexedDBAdapter", () => {
       path: "courses/abc/course.md",
       method: "POST",
       body: "a",
-      headers: {},
       options: {},
     });
     await adapter.execute({
       path: "courses/abc/lessons/l1.md",
       method: "POST",
       body: "b",
-      headers: {},
       options: {},
     });
     await adapter.execute({
       path: "courses/def/course.md",
       method: "POST",
       body: "c",
-      headers: {},
       options: {},
     });
 
@@ -203,14 +186,12 @@ describe("IndexedDBAdapter", () => {
       path: "data/a.json",
       method: "POST",
       body: "{}",
-      headers: {},
       options: {},
     });
     await adapter.execute({
       path: "data/b.md",
       method: "POST",
       body: "x",
-      headers: {},
       options: {},
     });
 
@@ -227,7 +208,6 @@ describe("IndexedDBAdapter", () => {
       path: "x.md",
       method: "POST",
       body: "hello",
-      headers: {},
       options: {},
     });
     const meta = await adapter.stat("x.md");
@@ -243,7 +223,6 @@ describe("IndexedDBAdapter", () => {
       path: "courses/abc/course.md",
       method: "POST",
       body: "a",
-      headers: {},
       options: {},
     });
     const meta = await adapter.stat("courses");
@@ -257,7 +236,6 @@ describe("IndexedDBAdapter", () => {
       path: "x.md",
       method: "POST",
       body: "v1",
-      headers: {},
       options: {},
     });
     const first = await adapter.stat("x.md");
@@ -268,7 +246,6 @@ describe("IndexedDBAdapter", () => {
       path: "x.md",
       method: "PUT",
       body: "v2",
-      headers: {},
       options: {},
     });
     expect(put.ok).toBe(true);
@@ -283,9 +260,68 @@ describe("IndexedDBAdapter", () => {
     const read = await adapter.execute({
       path: "x.md",
       method: "GET",
-      headers: {},
       options: {},
     });
     expect(await read.text()).toBe("v2");
+  });
+
+  it("POST to an existing path returns 409 and keeps the original content", async () => {
+    const adapter = makeAdapter();
+    await adapter.execute({
+      path: "x.md",
+      method: "POST",
+      body: "v1",
+      options: {},
+    });
+    const conflict = await adapter.execute({
+      path: "x.md",
+      method: "POST",
+      body: "v2",
+      options: {},
+    });
+    expect(conflict.ok).toBe(false);
+    expect(conflict.status).toBe(409);
+
+    const read = await adapter.execute({
+      path: "x.md",
+      method: "GET",
+      options: {},
+    });
+    expect(await read.text()).toBe("v1");
+  });
+
+  it("non-recursive DELETE of a directory returns 400", async () => {
+    const adapter = makeAdapter();
+    await adapter.execute({
+      path: "courses/abc/course.md",
+      method: "POST",
+      body: "a",
+      options: {},
+    });
+    const del = await adapter.execute({
+      path: "courses/abc",
+      method: "DELETE",
+      options: {},
+    });
+    expect(del.ok).toBe(false);
+    expect(del.status).toBe(400);
+    expect(await adapter.exists("courses/abc/course.md")).toBe(true);
+  });
+
+  it("GET of corrupt JSON returns 500 instead of raw text", async () => {
+    const adapter = makeAdapter();
+    await adapter.execute({
+      path: "bad.json",
+      method: "POST",
+      body: "{not json",
+      options: {},
+    });
+    const read = await adapter.execute({
+      path: "bad.json",
+      method: "GET",
+      options: {},
+    });
+    expect(read.ok).toBe(false);
+    expect(read.status).toBe(500);
   });
 });

@@ -110,7 +110,7 @@ export default defineEventHandler(
     };
 
     const quizAdapter = getFormatAdapter("quiz");
-    await storageApi.post(
+    await storageApi.put(
       storagePaths.quiz(courseId, lessonId),
       quizAdapter.serialize(content)
     );

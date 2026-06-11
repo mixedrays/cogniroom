@@ -80,4 +80,31 @@ describe("createStorageApi (scoped adapter)", () => {
     // Not visible through the default adapter's backend.
     expect(await storageApi.exists("written.json")).toBe(false);
   });
+
+  it("POST to an existing file returns 409; PUT overwrites", async () => {
+    const scoped = createStorageApi({ basePath: scopedDir });
+
+    const conflict = await scoped.post("scoped.json", { v: 2 });
+    expect(conflict.ok).toBe(false);
+    expect(conflict.status).toBe(409);
+
+    const put = await scoped.put("scoped.json", { v: 2 });
+    expect(put.ok).toBe(true);
+  });
+
+  it("rejects paths that escape the storage root", async () => {
+    const scoped = createStorageApi({ basePath: scopedDir });
+
+    const read = await scoped.get("../escape.json");
+    expect(read.ok).toBe(false);
+    expect(read.status).toBe(400);
+
+    const write = await scoped.put("nested/../../escape.json", { ok: true });
+    expect(write.ok).toBe(false);
+    expect(write.status).toBe(400);
+
+    // In-root traversal that stays inside the base path is still allowed.
+    const inRoot = await scoped.put("nested/../inside.json", { ok: true });
+    expect(inRoot.ok).toBe(true);
+  });
 });

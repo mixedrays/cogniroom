@@ -12,7 +12,7 @@ export default defineEventHandler(async (event): Promise<Deck> => {
   if (!response.ok) {
     throw new HTTPError({
       status: response.status,
-      message: response.status === 404 ? "Deck not found" : response.statusText,
+      message: response.status === 404 ? "Deck not found" : (response.error ?? response.statusText),
     });
   }
   try {

@@ -17,7 +17,6 @@ export type StorageContentType =
 export interface StorageInit {
   method?: StorageMethod;
   body?: string | object;
-  headers?: Record<string, string>;
   options?: StorageOptions;
 }
 
@@ -37,8 +36,10 @@ export interface StorageResponse<T = unknown> {
   ok: boolean;
   /** HTTP-like status code */
   status: number;
-  /** Status description */
+  /** Standard status description (e.g. "Not Found") */
   statusText: string;
+  /** Error detail for failed operations */
+  error?: string;
   /** Parsed data (for successful GET operations) */
   data?: T;
   /** Parse response as JSON */
@@ -54,7 +55,7 @@ export interface StorageConfig {
   /** Default encoding for text files */
   defaultEncoding?: BufferEncoding;
   /** Adapter type identifier */
-  adapter?: "filesystem" | "database" | "localstorage" | "indexeddb";
+  adapter?: "filesystem" | "indexeddb";
   /** IndexedDB database name (indexeddb adapter only) */
   databaseName?: string;
   /** IndexedDB object store name (indexeddb adapter only) */
@@ -97,8 +98,6 @@ export interface StorageRequest {
   method: StorageMethod;
   /** Request body (for POST/PUT) */
   body?: string | object;
-  /** Request headers */
-  headers: Record<string, string>;
   /** Additional options */
   options: StorageOptions;
 }

@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
     const response = await storageApi.delete(storagePaths.courseDir(id), true);
 
     if (!response.ok && response.status !== 404) {
-      return { success: false, error: response.statusText };
+      return { success: false, error: response.error ?? response.statusText };
     }
 
     return { success: true };

@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
     );
 
     if (!response.ok) {
-      return { success: false, error: response.statusText };
+      return { success: false, error: response.error ?? response.statusText };
     }
 
     return { success: true, id };

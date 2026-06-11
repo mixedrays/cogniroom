@@ -87,7 +87,7 @@ export default defineEventHandler(
     };
 
     const flashcardsAdapter = getFormatAdapter("flashcards");
-    await storageApi.post(
+    await storageApi.put(
       storagePaths.flashcards(courseId, lessonId),
       flashcardsAdapter.serialize(content)
     );

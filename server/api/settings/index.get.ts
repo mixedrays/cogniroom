@@ -31,7 +31,7 @@ export default defineEventHandler(async () => {
     }
 
     // Other error
-    console.error("Error reading settings:", response.statusText);
+    console.error("Error reading settings:", response.error ?? response.statusText);
     return { success: true, settings: DEFAULT_SETTINGS, isDefault: true };
   } catch (error: unknown) {
     console.error("Error reading settings:", error);

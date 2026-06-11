@@ -32,7 +32,7 @@ export default defineEventHandler(async () => {
     }
 
     // Other error
-    console.error("Error reading settings history:", response.statusText);
+    console.error("Error reading settings history:", response.error ?? response.statusText);
     return {
       success: true,
       history: { entries: [], maxEntries: 50 },
