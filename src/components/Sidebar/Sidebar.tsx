@@ -43,7 +43,7 @@ export default function AppSidebar() {
         <OfflineIndicator />
       </SidebarHeader>
 
-      <SidebarContent className="overflow-xhidden relative p-0">
+      <SidebarContent className="overflow-hidden relative p-0">
         <div
           className={`absolute inset-0 w-full h-full transition-transform duration-300 ease-in-out ${
             isCourseView ? "-translate-x-full" : "translate-x-0"
