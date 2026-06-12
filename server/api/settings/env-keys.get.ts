@@ -6,14 +6,6 @@ export interface ProviderEnvKeyInfo {
   providerId: string;
   envName: string;
   hasKey: boolean;
-  lastChars?: string;
-}
-
-function maskKey(value: string): string | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  if (trimmed.length <= 4) return "•".repeat(trimmed.length);
-  return trimmed.slice(-4);
 }
 
 export default defineEventHandler(() => {
@@ -26,7 +18,6 @@ export default defineEventHandler(() => {
         providerId: provider.id,
         envName,
         hasKey,
-        lastChars: hasKey ? maskKey(value) : undefined,
       };
     });
 

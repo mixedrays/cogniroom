@@ -42,7 +42,12 @@ function requireApiKey(providerId: string, providerName: string): string {
  */
 export function getBrowserLanguageModel(model: string): LanguageModel {
   const provider = getProviderForModel(model, providers);
-  const providerId = provider?.id ?? "openai";
+  if (!provider) {
+    throw new Error(
+      `Unknown model "${model}" — no configured provider supports it.`
+    );
+  }
+  const providerId = provider.id;
 
   if (providerId === "anthropic") {
     const apiKey = requireApiKey("anthropic", "Anthropic");

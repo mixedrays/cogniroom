@@ -56,6 +56,8 @@ export function getProviderEnvKeyName(providerId: string): string {
   return `${providerId.toUpperCase()}_API_KEY`;
 }
 
+// Namespaced to avoid collisions with other apps served from the same
+// origin (e.g. other dev projects reusing localhost:3000).
 export function getProviderLocalStorageKeyName(providerId: string): string {
-  return `${providerId.toLowerCase()}_api_key`;
+  return `cogniroom:${providerId.toLowerCase()}_api_key`;
 }

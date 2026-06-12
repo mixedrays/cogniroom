@@ -65,7 +65,6 @@ export interface ProviderEnvKeyInfo {
   providerId: string;
   envName: string;
   hasKey: boolean;
-  lastChars?: string;
 }
 
 // Get info on which provider API keys are set via environment variables

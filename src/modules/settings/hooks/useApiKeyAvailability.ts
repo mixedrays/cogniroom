@@ -10,7 +10,6 @@ export interface ProviderApiKeyAvailability {
   providerName: string;
   envName: string;
   hasEnvKey: boolean;
-  envLastChars?: string;
   hasLocalKey: boolean;
   localLastChars?: string;
   effectiveSource: ApiKeySource;
@@ -98,7 +97,6 @@ function buildAvailability(
       providerName: provider.name,
       envName: env?.envName ?? `${provider.id.toUpperCase()}_API_KEY`,
       hasEnvKey,
-      envLastChars: env?.lastChars,
       hasLocalKey,
       localLastChars: hasLocalKey ? maskLocal(localValue) : undefined,
       effectiveSource: hasLocalKey ? "local" : hasEnvKey ? "env" : "none",

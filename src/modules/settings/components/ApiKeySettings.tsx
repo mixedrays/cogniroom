@@ -57,7 +57,10 @@ function ApiKeyField({
     () => localStorage.getItem(storageKey) ?? ""
   );
 
-  const handleApiKeyChange = (value: string) => {
+  // Persist on blur rather than per keystroke so partially typed or
+  // accidentally edited keys never hit localStorage.
+  const handleApiKeyBlur = () => {
+    const value = apiKey.trim();
     setApiKey(value);
     if (value) {
       localStorage.setItem(storageKey, value);
@@ -75,7 +78,6 @@ function ApiKeyField({
 
   const hasEnvKey = availability?.hasEnvKey ?? false;
   const envName = availability?.envName;
-  const envLastChars = availability?.envLastChars;
   const hasLocalKey = apiKey.trim().length > 0;
   const localOverridesEnv = hasEnvKey && hasLocalKey;
 
@@ -90,9 +92,6 @@ function ApiKeyField({
           >
             <CheckCircle2 className="size-3" />
             ENV
-            {envLastChars && (
-              <span className="font-mono opacity-80">…{envLastChars}</span>
-            )}
           </span>
         )}
       </div>
@@ -101,7 +100,12 @@ function ApiKeyField({
           type="password"
           placeholder={placeholder}
           value={apiKey}
-          onChange={(e) => handleApiKeyChange(e.target.value)}
+          onChange={(e) => setApiKey(e.target.value)}
+          onBlur={handleApiKeyBlur}
+          autoComplete="off"
+          spellCheck={false}
+          data-1p-ignore
+          data-lpignore="true"
         />
         {apiKey && (
           <AlertDialog>
@@ -177,11 +181,6 @@ function EnvKeySummary({
             <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="size-3.5" />
               Set
-              {entry.envLastChars && (
-                <span className="font-mono opacity-80">
-                  …{entry.envLastChars}
-                </span>
-              )}
             </span>
           </div>
         ))}
@@ -240,8 +239,13 @@ function BrowserKeyDisclaimer() {
                   <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                     <li>
                       Saved in this browser's <code>localStorage</code> in plain
-                      text under keys like <code>openai_api_key</code> and{" "}
-                      <code>anthropic_api_key</code>.
+                      text under keys like <code>cogniroom:openai_api_key</code>{" "}
+                      and <code>cogniroom:anthropic_api_key</code>.
+                    </li>
+                    <li>
+                      <code>localStorage</code> is shared per origin — on{" "}
+                      <code>localhost</code>, any other app later served on the
+                      same port can read keys left here.
                     </li>
                     <li>
                       Never sent to this app's server — requests go directly
