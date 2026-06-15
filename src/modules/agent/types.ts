@@ -20,6 +20,10 @@ export interface AgentTool<TParams extends ZodType = ZodType> {
       superseded?: boolean;
     }>;
     renderAbovePrompt?: boolean;
+    // Renders the settled view after the user submits a result. When omitted,
+    // the chat falls back to a generic result bubble. Lets each tool own how its
+    // answer is summarized without the renderer knowing the tool by name.
+    SubmittedWidget?: ComponentType<{ params: unknown; result: unknown }>;
     // Render nothing once the user has acted on this tool call (the Widget owns
     // its own persisted UI, so the generic result bubble would be redundant).
     hideWhenSubmitted?: boolean;

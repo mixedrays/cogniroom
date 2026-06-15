@@ -2,8 +2,6 @@ import { Loader2 } from "lucide-react";
 import { Markdown } from "@/modules/markdown";
 import { ErrorMessage } from "@/components/ErrorMessage/ErrorMessage";
 import type { AgentMessageState, AgentTool } from "../types";
-import { AskUserParamsSchema } from "../tools/ask-user/schema";
-import { AskUserV2ParamsSchema } from "../tools/ask-user-v2/schema";
 
 interface AgentMessageProps {
   message: AgentMessageState;
@@ -75,65 +73,16 @@ export function AgentMessage({
         </div>
       );
 
-    if (message.status === "submitted" && message.toolName === "askUser") {
-      const parsed = AskUserParamsSchema.safeParse(message.params);
-      const answers = message.result as Record<string, string | string[]>;
-      if (parsed.success) {
-        return (
-          <div className="flex justify-end">
-            <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-primary/10 border border-primary/20 px-4 py-3 text-sm space-y-2">
-              {parsed.data.questions.map((q) => {
-                const ans = answers[q.header];
-                const ansText = Array.isArray(ans)
-                  ? ans.join(", ")
-                  : (ans ?? "—");
-                return (
-                  <div key={q.header}>
-                    <p className="text-muted-foreground text-xs">
-                      {q.question}
-                    </p>
-                    <p className="font-medium">{ansText}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      }
-    }
-
-    if (message.status === "submitted" && message.toolName === "askUserV2") {
-      const parsed = AskUserV2ParamsSchema.safeParse(message.params);
-      const answers = message.result as Record<string, string | string[]>;
-      if (parsed.success) {
-        return (
-          <div className="flex justify-end">
-            <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-primary/10 border border-primary/20 px-4 py-3 text-sm space-y-2">
-              {parsed.data.questions.map((q) => {
-                const ans = answers[q.header];
-                const ansText = Array.isArray(ans)
-                  ? ans.join(", ")
-                  : (ans ?? "—");
-                return (
-                  <div key={q.header}>
-                    <p className="text-muted-foreground text-xs">
-                      {q.question}
-                    </p>
-                    <p className="font-medium">{ansText}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      }
-    }
-
-    if (message.status === "submitted" && tool?.client?.hideWhenSubmitted) {
-      return null;
-    }
-
     if (message.status === "submitted") {
+      if (tool?.client?.hideWhenSubmitted) return null;
+
+      if (tool?.client?.SubmittedWidget) {
+        const { SubmittedWidget } = tool.client;
+        return (
+          <SubmittedWidget params={message.params} result={message.result} />
+        );
+      }
+
       const resultText = Array.isArray(message.result)
         ? (message.result as string[]).join(", ")
         : String(message.result ?? "");

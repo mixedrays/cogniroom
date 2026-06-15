@@ -1,6 +1,7 @@
 import type { AgentTool } from "../../types";
 import { AskUserV2ParamsSchema } from "./schema";
 import { AskUserV2Widget } from "./Widget";
+import { AskUserV2SubmittedView } from "./SubmittedView";
 
 export const askUserV2Tool: AgentTool<typeof AskUserV2ParamsSchema> = {
   server: {
@@ -28,6 +29,7 @@ export const askUserV2Tool: AgentTool<typeof AskUserV2ParamsSchema> = {
   client: {
     name: "askUserV2",
     Widget: AskUserV2Widget,
+    SubmittedWidget: AskUserV2SubmittedView,
   },
 };
 
