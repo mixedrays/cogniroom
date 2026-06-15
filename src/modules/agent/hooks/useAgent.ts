@@ -1,10 +1,11 @@
 import { useReducer, useRef, useCallback, useEffect } from "react";
-import type { AgentMessageState, AgentSseEvent, ChatBackend } from "../types";
+import type { AgentMessageState, ChatBackend } from "../types";
 import {
   messagesReducer,
   initialMessagesState,
   serializeMessages,
 } from "../lib/messagesReducer";
+import { streamAssistantTurn } from "../lib/streamAssistantTurn";
 
 export { serializeMessages };
 
@@ -37,74 +38,22 @@ export function useAgent({
   const abortRef = useRef<AbortController | null>(null);
   const modelRef = useRef<string>("");
 
-  const handleEvent = useCallback(
-    (assistantId: string, event: AgentSseEvent) => {
-      if (event.type === "token") {
-        dispatch({ type: "APPEND_TOKEN", id: assistantId, delta: event.delta });
-      } else if (event.type === "tool_call_start") {
-        dispatch({
-          type: "START_TOOL_CALL_STREAM",
-          assistantId,
-          toolCallId: event.toolCallId,
-          toolName: event.toolName,
-        });
-      } else if (event.type === "tool_call_delta") {
-        dispatch({
-          type: "APPEND_TOOL_CALL_DELTA",
-          toolCallId: event.toolCallId,
-          delta: event.delta,
-        });
-      } else if (event.type === "tool_call") {
-        dispatch({
-          type: "ADD_TOOL_CALL",
-          assistantId,
-          toolCallId: event.toolCallId,
-          toolName: event.toolName,
-          params: event.params,
-        });
-      } else if (event.type === "error") {
-        dispatch({
-          type: "SET_ERROR",
-          id: assistantId,
-          message: event.message,
-        });
-      } else if (event.type === "done") {
-        dispatch({ type: "COMPLETE_ASSISTANT", id: assistantId });
-      }
-    },
-    []
-  );
-
   const sendToAPI = useCallback(
     async (messages: AgentMessageState[]) => {
       if (abortRef.current) abortRef.current.abort();
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const assistantId = crypto.randomUUID();
-      dispatch({ type: "ADD_STREAMING_ASSISTANT", id: assistantId });
-
-      try {
-        await backend({
-          messages,
-          model: modelRef.current,
-          context,
-          signal: controller.signal,
-          onEvent: (event) => handleEvent(assistantId, event),
-        });
-      } catch (e) {
-        if ((e as Error).name === "AbortError") {
-          dispatch({ type: "CANCEL_ASSISTANT", id: assistantId });
-          return;
-        }
-        dispatch({
-          type: "SET_ERROR",
-          id: assistantId,
-          message: (e as Error).message ?? "Something went wrong",
-        });
-      }
+      await streamAssistantTurn({
+        backend,
+        messages,
+        model: modelRef.current,
+        context,
+        signal: controller.signal,
+        dispatch,
+      });
     },
-    [backend, context, handleEvent]
+    [backend, context]
   );
 
   const sendMessage = useCallback(

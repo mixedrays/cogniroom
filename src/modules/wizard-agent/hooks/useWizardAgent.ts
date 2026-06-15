@@ -5,13 +5,14 @@ import { useChatBackend } from "@/modules/agent/hooks/useChatBackend";
 import { askUserV2Tool } from "@/modules/agent/tools/ask-user-v2";
 import { memoryTool } from "@/modules/agent/tools/memory";
 import { getPresentToolForContentType } from "../tools/present/registry";
-import type { AgentMessageState, AgentSseEvent } from "@/modules/agent/types";
+import type { AgentMessageState } from "@/modules/agent/types";
 import {
   messagesReducer,
   initialMessagesState,
   type MessagesAction,
   type MessagesState,
 } from "@/modules/agent/lib/messagesReducer";
+import { streamAssistantTurn } from "@/modules/agent/lib/streamAssistantTurn";
 import type { WizardAgentContext } from "../components/WizardAgentDialog";
 import type { SessionMeta } from "../types";
 
@@ -236,51 +237,6 @@ export function useWizardAgent({
     []
   );
 
-  const handleEvent = useCallback(
-    (sessionId: string, assistantId: string, event: AgentSseEvent) => {
-      if (event.type === "token") {
-        sessionDispatch(sessionId, {
-          type: "APPEND_TOKEN",
-          id: assistantId,
-          delta: event.delta,
-        });
-      } else if (event.type === "tool_call_start") {
-        sessionDispatch(sessionId, {
-          type: "START_TOOL_CALL_STREAM",
-          assistantId,
-          toolCallId: event.toolCallId,
-          toolName: event.toolName,
-        });
-      } else if (event.type === "tool_call_delta") {
-        sessionDispatch(sessionId, {
-          type: "APPEND_TOOL_CALL_DELTA",
-          toolCallId: event.toolCallId,
-          delta: event.delta,
-        });
-      } else if (event.type === "tool_call") {
-        sessionDispatch(sessionId, {
-          type: "ADD_TOOL_CALL",
-          assistantId,
-          toolCallId: event.toolCallId,
-          toolName: event.toolName,
-          params: event.params,
-        });
-      } else if (event.type === "error") {
-        sessionDispatch(sessionId, {
-          type: "SET_ERROR",
-          id: assistantId,
-          message: event.message,
-        });
-      } else if (event.type === "done") {
-        sessionDispatch(sessionId, {
-          type: "COMPLETE_ASSISTANT",
-          id: assistantId,
-        });
-      }
-    },
-    [sessionDispatch]
-  );
-
   const sendToAPI = useCallback(
     async (sessionId: string, messages: AgentMessageState[]) => {
       const prior = streamControllersRef.current.get(sessionId);
@@ -288,32 +244,14 @@ export function useWizardAgent({
       const controller = new AbortController();
       streamControllersRef.current.set(sessionId, controller);
 
-      const assistantId = crypto.randomUUID();
-      sessionDispatch(sessionId, {
-        type: "ADD_STREAMING_ASSISTANT",
-        id: assistantId,
-      });
-
       try {
-        await backend({
+        await streamAssistantTurn({
+          backend,
           messages,
           model: modelRef.current,
           context: transportContext,
           signal: controller.signal,
-          onEvent: (event) => handleEvent(sessionId, assistantId, event),
-        });
-      } catch (e) {
-        if ((e as Error).name === "AbortError") {
-          sessionDispatch(sessionId, {
-            type: "CANCEL_ASSISTANT",
-            id: assistantId,
-          });
-          return;
-        }
-        sessionDispatch(sessionId, {
-          type: "SET_ERROR",
-          id: assistantId,
-          message: (e as Error).message ?? "Something went wrong",
+          dispatch: (action) => sessionDispatch(sessionId, action),
         });
       } finally {
         if (streamControllersRef.current.get(sessionId) === controller) {
@@ -321,7 +259,7 @@ export function useWizardAgent({
         }
       }
     },
-    [backend, handleEvent, sessionDispatch, transportContext]
+    [backend, sessionDispatch, transportContext]
   );
 
   const sendMessage = useCallback(
