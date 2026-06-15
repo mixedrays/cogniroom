@@ -1,13 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useState, useCallback } from "react";
+import { X, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Kbd } from "@/components/ui/kbd";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -19,258 +12,227 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AskUserParamsSchema, type AskUserQuestion } from "./schema";
+import {
+  AskUserV2ParamsSchema,
+  type AskUserV2Params,
+  type AskUserV2Question,
+} from "./schema";
 
 type Answers = Record<string, string | string[]>;
 
-interface QuestionsBatchWidgetProps {
+const DECIDE_FOR_ME = "Decide for me";
+
+interface AskUserV2WidgetProps {
   params: unknown;
+  isStreaming?: boolean;
   onSubmit: (result: unknown) => void;
   onDismiss: () => void;
 }
 
-export function QuestionsBatchWidget({
-  params,
-  onSubmit,
-  onDismiss,
-}: QuestionsBatchWidgetProps) {
-  const parsed = AskUserParamsSchema.safeParse(params);
-  const questions: AskUserQuestion[] = parsed.success
-    ? parsed.data.questions
-    : [];
+function computeInitialAnswers(questions: AskUserV2Question[]): Answers {
+  const initial: Answers = {};
+  for (const q of questions) {
+    const recommended =
+      q.options?.filter((o) => o.recommended).map((o) => o.label) ?? [];
+    if (recommended.length > 0) {
+      initial[q.header] = q.multiSelect ? recommended : recommended[0];
+    }
+  }
+  return initial;
+}
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Answers>({});
+interface AskUserV2FormProps {
+  data: AskUserV2Params;
+  onSubmit: (result: unknown) => void;
+  onDismiss: () => void;
+}
+
+function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
+  const [answers, setAnswers] = useState<Answers>(() =>
+    computeInitialAnswers(data.questions)
+  );
   const [freeformValues, setFreeformValues] = useState<Record<string, string>>(
     {}
   );
   const [showDismissDialog, setShowDismissDialog] = useState(false);
 
-  const total = questions.length;
-  const current = questions[currentIndex] ?? null;
-  const isFirst = currentIndex === 0;
-  const isLast = total > 0 && currentIndex === total - 1;
-  const currentAnswer = current ? answers[current.header] : undefined;
-  const currentFreeform = current ? (freeformValues[current.header] ?? "") : "";
-
-  useEffect(() => {
-    if (!parsed.success) return;
-    const initial: Answers = {};
-    for (const q of parsed.data.questions) {
-      const recommended =
-        q.options?.filter((o) => o.recommended).map((o) => o.label) ?? [];
-      if (recommended.length > 0) {
-        initial[q.header] = q.multiSelect ? recommended : recommended[0];
-      }
+  const handleToggle = useCallback((q: AskUserV2Question, label: string) => {
+    if (q.multiSelect) {
+      setAnswers((a) => {
+        const prev = Array.isArray(a[q.header])
+          ? (a[q.header] as string[])
+          : [];
+        const filtered = prev.filter((o) => o !== DECIDE_FOR_ME);
+        const next = filtered.includes(label)
+          ? filtered.filter((o) => o !== label)
+          : [...filtered, label];
+        return { ...a, [q.header]: next };
+      });
+    } else {
+      setAnswers((a) => ({ ...a, [q.header]: label }));
+      setFreeformValues((f) => ({ ...f, [q.header]: "" }));
     }
-    setAnswers(initial);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const toggleOption = useCallback(
-    (label: string) => {
-      if (!current) return;
-      if (current.multiSelect) {
-        const prev = Array.isArray(currentAnswer) ? currentAnswer : [];
-        const next = prev.includes(label)
-          ? prev.filter((o) => o !== label)
-          : [...prev, label];
-        setAnswers((a) => ({ ...a, [current.header]: next }));
-      } else {
-        setAnswers((a) => ({ ...a, [current.header]: label }));
-        setFreeformValues((f) => ({ ...f, [current.header]: "" }));
-      }
-    },
-    [current, currentAnswer]
-  );
+  const handleDecideForMe = useCallback((q: AskUserV2Question) => {
+    setFreeformValues((f) => ({ ...f, [q.header]: "" }));
+    setAnswers((a) => ({
+      ...a,
+      [q.header]: q.multiSelect ? [DECIDE_FOR_ME] : DECIDE_FOR_ME,
+    }));
+  }, []);
 
-  const handleSubmit = useCallback(() => {
-    onSubmit(answers);
-  }, [onSubmit, answers]);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const isInput = (e.target as HTMLElement).tagName === "INPUT";
-
-      if (isLast && (e.metaKey || e.ctrlKey) && e.key === "Enter") {
-        e.preventDefault();
-        handleSubmit();
-        return;
-      }
-
-      if (!isInput) {
-        if ((e.key === "ArrowLeft" || e.key === "j") && !isFirst) {
-          e.preventDefault();
-          setCurrentIndex((i) => i - 1);
-          return;
-        }
-        if ((e.key === "ArrowRight" || e.key === "k") && !isLast) {
-          e.preventDefault();
-          setCurrentIndex((i) => i + 1);
-          return;
-        }
-
-        const num = parseInt(e.key);
-        if (!isNaN(num) && num >= 1 && current?.options) {
-          const idx = num - 1;
-          if (idx < current.options.length) {
-            e.preventDefault();
-            toggleOption(current.options[idx].label);
-          }
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handler, true);
-    return () => document.removeEventListener("keydown", handler, true);
-  }, [isFirst, isLast, current, handleSubmit, toggleOption]);
-
-  if (!parsed.success || !current) return null;
-
-  const isOptionSelected = (label: string): boolean => {
-    if (current.multiSelect) {
-      return Array.isArray(currentAnswer) && currentAnswer.includes(label);
+  const isDecideForMeSelected = (q: AskUserV2Question): boolean => {
+    const ans = answers[q.header];
+    if (q.multiSelect) {
+      return Array.isArray(ans) && ans.includes(DECIDE_FOR_ME);
     }
-    return currentAnswer === label;
+    return ans === DECIDE_FOR_ME;
   };
 
-  const handleFreeformChange = (value: string) => {
-    setFreeformValues((f) => ({ ...f, [current.header]: value }));
-    if (!current.multiSelect) {
-      if (value) {
-        setAnswers((a) => ({ ...a, [current.header]: value }));
-      } else {
+  const handleFreeformChange = useCallback(
+    (q: AskUserV2Question, value: string) => {
+      setFreeformValues((f) => ({ ...f, [q.header]: value }));
+      if (q.multiSelect) {
+        if (!value) return;
         setAnswers((a) => {
-          const next = { ...a };
-          delete next[current.header];
-          return next;
+          const prev = Array.isArray(a[q.header])
+            ? (a[q.header] as string[])
+            : [];
+          if (!prev.includes(DECIDE_FOR_ME)) return a;
+          return {
+            ...a,
+            [q.header]: prev.filter((o) => o !== DECIDE_FOR_ME),
+          };
         });
+        return;
+      }
+      setAnswers((a) => {
+        const next = { ...a };
+        if (value) {
+          next[q.header] = value;
+        } else {
+          delete next[q.header];
+        }
+        return next;
+      });
+    },
+    []
+  );
+
+  const isOptionSelected = (q: AskUserV2Question, label: string): boolean => {
+    const ans = answers[q.header];
+    if (q.multiSelect) {
+      return Array.isArray(ans) && ans.includes(label);
+    }
+    return ans === label;
+  };
+
+  const handleSubmit = () => {
+    const result: Answers = { ...answers };
+    for (const q of data.questions) {
+      const freeform = freeformValues[q.header]?.trim();
+      if (!freeform) continue;
+      if (q.multiSelect) {
+        const existing = Array.isArray(result[q.header])
+          ? (result[q.header] as string[])
+          : [];
+        result[q.header] = [...existing, freeform];
       }
     }
+    onSubmit(result);
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-medium">{current.question}</p>
+    <div className="rounded-2xl border bg-card px-5 py-4">
+      <div className="flex items-start justify-between gap-2 mb-4">
+        {data.title ? (
+          <h3 className="text-lg font-semibold leading-tight">{data.title}</h3>
+        ) : (
+          <span />
+        )}
         <button
           type="button"
           onClick={() => setShowDismissDialog(true)}
           className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          aria-label="Dismiss"
         >
           <X className="size-4" />
         </button>
       </div>
 
-      {current.options && (
-        <div className="flex flex-col gap-1">
-          {current.options.map((opt, idx) => (
-            <button
-              key={opt.label}
-              type="button"
-              onClick={() => toggleOption(opt.label)}
-              className={cn(
-                "flex items-center gap-2 rounded-lg border px-4 py-2.5 text-left text-sm transition-colors cursor-pointer",
-                isOptionSelected(opt.label)
-                  ? "border-primary bg-primary/10"
-                  : "border-border hover:border-primary/50 hover:bg-accent"
-              )}
-            >
-              <span className="text-muted-foreground text-xs w-4 shrink-0">
-                {idx + 1}
-              </span>
-              <span className="flex-1">{opt.label}</span>
-              {current.multiSelect ? (
-                <Checkbox
-                  checked={isOptionSelected(opt.label)}
-                  tabIndex={-1}
-                  className="pointer-events-none shrink-0"
-                />
-              ) : (
-                isOptionSelected(opt.label) && (
-                  <span className="text-primary text-xs">✓</span>
-                )
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="space-y-6">
+        {data.questions.map((q) => {
+          const freeform = freeformValues[q.header] ?? "";
+          return (
+            <div key={q.header} className="space-y-2">
+              <div>
+                <p className="text-sm font-semibold">{q.question}</p>
+                {q.description && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {q.description}
+                  </p>
+                )}
+              </div>
 
-      {current.allowFreeformInput && (
-        <div
-          className={cn(
-            "flex -mt-2 items-center gap-2 rounded-lg border px-4 py-2.5 text-sm",
-            "border-border focus-within:border-primary/50 transition-colors"
-          )}
-        >
-          {current.options && (
-            <span className="text-muted-foreground text-xs w-4 shrink-0">
-              {(current.options?.length ?? 0) + 1}
-            </span>
-          )}
-          <input
-            type="text"
-            value={currentFreeform}
-            onChange={(e) => handleFreeformChange(e.target.value)}
-            placeholder={
-              current.options ? "Or enter custom answer…" : "Enter your answer…"
-            }
-            className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground text-sm"
-          />
-        </div>
-      )}
+              <div className="flex flex-wrap gap-2">
+                {q.options?.map((opt) => {
+                  const selected = isOptionSelected(q, opt.label);
+                  return (
+                    <button
+                      key={opt.label}
+                      type="button"
+                      onClick={() => handleToggle(q, opt.label)}
+                      className={cn(
+                        "rounded-full border px-3.5 py-1.5 text-sm transition-colors cursor-pointer",
+                        selected
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-background hover:border-primary/50 hover:bg-accent"
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  disabled={isFirst}
-                  onClick={() => setCurrentIndex((i) => i - 1)}
+                {q.allowFreeformInput && (
+                  <div
+                    className={cn(
+                      "flex items-center rounded-full border px-3.5 py-1.5 text-sm bg-background",
+                      "focus-within:border-primary/50 transition-colors"
+                    )}
+                  >
+                    <input
+                      type="text"
+                      value={freeform}
+                      onChange={(e) => handleFreeformChange(q, e.target.value)}
+                      placeholder="Other…"
+                      className="bg-transparent outline-none placeholder:text-muted-foreground text-sm w-28"
+                    />
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => handleDecideForMe(q)}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full border border-dashed px-3.5 py-1.5 text-sm transition-colors cursor-pointer",
+                    isDecideForMeSelected(q)
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-accent hover:text-foreground"
+                  )}
                 >
-                  <ChevronLeft />
-                </Button>
-              }
-            />
-            <TooltipContent>
-              Previous question <Kbd>←</Kbd> or <Kbd>J</Kbd>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  disabled={isLast}
-                  onClick={() => setCurrentIndex((i) => i + 1)}
-                >
-                  <ChevronRight />
-                </Button>
-              }
-            />
-            <TooltipContent>
-              Next question <Kbd>→</Kbd> or <Kbd>K</Kbd>
-            </TooltipContent>
-          </Tooltip>
-          <span className="text-xs text-muted-foreground ml-1">
-            {currentIndex + 1}/{total}
-          </span>
-        </div>
+                  <Sparkles className="size-3.5" />
+                  Decide for me
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-        {isLast && (
-          <Tooltip>
-            <TooltipTrigger render={<span />}>
-              <Button onClick={handleSubmit}>Submit</Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              Submit answers <Kbd>⌘ + Enter</Kbd>
-            </TooltipContent>
-          </Tooltip>
-        )}
+      <div className="flex justify-end mt-5">
+        <Button onClick={handleSubmit}>Submit</Button>
       </div>
 
       <AlertDialog open={showDismissDialog} onOpenChange={setShowDismissDialog}>
@@ -288,5 +250,36 @@ export function QuestionsBatchWidget({
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+export function AskUserV2Widget({
+  params,
+  isStreaming,
+  onSubmit,
+  onDismiss,
+}: AskUserV2WidgetProps) {
+  const parsed = AskUserV2ParamsSchema.safeParse(params);
+  if (!parsed.success) {
+    if (isStreaming) {
+      return (
+        <div className="flex justify-start">
+          <div className="flex items-center gap-2 rounded-2xl rounded-tl-sm bg-muted px-4 py-2.5 text-sm">
+            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+            <span className="text-muted-foreground text-xs">
+              Preparing questions…
+            </span>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  }
+  return (
+    <AskUserV2Form
+      data={parsed.data}
+      onSubmit={onSubmit}
+      onDismiss={onDismiss}
+    />
   );
 }
