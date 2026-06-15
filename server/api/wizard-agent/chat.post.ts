@@ -4,7 +4,7 @@ import { memoryTool } from "@/modules/agent/tools/memory";
 import {
   getPresentToolForContentType,
   type PresentContentType,
-} from "@/modules/agent/tools/present/registry";
+} from "@/modules/wizard-agent/tools/present/registry";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
 
 const VALID_CONTENT_TYPES: PresentContentType[] = [

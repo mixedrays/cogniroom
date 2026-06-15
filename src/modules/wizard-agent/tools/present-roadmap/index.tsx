@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ContentBubble } from "@/modules/agent/components/ContentBubble";
-import { RoadmapOutputSchema } from "@/modules/agent/lib/contentOutputSchemas";
+import { ContentBubble } from "@/modules/wizard-agent/components/ContentBubble";
+import { RoadmapOutputSchema } from "@/modules/wizard-agent/lib/contentOutputSchemas";
 import type { AgentTool } from "@/modules/agent/types";
 
 export const PresentRoadmapParamsSchema = z.object({
@@ -38,5 +38,7 @@ export const presentRoadmapTool: AgentTool = {
   client: {
     name: "presentRoadmap",
     Widget: RoadmapBubble,
+    hideWhenSubmitted: true,
+    supersedable: true,
   },
 };

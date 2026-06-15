@@ -8,7 +8,7 @@ import { generateUniqueDeckId } from "@modules/core";
 import {
   FlashcardsContentOutputSchema,
   QuizContentOutputSchema,
-} from "@/modules/agent/lib/contentOutputSchemas";
+} from "@/modules/wizard-agent/lib/contentOutputSchemas";
 import { toErrorMessage } from "@root/server/lib/errors";
 import type {
   Deck,

@@ -4,7 +4,6 @@ import { ErrorMessage } from "@/components/ErrorMessage/ErrorMessage";
 import type { AgentMessageState, AgentTool } from "../types";
 import { AskUserParamsSchema } from "../tools/ask-user/schema";
 import { AskUserV2ParamsSchema } from "../tools/ask-user-v2/schema";
-import { PRESENT_TOOL_NAMES } from "../tools/present/registry";
 
 interface AgentMessageProps {
   message: AgentMessageState;
@@ -65,6 +64,8 @@ export function AgentMessage({
   }
 
   if (message.role === "tool_call") {
+    const tool = tools.find((t) => t.client?.name === message.toolName);
+
     if (message.status === "dismissed")
       return (
         <div className="flex justify-end">
@@ -128,10 +129,7 @@ export function AgentMessage({
       }
     }
 
-    if (
-      message.status === "submitted" &&
-      PRESENT_TOOL_NAMES.has(message.toolName)
-    ) {
+    if (message.status === "submitted" && tool?.client?.hideWhenSubmitted) {
       return null;
     }
 
@@ -148,7 +146,6 @@ export function AgentMessage({
       );
     }
 
-    const tool = tools.find((t) => t.client?.name === message.toolName);
     if (!tool?.client) return null;
 
     if (tool.client.renderAbovePrompt) return null;
@@ -157,7 +154,7 @@ export function AgentMessage({
 
     const messageIndex = messages.indexOf(message);
     const isSuperseded =
-      PRESENT_TOOL_NAMES.has(message.toolName) &&
+      Boolean(tool.client.supersedable) &&
       message.status === "pending" &&
       messages.some(
         (m, i) =>

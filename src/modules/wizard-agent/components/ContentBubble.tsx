@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { parsePartialJson } from "../lib/parsePartialJson";
+import { parsePartialJson } from "@/modules/agent/lib/parsePartialJson";
 import type {
   Course,
   FlashcardsContent,

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ContentBubble } from "@/modules/agent/components/ContentBubble";
-import { QuizContentOutputSchema } from "@/modules/agent/lib/contentOutputSchemas";
+import { ContentBubble } from "@/modules/wizard-agent/components/ContentBubble";
+import { QuizContentOutputSchema } from "@/modules/wizard-agent/lib/contentOutputSchemas";
 import type { AgentTool } from "@/modules/agent/types";
 
 export const PresentLessonQuizParamsSchema = z.object({
@@ -40,5 +40,7 @@ export const presentLessonQuizTool: AgentTool = {
   client: {
     name: "presentLessonQuiz",
     Widget: QuizBubble,
+    hideWhenSubmitted: true,
+    supersedable: true,
   },
 };

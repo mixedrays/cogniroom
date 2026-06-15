@@ -2,7 +2,7 @@ import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { storagePaths } from "@root/server/lib/storagePaths";
-import { QuizContentOutputSchema } from "@/modules/agent/lib/contentOutputSchemas";
+import { QuizContentOutputSchema } from "@/modules/wizard-agent/lib/contentOutputSchemas";
 
 export default defineEventHandler(async (event) => {
   const courseId = getRouterParam(event, "id");

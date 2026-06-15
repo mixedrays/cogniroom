@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { WizardAgentInline } from "@/modules/wizard-agent";
 import type { WizardAgentContext } from "@/modules/wizard-agent";
-import type { ContentSaveOverride } from "@/modules/agent/components/ContentSaveContext";
+import type { ContentSaveOverride } from "@/modules/wizard-agent/components/ContentSaveContext";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import CreateCourseModal from "@/components/CreateCourseModal";

@@ -52,7 +52,7 @@ import type { Course, Deck } from "@modules/core";
 import {
   FlashcardsContentOutputSchema,
   QuizContentOutputSchema,
-} from "@/modules/agent/lib/contentOutputSchemas";
+} from "@/modules/wizard-agent/lib/contentOutputSchemas";
 
 // Self-contained content-root resolution (mirrors server/env.ts) so the bundled
 // validator carries no app-env coupling. Reads DATA_PATH from .env / process.env,

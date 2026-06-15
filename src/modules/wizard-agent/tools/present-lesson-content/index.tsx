@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ContentBubble } from "@/modules/agent/components/ContentBubble";
+import { ContentBubble } from "@/modules/wizard-agent/components/ContentBubble";
 import type { AgentTool } from "@/modules/agent/types";
 
 export const PresentLessonContentParamsSchema = z.object({
@@ -44,5 +44,7 @@ export const presentLessonContentTool: AgentTool = {
   client: {
     name: "presentLessonContent",
     Widget: LessonBubble,
+    hideWhenSubmitted: true,
+    supersedable: true,
   },
 };

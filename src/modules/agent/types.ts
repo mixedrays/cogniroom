@@ -20,6 +20,11 @@ export interface AgentTool<TParams extends ZodType = ZodType> {
       superseded?: boolean;
     }>;
     renderAbovePrompt?: boolean;
+    // Render nothing once the user has acted on this tool call (the Widget owns
+    // its own persisted UI, so the generic result bubble would be redundant).
+    hideWhenSubmitted?: boolean;
+    // A newer pending call of the same tool supersedes earlier pending ones.
+    supersedable?: boolean;
   };
 }
 

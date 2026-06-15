@@ -15308,7 +15308,7 @@ function mdToCourse(text) {
   };
 }
 
-// src/modules/agent/lib/contentOutputSchemas.ts
+// src/modules/wizard-agent/lib/contentOutputSchemas.ts
 var difficulty = external_exports.enum(["easy", "medium", "hard"]);
 var LessonOutputSchema = external_exports.object({
   title: external_exports.string().min(1).describe("Concrete, action-oriented lesson title."),

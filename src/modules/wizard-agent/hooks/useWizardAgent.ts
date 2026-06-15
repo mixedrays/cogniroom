@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useChatBackend } from "@/modules/agent/hooks/useChatBackend";
 import { askUserV2Tool } from "@/modules/agent/tools/ask-user-v2";
 import { memoryTool } from "@/modules/agent/tools/memory";
-import { getPresentToolForContentType } from "@/modules/agent/tools/present/registry";
+import { getPresentToolForContentType } from "../tools/present/registry";
 import type { AgentMessageState, AgentSseEvent } from "@/modules/agent/types";
 import {
   messagesReducer,

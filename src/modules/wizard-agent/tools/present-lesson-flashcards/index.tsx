@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ContentBubble } from "@/modules/agent/components/ContentBubble";
-import { FlashcardsContentOutputSchema } from "@/modules/agent/lib/contentOutputSchemas";
+import { ContentBubble } from "@/modules/wizard-agent/components/ContentBubble";
+import { FlashcardsContentOutputSchema } from "@/modules/wizard-agent/lib/contentOutputSchemas";
 import type { AgentTool } from "@/modules/agent/types";
 
 export const PresentLessonFlashcardsParamsSchema = z.object({
@@ -40,5 +40,7 @@ export const presentLessonFlashcardsTool: AgentTool = {
   client: {
     name: "presentLessonFlashcards",
     Widget: FlashcardsBubble,
+    hideWhenSubmitted: true,
+    supersedable: true,
   },
 };

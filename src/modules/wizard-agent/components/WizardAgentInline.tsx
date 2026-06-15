@@ -4,7 +4,7 @@ import { AgentChat } from "@/modules/agent/components/AgentChat";
 import {
   ContentSaveProvider,
   type ContentSaveOverride,
-} from "@/modules/agent/components/ContentSaveContext";
+} from "./ContentSaveContext";
 import { useWizardAgent } from "../hooks/useWizardAgent";
 import type { WizardAgentContext } from "./WizardAgentDialog";
 import type { SessionMeta } from "../types";
