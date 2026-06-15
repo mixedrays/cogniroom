@@ -6,8 +6,7 @@ import {
   type ContentSaveOverride,
 } from "./ContentSaveContext";
 import { useWizardAgent } from "../hooks/useWizardAgent";
-import type { WizardAgentContext } from "./WizardAgentDialog";
-import type { SessionMeta } from "../types";
+import type { WizardAgentContext, SessionMeta } from "../types";
 
 interface InlineRenderState {
   hasMessages: boolean;

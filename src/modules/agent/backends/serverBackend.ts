@@ -1,5 +1,5 @@
 import type { AgentSseEvent, ChatBackend } from "../types";
-import { serializeMessages } from "../hooks/useAgent";
+import { serializeMessages } from "../lib/messagesReducer";
 
 export function createServerBackend(endpoint: string): ChatBackend {
   return async ({ messages, model, context, signal, onEvent }) => {

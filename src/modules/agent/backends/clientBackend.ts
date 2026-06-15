@@ -1,7 +1,7 @@
 import { APICallError } from "ai";
 import type { AgentTool, ChatBackend } from "../types";
 import { runAgentStream } from "../lib/runAgentStream";
-import { serializeMessages } from "../hooks/useAgent";
+import { serializeMessages } from "../lib/messagesReducer";
 import { getBrowserLanguageModel } from "@/lib/llm-models/browserClient";
 import { getProviderLocalStorageKeyName } from "@/lib/llm-models";
 

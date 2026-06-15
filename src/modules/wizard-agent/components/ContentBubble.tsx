@@ -28,6 +28,7 @@ import {
   saveLessonExercises,
 } from "@/lib/courses";
 import { useContentSaveOverride } from "./ContentSaveContext";
+import type { WizardToolContext } from "../types";
 
 export type ContentBubbleType =
   | "roadmap"
@@ -43,10 +44,7 @@ interface ContentBubbleProps {
   isStreaming?: boolean;
   onSubmit: (result: unknown) => void;
   onDismiss: () => void;
-  context?: {
-    courseId?: string;
-    lessonId?: string;
-  };
+  context?: WizardToolContext;
   superseded?: boolean;
 }
 

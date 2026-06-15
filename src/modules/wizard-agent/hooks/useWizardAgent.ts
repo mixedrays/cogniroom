@@ -13,7 +13,7 @@ import {
   type MessagesState,
 } from "@/modules/agent/lib/messagesReducer";
 import { streamAssistantTurn } from "@/modules/agent/lib/streamAssistantTurn";
-import type { WizardAgentContext } from "../components/WizardAgentDialog";
+import type { WizardAgentContext } from "../types";
 import type { SessionMeta } from "../types";
 
 function scopeQuery(context: WizardAgentContext): string {

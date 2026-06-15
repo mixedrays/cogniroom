@@ -3,11 +3,8 @@ import type { AgentMessageState, ChatBackend } from "../types";
 import {
   messagesReducer,
   initialMessagesState,
-  serializeMessages,
 } from "../lib/messagesReducer";
 import { streamAssistantTurn } from "../lib/streamAssistantTurn";
-
-export { serializeMessages };
 
 export interface UseAgentReturn {
   messages: AgentMessageState[];

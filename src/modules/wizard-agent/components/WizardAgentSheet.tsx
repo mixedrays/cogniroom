@@ -12,7 +12,7 @@ import { PromptTextarea } from "@/components/PromptTextarea";
 import { AgentChat } from "@/modules/agent/components/AgentChat";
 import { cn } from "@/lib/utils";
 import { useWizardAgent } from "../hooks/useWizardAgent";
-import type { WizardAgentContext } from "./WizardAgentDialog";
+import type { WizardAgentContext } from "../types";
 import { SessionHistoryPanel } from "./SessionHistoryPanel";
 import type { WizardAgentAttachment } from "../types";
 

@@ -9,15 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PromptTextarea } from "@/components/PromptTextarea";
 import { AgentChat } from "@/modules/agent/components/AgentChat";
 import { useWizardAgent } from "../hooks/useWizardAgent";
-
-export interface WizardAgentContext {
-  contentType: "roadmap" | "lesson" | "quiz" | "flashcards" | "exercise";
-  courseId?: string;
-  lessonId?: string;
-  topic?: string;
-  lessonTitle?: string;
-  courseTitle?: string;
-}
+import type { WizardAgentContext } from "../types";
 
 interface WizardAgentDialogProps {
   open: boolean;

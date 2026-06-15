@@ -1,4 +1,19 @@
-import type { WizardAgentContext } from "./components/WizardAgentDialog";
+export interface WizardAgentContext {
+  contentType: "roadmap" | "lesson" | "quiz" | "flashcards" | "exercise";
+  courseId?: string;
+  lessonId?: string;
+  topic?: string;
+  lessonTitle?: string;
+  courseTitle?: string;
+}
+
+// The subset of context the content-preview tools (ContentBubble) need to save
+// generated content against. Threaded through the generic agent layer as an
+// opaque map, then narrowed back to this on the wizard side.
+export interface WizardToolContext {
+  courseId?: string;
+  lessonId?: string;
+}
 
 export interface WizardAgentAttachment {
   id: string;
