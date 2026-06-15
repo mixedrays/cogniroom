@@ -1,12 +1,12 @@
-import { AskUserV2ParamsSchema } from "./schema";
+import { AskUserParamsSchema } from "./schema";
 
 interface SubmittedViewProps {
   params: unknown;
   result: unknown;
 }
 
-export function AskUserV2SubmittedView({ params, result }: SubmittedViewProps) {
-  const parsed = AskUserV2ParamsSchema.safeParse(params);
+export function AskUserSubmittedView({ params, result }: SubmittedViewProps) {
+  const parsed = AskUserParamsSchema.safeParse(params);
   if (!parsed.success) return null;
 
   const answers = (result ?? {}) as Record<string, string | string[]>;

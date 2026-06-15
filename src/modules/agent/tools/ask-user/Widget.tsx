@@ -13,23 +13,23 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  AskUserV2ParamsSchema,
-  type AskUserV2Params,
-  type AskUserV2Question,
+  AskUserParamsSchema,
+  type AskUserParams,
+  type AskUserQuestion,
 } from "./schema";
 
 type Answers = Record<string, string | string[]>;
 
 const DECIDE_FOR_ME = "Decide for me";
 
-interface AskUserV2WidgetProps {
+interface AskUserWidgetProps {
   params: unknown;
   isStreaming?: boolean;
   onSubmit: (result: unknown) => void;
   onDismiss: () => void;
 }
 
-function computeInitialAnswers(questions: AskUserV2Question[]): Answers {
+function computeInitialAnswers(questions: AskUserQuestion[]): Answers {
   const initial: Answers = {};
   for (const q of questions) {
     const recommended =
@@ -41,13 +41,13 @@ function computeInitialAnswers(questions: AskUserV2Question[]): Answers {
   return initial;
 }
 
-interface AskUserV2FormProps {
-  data: AskUserV2Params;
+interface AskUserFormProps {
+  data: AskUserParams;
   onSubmit: (result: unknown) => void;
   onDismiss: () => void;
 }
 
-function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
+function AskUserForm({ data, onSubmit, onDismiss }: AskUserFormProps) {
   const [answers, setAnswers] = useState<Answers>(() =>
     computeInitialAnswers(data.questions)
   );
@@ -56,7 +56,7 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
   );
   const [showDismissDialog, setShowDismissDialog] = useState(false);
 
-  const handleToggle = useCallback((q: AskUserV2Question, label: string) => {
+  const handleToggle = useCallback((q: AskUserQuestion, label: string) => {
     if (q.multiSelect) {
       setAnswers((a) => {
         const prev = Array.isArray(a[q.header])
@@ -74,7 +74,7 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
     }
   }, []);
 
-  const handleDecideForMe = useCallback((q: AskUserV2Question) => {
+  const handleDecideForMe = useCallback((q: AskUserQuestion) => {
     setFreeformValues((f) => ({ ...f, [q.header]: "" }));
     setAnswers((a) => ({
       ...a,
@@ -82,7 +82,7 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
     }));
   }, []);
 
-  const isDecideForMeSelected = (q: AskUserV2Question): boolean => {
+  const isDecideForMeSelected = (q: AskUserQuestion): boolean => {
     const ans = answers[q.header];
     if (q.multiSelect) {
       return Array.isArray(ans) && ans.includes(DECIDE_FOR_ME);
@@ -91,7 +91,7 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
   };
 
   const handleFreeformChange = useCallback(
-    (q: AskUserV2Question, value: string) => {
+    (q: AskUserQuestion, value: string) => {
       setFreeformValues((f) => ({ ...f, [q.header]: value }));
       if (q.multiSelect) {
         if (!value) return;
@@ -120,7 +120,7 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
     []
   );
 
-  const isOptionSelected = (q: AskUserV2Question, label: string): boolean => {
+  const isOptionSelected = (q: AskUserQuestion, label: string): boolean => {
     const ans = answers[q.header];
     if (q.multiSelect) {
       return Array.isArray(ans) && ans.includes(label);
@@ -253,13 +253,13 @@ function AskUserV2Form({ data, onSubmit, onDismiss }: AskUserV2FormProps) {
   );
 }
 
-export function AskUserV2Widget({
+export function AskUserWidget({
   params,
   isStreaming,
   onSubmit,
   onDismiss,
-}: AskUserV2WidgetProps) {
-  const parsed = AskUserV2ParamsSchema.safeParse(params);
+}: AskUserWidgetProps) {
+  const parsed = AskUserParamsSchema.safeParse(params);
   if (!parsed.success) {
     if (isStreaming) {
       return (
@@ -276,7 +276,7 @@ export function AskUserV2Widget({
     return null;
   }
   return (
-    <AskUserV2Form
+    <AskUserForm
       data={parsed.data}
       onSubmit={onSubmit}
       onDismiss={onDismiss}

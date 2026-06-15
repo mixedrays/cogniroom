@@ -16,13 +16,13 @@ describe("sseEventToMessagesAction", () => {
       sseEventToMessagesAction(ASSISTANT_ID, {
         type: "tool_call_start",
         toolCallId: "t1",
-        toolName: "askUserV2",
+        toolName: "askUser",
       })
     ).toEqual({
       type: "START_TOOL_CALL_STREAM",
       assistantId: ASSISTANT_ID,
       toolCallId: "t1",
-      toolName: "askUserV2",
+      toolName: "askUser",
     });
 
     expect(
@@ -37,14 +37,14 @@ describe("sseEventToMessagesAction", () => {
       sseEventToMessagesAction(ASSISTANT_ID, {
         type: "tool_call",
         toolCallId: "t1",
-        toolName: "askUserV2",
+        toolName: "askUser",
         params: { a: 1 },
       })
     ).toEqual({
       type: "ADD_TOOL_CALL",
       assistantId: ASSISTANT_ID,
       toolCallId: "t1",
-      toolName: "askUserV2",
+      toolName: "askUser",
       params: { a: 1 },
     });
   });

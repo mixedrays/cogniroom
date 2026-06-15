@@ -1,11 +1,11 @@
 import type { AgentTool } from "../../types";
-import { AskUserV2ParamsSchema } from "./schema";
-import { AskUserV2Widget } from "./Widget";
-import { AskUserV2SubmittedView } from "./SubmittedView";
+import { AskUserParamsSchema } from "./schema";
+import { AskUserWidget } from "./Widget";
+import { AskUserSubmittedView } from "./SubmittedView";
 
-export const askUserV2Tool: AgentTool<typeof AskUserV2ParamsSchema> = {
+export const askUserTool: AgentTool<typeof AskUserParamsSchema> = {
   server: {
-    name: "askUserV2",
+    name: "askUser",
     description: `
       Ask the user a batch of clarifying questions rendered inline in the chat as a single card.
       Send 2–8 questions in a single call. All questions appear together on screen so the user can
@@ -24,13 +24,13 @@ export const askUserV2Tool: AgentTool<typeof AskUserV2ParamsSchema> = {
       (or contains it in a multiSelect array), the user is deferring that choice: pick a
       sensible default yourself based on the surrounding context.
     `,
-    parameters: AskUserV2ParamsSchema,
+    parameters: AskUserParamsSchema,
   },
   client: {
-    name: "askUserV2",
-    Widget: AskUserV2Widget,
-    SubmittedWidget: AskUserV2SubmittedView,
+    name: "askUser",
+    Widget: AskUserWidget,
+    SubmittedWidget: AskUserSubmittedView,
   },
 };
 
-export type { AskUserV2Params, AskUserV2Question } from "./schema";
+export type { AskUserParams, AskUserQuestion } from "./schema";

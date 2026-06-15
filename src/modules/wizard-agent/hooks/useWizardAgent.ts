@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useChatBackend } from "@/modules/agent/hooks/useChatBackend";
-import { askUserV2Tool } from "@/modules/agent/tools/ask-user-v2";
+import { askUserTool } from "@/modules/agent/tools/ask-user";
 import { memoryTool } from "@/modules/agent/tools/memory";
 import { getPresentToolForContentType } from "../tools/present/registry";
 import type { AgentMessageState } from "@/modules/agent/types";
@@ -204,7 +204,7 @@ export function useWizardAgent({
 
   const tools = useMemo(
     () => [
-      askUserV2Tool,
+      askUserTool,
       memoryTool,
       getPresentToolForContentType(context.contentType),
     ],
