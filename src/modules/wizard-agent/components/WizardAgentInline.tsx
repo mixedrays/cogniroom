@@ -6,6 +6,7 @@ import {
   type ContentSaveOverride,
 } from "./ContentSaveContext";
 import { useWizardAgent } from "../hooks/useWizardAgent";
+import { useWizardSources } from "../hooks/useWizardSources";
 import type { WizardAgentContext, SessionMeta } from "../types";
 
 interface InlineRenderState {
@@ -53,9 +54,15 @@ export function WizardAgentInline({
   saveOverride,
   children,
 }: WizardAgentInlineProps) {
+  const sources = useWizardSources({
+    courseId: context.courseId,
+    lessonId: context.lessonId,
+  });
+
   const agent = useWizardAgent({
     context,
     contextPrompt,
+    sourceIds: sources.readySourceIds,
     initialSessionId,
     startNewSession,
     onSessionPersisted,
@@ -74,6 +81,12 @@ export function WizardAgentInline({
         placeholder={placeholder}
         autoFocus={!agent.hasMessages}
         textareaId={promptTextareaId}
+        attachments={sources.selectedChips}
+        availableAttachments={sources.availableChips}
+        onAttachmentAdd={sources.addSource}
+        onAttachmentRemove={sources.removeSource}
+        onFilesSelected={sources.onFilesSelected}
+        isUploading={sources.isUploading}
       />
 
       {promptExtra && (

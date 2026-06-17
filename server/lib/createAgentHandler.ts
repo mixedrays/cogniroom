@@ -1,9 +1,15 @@
 import { defineEventHandler, readBody, createEventStream } from "h3";
 import type { ModelMessage } from "ai";
-import { getDefaultModel, getLanguageModel, resolveModelId } from "./llm";
+import {
+  DEFAULT_MODEL,
+  getDefaultModel,
+  getLanguageModel,
+  resolveModelId,
+} from "./llm";
 import type { AgentTool } from "@/modules/agent/types";
 import { runAgentStream } from "@/modules/agent/lib/runAgentStream";
 import { getMemoryContext } from "./memoryService";
+import { hydrateSources } from "./sources/hydrate";
 
 export function createAgentHandler(config: {
   tools: AgentTool[] | ((context: Record<string, unknown>) => AgentTool[]);
@@ -31,15 +37,21 @@ export function createAgentHandler(config: {
 
     const eventStream = createEventStream(event);
 
+    const modelId = body.model ? resolveModelId(body.model) : DEFAULT_MODEL;
+    const sourceIds = Array.isArray(context.sourceIds)
+      ? (context.sourceIds as string[])
+      : undefined;
+
     void (async () => {
       try {
         const model = body.model
-          ? getLanguageModel(resolveModelId(body.model))
+          ? getLanguageModel(modelId)
           : getDefaultModel();
+        const messages = await hydrateSources(body.messages, sourceIds, modelId);
         await runAgentStream({
           model,
           system,
-          messages: body.messages,
+          messages,
           tools,
           onEvent: (e) => eventStream.push(JSON.stringify(e)),
         });

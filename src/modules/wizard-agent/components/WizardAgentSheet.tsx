@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bot, History, Plus, XIcon } from "lucide-react";
 import {
   Sheet,
@@ -12,6 +12,7 @@ import { PromptTextarea } from "@/components/PromptTextarea";
 import { AgentChat } from "@/modules/agent/components/AgentChat";
 import { cn } from "@/lib/utils";
 import { useWizardAgent } from "../hooks/useWizardAgent";
+import { useWizardSources } from "../hooks/useWizardSources";
 import type { WizardAgentContext } from "../types";
 import { SessionHistoryPanel } from "./SessionHistoryPanel";
 import type { WizardAgentAttachment } from "../types";
@@ -105,18 +106,46 @@ export function WizardAgentSheet({
     [selectedAttachments, contextPrompt]
   );
 
+  // User-uploaded file sources (hydrated server-side via `sourceIds`), separate
+  // from the text-only internal attachments above which go via `contextPrompt`.
+  const sources = useWizardSources({
+    courseId: context.courseId,
+    lessonId: context.lessonId,
+    enabled: open,
+  });
+
   const agent = useWizardAgent({
     context,
     contextPrompt: mergedContextPrompt,
+    sourceIds: sources.readySourceIds,
     active: open,
   });
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const promptAttachments = selectedAttachments.map((a) => ({
-    id: a.id,
-    label: a.label,
-  }));
-  const promptAvailable = available.map((a) => ({ id: a.id, label: a.label }));
+  const promptAttachments = [
+    ...selectedAttachments.map((a) => ({ id: a.id, label: a.label })),
+    ...sources.selectedChips,
+  ];
+  const promptAvailable = [
+    ...available.map((a) => ({ id: a.id, label: a.label })),
+    ...sources.availableChips,
+  ];
+
+  const handleAttachmentAdd = useCallback(
+    (id: string) => {
+      if (sources.isSource(id)) sources.addSource(id);
+      else setSelectedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    },
+    [sources]
+  );
+
+  const handleAttachmentRemove = useCallback(
+    (id: string) => {
+      if (sources.isSource(id)) sources.removeSource(id);
+      else setSelectedIds((prev) => prev.filter((x) => x !== id));
+    },
+    [sources]
+  );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -199,14 +228,10 @@ export function WizardAgentSheet({
                   placeholder="Type a message…"
                   attachments={promptAttachments}
                   availableAttachments={promptAvailable}
-                  onAttachmentRemove={(id) =>
-                    setSelectedIds((prev) => prev.filter((x) => x !== id))
-                  }
-                  onAttachmentAdd={(id) =>
-                    setSelectedIds((prev) =>
-                      prev.includes(id) ? prev : [...prev, id]
-                    )
-                  }
+                  onAttachmentRemove={handleAttachmentRemove}
+                  onAttachmentAdd={handleAttachmentAdd}
+                  onFilesSelected={sources.onFilesSelected}
+                  isUploading={sources.isUploading}
                 />
               }
             />

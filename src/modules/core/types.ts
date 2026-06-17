@@ -160,3 +160,72 @@ export interface DeckMetadata {
   source: DeckSource;
   itemCount: number;
 }
+
+/**
+ * External material a user attaches so the wizard agent can extract and consider
+ * it during content generation (see .features/chat-attachments.md). Files
+ * (image/pdf/document/text) are supported now; links (webpage/youtube) are
+ * modeled here but processed in a later phase.
+ */
+export type SourceKind =
+  | "image"
+  | "pdf"
+  | "document"
+  | "text"
+  | "webpage"
+  | "youtube";
+
+export type SourceStatus = "processing" | "ready" | "error";
+
+/** How the source reaches the model: native multimodal part or extracted text. */
+export type SourceDelivery = "native" | "text";
+
+/** A course/lesson a source is attached to (many-to-many; drives the picker view). */
+export interface SourceScope {
+  courseId?: string;
+  lessonId?: string;
+}
+
+export interface SourceMeta {
+  title?: string;
+  author?: string;
+  durationSec?: number;
+  pageCount?: number;
+  width?: number;
+  height?: number;
+}
+
+export interface Source {
+  /** sha256 of the blob content — also the dedup key. */
+  id: string;
+  kind: SourceKind;
+  origin: "upload" | "link";
+  delivery: SourceDelivery;
+  /** Display name: filename, page title, or "Notes". */
+  label: string;
+  /** Original filename or URL. */
+  source: string;
+  mimeType?: string;
+  byteSize?: number;
+  /** Link sources (phase 2). */
+  url?: string;
+  status: SourceStatus;
+  error?: string;
+  /**
+   * Extracted text form for `delivery: "text"` sources (documents now; web/yt
+   * later; pdf fallback). Persisted separately on disk, not embedded in
+   * listings — populated only when a source is loaded for use.
+   */
+  extractedText?: string;
+  /** ~chars / 4, so size is known without loading the text. */
+  extractedTokens?: number;
+  meta?: SourceMeta;
+  /** Course/lesson associations this source is attached to. */
+  scopes: SourceScope[];
+  refCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Lightweight derivation for chips and message attachment refs. */
+export type SourceRef = Pick<Source, "id" | "kind" | "label" | "status">;

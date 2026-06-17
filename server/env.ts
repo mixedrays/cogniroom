@@ -68,3 +68,10 @@ export const SETTINGS_HISTORY_FILE = join(SETTINGS_DIR, "history.json");
 export const HISTORY_DIR = join(DATA_PATH, "history");
 
 export const MEMORY_DIR = join(DATA_PATH, "memory");
+
+/** Attached source material (uploads/links) for the wizard agent. */
+export const SOURCES_DIR = join(DATA_PATH, "sources");
+
+export function getSourceDir(sourceId: string): string {
+  return join(SOURCES_DIR, sourceId);
+}

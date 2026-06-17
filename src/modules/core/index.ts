@@ -20,6 +20,13 @@ export type {
   DeckSource,
   Deck,
   DeckMetadata,
+  SourceKind,
+  SourceStatus,
+  SourceDelivery,
+  SourceScope,
+  SourceMeta,
+  Source,
+  SourceRef,
 } from "./types";
 
 export * from "./utils";

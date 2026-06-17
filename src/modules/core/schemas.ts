@@ -94,6 +94,50 @@ export const reviewDataSchema = z.object({
   entries: z.array(reviewEntrySchema),
 });
 
+export const sourceKindSchema = z.enum([
+  "image",
+  "pdf",
+  "document",
+  "text",
+  "webpage",
+  "youtube",
+]);
+
+export const sourceScopeSchema = z.object({
+  courseId: z.string().optional(),
+  lessonId: z.string().optional(),
+});
+
+export const sourceMetaSchema = z.object({
+  title: z.string().optional(),
+  author: z.string().optional(),
+  durationSec: z.number().optional(),
+  pageCount: z.number().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+});
+
+export const sourceSchema = z.object({
+  id: z.string(),
+  kind: sourceKindSchema,
+  origin: z.enum(["upload", "link"]),
+  delivery: z.enum(["native", "text"]),
+  label: z.string(),
+  source: z.string(),
+  mimeType: z.string().optional(),
+  byteSize: z.number().optional(),
+  url: z.string().optional(),
+  status: z.enum(["processing", "ready", "error"]),
+  error: z.string().optional(),
+  extractedText: z.string().optional(),
+  extractedTokens: z.number().optional(),
+  meta: sourceMetaSchema.optional(),
+  scopes: z.array(sourceScopeSchema),
+  refCount: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
 export type CourseCreateInput = z.infer<typeof courseCreateSchema>;
 export type LessonCompletionUpdate = z.infer<
   typeof lessonCompletionUpdateSchema

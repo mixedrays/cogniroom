@@ -1,5 +1,13 @@
-import { useState } from "react";
-import { ArrowUp, Loader2, Plus, Square, X } from "lucide-react";
+import { useRef, useState } from "react";
+import {
+  AlertCircle,
+  ArrowUp,
+  Loader2,
+  Paperclip,
+  Plus,
+  Square,
+  X,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +26,12 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 export type PromptAttachmentOption = {
   id: string;
   label: string;
+  status?: "processing" | "ready" | "error";
 };
+
+/** File types the attach (paperclip) button accepts in phase 1. */
+const DEFAULT_ACCEPT =
+  "image/*,application/pdf,.pdf,.docx,.doc,.txt,.md,.markdown";
 
 type PromptTextareaProps = {
   value: string;
@@ -33,6 +46,10 @@ type PromptTextareaProps = {
   availableAttachments?: PromptAttachmentOption[];
   onAttachmentRemove?: (id: string) => void;
   onAttachmentAdd?: (id: string) => void;
+  /** Upload handler for the attach (paperclip) button. */
+  onFilesSelected?: (files: File[]) => void;
+  isUploading?: boolean;
+  acceptFileTypes?: string;
   textareaId?: string;
 };
 
@@ -49,13 +66,22 @@ export function PromptTextarea({
   availableAttachments,
   onAttachmentRemove,
   onAttachmentAdd,
+  onFilesSelected,
+  isUploading = false,
+  acceptFileTypes = DEFAULT_ACCEPT,
   textareaId,
 }: PromptTextareaProps) {
   const { settings } = useSettings();
   const online = useOnlineStatus();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedModel, setSelectedModel] = useState(() =>
     getValidModel(settings.llm.defaultModel)
   );
+
+  const handleFiles = (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    onFilesSelected?.(Array.from(fileList));
+  };
 
   const handleSubmit = () => {
     const text = value.trim();
@@ -92,9 +118,18 @@ export function PromptTextarea({
           {activeAttachments.map((a) => (
             <Tooltip
               key={a.id}
-              content={`${a.label} is attached as context for the AI. Click × to remove.`}
+              content={
+                a.status === "error"
+                  ? `${a.label} couldn't be processed.`
+                  : a.status === "processing"
+                    ? `${a.label} is being processed…`
+                    : `${a.label} is attached as context for the AI. Click × to remove.`
+              }
             >
-              <Badge variant="outline" className="pl-0!">
+              <Badge
+                variant="outline"
+                className={cn("pl-0!", a.status === "error" && "border-destructive text-destructive")}
+              >
                 {onAttachmentRemove ? (
                   <button
                     type="button"
@@ -106,6 +141,10 @@ export function PromptTextarea({
                     <X className="size-3" />
                   </button>
                 ) : null}
+                {a.status === "processing" && (
+                  <Loader2 className="size-3 animate-spin" />
+                )}
+                {a.status === "error" && <AlertCircle className="size-3" />}
                 <span className="truncate max-w-50">{a.label}</span>
               </Badge>
             </Tooltip>
@@ -124,6 +163,37 @@ export function PromptTextarea({
         autoFocus={autoFocus}
       />
       <div className="flex items-center gap-1 px-2 pb-2">
+        {onFilesSelected && (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept={acceptFileTypes}
+              className="hidden"
+              onChange={(e) => {
+                handleFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <Tooltip content="Attach files (PDF, images, documents)">
+              <Button
+                size="icon"
+                variant="ghost"
+                disabled={isInputDisabled || isUploading}
+                aria-label="Attach files"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {isUploading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <Paperclip />
+                )}
+              </Button>
+            </Tooltip>
+          </>
+        )}
+
         {showAddButton && (
           <DropdownMenu>
             <DropdownMenuTrigger

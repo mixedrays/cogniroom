@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PromptTextarea } from "@/components/PromptTextarea";
 import { AgentChat } from "@/modules/agent/components/AgentChat";
 import { useWizardAgent } from "../hooks/useWizardAgent";
+import { useWizardSources } from "../hooks/useWizardSources";
 import type { WizardAgentContext } from "../types";
 
 interface WizardAgentDialogProps {
@@ -35,7 +36,17 @@ export function WizardAgentDialog({
   context,
   contextPrompt,
 }: WizardAgentDialogProps) {
-  const agent = useWizardAgent({ context, contextPrompt, active: open });
+  const sources = useWizardSources({
+    courseId: context.courseId,
+    lessonId: context.lessonId,
+    enabled: open,
+  });
+  const agent = useWizardAgent({
+    context,
+    contextPrompt,
+    sourceIds: sources.readySourceIds,
+    active: open,
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -76,6 +87,12 @@ export function WizardAgentDialog({
               isStreaming={agent.isStreaming}
               onStop={agent.stopStreaming}
               placeholder="Type a message…"
+              attachments={sources.selectedChips}
+              availableAttachments={sources.availableChips}
+              onAttachmentAdd={sources.addSource}
+              onAttachmentRemove={sources.removeSource}
+              onFilesSelected={sources.onFilesSelected}
+              isUploading={sources.isUploading}
             />
           }
         />

@@ -140,6 +140,8 @@ function generateSessionId(): string {
 interface UseWizardAgentOptions {
   context: WizardAgentContext;
   contextPrompt?: string;
+  /** Attached source ids hydrated server-side onto the outgoing user turn. */
+  sourceIds?: string[];
   active?: boolean;
   initialSessionId?: string;
   startNewSession?: boolean;
@@ -149,6 +151,7 @@ interface UseWizardAgentOptions {
 export function useWizardAgent({
   context,
   contextPrompt,
+  sourceIds,
   active = true,
   initialSessionId,
   startNewSession = false,
@@ -217,13 +220,12 @@ export function useWizardAgent({
     getSystemPrompt
   );
 
-  const transportContext = useMemo(
-    () =>
-      (contextPrompt
-        ? { ...context, contextPrompt }
-        : context) as unknown as Record<string, unknown>,
-    [context, contextPrompt]
-  );
+  const transportContext = useMemo(() => {
+    const base: Record<string, unknown> = { ...context };
+    if (contextPrompt) base.contextPrompt = contextPrompt;
+    if (sourceIds && sourceIds.length > 0) base.sourceIds = sourceIds;
+    return base;
+  }, [context, contextPrompt, sourceIds]);
 
   const sessionDispatch = useCallback(
     (sessionId: string, action: MessagesAction) => {

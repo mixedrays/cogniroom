@@ -1,13 +1,19 @@
-import type { ProviderConfig, ProviderModels } from "./types";
+import type {
+  ModelCapabilities,
+  ProviderConfig,
+  ProviderModels,
+} from "./types";
 import type { AvailableModelsId } from "./providers";
 import { providers } from "./providers";
 import {
   getModelLabel as _getModelLabel,
   getValidModel as _getValidModel,
+  getProviderForModel,
 } from "./utils";
 
 export type {
   ModelStats,
+  ModelCapabilities,
   ProviderConfig,
   ProviderModelDefinitions,
   ProviderModels,
@@ -69,6 +75,26 @@ export function getAvailableModels(
  */
 export function getProviderById(id: string): ProviderConfig | undefined {
   return providers.find((p) => p.id === id);
+}
+
+/**
+ * Conservative defaults applied when a model entry has no explicit
+ * `capabilities`. Per-model overrides win. Used to decide whether attached
+ * sources can be sent as native multimodal parts vs. extracted text.
+ */
+const PROVIDER_CAPABILITY_DEFAULTS: Record<string, ModelCapabilities> = {
+  anthropic: { vision: true, pdf: true },
+  openai: { vision: true, pdf: true },
+  openrouter: { vision: false, pdf: false },
+};
+
+export function getModelCapabilities(modelId: string): ModelCapabilities {
+  const provider = getProviderForModel(modelId, providers);
+  const base = PROVIDER_CAPABILITY_DEFAULTS[provider?.id ?? ""] ?? {
+    vision: false,
+    pdf: false,
+  };
+  return { ...base, ...(ALL_MODELS[modelId]?.capabilities ?? {}) };
 }
 
 // Backwards compat — consumers that imported AVAILABLE_MODELS get all models
