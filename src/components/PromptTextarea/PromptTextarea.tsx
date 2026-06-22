@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import {
   AlertCircle,
   ArrowUp,
+  FileText,
   Loader2,
   Paperclip,
   Plus,
@@ -14,6 +15,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip } from "@/components/ui/tooltip.adapter";
@@ -104,7 +109,9 @@ export function PromptTextarea({
   const addableAttachments = (availableAttachments ?? []).filter(
     (a) => !selectedIds.has(a.id)
   );
-  const showAddButton = !!onAttachmentAdd && addableAttachments.length > 0;
+  const canUpload = !!onFilesSelected;
+  const canAddAttachment = !!onAttachmentAdd && addableAttachments.length > 0;
+  const showAddButton = canUpload || canAddAttachment;
 
   return (
     <div
@@ -163,35 +170,18 @@ export function PromptTextarea({
         autoFocus={autoFocus}
       />
       <div className="flex items-center gap-1 px-2 pb-2">
-        {onFilesSelected && (
-          <>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept={acceptFileTypes}
-              className="hidden"
-              onChange={(e) => {
-                handleFiles(e.target.files);
-                e.target.value = "";
-              }}
-            />
-            <Tooltip content="Attach files (PDF, images, documents)">
-              <Button
-                size="icon"
-                variant="ghost"
-                disabled={isInputDisabled || isUploading}
-                aria-label="Attach files"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {isUploading ? (
-                  <Loader2 className="animate-spin" />
-                ) : (
-                  <Paperclip />
-                )}
-              </Button>
-            </Tooltip>
-          </>
+        {canUpload && (
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept={acceptFileTypes}
+            className="hidden"
+            onChange={(e) => {
+              handleFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
         )}
 
         {showAddButton && (
@@ -201,22 +191,43 @@ export function PromptTextarea({
                 <Button
                   size="icon"
                   variant="ghost"
-                  disabled={isInputDisabled}
+                  disabled={isInputDisabled || isUploading}
                   aria-label="Add attachment"
                 >
-                  <Plus />
+                  {isUploading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <Plus />
+                  )}
                 </Button>
               }
             />
-            <DropdownMenuContent align="start">
-              {addableAttachments.map((a) => (
-                <DropdownMenuItem
-                  key={a.id}
-                  onClick={() => onAttachmentAdd?.(a.id)}
-                >
-                  {a.label}
+            <DropdownMenuContent align="start" className="w-auto">
+              {canUpload && (
+                <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                  <Paperclip />
+                  Add photos &amp; files
                 </DropdownMenuItem>
-              ))}
+              )}
+              {canUpload && canAddAttachment && <DropdownMenuSeparator />}
+              {canAddAttachment && (
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <FileText />
+                    Recent files
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {addableAttachments.map((a) => (
+                      <DropdownMenuItem
+                        key={a.id}
+                        onClick={() => onAttachmentAdd?.(a.id)}
+                      >
+                        <span className="truncate max-w-60">{a.label}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
