@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   AlertCircle,
   ArrowUp,
@@ -6,6 +7,7 @@ import {
   Loader2,
   Paperclip,
   Plus,
+  Settings2,
   Square,
   X,
 } from "lucide-react";
@@ -110,8 +112,8 @@ export function PromptTextarea({
     (a) => !selectedIds.has(a.id)
   );
   const canUpload = !!onFilesSelected;
-  const canAddAttachment = !!onAttachmentAdd && addableAttachments.length > 0;
-  const showAddButton = canUpload || canAddAttachment;
+  const showSourcesMenu = !!onAttachmentAdd;
+  const showAddButton = canUpload || showSourcesMenu;
 
   return (
     <div
@@ -209,22 +211,35 @@ export function PromptTextarea({
                   Add photos &amp; files
                 </DropdownMenuItem>
               )}
-              {canUpload && canAddAttachment && <DropdownMenuSeparator />}
-              {canAddAttachment && (
+              {canUpload && showSourcesMenu && <DropdownMenuSeparator />}
+              {showSourcesMenu && (
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <FileText />
                     Recent files
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
-                    {addableAttachments.map((a) => (
-                      <DropdownMenuItem
-                        key={a.id}
-                        onClick={() => onAttachmentAdd?.(a.id)}
-                      >
-                        <span className="truncate max-w-60">{a.label}</span>
+                    {addableAttachments.length > 0 ? (
+                      addableAttachments.map((a) => (
+                        <DropdownMenuItem
+                          key={a.id}
+                          onClick={() => onAttachmentAdd?.(a.id)}
+                        >
+                          <span className="truncate max-w-60">{a.label}</span>
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <DropdownMenuItem disabled>
+                        <span className="text-muted-foreground">
+                          No recent files
+                        </span>
                       </DropdownMenuItem>
-                    ))}
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem render={<Link to="/sources" />}>
+                      <Settings2 />
+                      Manage sources
+                    </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
               )}

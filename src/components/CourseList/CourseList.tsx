@@ -1,8 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import {
   Book,
   Sparkles,
   FileJson,
+  FolderOpen,
   Link as LinkIcon,
   Trash2,
   ChevronDown,
@@ -56,6 +57,7 @@ export default function CourseList() {
     message: string;
   } | null>(null);
   const online = useOnlineStatus();
+  const location = useLocation();
 
   const coursesQuery = useQuery({
     queryKey: ["courses"],
@@ -121,6 +123,17 @@ export default function CourseList() {
                   >
                     <Plus />
                     <span>Create</span>
+                  </Link>
+                }
+              />
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={location.pathname === "/sources"}
+                render={
+                  <Link to="/sources">
+                    <FolderOpen />
+                    <span>Sources</span>
                   </Link>
                 }
               />
