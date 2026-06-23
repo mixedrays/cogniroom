@@ -1,9 +1,8 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
   Book,
   Sparkles,
   FileJson,
-  FolderOpen,
   Link as LinkIcon,
   Trash2,
   ChevronDown,
@@ -42,6 +41,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import CourseHistory from "@/components/CourseHistory";
+import SourcesList from "@/components/SourcesList";
 import { CollapsibleSidebarGroup } from "@/components/Sidebar";
 import { CommandPaletteTrigger } from "@/modules/command-palette";
 import DeckList from "@/components/DeckList";
@@ -57,7 +57,6 @@ export default function CourseList() {
     message: string;
   } | null>(null);
   const online = useOnlineStatus();
-  const location = useLocation();
 
   const coursesQuery = useQuery({
     queryKey: ["courses"],
@@ -123,17 +122,6 @@ export default function CourseList() {
                   >
                     <Plus />
                     <span>Create</span>
-                  </Link>
-                }
-              />
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={location.pathname === "/sources"}
-                render={
-                  <Link to="/sources">
-                    <FolderOpen />
-                    <span>Sources</span>
                   </Link>
                 }
               />
@@ -318,6 +306,8 @@ export default function CourseList() {
               </CollapsibleSidebarGroup>
 
               <DeckList />
+
+              <SourcesList />
 
               <CourseHistory />
             </>
