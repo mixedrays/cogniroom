@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   AlertCircle,
@@ -7,6 +7,7 @@ import {
   Home,
   Image as ImageIcon,
   Loader2,
+  Paperclip,
   Trash2,
 } from "lucide-react";
 import type { Source } from "@/modules/core";
@@ -32,6 +33,10 @@ export const Route = createFileRoute("/sources")({
   component: SourcesPage,
 });
 
+/** File types the attach button accepts, matching the AI assistant's menu. */
+const ACCEPT_FILE_TYPES =
+  "image/*,application/pdf,.pdf,.docx,.doc,.txt,.md,.markdown";
+
 function formatBytes(bytes?: number): string {
   if (!bytes || bytes <= 0) return "—";
   const units = ["B", "KB", "MB", "GB"];
@@ -50,11 +55,19 @@ function kindIcon(kind: Source["kind"]) {
 }
 
 function SourcesPage() {
-  const { sources, isLoading, remove } = useSources({ scope: {} });
+  const { sources, isLoading, remove, upload, isUploading } = useSources({
+    scope: {},
+  });
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDelete = (id: string) => {
     remove.mutate(id, { onSettled: () => setDeleteId(null) });
+  };
+
+  const handleFiles = (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    upload.mutate(Array.from(fileList));
   };
 
   return (
@@ -70,14 +83,36 @@ function SourcesPage() {
       </PageHeader>
 
       <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6 w-full">
-        <div className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Sources
-          </h1>
-          <p className="text-muted-foreground">
-            Files you've attached to the AI assistant. Deleting a source removes
-            it everywhere it's attached.
-          </p>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept={ACCEPT_FILE_TYPES}
+          className="hidden"
+          onChange={(e) => {
+            handleFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
+
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+              Sources
+            </h1>
+            <p className="text-muted-foreground">
+              Files you've attached to the AI assistant. Deleting a source
+              removes it everywhere it's attached.
+            </p>
+          </div>
+          <Button
+            className="shrink-0"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            {isUploading ? <Loader2 className="animate-spin" /> : <Paperclip />}
+            Attach files
+          </Button>
         </div>
 
         {isLoading ? (
@@ -86,10 +121,22 @@ function SourcesPage() {
           <div className="rounded-xl border bg-card p-10 text-center">
             <FolderOpen className="size-12 mx-auto mb-4 opacity-40" />
             <h2 className="text-lg font-medium mb-1">No sources yet</h2>
-            <p className="text-sm text-muted-foreground">
-              Attach photos, PDFs, or documents from the AI assistant's "+" menu
-              and they'll show up here.
+            <p className="text-sm text-muted-foreground mb-4">
+              Attach photos, PDFs, or documents here, or from the AI assistant's
+              "+" menu, and they'll show up here.
             </p>
+            <Button
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+            >
+              {isUploading ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <Paperclip />
+              )}
+              Attach files
+            </Button>
           </div>
         ) : (
           <div className="rounded-xl border bg-card divide-y">
