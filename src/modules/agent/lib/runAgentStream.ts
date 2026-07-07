@@ -1,4 +1,9 @@
-import { streamText, type LanguageModel, type ModelMessage } from "ai";
+import {
+  stepCountIs,
+  streamText,
+  type LanguageModel,
+  type ModelMessage,
+} from "ai";
 import type { ZodType } from "zod";
 import type { AgentSseEvent, AgentTool } from "../types";
 
@@ -40,6 +45,11 @@ export async function runAgentStream({
     messages,
     tools: toolSet,
     abortSignal: signal,
+    // Allow the model to continue after a server-executed tool (e.g. memory)
+    // resolves, so it can generate a follow-up reply instead of ending the turn
+    // silently. Client tools have no `execute`, so the stream still stops at
+    // their first call (handled by the break below).
+    stopWhen: stepCountIs(8),
   });
 
   let streamingClientTool = false;

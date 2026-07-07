@@ -52,6 +52,8 @@ export function AgentMessage({
       );
     }
 
+    if (!message.text) return null;
+
     return (
       <div className="flex justify-start">
         <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-muted px-4 py-2.5 text-sm">
