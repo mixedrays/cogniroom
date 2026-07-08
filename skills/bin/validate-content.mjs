@@ -14,7 +14,11 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 var __commonJS = (cb, mod) => function __require2() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 var __export = (target, all) => {
   for (var name in all)
@@ -15205,6 +15209,46 @@ var reviewEntrySchema = external_exports.object({
 var reviewDataSchema = external_exports.object({
   lessonId: external_exports.string(),
   entries: external_exports.array(reviewEntrySchema)
+});
+var sourceKindSchema = external_exports.enum([
+  "image",
+  "pdf",
+  "document",
+  "text",
+  "webpage",
+  "youtube"
+]);
+var sourceScopeSchema = external_exports.object({
+  courseId: external_exports.string().optional(),
+  lessonId: external_exports.string().optional()
+});
+var sourceMetaSchema = external_exports.object({
+  title: external_exports.string().optional(),
+  author: external_exports.string().optional(),
+  durationSec: external_exports.number().optional(),
+  pageCount: external_exports.number().optional(),
+  width: external_exports.number().optional(),
+  height: external_exports.number().optional()
+});
+var sourceSchema = external_exports.object({
+  id: external_exports.string(),
+  kind: sourceKindSchema,
+  origin: external_exports.enum(["upload", "link"]),
+  delivery: external_exports.enum(["native", "text"]),
+  label: external_exports.string(),
+  source: external_exports.string(),
+  mimeType: external_exports.string().optional(),
+  byteSize: external_exports.number().optional(),
+  url: external_exports.string().optional(),
+  status: external_exports.enum(["processing", "ready", "error"]),
+  error: external_exports.string().optional(),
+  extractedText: external_exports.string().optional(),
+  extractedTokens: external_exports.number().optional(),
+  meta: sourceMetaSchema.optional(),
+  scopes: external_exports.array(sourceScopeSchema),
+  refCount: external_exports.number(),
+  createdAt: external_exports.string(),
+  updatedAt: external_exports.string()
 });
 
 // src/modules/md-formats/course.ts

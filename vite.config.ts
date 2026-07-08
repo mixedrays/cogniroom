@@ -19,6 +19,16 @@ const config = defineConfig({
     devtools(),
     nitro({
       serverDir: "server",
+      // Nitro's default chunk naming embeds route params like `[id]` in the
+      // server chunk filenames (e.g. `_routes/api/courses/[id]/...`). With the
+      // rollup-based Vite build those brackets are parsed as invalid output
+      // placeholders and abort the build, so emit bracket-free chunk names.
+      rollupConfig: {
+        output: {
+          chunkFileNames: (chunkInfo: { name: string }) =>
+            `_chunks/${chunkInfo.name.replace(/[^\w.-]+/g, "_")}-[hash].mjs`,
+        },
+      },
     }),
     // this is the plugin that enables path aliases
     viteTsConfigPaths({

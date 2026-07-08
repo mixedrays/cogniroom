@@ -1,6 +1,6 @@
 import { createAgentHandler } from "@root/server/lib/createAgentHandler";
 import { askUserTool } from "@/modules/agent/tools/ask-user";
-import { memoryTool } from "@/modules/agent/tools/memory";
+import { memoryToolServer } from "@/modules/agent/tools/memory/server";
 import {
   getPresentToolForContentType,
   type PresentContentType,
@@ -26,7 +26,7 @@ export default createAgentHandler({
     const contentType = resolveContentType(context.contentType);
     return [
       askUserTool,
-      memoryTool,
+      memoryToolServer,
       getPresentToolForContentType(contentType),
     ];
   },
