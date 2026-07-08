@@ -31,12 +31,12 @@ export interface CssTheme {
 
 // Registry of extra CSS theme files.
 // To add a new theme: drop a CSS file in themes/, import its ?url here, and add an entry.
-// The "default" theme has no cssClass and no url — it uses the :root variables from styles.css.
+// The "default" theme (labeled "Neutral") has no cssClass and no url — it uses the :root variables from styles.css.
 // Each theme file contains both light and dark variants (.theme and .dark.theme selectors).
 export const CSS_THEMES: CssTheme[] = [
   {
     id: "default",
-    label: "Default",
+    label: "Neutral",
     cssClass: "",
     icon: Palette,
   },

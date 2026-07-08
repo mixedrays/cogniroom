@@ -47,7 +47,7 @@ export interface SettingsHistory {
 // Default settings
 export const DEFAULT_SETTINGS: Settings = {
   appearance: {
-    cssThemeId: null,
+    cssThemeId: "one",
     mode: "light",
     radius: 0.625, // Default radius in rem
   },
