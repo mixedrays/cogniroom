@@ -142,15 +142,15 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
     try {
       const result = await getSettings();
-      if (result.success && result.settings) {
+      // Only adopt server settings when the server actually has persisted
+      // settings. When `isDefault` is set the server is just echoing its
+      // defaults (no settings.json yet) — keep the cached selection already
+      // applied on mount instead of clobbering it back to defaults.
+      if (result.success && result.settings && !result.isDefault) {
         const normalized = normalizeSettings(result.settings);
         setSettings(normalized);
         applySettings(normalized);
         cacheSettings(normalized);
-      } else {
-        setSettings(DEFAULT_SETTINGS);
-        applySettings(DEFAULT_SETTINGS);
-        cacheSettings(DEFAULT_SETTINGS);
       }
     } catch (e) {
       setError(String(e));

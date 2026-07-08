@@ -5,7 +5,7 @@ import { toErrorMessage } from "@root/server/lib/errors";
 // Default settings matching the client-side defaults
 const DEFAULT_SETTINGS = {
   appearance: {
-    cssThemeId: null as string | null,
+    cssThemeId: "one" as string | null,
     mode: "light" as const,
     radius: 0.625,
   },
