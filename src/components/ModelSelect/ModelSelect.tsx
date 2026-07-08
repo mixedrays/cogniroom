@@ -56,7 +56,7 @@ export function ModelSelect({
   triggerClassName,
 }: ModelSelectProps) {
   const { settings } = useSettings();
-  const { availableProviderIds } = useApiKeyAvailability();
+  const { availableProviderIds, isLoading } = useApiKeyAvailability();
   const { open: openSettings } = useSettingsSearch();
   const [open, setOpen] = useState(false);
 
@@ -93,6 +93,24 @@ export function ModelSelect({
     setOpen(false);
     openSettings(path);
   };
+
+  if (!hasProviders) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        disabled={disabled || isLoading}
+        onClick={() => openSettings("api-key")}
+        className={cn(
+          "justify-between gap-1.5 font-normal text-muted-foreground",
+          triggerClassName
+        )}
+      >
+        <KeyRoundIcon className="size-3.5" />
+        {isLoading ? "Loading models…" : "Add API key"}
+      </Button>
+    );
+  }
 
   return (
     <Combobox<ModelItem>
@@ -131,26 +149,7 @@ export function ModelSelect({
       <ComboboxContent className={cn("w-auto", className)}>
         <ComboboxInput showTrigger={false} placeholder="Search models..." />
 
-        <ComboboxEmpty>
-          {hasProviders ? (
-            "No models found."
-          ) : (
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => goToSettings("api-key")}
-              className="flex w-full flex-col items-center gap-1 px-3 py-3 text-center hover:bg-accent rounded-sm"
-            >
-              <span className="text-sm font-medium text-foreground">
-                No models available
-              </span>
-              <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
-                <KeyRoundIcon className="size-3" />
-                Add an API key in Settings
-              </span>
-            </button>
-          )}
-        </ComboboxEmpty>
+        <ComboboxEmpty>No models found.</ComboboxEmpty>
 
         <ComboboxList>
           <ComboboxCollection>
@@ -225,19 +224,17 @@ export function ModelSelect({
           </ComboboxCollection>
         </ComboboxList>
 
-        {hasProviders && (
-          <div className="border-t p-1">
-            <Button
-              onClick={() => goToSettings("llm")}
-              size="sm"
-              className="w-full text-muted-foreground justify-start"
-              variant="ghost"
-            >
-              <SettingsIcon className="size-4" />
-              Manage models…
-            </Button>
-          </div>
-        )}
+        <div className="border-t p-1">
+          <Button
+            onClick={() => goToSettings("llm")}
+            size="sm"
+            className="w-full text-muted-foreground justify-start"
+            variant="ghost"
+          >
+            <SettingsIcon className="size-4" />
+            Manage models…
+          </Button>
+        </div>
       </ComboboxContent>
     </Combobox>
   );
