@@ -20,15 +20,20 @@ CogniRoom - A platform for creating, managing, and tracking skill learning roadm
 
 ## General Guidelines
 
-- Do not provide explanations or summaries of actions unless explicitly requested.
-- Do not provide list of made changes.
-- Use CLI for moving, renaming, or deleting files instead of suggesting code changes.
 - Use `npm install` to install new dependencies, instead of editing `package.json` directly.
 - Ensure to handle API responses and errors appropriately when using fetch calls.
 - Do not hardcode any API keys or sensitive information in the codebase. Use environment variables instead.
-- Do not add comments to the code unless necessary for clarity. The code should be self-explanatory and follow best practices for readability.
 - After making changes, run `npm run validate` to run all checks (typecheck, lint, unit tests, e2e tests).
 - Do not use git worktrees unless the user explicitly requests them. Work directly in the current checkout.
+
+## Token Cost Optimization Guidelines
+- Do not provide explanations or summaries of actions unless explicitly requested.
+- Do not provide intermediate reasoning steps or thought processes unless explicitly requested.
+- Do not provide list of made changes.
+- Use CLI for moving, renaming, or deleting files instead of suggesting code changes.
+- Do not add comments to the code unless necessary for clarity. The code should be self-explanatory and follow best practices for readability.
+- When adding comments, prioritize why the code is doing something rather than what it is doing. Avoid redundant comments that restate the code.
+- Avoid unnecessary code duplication. If a function or component can be reused, extract it into a shared module instead of duplicating it.
 
 ## Core Domain Modeling
 
