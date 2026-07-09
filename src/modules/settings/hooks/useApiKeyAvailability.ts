@@ -1,7 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useSyncExternalStore } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { providers, getProviderLocalStorageKeyName } from "@/lib/llm-models";
 import { getEnvApiKeys, type ProviderEnvKeyInfo } from "../lib/settings";
+
+const EMPTY_ENV_KEYS: ProviderEnvKeyInfo[] = [];
 
 export type ApiKeySource = "local" | "env" | "none";
 
@@ -110,24 +113,21 @@ export function useApiKeyAvailability() {
     getClientLocalKeysSnapshot,
     getServerLocalKeysSnapshot
   );
-  const [envKeys, setEnvKeys] = useState<ProviderEnvKeyInfo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+  // Env-var-backed keys can't change during a session, so fetch them once and
+  // share the result across every consumer instead of refetching on each mount
+  // (e.g. every time ModelSelect remounts on a course/deck context switch).
+  const { data: envKeys = EMPTY_ENV_KEYS, isLoading } = useQuery({
+    queryKey: ["settings", "env-api-keys"],
+    queryFn: async () => {
+      const result = await getEnvApiKeys();
+      return result.success ? result.keys : EMPTY_ENV_KEYS;
+    },
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
 
   const refreshLocal = useCallback(() => invalidateLocalKeys(), []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      const result = await getEnvApiKeys();
-      if (cancelled) return;
-      if (result.success) setEnvKeys(result.keys);
-      setIsLoading(false);
-    };
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const availability = useMemo(
     () => buildAvailability(envKeys, localKeys),
