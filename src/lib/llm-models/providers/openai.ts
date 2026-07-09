@@ -16,7 +16,7 @@ export type OpenAIAvailableModelsIds = Exclude<
 const openaiModels = {
   "gpt-5.5": {
     price: { input: getPricePerToken(5), output: getPricePerToken(30) },
-    priceRating: 3,
+    priceRating: 4,
     label: "GPT-5.5",
     hint: "Most capable model, best for complex tasks",
   },
@@ -44,30 +44,30 @@ const openaiModels = {
     label: "GPT-5.4 Nano",
     hint: "Ultra low-cost for simple tasks",
   },
-  "gpt-5.2": {
-    price: { input: getPricePerToken(1.75), output: getPricePerToken(14) },
-    priceRating: 3,
-    label: "GPT-5.2",
-    hint: "Most cost-effective for general use",
-  },
+//   "gpt-5.2": {
+//     price: { input: getPricePerToken(1.75), output: getPricePerToken(14) },
+//     priceRating: 3,
+//     label: "GPT-5.2",
+//     hint: "Most cost-effective for general use",
+//   },
 //   "gpt-5.2-pro": {
 //     price: { input: getPricePerToken(21), output: getPricePerToken(168) },
 //     priceRating: 4,
 //     label: "GPT-5.2 Pro",
 //     hint: "Best for high-value or complex tasks",
 //   },
-  "gpt-5-mini": {
-    price: { input: getPricePerToken(0.25), output: getPricePerToken(2) },
-    priceRating: 2,
-    label: "GPT-5 Mini",
-    hint: "Good for simple tasks and testing",
-  },
-  "gpt-5-nano": {
-    price: { input: getPricePerToken(0.05), output: getPricePerToken(0.4) },
-    priceRating: 1,
-    label: "GPT-5 Nano",
-    hint: "Ultra low-cost for simple tasks",
-  },
+//   "gpt-5-mini": {
+//     price: { input: getPricePerToken(0.25), output: getPricePerToken(2) },
+//     priceRating: 2,
+//     label: "GPT-5 Mini",
+//     hint: "Good for simple tasks and testing",
+//   },
+//   "gpt-5-nano": {
+//     price: { input: getPricePerToken(0.05), output: getPricePerToken(0.4) },
+//     priceRating: 1,
+//     label: "GPT-5 Nano",
+//     hint: "Ultra low-cost for simple tasks",
+//   },
 //   o1: {
 //     price: { input: getPricePerToken(15), output: getPricePerToken(60) },
 //     priceRating: 4,
@@ -76,13 +76,13 @@ const openaiModels = {
 //   },
   o3: {
     price: { input: getPricePerToken(2), output: getPricePerToken(8) },
-    priceRating: 3,
+    priceRating: 2,
     label: "O3",
     hint: "Balanced model for a wide range of tasks",
   },
   "o3-mini": {
     price: { input: getPricePerToken(1.1), output: getPricePerToken(4.4) },
-    priceRating: 3,
+    priceRating: 1,
     label: "O3 Mini",
     hint: "Cost-effective version of O3",
   },
