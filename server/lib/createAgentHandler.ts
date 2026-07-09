@@ -9,7 +9,8 @@ import {
 import type { AgentTool } from "@/modules/agent/types";
 import { runAgentStream } from "@/modules/agent/lib/runAgentStream";
 import { getMemoryContext } from "./memoryService";
-import { hydrateSources } from "./sources/hydrate";
+import { hydrateSources, clientSourceResolver } from "./sources/hydrate";
+import type { SourceHydrationPayload } from "@modules/core";
 
 export function createAgentHandler(config: {
   tools: AgentTool[] | ((context: Record<string, unknown>) => AgentTool[]);
@@ -46,13 +47,26 @@ export function createAgentHandler(config: {
     const sourceIds = Array.isArray(context.sourceIds)
       ? (context.sourceIds as string[])
       : undefined;
+    // Browser mode ships resolved source payloads (text + native blobs) since
+    // the server filesystem has none; hydrate from those instead of disk.
+    const clientSources = Array.isArray(context.clientSources)
+      ? (context.clientSources as SourceHydrationPayload[])
+      : undefined;
+    const sourceResolver = clientSources
+      ? clientSourceResolver(clientSources)
+      : undefined;
 
     void (async () => {
       try {
         const model = body.model
           ? getLanguageModel(modelId)
           : getDefaultModel();
-        const messages = await hydrateSources(body.messages, sourceIds, modelId);
+        const messages = await hydrateSources(
+          body.messages,
+          sourceIds,
+          modelId,
+          sourceResolver
+        );
         await runAgentStream({
           model,
           system,

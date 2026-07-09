@@ -9,6 +9,8 @@ export * as courseRepo from "./courses";
 export * as deckRepo from "./decks";
 export * as sessionRepo from "./sessions";
 export * as memoryRepo from "./memory";
+export * as sourceRepo from "./sources";
 export type { MutationResult } from "./courses";
 export type { CreateDeckInput } from "./decks";
 export type { Session, SessionMeta, SessionScope } from "./sessions";
+export type { StoreSourceInput } from "./sources";

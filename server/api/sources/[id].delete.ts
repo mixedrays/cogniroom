@@ -1,10 +1,12 @@
-import { defineEventHandler, getRouterParam, getQuery } from "h3";
+import { defineEventHandler, getRouterParam, getQuery, HTTPError } from "h3";
 import type { SourceScope } from "@modules/core";
 import { deleteSource } from "@root/server/lib/sources/store";
 import { toErrorMessage } from "@root/server/lib/errors";
+import { assertServerStorageEnabled } from "@root/server/lib/assertServerStorageEnabled";
 
 export default defineEventHandler(async (event) => {
   try {
+    assertServerStorageEnabled();
     const id = getRouterParam(event, "id");
     if (!id) return { success: false, error: "Missing source ID" };
 
@@ -16,6 +18,7 @@ export default defineEventHandler(async (event) => {
     await deleteSource(id, scope.courseId || scope.lessonId ? scope : undefined);
     return { success: true };
   } catch (error) {
+    if (error instanceof HTTPError) throw error;
     console.error("Error deleting source:", error);
     return { success: false, error: toErrorMessage(error) };
   }

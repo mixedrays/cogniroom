@@ -19,6 +19,8 @@ import { getStorageMode } from "@/lib/runtimeConfig";
 import { getLocalDataApi, isLocalDataAvailable } from "@/lib/localRepo";
 import { sessionRepo, memoryRepo } from "@modules/repository";
 import type { SessionScope } from "@modules/repository";
+import { loadSourceHydration } from "@/modules/sources";
+import type { SourceHydrationPayload } from "@modules/core";
 
 async function isBrowserMode(): Promise<boolean> {
   return (await getStorageMode()) === "browser";
@@ -319,13 +321,33 @@ export function useWizardAgent({
     };
   }, []);
 
+  // In browser mode attached sources live in IndexedDB, so the server can't
+  // hydrate them from `sourceIds` alone; resolve the payloads (extracted text +
+  // native blobs) client-side and ship them in the request context. Empty in
+  // filesystem mode, where the server hydrates from disk.
+  const [clientSources, setClientSources] = useState<SourceHydrationPayload[]>(
+    []
+  );
+  const sourceIdsKey = (sourceIds ?? []).join(",");
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const payloads = await loadSourceHydration(sourceIds ?? []);
+      if (active) setClientSources(payloads);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [sourceIdsKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const transportContext = useMemo(() => {
     const base: Record<string, unknown> = { ...context };
     if (contextPrompt) base.contextPrompt = contextPrompt;
     if (sourceIds && sourceIds.length > 0) base.sourceIds = sourceIds;
     if (memoryContext) base.memoryContext = memoryContext;
+    if (clientSources.length > 0) base.clientSources = clientSources;
     return base;
-  }, [context, contextPrompt, sourceIds, memoryContext]);
+  }, [context, contextPrompt, sourceIds, memoryContext, clientSources]);
 
   const sessionDispatch = useCallback(
     (sessionId: string, action: MessagesAction) => {

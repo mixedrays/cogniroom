@@ -70,6 +70,58 @@ async function readMeta(id: string): Promise<Source | null> {
   }
 }
 
+export interface ExtractSourceInput {
+  bytes: Buffer;
+  filename: string;
+  mimeType?: string;
+}
+
+/** Result of extracting an upload without persisting it (browser mode). */
+export interface ExtractedSource {
+  /** Metadata with no scopes assigned yet — the caller owns scope/refCount. */
+  metadata: Source;
+  extractedText?: string;
+  /** Extension the blob is stored under (`blob.<ext>`). */
+  blobExt: string;
+}
+
+/**
+ * Classify + process an upload's bytes into a `Source` metadata record and its
+ * extracted text, WITHOUT touching the filesystem. Shared by `createSource`
+ * (filesystem persistence) and the stateless extract endpoint (browser mode,
+ * where the client persists into IndexedDB).
+ */
+export async function extractSource(
+  input: ExtractSourceInput
+): Promise<ExtractedSource> {
+  const { bytes, filename, mimeType } = input;
+  const id = createHash("sha256").update(bytes).digest("hex");
+  const now = new Date().toISOString();
+  const kind = classifyUpload(filename, mimeType);
+  const ext = blobExt(filename, mimeType);
+  const result = await processSource(kind, { bytes, filename, mimeType });
+
+  const metadata: Source = {
+    id,
+    kind,
+    origin: "upload",
+    delivery: result.delivery,
+    label: filename,
+    source: filename,
+    mimeType,
+    byteSize: bytes.byteLength,
+    status: result.status,
+    error: result.error,
+    extractedTokens: result.extractedTokens,
+    meta: result.meta,
+    scopes: [],
+    refCount: 0,
+    createdAt: now,
+    updatedAt: now,
+  };
+  return { metadata, extractedText: result.extractedText, blobExt: ext };
+}
+
 export interface CreateSourceInput {
   bytes: Buffer;
   filename: string;
@@ -82,7 +134,7 @@ export interface CreateSourceInput {
  * repeat upload reuses the existing blob and just adds the new scope/refCount.
  */
 export async function createSource(input: CreateSourceInput): Promise<Source> {
-  const { bytes, filename, mimeType, scope } = input;
+  const { bytes, scope } = input;
   const id = createHash("sha256").update(bytes).digest("hex");
   const dir = getSourceDir(id);
   const now = new Date().toISOString();
@@ -100,33 +152,17 @@ export async function createSource(input: CreateSourceInput): Promise<Source> {
 
   await mkdir(dir, { recursive: true });
 
-  const kind = classifyUpload(filename, mimeType);
-  const ext = blobExt(filename, mimeType);
+  const { metadata, extractedText, blobExt: ext } = await extractSource(input);
   await writeFile(join(dir, `blob.${ext}`), bytes);
-
-  const result = await processSource(kind, { bytes, filename, mimeType });
-  if (result.extractedText) {
-    await writeFile(join(dir, TEXT_FILE), result.extractedText, "utf8");
+  if (extractedText) {
+    await writeFile(join(dir, TEXT_FILE), extractedText, "utf8");
   }
 
   const scopes = scope ? [scope] : [];
   const source: Source = {
-    id,
-    kind,
-    origin: "upload",
-    delivery: result.delivery,
-    label: filename,
-    source: filename,
-    mimeType,
-    byteSize: bytes.byteLength,
-    status: result.status,
-    error: result.error,
-    extractedTokens: result.extractedTokens,
-    meta: result.meta,
+    ...metadata,
     scopes,
     refCount: scopes.length,
-    createdAt: now,
-    updatedAt: now,
   };
   await writeMeta(source);
   return source;

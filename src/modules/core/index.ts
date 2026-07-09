@@ -27,6 +27,7 @@ export type {
   SourceMeta,
   Source,
   SourceRef,
+  SourceHydrationPayload,
 } from "./types";
 
 export * from "./utils";

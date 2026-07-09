@@ -4,4 +4,6 @@ export {
   uploadSources,
   deleteSource,
   sourceBlobUrl,
+  resolveSourceBlobUrl,
+  loadSourceHydration,
 } from "./lib/sourcesApi";

@@ -60,4 +60,20 @@ export const storagePaths = {
   memoryEntry(key: string): string {
     return `memory/${key}.md`;
   },
+
+  sourceDir(id: string): string {
+    return `sources/${id}`;
+  },
+
+  sourceMeta(id: string): string {
+    return `sources/${id}/source.json`;
+  },
+
+  sourceText(id: string): string {
+    return `sources/${id}/extracted.txt`;
+  },
+
+  sourceBlob(id: string, ext: string): string {
+    return `sources/${id}/blob.${ext}`;
+  },
 };

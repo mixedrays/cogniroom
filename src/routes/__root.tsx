@@ -23,6 +23,12 @@ import appCss from "../styles.css?url";
 import { CSS_THEMES, ThemeInitScriptElement } from "@/modules/color-themes";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
+  // In browser mode `defaultSsr` is false so data routes render as client-only
+  // shells (their loaders read the browser's IndexedDB, absent during SSR). The
+  // root must still SSR, though: it emits the `<html>` document and `<Scripts>`
+  // that bootstrap the client bundle. Without this the whole page ships empty
+  // and nothing ever hydrates. No-op in filesystem mode (defaultSsr already on).
+  ssr: true,
   head: () => ({
     meta: [
       {

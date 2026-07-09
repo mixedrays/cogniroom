@@ -2,12 +2,14 @@ import { defineEventHandler, readFormData, HTTPError } from "h3";
 import type { Source, SourceScope } from "@modules/core";
 import { createSource } from "@root/server/lib/sources/store";
 import { toErrorMessage } from "@root/server/lib/errors";
+import { assertServerStorageEnabled } from "@root/server/lib/assertServerStorageEnabled";
 
 /** Max upload size per file (25 MB), mirroring the safeFetch cap planned for links. */
 const MAX_BYTES = 25 * 1024 * 1024;
 
 export default defineEventHandler(async (event) => {
   try {
+    assertServerStorageEnabled();
     const form = await readFormData(event);
 
     const scope: SourceScope = {};

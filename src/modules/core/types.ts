@@ -229,3 +229,22 @@ export interface Source {
 
 /** Lightweight derivation for chips and message attachment refs. */
 export type SourceRef = Pick<Source, "id" | "kind" | "label" | "status">;
+
+/**
+ * Client-resolved source payload sent in the chat request context in browser
+ * mode, where sources live in the browser's IndexedDB rather than the server
+ * filesystem. The server hydrates the outgoing user turn from these instead of
+ * reading from disk. Text sources carry `extractedText`; native image/PDF
+ * sources carry the original bytes as `blobBase64` so they can be delivered as
+ * multimodal parts. Derived from {@link Source}.
+ */
+export interface SourceHydrationPayload {
+  id: string;
+  kind: SourceKind;
+  label: string;
+  status: SourceStatus;
+  mimeType?: string;
+  extractedText?: string;
+  /** base64-encoded original bytes for native (image/pdf) delivery. */
+  blobBase64?: string;
+}
