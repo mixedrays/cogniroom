@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { defineConfig } from "vite";
 import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
@@ -7,12 +8,22 @@ import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+function resolveCommitHash(): string {
+  if (process.env.APP_COMMIT_HASH) return process.env.APP_COMMIT_HASH;
+  try {
+    return execSync("git rev-parse --short HEAD").toString().trim();
+  } catch {
+    return "unknown";
+  }
+}
+
 const config = defineConfig({
   optimizeDeps: {
     include: ["mermaid"],
   },
   define: {
     APP_VERSION: JSON.stringify(process.env.npm_package_version),
+    APP_COMMIT_HASH: JSON.stringify(resolveCommitHash()),
   },
   envPrefix: ["VITE_", "APP_"],
   plugins: [

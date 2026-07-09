@@ -7,6 +7,7 @@ import {
   MessageSquareTextIcon,
   ChevronRightIcon,
   KeyRoundIcon,
+  InfoIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -24,6 +25,7 @@ import { ApiKeySettings } from "./ApiKeySettings";
 import { HistorySettings } from "./HistorySettings";
 import { PromptsSettings } from "./PromptsSettings";
 import { MemorySettings } from "./MemorySettings";
+import { AboutSettings } from "./AboutSettings";
 
 const NAV_ITEMS = [
   { key: "appearance", label: "Appearance", icon: PaletteIcon },
@@ -32,6 +34,7 @@ const NAV_ITEMS = [
   { key: "prompts", label: "Prompts", icon: MessageSquareTextIcon },
   { key: "memory", label: "Memory", icon: BrainIcon },
   { key: "history", label: "History", icon: HistoryIcon },
+  { key: "about", label: "About", icon: InfoIcon },
 ] as const;
 
 type SettingsTab = (typeof NAV_ITEMS)[number]["key"];
@@ -121,6 +124,7 @@ export function SettingsContent({
           )}
           {activeTab === "memory" && <MemorySettings />}
           {activeTab === "history" && <HistorySettings />}
+          {activeTab === "about" && <AboutSettings />}
         </div>
       </div>
     </SidebarProvider>

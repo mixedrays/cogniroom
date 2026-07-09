@@ -2,6 +2,8 @@
 
 A local-first platform for creating, managing, and tracking skill learning roadmaps. Generate a roadmap with an LLM, then generate lessons, exercises, flashcards, and quizzes for each step — and track your progress as you learn.
 
+**Live demo:** [cogniroom.vercel.app](https://cogniroom.vercel.app)
+
 ## Features
 
 - **Roadmap creation** — generate a structured learning roadmap from a prompt.

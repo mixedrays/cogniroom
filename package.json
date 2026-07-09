@@ -2,7 +2,7 @@
   "name": "cogniroom",
   "private": true,
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "scripts": {
     "dev": "vite dev --port 3000",
     "build:validator": "tsx skills/validator/build.ts",

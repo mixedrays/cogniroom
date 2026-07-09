@@ -7,6 +7,7 @@ const VALID_TABS = [
   "prompts",
   "memory",
   "history",
+  "about",
 ] as const;
 
 type SettingsTab = (typeof VALID_TABS)[number];
