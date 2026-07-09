@@ -1,6 +1,6 @@
 import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
-import { storagePaths } from "@root/server/lib/storagePaths";
+import { courseRepo } from "@modules/repository";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
 export default defineEventHandler(
@@ -15,21 +15,17 @@ export default defineEventHandler(
       });
     }
 
-    const response = await storageApi.get<string>(
-      storagePaths.exercise(courseId, lessonId)
+    const result = await courseRepo.getLessonExercises(
+      storageApi,
+      courseId,
+      lessonId
     );
-
-    if (!response.ok) {
+    if (!result) {
       throw new HTTPError({
-        status: response.status,
-        message:
-          response.status === 404
-            ? "Exercises content not found"
-            : response.statusText,
+        status: 404,
+        message: "Exercises content not found",
       });
     }
-
-    const content = await response.text();
-    return { content };
+    return result;
   })
 );

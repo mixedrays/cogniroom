@@ -1,18 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { readdirSync } from "node:fs";
 import { defineEventHandler, readBody } from "h3";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { getLanguageModel, resolveModelId } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { storageApi } from "@modules/storage";
-import { getFormatAdapter } from "@modules/content-formats";
-import { storagePaths } from "@root/server/lib/storagePaths";
 import { composeAdditionalInstructions } from "@root/server/lib/composeAdditionalInstructions";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
-import { DECKS_DIR } from "@root/server/env";
-import { generateUniqueDeckId } from "@modules/core";
-import type { Deck, QuizContent } from "@modules/core";
+import type { QuizContent } from "@modules/core";
 
 const QuizDraftSchema = z.object({
   quizQuestions: z.array(
@@ -29,10 +23,10 @@ const QuizDraftSchema = z.object({
   ),
 });
 
-function timestampTitle(): string {
-  return new Date().toISOString().slice(0, 16).replace("T", " ");
-}
-
+/**
+ * Stateless: returns generated quiz questions without creating a deck. The
+ * client persists the deck via the mode-dispatched `createDeck`.
+ */
 export default defineEventHandler(
   withErrorGuard("Failed to generate quiz deck", async (event) => {
     const body = await readBody<{
@@ -90,30 +84,6 @@ export default defineEventHandler(
       quizQuestions: quizQuestions as QuizContent["quizQuestions"],
     };
 
-    const title = timestampTitle();
-    let existingIds: string[] = [];
-    try {
-      existingIds = readdirSync(DECKS_DIR);
-    } catch {}
-    const id = generateUniqueDeckId(title, existingIds);
-
-    const now = new Date().toISOString();
-    const deck: Deck = {
-      id,
-      title,
-      kind: "quiz",
-      source: "llm",
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    await storageApi.post(storagePaths.deck(id), JSON.stringify(deck, null, 2));
-    const adapter = getFormatAdapter("quiz");
-    await storageApi.post(
-      storagePaths.deckQuiz(id),
-      adapter.serialize(content)
-    );
-
-    return { success: true, id, content };
+    return { success: true, content };
   })
 );

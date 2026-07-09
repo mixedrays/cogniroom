@@ -5,6 +5,7 @@ import {
   type Session,
 } from "@root/server/lib/historyService";
 import { parseSessionScope } from "@root/server/lib/sessionScope";
+import { assertServerStorageEnabled } from "@root/server/lib/assertServerStorageEnabled";
 import type { AgentMessageState } from "@/modules/agent/types";
 
 function deriveTitle(messages: AgentMessageState[]): string {
@@ -18,6 +19,7 @@ function deriveTitle(messages: AgentMessageState[]): string {
 }
 
 export default defineEventHandler(async (event) => {
+  assertServerStorageEnabled();
   const scope = parseSessionScope(event);
   const sessionId = getRouterParam(event, "sessionId") ?? "";
   const body = await readBody<{

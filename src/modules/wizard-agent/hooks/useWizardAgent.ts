@@ -15,6 +15,22 @@ import {
 import { streamAssistantTurn } from "@/modules/agent/lib/streamAssistantTurn";
 import type { WizardAgentContext } from "../types";
 import type { SessionMeta } from "../types";
+import { getStorageMode } from "@/lib/runtimeConfig";
+import { getLocalDataApi, isLocalDataAvailable } from "@/lib/localRepo";
+import { sessionRepo, memoryRepo } from "@modules/repository";
+import type { SessionScope } from "@modules/repository";
+
+async function isBrowserMode(): Promise<boolean> {
+  return (await getStorageMode()) === "browser";
+}
+
+function contextScope(context: WizardAgentContext): SessionScope {
+  return {
+    contentType: context.contentType,
+    courseId: context.courseId,
+    lessonId: context.lessonId,
+  };
+}
 
 function scopeQuery(context: WizardAgentContext): string {
   const params = new URLSearchParams({ contentType: context.contentType });
@@ -26,6 +42,17 @@ function scopeQuery(context: WizardAgentContext): string {
 async function fetchSessions(
   context: WizardAgentContext
 ): Promise<SessionMeta[]> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return [];
+    try {
+      return await sessionRepo.listSessions(
+        getLocalDataApi(),
+        contextScope(context)
+      );
+    } catch {
+      return [];
+    }
+  }
   try {
     const res = await fetch(
       `/api/wizard-agent/sessions?${scopeQuery(context)}`
@@ -42,6 +69,21 @@ async function fetchSession(
   context: WizardAgentContext,
   sessionId: string
 ): Promise<{ messages: AgentMessageState[]; meta: SessionMeta | null }> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return { messages: [], meta: null };
+    try {
+      const session = await sessionRepo.readSession(
+        getLocalDataApi(),
+        contextScope(context),
+        sessionId
+      );
+      if (!session) return { messages: [], meta: null };
+      const { messages, ...meta } = session;
+      return { messages: Array.isArray(messages) ? messages : [], meta };
+    } catch {
+      return { messages: [], meta: null };
+    }
+  }
   try {
     const res = await fetch(
       `/api/wizard-agent/sessions/${encodeURIComponent(sessionId)}?${scopeQuery(context)}`
@@ -76,6 +118,28 @@ async function saveSession(
   sessionId: string,
   messages: AgentMessageState[]
 ): Promise<SessionMeta | null> {
+  if (await isBrowserMode()) {
+    try {
+      const session = await sessionRepo.writeSession(
+        getLocalDataApi(),
+        contextScope(context),
+        sessionId,
+        messages
+      );
+      return {
+        id: session.id,
+        title: session.title,
+        createdAt: session.createdAt,
+        updatedAt: session.updatedAt,
+        scope: session.scope,
+      };
+    } catch (e) {
+      toast.error("Failed to save chat session", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+      return null;
+    }
+  }
   try {
     const res = await fetch(
       `/api/wizard-agent/sessions/${encodeURIComponent(sessionId)}?${scopeQuery(context)}`,
@@ -117,6 +181,20 @@ async function removeSession(
   context: WizardAgentContext,
   sessionId: string
 ): Promise<void> {
+  if (await isBrowserMode()) {
+    try {
+      await sessionRepo.deleteSession(
+        getLocalDataApi(),
+        contextScope(context),
+        sessionId
+      );
+    } catch (e) {
+      toast.error("Failed to delete chat session", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    }
+    return;
+  }
   try {
     const res = await fetch(
       `/api/wizard-agent/sessions/${encodeURIComponent(sessionId)}?${scopeQuery(context)}`,
@@ -220,12 +298,34 @@ export function useWizardAgent({
     getSystemPrompt
   );
 
+  // In browser mode the agent's memory lives in IndexedDB, so the client
+  // assembles the memory block and passes it in the request context (the server
+  // has no filesystem to read it from). Empty string in filesystem mode.
+  const [memoryContext, setMemoryContext] = useState("");
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      if ((await isBrowserMode()) && isLocalDataAvailable()) {
+        try {
+          const ctx = await memoryRepo.getMemoryContext(getLocalDataApi());
+          if (active) setMemoryContext(ctx);
+        } catch {
+          if (active) setMemoryContext("");
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const transportContext = useMemo(() => {
     const base: Record<string, unknown> = { ...context };
     if (contextPrompt) base.contextPrompt = contextPrompt;
     if (sourceIds && sourceIds.length > 0) base.sourceIds = sourceIds;
+    if (memoryContext) base.memoryContext = memoryContext;
     return base;
-  }, [context, contextPrompt, sourceIds]);
+  }, [context, contextPrompt, sourceIds, memoryContext]);
 
   const sessionDispatch = useCallback(
     (sessionId: string, action: MessagesAction) => {

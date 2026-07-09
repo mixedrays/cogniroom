@@ -10,6 +10,17 @@ import type {
 import { withReadMirror, writeCache, deleteCache } from "./clientStorage";
 import { enqueueDeckReview } from "./syncQueue";
 import { postJson, getJson } from "./apiClient";
+import { getStorageMode } from "./runtimeConfig";
+import { getLocalDataApi, isLocalDataAvailable } from "./localRepo";
+import { deckRepo } from "@modules/repository";
+import {
+  FlashcardsContentOutputSchema,
+  QuizContentOutputSchema,
+} from "@/modules/wizard-agent/lib/contentOutputSchemas";
+
+async function isBrowserMode(): Promise<boolean> {
+  return (await getStorageMode()) === "browser";
+}
 
 function getBaseUrl() {
   if (typeof window !== "undefined") return "";
@@ -23,6 +34,10 @@ const deckQuizKey = (id: string) => `cache/decks/${id}/quiz`;
 const deckReviewsKey = (id: string) => `cache/decks/${id}/reviews`;
 
 export async function listDecks(): Promise<DeckMetadata[]> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return [];
+    return deckRepo.listDecks(getLocalDataApi());
+  }
   const cached = await withReadMirror<DeckMetadata[]>(
     DECK_LIST_KEY,
     async () => {
@@ -43,6 +58,10 @@ export async function listDecks(): Promise<DeckMetadata[]> {
 }
 
 export async function getDeck(id: string): Promise<Deck | null> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return null;
+    return deckRepo.getDeck(getLocalDataApi(), id);
+  }
   return withReadMirror<Deck>(deckKey(id), async () => {
     try {
       const response = await fetch(`${getBaseUrl()}/api/decks/${id}`);
@@ -71,6 +90,39 @@ export interface CreateDeckInput {
 export async function createDeck(
   input: CreateDeckInput
 ): Promise<{ success: boolean; id?: string; error?: string }> {
+  if (await isBrowserMode()) {
+    let flashcards: FlashcardsContent | null = null;
+    let quiz: QuizContent | null = null;
+    if (input.content !== undefined && input.content !== null) {
+      if (input.kind === "flashcards") {
+        const parsed = FlashcardsContentOutputSchema.safeParse(input.content);
+        if (!parsed.success) {
+          return {
+            success: false,
+            error: `Invalid flashcards content: ${parsed.error.issues[0]?.message ?? "validation failed"}`,
+          };
+        }
+        flashcards = { version: 2, ...parsed.data };
+      } else {
+        const parsed = QuizContentOutputSchema.safeParse(input.content);
+        if (!parsed.success) {
+          return {
+            success: false,
+            error: `Invalid quiz content: ${parsed.error.issues[0]?.message ?? "validation failed"}`,
+          };
+        }
+        quiz = { version: 2, ...parsed.data };
+      }
+    }
+    return deckRepo.createDeck(getLocalDataApi(), {
+      title: input.title,
+      description: input.description,
+      kind: input.kind,
+      source: input.source,
+      flashcards,
+      quiz,
+    });
+  }
   return postJson<{ success: boolean; id?: string; error?: string }>(
     `${getBaseUrl()}/api/decks`,
     input,
@@ -81,6 +133,9 @@ export async function createDeck(
 export async function deleteDeck(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    return deckRepo.deleteDeck(getLocalDataApi(), id);
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/decks/${id}`, {
       method: "DELETE",
@@ -101,6 +156,10 @@ export async function deleteDeck(
 export async function getDeckFlashcards(
   id: string
 ): Promise<{ content: FlashcardsContent } | null> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return null;
+    return deckRepo.getDeckFlashcards(getLocalDataApi(), id);
+  }
   return withReadMirror<{ content: FlashcardsContent }>(
     deckFlashcardsKey(id),
     () =>
@@ -114,6 +173,10 @@ export async function getDeckFlashcards(
 export async function getDeckQuiz(
   id: string
 ): Promise<{ content: QuizContent } | null> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return null;
+    return deckRepo.getDeckQuiz(getLocalDataApi(), id);
+  }
   return withReadMirror<{ content: QuizContent }>(deckQuizKey(id), () =>
     getJson<{ content: QuizContent }>(
       `${getBaseUrl()}/api/decks/${id}/quiz`,
@@ -123,6 +186,10 @@ export async function getDeckQuiz(
 }
 
 export async function getDeckReviews(id: string): Promise<ReviewData | null> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return null;
+    return deckRepo.getDeckReviews(getLocalDataApi(), id);
+  }
   return withReadMirror<ReviewData>(deckReviewsKey(id), () =>
     getJson<ReviewData>(
       `${getBaseUrl()}/api/decks/${id}/reviews`,
@@ -137,6 +204,11 @@ export interface GenerateDeckOptions {
   generationOptions?: string;
 }
 
+/** Human-readable default title for a generated deck (e.g. "2026-07-09 13:40"). */
+function timestampTitle(): string {
+  return new Date().toISOString().slice(0, 16).replace("T", " ");
+}
+
 export async function generateFlashcardsDeck(
   options: GenerateDeckOptions = {}
 ): Promise<{
@@ -145,16 +217,21 @@ export async function generateFlashcardsDeck(
   content?: FlashcardsContent;
   error?: string;
 }> {
-  return postJson<{
+  const res = await postJson<{
     success: boolean;
-    id?: string;
     content?: FlashcardsContent;
     error?: string;
-  }>(
-    `${getBaseUrl()}/api/decks/flashcards/generate`,
-    options,
-    "Generate failed"
-  );
+  }>(`${getBaseUrl()}/api/decks/flashcards/generate`, options, "Generate failed");
+  if (!res.success || !res.content) return res;
+
+  const created = await createDeck({
+    title: timestampTitle(),
+    kind: "flashcards",
+    source: "llm",
+    content: res.content,
+  });
+  if (!created.success) return { success: false, error: created.error };
+  return { success: true, id: created.id, content: res.content };
 }
 
 export async function generateQuizDeck(
@@ -165,18 +242,30 @@ export async function generateQuizDeck(
   content?: QuizContent;
   error?: string;
 }> {
-  return postJson<{
+  const res = await postJson<{
     success: boolean;
-    id?: string;
     content?: QuizContent;
     error?: string;
   }>(`${getBaseUrl()}/api/decks/quiz/generate`, options, "Generate failed");
+  if (!res.success || !res.content) return res;
+
+  const created = await createDeck({
+    title: timestampTitle(),
+    kind: "quiz",
+    source: "llm",
+    content: res.content,
+  });
+  if (!created.success) return { success: false, error: created.error };
+  return { success: true, id: created.id, content: res.content };
 }
 
 export async function saveDeckReviews(
   id: string,
   data: ReviewData
 ): Promise<{ success: boolean; error?: string; queued?: boolean }> {
+  if (await isBrowserMode()) {
+    return deckRepo.saveDeckReviews(getLocalDataApi(), id, data);
+  }
   void writeCache(deckReviewsKey(id), data);
   try {
     const response = await fetch(`${getBaseUrl()}/api/decks/${id}/reviews`, {

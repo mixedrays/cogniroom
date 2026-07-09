@@ -1,6 +1,7 @@
-import { defineEventHandler, getRouterParam } from "h3";
+import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { settingsStorage } from "@root/server/lib/settingsStorage";
 import { toErrorMessage } from "@root/server/lib/errors";
+import { assertServerStorageEnabled } from "@root/server/lib/assertServerStorageEnabled";
 
 interface HistoryEntry {
   id: string;
@@ -16,6 +17,7 @@ interface History {
 
 export default defineEventHandler(async (event) => {
   try {
+    assertServerStorageEnabled();
     const id = getRouterParam(event, "id");
 
     if (!id) {
@@ -44,6 +46,7 @@ export default defineEventHandler(async (event) => {
 
     return { success: true };
   } catch (error: unknown) {
+    if (error instanceof HTTPError) throw error;
     console.error("Error deleting history entry:", error);
     return { success: false, error: toErrorMessage(error) };
   }

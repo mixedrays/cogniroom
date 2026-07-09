@@ -1,6 +1,6 @@
 import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
-import { storagePaths } from "@root/server/lib/storagePaths";
+import { deckRepo } from "@modules/repository";
 import type { Deck } from "@modules/core";
 
 export default defineEventHandler(async (event): Promise<Deck> => {
@@ -8,16 +8,9 @@ export default defineEventHandler(async (event): Promise<Deck> => {
   if (!id) {
     throw new HTTPError({ status: 400, message: "Missing deck ID" });
   }
-  const response = await storageApi.get<string>(storagePaths.deck(id));
-  if (!response.ok) {
-    throw new HTTPError({
-      status: response.status,
-      message: response.status === 404 ? "Deck not found" : (response.error ?? response.statusText),
-    });
+  const deck = await deckRepo.getDeck(storageApi, id);
+  if (!deck) {
+    throw new HTTPError({ status: 404, message: "Deck not found" });
   }
-  try {
-    return JSON.parse(await response.text()) as Deck;
-  } catch {
-    throw new HTTPError({ status: 500, message: "Failed to parse deck" });
-  }
+  return deck;
 });

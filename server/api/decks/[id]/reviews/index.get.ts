@@ -1,7 +1,6 @@
 import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
-import { storagePaths } from "@root/server/lib/storagePaths";
-import type { ReviewData } from "@modules/core";
+import { deckRepo } from "@modules/repository";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
 export default defineEventHandler(
@@ -10,12 +9,10 @@ export default defineEventHandler(
     if (!id) {
       throw new HTTPError({ status: 400, message: "Missing deck ID" });
     }
-    const response = await storageApi.get<ReviewData>(
-      storagePaths.deckReviews(id)
-    );
-    if (response.ok) {
-      return await response.json();
+    const result = await deckRepo.getDeckReviews(storageApi, id);
+    if (!result) {
+      throw new HTTPError({ status: 404, message: "Reviews not found" });
     }
-    throw new HTTPError({ status: 404, message: "Reviews not found" });
+    return result;
   })
 );

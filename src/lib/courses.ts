@@ -9,6 +9,15 @@ import type {
 import { withReadMirror, writeCache, deleteCache } from "./clientStorage";
 import { enqueueFlashcardsReview } from "./syncQueue";
 import { postJson, getJson } from "./apiClient";
+import { getStorageMode } from "./runtimeConfig";
+import { getLocalDataApi, isLocalDataAvailable } from "./localRepo";
+import { courseRepo } from "@modules/repository";
+import { findLessonInCourse } from "@modules/core";
+import type { LessonGenerationContext } from "@modules/core";
+import {
+  FlashcardsContentOutputSchema,
+  QuizContentOutputSchema,
+} from "@/modules/wizard-agent/lib/contentOutputSchemas";
 
 const COURSE_LIST_KEY = "cache/courses/index";
 const courseKey = (id: string) => `cache/courses/${id}`;
@@ -25,6 +34,45 @@ const reviewsKey = (cid: string, lid: string) =>
 
 export type CourseSkillLevel = "beginner" | "intermediate" | "advanced";
 
+/** True when the browser's IndexedDB is the authoritative store. */
+async function isBrowserMode(): Promise<boolean> {
+  return (await getStorageMode()) === "browser";
+}
+
+/**
+ * Assemble the lesson context the stateless generation endpoints need, from
+ * data the client already holds (mode-dispatched reads). Returns null when the
+ * course or lesson is missing. When `includeLessonTheory` is set, the saved
+ * lesson theory is attached for the "include lesson content" generation option.
+ */
+async function buildLessonContext(
+  courseId: string,
+  lessonId: string,
+  includeLessonTheory: boolean
+): Promise<LessonGenerationContext | null> {
+  const course = await getCourse(courseId);
+  if (!course) return null;
+  const found = findLessonInCourse(course, lessonId);
+  if (!found) return null;
+
+  const context: LessonGenerationContext = {
+    courseTitle: course.title,
+    topicTitle: found.topic.title,
+    topicDescription: found.topic.description ?? "",
+    lessonTitle: found.lesson.title,
+    lessonDescription: found.lesson.description ?? "",
+  };
+
+  if (includeLessonTheory) {
+    const lesson = await getLesson(courseId, lessonId);
+    if (lesson?.content?.trim()) {
+      context.lessonContent = lesson.content;
+    }
+  }
+
+  return context;
+}
+
 function getBaseUrl() {
   if (typeof window !== "undefined") return "";
   return "http://localhost:3000";
@@ -34,6 +82,10 @@ function getBaseUrl() {
 
 // List all courses
 export async function listCourses(): Promise<CourseMetadata[]> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return [];
+    return courseRepo.listCourses(getLocalDataApi());
+  }
   const cached = await withReadMirror<CourseMetadata[]>(
     COURSE_LIST_KEY,
     async () => {
@@ -57,6 +109,9 @@ export async function listCourses(): Promise<CourseMetadata[]> {
 export async function saveCourse(
   course: Course
 ): Promise<{ success: boolean; id?: string; error?: string }> {
+  if (await isBrowserMode()) {
+    return courseRepo.createCourse(getLocalDataApi(), course);
+  }
   return postJson<{ success: boolean; id?: string; error?: string }>(
     `${getBaseUrl()}/api/courses`,
     course,
@@ -101,6 +156,10 @@ export async function generateCourse(params: {
 
 // Get a single course
 export async function getCourse(id: string): Promise<Course | null> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return null;
+    return courseRepo.getCourse(getLocalDataApi(), id);
+  }
   return withReadMirror<Course>(courseKey(id), async () => {
     try {
       const url = `${getBaseUrl()}/api/courses/${id}`;
@@ -125,6 +184,9 @@ export async function getCourse(id: string): Promise<Course | null> {
 export async function deleteCourse(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    return courseRepo.deleteCourse(getLocalDataApi(), id);
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/courses/${id}`, {
       method: "DELETE",
@@ -147,6 +209,9 @@ export async function deleteLessonContent(
   courseId: string,
   lessonId: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    return courseRepo.deleteLessonContent(getLocalDataApi(), courseId, lessonId);
+  }
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}`,
@@ -172,26 +237,41 @@ export async function generateLessonFlashcards(
   lessonId: string,
   options: GenerateLessonContentOptions = {}
 ): Promise<{ success: boolean; content?: FlashcardsContent; error?: string }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards/generate`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(options),
-      }
-    );
-    return await response.json();
-  } catch (e) {
-    console.error("Error generating flashcards:", e);
-    return { success: false, error: String(e) };
+  const context = await buildLessonContext(
+    courseId,
+    lessonId,
+    options.includeContent !== false
+  );
+  if (!context) {
+    return { success: false, error: "Lesson not found in course" };
   }
+  const res = await postJson<{
+    success: boolean;
+    content?: FlashcardsContent;
+    error?: string;
+  }>(
+    `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards/generate`,
+    { ...options, context },
+    "Generate failed"
+  );
+  if (!res.success || !res.content) return res;
+
+  const save = await saveLessonFlashcards(courseId, lessonId, res.content);
+  if (!save.success) return { success: false, error: save.error };
+  return { success: true, content: res.content };
 }
 
 export async function deleteLessonFlashcards(
   courseId: string,
   lessonId: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    return courseRepo.deleteLessonFlashcards(
+      getLocalDataApi(),
+      courseId,
+      lessonId
+    );
+  }
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards`,
@@ -209,26 +289,37 @@ export async function generateLessonQuiz(
   lessonId: string,
   options: GenerateLessonContentOptions = {}
 ): Promise<{ success: boolean; content?: QuizContent; error?: string }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz/generate`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(options),
-      }
-    );
-    return await response.json();
-  } catch (e) {
-    console.error("Error generating quiz:", e);
-    return { success: false, error: String(e) };
+  const context = await buildLessonContext(
+    courseId,
+    lessonId,
+    options.includeContent !== false
+  );
+  if (!context) {
+    return { success: false, error: "Lesson not found in course" };
   }
+  const res = await postJson<{
+    success: boolean;
+    content?: QuizContent;
+    error?: string;
+  }>(
+    `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz/generate`,
+    { ...options, context },
+    "Generate failed"
+  );
+  if (!res.success || !res.content) return res;
+
+  const save = await saveLessonQuiz(courseId, lessonId, res.content);
+  if (!save.success) return { success: false, error: save.error };
+  return { success: true, content: res.content };
 }
 
 export async function deleteLessonQuiz(
   courseId: string,
   lessonId: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    return courseRepo.deleteLessonQuiz(getLocalDataApi(), courseId, lessonId);
+  }
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz`,
@@ -246,6 +337,13 @@ export async function deleteLessonExercises(
   courseId: string,
   lessonId: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    return courseRepo.deleteLessonExercises(
+      getLocalDataApi(),
+      courseId,
+      lessonId
+    );
+  }
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises`,
@@ -263,6 +361,10 @@ export async function getLesson(
   courseId: string,
   lessonId: string
 ): Promise<{ content: string } | null> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return null;
+    return courseRepo.getLessonContent(getLocalDataApi(), courseId, lessonId);
+  }
   return withReadMirror<{ content: string }>(
     lessonKey(courseId, lessonId),
     () =>
@@ -277,6 +379,10 @@ export async function getLessonFlashcards(
   courseId: string,
   lessonId: string
 ): Promise<{ content: FlashcardsContent } | null> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return null;
+    return courseRepo.getLessonFlashcards(getLocalDataApi(), courseId, lessonId);
+  }
   return withReadMirror<{ content: FlashcardsContent }>(
     flashcardsKey(courseId, lessonId),
     () =>
@@ -291,6 +397,10 @@ export async function getLessonQuiz(
   courseId: string,
   lessonId: string
 ): Promise<{ content: QuizContent } | null> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return null;
+    return courseRepo.getLessonQuiz(getLocalDataApi(), courseId, lessonId);
+  }
   return withReadMirror<{ content: QuizContent }>(
     quizKey(courseId, lessonId),
     () =>
@@ -305,6 +415,14 @@ export async function getFlashcardsReviews(
   courseId: string,
   lessonId: string
 ): Promise<ReviewData | null> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return null;
+    return courseRepo.getFlashcardsReviews(
+      getLocalDataApi(),
+      courseId,
+      lessonId
+    );
+  }
   return withReadMirror<ReviewData>(reviewsKey(courseId, lessonId), () =>
     getJson<ReviewData>(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/reviews`,
@@ -318,6 +436,14 @@ export async function saveFlashcardsReviews(
   lessonId: string,
   data: ReviewData
 ): Promise<{ success: boolean; error?: string; queued?: boolean }> {
+  if (await isBrowserMode()) {
+    return courseRepo.saveFlashcardsReviews(
+      getLocalDataApi(),
+      courseId,
+      lessonId,
+      data
+    );
+  }
   void writeCache(reviewsKey(courseId, lessonId), data);
   try {
     const response = await fetch(
@@ -343,6 +469,10 @@ export async function getLessonExercises(
   courseId: string,
   lessonId: string
 ): Promise<{ content: string } | null> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return null;
+    return courseRepo.getLessonExercises(getLocalDataApi(), courseId, lessonId);
+  }
   return withReadMirror<{ content: string }>(
     exercisesKey(courseId, lessonId),
     () =>
@@ -353,29 +483,30 @@ export async function getLessonExercises(
   );
 }
 
-// Generate lesson content
+// Generate lesson content (stateless endpoint; client builds context + persists)
 export async function generateLesson(
   courseId: string,
   lessonId: string,
   options: GenerateLessonContentOptions = {}
 ): Promise<{ success: boolean; content?: string; error?: string }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/generate`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(options),
-      }
-    );
-
-    return await response.json();
-  } catch (e) {
-    console.error("Error generating lesson:", e);
-    return { success: false, error: String(e) };
+  const context = await buildLessonContext(courseId, lessonId, false);
+  if (!context) {
+    return { success: false, error: "Lesson not found in course" };
   }
+  const res = await postJson<{
+    success: boolean;
+    content?: string;
+    error?: string;
+  }>(
+    `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/generate`,
+    { ...options, context },
+    "Generate failed"
+  );
+  if (!res.success || res.content === undefined) return res;
+
+  const save = await saveLessonContent(courseId, lessonId, res.content);
+  if (!save.success) return { success: false, error: save.error };
+  return { success: true, content: res.content };
 }
 
 export async function generateLessonExercises(
@@ -383,23 +514,28 @@ export async function generateLessonExercises(
   lessonId: string,
   options: GenerateLessonContentOptions = {}
 ): Promise<{ success: boolean; content?: string; error?: string }> {
-  try {
-    const response = await fetch(
-      `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises/generate`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(options),
-      }
-    );
-
-    return await response.json();
-  } catch (e) {
-    console.error("Error generating lesson exercises:", e);
-    return { success: false, error: String(e) };
+  const context = await buildLessonContext(
+    courseId,
+    lessonId,
+    options.includeContent !== false
+  );
+  if (!context) {
+    return { success: false, error: "Lesson not found in course" };
   }
+  const res = await postJson<{
+    success: boolean;
+    content?: string;
+    error?: string;
+  }>(
+    `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises/generate`,
+    { ...options, context },
+    "Generate failed"
+  );
+  if (!res.success || res.content === undefined) return res;
+
+  const save = await saveLessonExercises(courseId, lessonId, res.content);
+  if (!save.success) return { success: false, error: save.error };
+  return { success: true, content: res.content };
 }
 
 export async function saveLessonContent(
@@ -407,6 +543,14 @@ export async function saveLessonContent(
   lessonId: string,
   content: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    return courseRepo.saveLessonContent(
+      getLocalDataApi(),
+      courseId,
+      lessonId,
+      content
+    );
+  }
   return postJson(
     `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/save`,
     { content },
@@ -419,6 +563,19 @@ export async function saveLessonQuiz(
   lessonId: string,
   content: unknown
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    const parsed = QuizContentOutputSchema.safeParse(content);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: `Invalid quiz content: ${parsed.error.issues[0]?.message ?? "validation failed"}`,
+      };
+    }
+    return courseRepo.saveLessonQuiz(getLocalDataApi(), courseId, lessonId, {
+      version: 2,
+      ...parsed.data,
+    });
+  }
   return postJson(
     `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/quiz/save`,
     { content },
@@ -431,6 +588,21 @@ export async function saveLessonFlashcards(
   lessonId: string,
   content: unknown
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    const parsed = FlashcardsContentOutputSchema.safeParse(content);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: `Invalid flashcards content: ${parsed.error.issues[0]?.message ?? "validation failed"}`,
+      };
+    }
+    return courseRepo.saveLessonFlashcards(
+      getLocalDataApi(),
+      courseId,
+      lessonId,
+      { version: 2, ...parsed.data }
+    );
+  }
   return postJson(
     `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/flashcards/save`,
     { content },
@@ -443,6 +615,14 @@ export async function saveLessonExercises(
   lessonId: string,
   content: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    return courseRepo.saveLessonExercises(
+      getLocalDataApi(),
+      courseId,
+      lessonId,
+      content
+    );
+  }
   return postJson(
     `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}/exercises/save`,
     { content },
@@ -456,6 +636,19 @@ export async function updateLessonCompletion(
   completed: boolean,
   section: LessonSection = "theory"
 ): Promise<{ success: boolean; completed?: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    const result = await courseRepo.updateLessonCompletion(
+      getLocalDataApi(),
+      courseId,
+      lessonId,
+      completed,
+      section
+    );
+    if (!result) {
+      return { success: false, error: "Lesson not found in course" };
+    }
+    return { success: true, completed: result.completed };
+  }
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/courses/${courseId}/lessons/${lessonId}`,

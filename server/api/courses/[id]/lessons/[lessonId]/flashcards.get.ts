@@ -1,7 +1,6 @@
 import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
-import { getFormatAdapter } from "@modules/content-formats";
-import { storagePaths } from "@root/server/lib/storagePaths";
+import { courseRepo } from "@modules/repository";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
 export default defineEventHandler(
@@ -16,19 +15,14 @@ export default defineEventHandler(
       });
     }
 
-    const flashcardsAdapter = getFormatAdapter("flashcards");
-    const response = await storageApi.get<string>(
-      storagePaths.flashcards(courseId, lessonId)
+    const result = await courseRepo.getLessonFlashcards(
+      storageApi,
+      courseId,
+      lessonId
     );
-    if (response.ok) {
-      const text = await response.text();
-      const content = flashcardsAdapter.deserialize(text);
-      return { content };
+    if (!result) {
+      throw new HTTPError({ status: 404, message: "Flashcards not found" });
     }
-
-    throw new HTTPError({
-      status: 404,
-      message: "Flashcards not found",
-    });
+    return result;
   })
 );

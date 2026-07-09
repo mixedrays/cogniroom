@@ -1,3 +1,11 @@
+import { getStorageMode } from "./runtimeConfig";
+import { getLocalDataApi, isLocalDataAvailable } from "./localRepo";
+import {
+  getAllPromptsLocal,
+  savePromptLocal,
+  resetPromptLocal,
+} from "./promptsLocal";
+
 export interface PromptInfo {
   id: string;
   label: string;
@@ -7,6 +15,10 @@ export interface PromptInfo {
   defaultContent: string;
   content: string;
   isCustomized: boolean;
+}
+
+async function isBrowserMode(): Promise<boolean> {
+  return (await getStorageMode()) === "browser";
 }
 
 function getBaseUrl() {
@@ -19,6 +31,17 @@ export async function getPrompts(): Promise<{
   prompts: PromptInfo[];
   error?: string;
 }> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return { success: true, prompts: [] };
+    try {
+      return {
+        success: true,
+        prompts: await getAllPromptsLocal(getLocalDataApi()),
+      };
+    } catch (e) {
+      return { success: false, prompts: [], error: String(e) };
+    }
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/prompts`);
     if (!response.ok) {
@@ -34,6 +57,9 @@ export async function savePrompt(
   id: string,
   content: string
 ): Promise<{ success: boolean; content?: string; error?: string }> {
+  if (await isBrowserMode()) {
+    return savePromptLocal(getLocalDataApi(), id, content);
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/prompts/${id}`, {
       method: "PUT",
@@ -49,6 +75,9 @@ export async function savePrompt(
 export async function resetPrompt(
   id: string
 ): Promise<{ success: boolean; content?: string; error?: string }> {
+  if (await isBrowserMode()) {
+    return resetPromptLocal(getLocalDataApi(), id);
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/prompts/${id}`, {
       method: "DELETE",

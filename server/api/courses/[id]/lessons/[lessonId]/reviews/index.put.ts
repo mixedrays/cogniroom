@@ -1,11 +1,13 @@
 import { defineEventHandler, getRouterParam, readBody, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
-import { storagePaths } from "@root/server/lib/storagePaths";
 import { reviewDataSchema } from "@modules/core";
+import { courseRepo } from "@modules/repository";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
+import { assertServerStorageEnabled } from "@root/server/lib/assertServerStorageEnabled";
 
 export default defineEventHandler(
   withErrorGuard("Failed to save reviews", async (event) => {
+    assertServerStorageEnabled();
     const courseId = getRouterParam(event, "id");
     const lessonId = getRouterParam(event, "lessonId");
 
@@ -17,7 +19,6 @@ export default defineEventHandler(
     }
 
     const parsed = reviewDataSchema.safeParse(await readBody(event));
-
     if (!parsed.success) {
       throw new HTTPError({
         status: 400,
@@ -25,8 +26,11 @@ export default defineEventHandler(
       });
     }
 
-    await storageApi.put(storagePaths.reviews(courseId, lessonId), parsed.data);
-
-    return { success: true };
+    return courseRepo.saveFlashcardsReviews(
+      storageApi,
+      courseId,
+      lessonId,
+      parsed.data
+    );
   })
 );

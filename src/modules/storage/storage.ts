@@ -22,30 +22,17 @@ export function initStorage(adapter: StorageAdapter): void {
   defaultAdapter = adapter;
 }
 
-const ADAPTER_TYPES: ReadonlyArray<NonNullable<StorageConfig["adapter"]>> = [
-  "filesystem",
-  "indexeddb",
-];
-
-function adapterTypeFromEnv(): StorageConfig["adapter"] {
-  const value = process.env.STORAGE_ADAPTER;
-  if (!value) return "filesystem";
-  if ((ADAPTER_TYPES as string[]).includes(value)) {
-    return value as StorageConfig["adapter"];
-  }
-  throw new Error(
-    `Invalid STORAGE_ADAPTER "${value}". Expected one of: ${ADAPTER_TYPES.join(", ")}`
-  );
-}
-
 /**
- * Get the current adapter, initializing from environment defaults if needed
+ * Get the current adapter, initializing from environment defaults if needed.
+ * The server adapter is always the filesystem; the only user-facing switch is
+ * `STORAGE_MODE` (see `server/env.ts`), which routes writes to the browser's
+ * IndexedDB via the client data layer rather than swapping the server adapter.
  */
 export function getAdapter(): StorageAdapter {
   if (!defaultAdapter) {
     defaultAdapter = createStorage({
       basePath: process.env.DATA_PATH || "./data",
-      adapter: adapterTypeFromEnv(),
+      adapter: "filesystem",
     });
   }
   return defaultAdapter;

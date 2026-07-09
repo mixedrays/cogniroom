@@ -1,18 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { readdirSync } from "node:fs";
 import { defineEventHandler, readBody } from "h3";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { getLanguageModel, resolveModelId } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { storageApi } from "@modules/storage";
-import { getFormatAdapter } from "@modules/content-formats";
-import { storagePaths } from "@root/server/lib/storagePaths";
 import { composeAdditionalInstructions } from "@root/server/lib/composeAdditionalInstructions";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
-import { DECKS_DIR } from "@root/server/env";
-import { generateUniqueDeckId } from "@modules/core";
-import type { Deck, FlashcardsContent } from "@modules/core";
+import type { FlashcardsContent } from "@modules/core";
 
 const FlashcardsDraftSchema = z.object({
   flashcards: z.array(
@@ -25,10 +19,10 @@ const FlashcardsDraftSchema = z.object({
   ),
 });
 
-function timestampTitle(): string {
-  return new Date().toISOString().slice(0, 16).replace("T", " ");
-}
-
+/**
+ * Stateless: returns generated flashcards without creating a deck. The client
+ * persists the deck via the mode-dispatched `createDeck`.
+ */
 export default defineEventHandler(
   withErrorGuard("Failed to generate flashcards deck", async (event) => {
     const body = await readBody<{
@@ -70,30 +64,6 @@ export default defineEventHandler(
       })),
     };
 
-    const title = timestampTitle();
-    let existingIds: string[] = [];
-    try {
-      existingIds = readdirSync(DECKS_DIR);
-    } catch {}
-    const id = generateUniqueDeckId(title, existingIds);
-
-    const now = new Date().toISOString();
-    const deck: Deck = {
-      id,
-      title,
-      kind: "flashcards",
-      source: "llm",
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    await storageApi.post(storagePaths.deck(id), JSON.stringify(deck, null, 2));
-    const adapter = getFormatAdapter("flashcards");
-    await storageApi.post(
-      storagePaths.deckFlashcards(id),
-      adapter.serialize(content)
-    );
-
-    return { success: true, id, content };
+    return { success: true, content };
   })
 );

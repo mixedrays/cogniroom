@@ -138,8 +138,27 @@ export const sourceSchema = z.object({
   updatedAt: z.string(),
 });
 
+/**
+ * Lesson context supplied by the client to the stateless generation endpoints.
+ * Mirrors the inputs of `buildLessonPromptVars`. In browser mode the server has
+ * no filesystem to read the course from, so the client sends what the prompt
+ * needs; `lessonContent` is the raw saved theory (the server wraps it into the
+ * prompt's theory block).
+ */
+export const lessonGenerationContextSchema = z.object({
+  courseTitle: z.string(),
+  topicTitle: z.string(),
+  topicDescription: z.string().optional(),
+  lessonTitle: z.string(),
+  lessonDescription: z.string().optional(),
+  lessonContent: z.string().optional(),
+});
+
 export type CourseCreateInput = z.infer<typeof courseCreateSchema>;
 export type LessonCompletionUpdate = z.infer<
   typeof lessonCompletionUpdateSchema
 >;
 export type LessonContentInput = z.infer<typeof lessonContentSchema>;
+export type LessonGenerationContext = z.infer<
+  typeof lessonGenerationContextSchema
+>;

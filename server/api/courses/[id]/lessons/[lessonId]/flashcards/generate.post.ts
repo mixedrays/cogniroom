@@ -1,19 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
+import { defineEventHandler, readBody, HTTPError } from "h3";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { getLanguageModel, resolveModelId } from "@root/server/lib/llm";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
-import { storageApi } from "@modules/storage";
-import { getFormatAdapter } from "@modules/content-formats";
-import { storagePaths } from "@root/server/lib/storagePaths";
 import { composeAdditionalInstructions } from "@root/server/lib/composeAdditionalInstructions";
-import {
-  loadLessonContext,
-  loadLessonTheoryBlock,
-  buildLessonPromptVars,
-} from "@root/server/lib/lessonContext";
+import { buildLessonPromptVarsFromContext } from "@root/server/lib/lessonContext";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
+import { lessonGenerationContextSchema } from "@modules/core";
 
 const FlashcardsDraftSchema = z.object({
   flashcards: z.array(
@@ -26,41 +20,38 @@ const FlashcardsDraftSchema = z.object({
   ),
 });
 
+/**
+ * Stateless: returns generated flashcards without persisting. The client saves
+ * via the mode-dispatched `saveLessonFlashcards`. The optional "include lesson
+ * theory" is supplied by the client in `context.lessonContent`.
+ */
 export default defineEventHandler(
   withErrorGuard("Failed to generate flashcards", async (event) => {
-    const courseId = getRouterParam(event, "id");
-    const lessonId = getRouterParam(event, "lessonId");
     const body = await readBody<{
+      context?: unknown;
       additionalInstructions?: string;
       model?: string;
-      includeContent?: boolean;
       generationOptions?: string;
     }>(event);
-    const model = resolveModelId(body?.model);
 
-    if (!courseId || !lessonId) {
+    const parsedContext = lessonGenerationContextSchema.safeParse(body?.context);
+    if (!parsedContext.success) {
       throw new HTTPError({
         status: 400,
-        message: "Missing courseId or lessonId",
+        message: `Invalid lesson context: ${parsedContext.error.issues[0]?.message ?? "validation failed"}`,
       });
     }
 
-    const ctx = await loadLessonContext(courseId, lessonId);
+    const model = resolveModelId(body?.model);
 
     const additionalInstructions = await composeAdditionalInstructions(
       body?.generationOptions,
       body?.additionalInstructions
     );
 
-    const lessonContent = await loadLessonTheoryBlock(
-      courseId,
-      lessonId,
-      body?.includeContent !== false
-    );
-
     const prompt = await getRenderedPrompt(
       "flashcards-generation",
-      buildLessonPromptVars(ctx, additionalInstructions, lessonContent)
+      buildLessonPromptVarsFromContext(parsedContext.data, additionalInstructions)
     );
 
     const result = await generateText({
@@ -85,12 +76,6 @@ export default defineEventHandler(
         difficulty: card.difficulty,
       })),
     };
-
-    const flashcardsAdapter = getFormatAdapter("flashcards");
-    await storageApi.put(
-      storagePaths.flashcards(courseId, lessonId),
-      flashcardsAdapter.serialize(content)
-    );
 
     return { success: true, content };
   })

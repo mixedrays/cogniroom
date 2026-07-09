@@ -15250,6 +15250,14 @@ var sourceSchema = external_exports.object({
   createdAt: external_exports.string(),
   updatedAt: external_exports.string()
 });
+var lessonGenerationContextSchema = external_exports.object({
+  courseTitle: external_exports.string(),
+  topicTitle: external_exports.string(),
+  topicDescription: external_exports.string().optional(),
+  lessonTitle: external_exports.string(),
+  lessonDescription: external_exports.string().optional(),
+  lessonContent: external_exports.string().optional()
+});
 
 // src/modules/md-formats/course.ts
 function courseToMd(course) {

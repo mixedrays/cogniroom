@@ -23,10 +23,22 @@ import {
 import { ErrorState } from "@/components/ErrorState";
 import { cn } from "@/lib/utils";
 import type { SessionMeta } from "@/modules/wizard-agent";
+import { getStorageMode } from "@/lib/runtimeConfig";
+import { getLocalDataApi, isLocalDataAvailable } from "@/lib/localRepo";
+import { sessionRepo } from "@modules/repository";
 
 const SCOPE_QUERY = "contentType=roadmap";
+const ROADMAP_SCOPE = { contentType: "roadmap" as const };
+
+async function isBrowserMode(): Promise<boolean> {
+  return (await getStorageMode()) === "browser";
+}
 
 async function fetchRoadmapSessions(): Promise<SessionMeta[]> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return [];
+    return sessionRepo.listSessions(getLocalDataApi(), ROADMAP_SCOPE);
+  }
   const res = await fetch(`/api/wizard-agent/sessions?${SCOPE_QUERY}`);
   if (!res.ok) return [];
   const data = await res.json();
@@ -34,6 +46,10 @@ async function fetchRoadmapSessions(): Promise<SessionMeta[]> {
 }
 
 async function deleteRoadmapSession(id: string): Promise<void> {
+  if (await isBrowserMode()) {
+    await sessionRepo.deleteSession(getLocalDataApi(), ROADMAP_SCOPE, id);
+    return;
+  }
   const res = await fetch(
     `/api/wizard-agent/sessions/${encodeURIComponent(id)}?${SCOPE_QUERY}`,
     { method: "DELETE" }

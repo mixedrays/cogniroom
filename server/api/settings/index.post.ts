@@ -1,7 +1,8 @@
-import { defineEventHandler, readBody } from "h3";
+import { defineEventHandler, readBody, HTTPError } from "h3";
 import { settingsStorage } from "@root/server/lib/settingsStorage";
 import { v4 as uuid } from "uuid";
 import { toErrorMessage } from "@root/server/lib/errors";
+import { assertServerStorageEnabled } from "@root/server/lib/assertServerStorageEnabled";
 
 const VALID_MODES = ["light", "dark", "system"];
 
@@ -105,6 +106,7 @@ async function saveHistory(history: History): Promise<void> {
 
 export default defineEventHandler(async (event) => {
   try {
+    assertServerStorageEnabled();
     const body = await readBody<{
       settings: Settings;
       description?: string;
@@ -153,6 +155,7 @@ export default defineEventHandler(async (event) => {
 
     return { success: true, settings };
   } catch (error: unknown) {
+    if (error instanceof HTTPError) throw error;
     console.error("Error saving settings:", error);
     return { success: false, error: toErrorMessage(error) };
   }

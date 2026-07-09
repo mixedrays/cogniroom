@@ -1,7 +1,6 @@
 import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
-import { getFormatAdapter } from "@modules/content-formats";
-import { storagePaths } from "@root/server/lib/storagePaths";
+import { courseRepo } from "@modules/repository";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
 export default defineEventHandler(
@@ -16,19 +15,14 @@ export default defineEventHandler(
       });
     }
 
-    const quizAdapter = getFormatAdapter("quiz");
-    const response = await storageApi.get<string>(
-      storagePaths.quiz(courseId, lessonId)
+    const result = await courseRepo.getLessonQuiz(
+      storageApi,
+      courseId,
+      lessonId
     );
-    if (response.ok) {
-      const text = await response.text();
-      const content = quizAdapter.deserialize(text);
-      return { content };
+    if (!result) {
+      throw new HTTPError({ status: 404, message: "Quiz not found" });
     }
-
-    throw new HTTPError({
-      status: 404,
-      message: "Quiz not found",
-    });
+    return result;
   })
 );

@@ -1,10 +1,11 @@
 import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
-import { getFormatAdapter } from "@modules/content-formats";
-import { storagePaths } from "@root/server/lib/storagePaths";
 import { FlashcardsContentOutputSchema } from "@/modules/wizard-agent/lib/contentOutputSchemas";
+import { courseRepo } from "@modules/repository";
+import { assertServerStorageEnabled } from "@root/server/lib/assertServerStorageEnabled";
 
 export default defineEventHandler(async (event) => {
+  assertServerStorageEnabled();
   const courseId = getRouterParam(event, "id");
   const lessonId = getRouterParam(event, "lessonId");
 
@@ -24,12 +25,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const content = { version: 2 as const, ...parsed.data };
-
-  const adapter = getFormatAdapter("flashcards");
-  await storageApi.put(
-    storagePaths.flashcards(courseId, lessonId),
-    adapter.serialize(content)
-  );
-  return { success: true };
+  return courseRepo.saveLessonFlashcards(storageApi, courseId, lessonId, {
+    version: 2,
+    ...parsed.data,
+  });
 });

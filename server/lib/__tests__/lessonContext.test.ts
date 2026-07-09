@@ -22,6 +22,8 @@ import {
   loadLessonContext,
   loadLessonTheoryBlock,
   buildLessonPromptVars,
+  formatLessonTheoryBlock,
+  buildLessonPromptVarsFromContext,
 } from "../lessonContext";
 
 const course: Course = {
@@ -158,5 +160,53 @@ describe("buildLessonPromptVars", () => {
   it("includes the supplied lesson content block", () => {
     const vars = buildLessonPromptVars(ctx, "", "\n\nLesson Theory...");
     expect(vars.lessonContent).toBe("\n\nLesson Theory...");
+  });
+});
+
+describe("formatLessonTheoryBlock", () => {
+  it("returns an empty string for blank/absent text", () => {
+    expect(formatLessonTheoryBlock(undefined)).toBe("");
+    expect(formatLessonTheoryBlock("   ")).toBe("");
+  });
+
+  it("wraps trimmed text identically to loadLessonTheoryBlock", () => {
+    expect(formatLessonTheoryBlock("  body  ")).toBe(
+      "\n\nLesson Theory Content:\n---\nbody\n---"
+    );
+  });
+});
+
+describe("buildLessonPromptVarsFromContext", () => {
+  it("maps a client-supplied context and wraps its lesson theory", () => {
+    const vars = buildLessonPromptVarsFromContext(
+      {
+        courseTitle: "Course One",
+        topicTitle: "Topic One",
+        topicDescription: "Topic desc",
+        lessonTitle: "Lesson One",
+        lessonDescription: "Lesson desc",
+        lessonContent: "raw theory",
+      },
+      "\nextra"
+    );
+    expect(vars).toEqual({
+      courseTitle: "Course One",
+      topicTitle: "Topic One",
+      topicDescription: "Topic desc",
+      lessonTitle: "Lesson One",
+      lessonDescription: "Lesson desc",
+      lessonContent: "\n\nLesson Theory Content:\n---\nraw theory\n---",
+      additionalInstructions: "\nextra",
+    });
+  });
+
+  it("defaults optional fields and omits the theory block when absent", () => {
+    const vars = buildLessonPromptVarsFromContext(
+      { courseTitle: "C", topicTitle: "T", lessonTitle: "L" },
+      ""
+    );
+    expect(vars.topicDescription).toBe("");
+    expect(vars.lessonDescription).toBe("");
+    expect(vars.lessonContent).toBe("");
   });
 });

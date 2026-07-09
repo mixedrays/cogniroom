@@ -6,6 +6,7 @@ import {
   type PresentContentType,
 } from "@/modules/wizard-agent/tools/present/registry";
 import { getRenderedPrompt } from "@root/server/lib/promptService";
+import { STORAGE_MODE } from "@root/server/env";
 
 const VALID_CONTENT_TYPES: PresentContentType[] = [
   "roadmap",
@@ -24,9 +25,12 @@ function resolveContentType(value: unknown): PresentContentType {
 export default createAgentHandler({
   tools: (context) => {
     const contentType = resolveContentType(context.contentType);
+    // In browser mode the server filesystem is read-only, so the memory write
+    // tool is omitted; memory reads still reach the model via the client-
+    // supplied `memoryContext` in the system prompt.
     return [
       askUserTool,
-      memoryToolServer,
+      ...(STORAGE_MODE === "browser" ? [] : [memoryToolServer]),
       getPresentToolForContentType(contentType),
     ];
   },

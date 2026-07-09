@@ -1,20 +1,19 @@
-import { defineEventHandler, getRouterParam } from "h3";
+import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
-import { storagePaths } from "@root/server/lib/storagePaths";
 import { toErrorMessage } from "@root/server/lib/errors";
+import { assertServerStorageEnabled } from "@root/server/lib/assertServerStorageEnabled";
+import { deckRepo } from "@modules/repository";
 
 export default defineEventHandler(async (event) => {
   try {
+    assertServerStorageEnabled();
     const id = getRouterParam(event, "id");
     if (!id) {
       return { success: false, error: "Missing deck ID" };
     }
-    const response = await storageApi.delete(storagePaths.deckDir(id), true);
-    if (!response.ok && response.status !== 404) {
-      return { success: false, error: response.error ?? response.statusText };
-    }
-    return { success: true };
+    return await deckRepo.deleteDeck(storageApi, id);
   } catch (error) {
+    if (error instanceof HTTPError) throw error;
     console.error("Error deleting deck:", error);
     return { success: false, error: toErrorMessage(error) };
   }

@@ -1,7 +1,6 @@
 import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
-import { storagePaths } from "@root/server/lib/storagePaths";
-import type { ReviewData } from "@modules/core";
+import { courseRepo } from "@modules/repository";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
 export default defineEventHandler(
@@ -16,17 +15,14 @@ export default defineEventHandler(
       });
     }
 
-    const response = await storageApi.get<ReviewData>(
-      storagePaths.reviews(courseId, lessonId)
+    const result = await courseRepo.getFlashcardsReviews(
+      storageApi,
+      courseId,
+      lessonId
     );
-
-    if (response.ok) {
-      return await response.json();
+    if (!result) {
+      throw new HTTPError({ status: 404, message: "Reviews not found" });
     }
-
-    throw new HTTPError({
-      status: 404,
-      message: "Reviews not found",
-    });
+    return result;
   })
 );

@@ -1,18 +1,13 @@
 import { defineEventHandler, readBody, HTTPError, getRouterParam } from "h3";
 import { storageApi } from "@modules/storage";
-import { getFormatAdapter } from "@modules/content-formats";
-import { storagePaths } from "@root/server/lib/storagePaths";
-import {
-  findLessonInCourse,
-  isLessonSectionCompleted,
-  setLessonSectionCompletion,
-  lessonCompletionUpdateSchema,
-} from "@modules/core";
-import type { LessonSection } from "@modules/core";
+import { lessonCompletionUpdateSchema } from "@modules/core";
+import { courseRepo } from "@modules/repository";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
+import { assertServerStorageEnabled } from "@root/server/lib/assertServerStorageEnabled";
 
 export default defineEventHandler(
   withErrorGuard("Failed to update lesson completion", async (event) => {
+    assertServerStorageEnabled();
     const courseId = getRouterParam(event, "id");
     const lessonId = getRouterParam(event, "lessonId");
 
@@ -32,56 +27,21 @@ export default defineEventHandler(
         message: `Invalid request body: ${parsed.error.issues[0]?.message ?? "validation failed"}`,
       });
     }
-    const body = parsed.data;
 
-    const courseAdapter = getFormatAdapter("course");
-    const section: LessonSection = body.section ?? "theory";
-    const coursePath = storagePaths.course(courseId);
-    const response = await storageApi.get<string>(coursePath);
+    const result = await courseRepo.updateLessonCompletion(
+      storageApi,
+      courseId,
+      lessonId,
+      parsed.data.completed,
+      parsed.data.section ?? "theory"
+    );
 
-    if (!response.ok) {
-      throw new HTTPError({
-        status: response.status,
-        message:
-          response.status === 404 ? "Course not found" : response.statusText,
-      });
-    }
-
-    const course = courseAdapter.deserialize(await response.text());
-
-    const found = findLessonInCourse(course, lessonId);
-
-    if (!found) {
+    if (!result) {
       throw new HTTPError({
         status: 404,
         message: "Lesson not found in course",
       });
     }
-
-    const targetLesson = found.lesson;
-
-    const now = new Date().toISOString();
-
-    const currentValue = isLessonSectionCompleted(targetLesson, section);
-    const nextCompleted =
-      typeof body.completed === "boolean" ? body.completed : !currentValue;
-
-    setLessonSectionCompletion(
-      targetLesson,
-      section,
-      nextCompleted,
-      nextCompleted ? now : undefined
-    );
-
-    course.updatedAt = now;
-
-    await storageApi.put(coursePath, courseAdapter.serialize(course));
-
-    return {
-      success: true,
-      section,
-      completed: nextCompleted,
-      completedAt: nextCompleted ? now : null,
-    };
+    return result;
   })
 );

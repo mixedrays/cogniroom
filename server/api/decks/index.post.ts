@@ -1,17 +1,13 @@
 import { defineEventHandler, readBody, HTTPError } from "h3";
-import { readdirSync } from "node:fs";
 import { storageApi } from "@modules/storage";
-import { DECKS_DIR } from "@root/server/env";
-import { getFormatAdapter } from "@modules/content-formats";
-import { storagePaths } from "@root/server/lib/storagePaths";
-import { generateUniqueDeckId } from "@modules/core";
 import {
   FlashcardsContentOutputSchema,
   QuizContentOutputSchema,
 } from "@/modules/wizard-agent/lib/contentOutputSchemas";
 import { toErrorMessage } from "@root/server/lib/errors";
+import { assertServerStorageEnabled } from "@root/server/lib/assertServerStorageEnabled";
+import { deckRepo } from "@modules/repository";
 import type {
-  Deck,
   DeckKind,
   DeckSource,
   FlashcardsContent,
@@ -28,6 +24,7 @@ interface CreateDeckBody {
 
 export default defineEventHandler(async (event) => {
   try {
+    assertServerStorageEnabled();
     const body = await readBody<CreateDeckBody>(event);
 
     if (!body || typeof body.title !== "string" || body.title.trim() === "") {
@@ -64,38 +61,14 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    let existingIds: string[] = [];
-    try {
-      existingIds = readdirSync(DECKS_DIR);
-    } catch {}
-    const id = generateUniqueDeckId(body.title, existingIds);
-
-    const now = new Date().toISOString();
-    const deck: Deck = {
-      id,
-      title: body.title.trim(),
-      description: body.description?.trim() || undefined,
+    return await deckRepo.createDeck(storageApi, {
+      title: body.title,
+      description: body.description,
       kind: body.kind,
-      source: body.source ?? "manual",
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    await storageApi.post(storagePaths.deck(id), JSON.stringify(deck, null, 2));
-
-    if (flashcards) {
-      const adapter = getFormatAdapter("flashcards");
-      await storageApi.post(
-        storagePaths.deckFlashcards(id),
-        adapter.serialize(flashcards)
-      );
-    }
-    if (quiz) {
-      const adapter = getFormatAdapter("quiz");
-      await storageApi.post(storagePaths.deckQuiz(id), adapter.serialize(quiz));
-    }
-
-    return { success: true, id };
+      source: body.source,
+      flashcards,
+      quiz,
+    });
   } catch (error) {
     if (error instanceof HTTPError) throw error;
     console.error("Error creating deck:", error);

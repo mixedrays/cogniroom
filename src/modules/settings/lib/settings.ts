@@ -4,6 +4,14 @@ import type {
   SettingsHistoryEntry,
 } from "./settingsTypes";
 import { DEFAULT_SETTINGS } from "./settingsTypes";
+import { getStorageMode } from "@/lib/runtimeConfig";
+import { getLocalDataApi, isLocalDataAvailable } from "@/lib/localRepo";
+import * as settingsRepo from "./settingsRepo";
+import { memoryRepo } from "@modules/repository";
+
+async function isBrowserMode(): Promise<boolean> {
+  return (await getStorageMode()) === "browser";
+}
 
 function getBaseUrl() {
   if (typeof window !== "undefined") return "";
@@ -17,6 +25,12 @@ export async function getSettings(): Promise<{
   isDefault?: boolean;
   error?: string;
 }> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) {
+      return { success: true, settings: DEFAULT_SETTINGS, isDefault: true };
+    }
+    return settingsRepo.readSettings(getLocalDataApi());
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/settings`);
     if (!response.ok) {
@@ -42,6 +56,9 @@ export async function saveSettings(
     addToHistory?: boolean;
   }
 ): Promise<{ success: boolean; settings?: Settings; error?: string }> {
+  if (await isBrowserMode()) {
+    return settingsRepo.writeSettings(getLocalDataApi(), settings, options);
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/settings`, {
       method: "POST",
@@ -91,6 +108,12 @@ export async function getSettingsHistory(): Promise<{
   history: SettingsHistory;
   error?: string;
 }> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) {
+      return { success: true, history: { entries: [], maxEntries: 50 } };
+    }
+    return settingsRepo.readHistory(getLocalDataApi());
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/settings/history`);
     if (!response.ok) {
@@ -116,6 +139,9 @@ export async function getSettingsHistory(): Promise<{
 export async function deleteHistoryEntry(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    return settingsRepo.deleteHistoryEntry(getLocalDataApi(), id);
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/settings/history/${id}`, {
       method: "DELETE",
@@ -132,6 +158,9 @@ export async function clearSettingsHistory(): Promise<{
   success: boolean;
   error?: string;
 }> {
+  if (await isBrowserMode()) {
+    return settingsRepo.clearHistory(getLocalDataApi());
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/settings/history`, {
       method: "DELETE",
@@ -154,6 +183,15 @@ export async function getMemoryEntries(): Promise<{
   entries: MemoryEntry[];
   error?: string;
 }> {
+  if (await isBrowserMode()) {
+    if (!isLocalDataAvailable()) return { success: true, entries: [] };
+    try {
+      const entries = await memoryRepo.listMemoryEntries(getLocalDataApi());
+      return { success: true, entries };
+    } catch (e) {
+      return { success: false, entries: [], error: String(e) };
+    }
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/settings/memory`);
     if (!response.ok) {
@@ -170,6 +208,14 @@ export async function updateMemoryEntry(
   key: string,
   content: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    try {
+      await memoryRepo.writeMemory(getLocalDataApi(), key, content);
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: String(e) };
+    }
+  }
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/settings/memory/${encodeURIComponent(key)}`,
@@ -189,6 +235,14 @@ export async function updateMemoryEntry(
 export async function deleteMemoryEntry(
   key: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (await isBrowserMode()) {
+    try {
+      await memoryRepo.deleteMemory(getLocalDataApi(), key);
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: String(e) };
+    }
+  }
   try {
     const response = await fetch(
       `${getBaseUrl()}/api/settings/memory/${encodeURIComponent(key)}`,
@@ -205,6 +259,14 @@ export async function clearAllMemory(): Promise<{
   success: boolean;
   error?: string;
 }> {
+  if (await isBrowserMode()) {
+    try {
+      await memoryRepo.clearAllMemory(getLocalDataApi());
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: String(e) };
+    }
+  }
   try {
     const response = await fetch(`${getBaseUrl()}/api/settings/memory`, {
       method: "DELETE",

@@ -28,7 +28,12 @@ export function createAgentHandler(config: {
 
     const context = body.context ?? {};
     const baseSystem = await config.getSystemPrompt(context);
-    const memoryContext = await getMemoryContext();
+    // In browser mode the client owns memory and supplies the pre-formatted
+    // block in the request; otherwise assemble it from the server filesystem.
+    const memoryContext =
+      typeof context.memoryContext === "string"
+        ? context.memoryContext
+        : await getMemoryContext();
     const system = memoryContext
       ? `${baseSystem}\n\n${memoryContext}`
       : baseSystem;

@@ -1,7 +1,6 @@
 import { defineEventHandler, getRouterParam, HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
-import { getFormatAdapter } from "@modules/content-formats";
-import { storagePaths } from "@root/server/lib/storagePaths";
+import { deckRepo } from "@modules/repository";
 import { withErrorGuard } from "@root/server/lib/withErrorGuard";
 
 export default defineEventHandler(
@@ -10,11 +9,10 @@ export default defineEventHandler(
     if (!id) {
       throw new HTTPError({ status: 400, message: "Missing deck ID" });
     }
-    const adapter = getFormatAdapter("quiz");
-    const response = await storageApi.get<string>(storagePaths.deckQuiz(id));
-    if (response.ok) {
-      return { content: adapter.deserialize(await response.text()) };
+    const result = await deckRepo.getDeckQuiz(storageApi, id);
+    if (!result) {
+      throw new HTTPError({ status: 404, message: "Quiz not found" });
     }
-    throw new HTTPError({ status: 404, message: "Quiz not found" });
+    return result;
   })
 );

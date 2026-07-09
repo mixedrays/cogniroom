@@ -15,6 +15,23 @@ export function getRequiredEnv(name: string): string {
 
 export const APP_NAME = process.env.APP_NAME || "CogniRoom";
 
+export type StorageMode = "filesystem" | "browser";
+
+/**
+ * Authoritative store for user data.
+ * - `filesystem` (default): server persists under DATA_PATH.
+ * - `browser`: the browser's IndexedDB is the source of truth; server storage
+ *   is disabled (see `assertServerStorageEnabled`). Used on read-only serverless
+ *   filesystems (e.g. Vercel).
+ */
+export const STORAGE_MODE: StorageMode = ((): StorageMode => {
+  const raw = (process.env.STORAGE_MODE || "filesystem").trim();
+  if (raw === "filesystem" || raw === "browser") return raw;
+  throw new Error(
+    `Invalid STORAGE_MODE "${raw}". Expected one of: filesystem, browser`
+  );
+})();
+
 export const DATA_PATH = resolve(
   process.cwd(),
   process.env.DATA_PATH || "./data"

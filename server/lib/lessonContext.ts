@@ -2,7 +2,12 @@ import { HTTPError } from "h3";
 import { storageApi } from "@modules/storage";
 import { getFormatAdapter } from "@modules/content-formats";
 import { findLessonInCourse } from "@modules/core";
-import type { Course, Lesson, Topic } from "@modules/core";
+import type {
+  Course,
+  Lesson,
+  Topic,
+  LessonGenerationContext,
+} from "@modules/core";
 import { storagePaths } from "./storagePaths";
 
 export interface LessonContext {
@@ -82,6 +87,37 @@ export function buildLessonPromptVars(
     lessonTitle: ctx.lesson.title,
     lessonDescription: ctx.lesson.description ?? "",
     lessonContent,
+    additionalInstructions,
+  };
+}
+
+/**
+ * Wrap raw saved lesson theory into the prompt's theory block. Kept identical
+ * to `loadLessonTheoryBlock`'s formatting so prompts are unchanged whether the
+ * theory comes from disk (filesystem mode) or from the request body (browser
+ * mode). Returns "" for blank/absent text.
+ */
+export function formatLessonTheoryBlock(text: string | undefined): string {
+  if (!text?.trim()) return "";
+  return `\n\nLesson Theory Content:\n---\n${text.trim()}\n---`;
+}
+
+/**
+ * Build lesson prompt vars from a client-supplied `LessonGenerationContext`
+ * (stateless generation), mirroring `buildLessonPromptVars`. `lessonContent` is
+ * the raw saved theory; it is wrapped here into the theory block.
+ */
+export function buildLessonPromptVarsFromContext(
+  context: LessonGenerationContext,
+  additionalInstructions: string
+): Record<string, string> {
+  return {
+    courseTitle: context.courseTitle,
+    topicTitle: context.topicTitle,
+    topicDescription: context.topicDescription ?? "",
+    lessonTitle: context.lessonTitle,
+    lessonDescription: context.lessonDescription ?? "",
+    lessonContent: formatLessonTheoryBlock(context.lessonContent),
     additionalInstructions,
   };
 }
