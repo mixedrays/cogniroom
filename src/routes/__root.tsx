@@ -17,6 +17,7 @@ import {
 } from "@/modules/command-palette";
 import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
+import { BrowserModeNotice } from "@/components/BrowserModeNotice";
 import { useSyncQueue } from "@/hooks/useSyncQueue";
 import type { RouterContext } from "@/lib/routerContext";
 import appCss from "../styles.css?url";
@@ -88,6 +89,7 @@ function RootComponent() {
         </SettingsProvider>
         <Toaster />
         <ServiceWorkerRegistrar />
+        <BrowserModeNotice />
         <SyncQueueRunner />
       </QueryClientProvider>
     </RootDocument>
