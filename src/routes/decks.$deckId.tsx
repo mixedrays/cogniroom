@@ -2,13 +2,10 @@ import {
   createFileRoute,
   useLoaderData,
   useParams,
-  useNavigate,
 } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Home, Layers, ListChecks, Trash2 } from "lucide-react";
+import { useCallback, useMemo } from "react";
+import { Home, Layers, ListChecks } from "lucide-react";
 import {
-  deleteDeck,
   getDeck,
   getDeckFlashcards,
   getDeckQuiz,
@@ -18,21 +15,9 @@ import {
 import type { Flashcard, QuizQuestion, ReviewData } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { DeckActionsMenu } from "@/components/DeckActionsMenu";
 import { SM2UI } from "@/modules/flashcards/strategies/SM2/SM2UI";
 import { Quiz } from "@/modules/quiz";
-import { decksQueryKey } from "@/components/DeckList";
 
 export const Route = createFileRoute("/decks/$deckId")({
   loader: async ({ params }) => {
@@ -102,11 +87,6 @@ function DeckViewer() {
     from: "/decks/$deckId",
   });
   const { deckId } = useParams({ from: "/decks/$deckId" });
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const cards = useMemo(() => parseFlashcards(flashcards), [flashcards]);
   const questions = useMemo(() => parseQuizQuestions(quiz), [quiz]);
@@ -120,60 +100,11 @@ function DeckViewer() {
     [deckId]
   );
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    setDeleteError(null);
-    try {
-      const result = await deleteDeck(deckId);
-      if (!result.success) {
-        setDeleteError(result.error || "Failed to delete");
-        return;
-      }
-      await queryClient.invalidateQueries({ queryKey: decksQueryKey });
-      navigate({ to: "/decks" });
-    } catch (e) {
-      setDeleteError(String(e));
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   return (
     <div className="relative animate-in fade-in duration-500 h-full flex flex-col">
       <PageHeader
         actions={
-          <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-            <AlertDialogTrigger
-              render={
-                <Button size="icon-sm" variant="ghost" title="Delete deck">
-                  <Trash2 />
-                </Button>
-              }
-            />
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete deck?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete "{deck.title}".
-                </AlertDialogDescription>
-                {deleteError && (
-                  <p className="text-sm text-destructive">{deleteError}</p>
-                )}
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel disabled={isDeleting}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? "Deleting…" : "Delete"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <DeckActionsMenu deck={deck} flashcards={flashcards} quiz={quiz} />
         }
       >
         <Breadcrumbs

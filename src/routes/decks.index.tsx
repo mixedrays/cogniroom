@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Layers, ListChecks } from "lucide-react";
+import { Home, Layers, ListChecks, Upload } from "lucide-react";
 import { listDecks } from "@/lib/decks";
 import { PageHeader } from "@/components/PageHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import CreateDeckDialog from "@/components/CreateDeckDialog";
+import { ImportDeckDialog } from "@/components/ImportDeckDialog";
+import { Button } from "@/components/ui/button";
 import { decksQueryKey } from "@/components/DeckList";
 
 export const Route = createFileRoute("/decks/")({
@@ -23,9 +25,7 @@ function DecksIndex() {
 
   return (
     <div className="relative animate-in fade-in duration-500 h-full flex flex-col overflow-auto">
-      <PageHeader
-      // actions={<CreateDeckDialog />}
-      >
+      <PageHeader>
         <Breadcrumbs
           className="flex items-center"
           items={[
@@ -36,13 +36,25 @@ function DecksIndex() {
       </PageHeader>
 
       <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6 w-full">
-        <div className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Decks
-          </h1>
-          <p className="text-muted-foreground">
-            Standalone flashcard sets and quizzes — separate from courses.
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+              Decks
+            </h1>
+            <p className="text-muted-foreground">
+              Standalone flashcard sets and quizzes — separate from courses.
+            </p>
+          </div>
+          {decks.length > 0 && (
+            <ImportDeckDialog
+              trigger={
+                <Button className="shrink-0">
+                  <Upload />
+                  Import deck
+                </Button>
+              }
+            />
+          )}
         </div>
 
         {decksQuery.isLoading ? (
@@ -60,9 +72,20 @@ function DecksIndex() {
             <Layers className="size-12 mx-auto mb-4 opacity-40" />
             <h2 className="text-lg font-medium mb-1">No decks yet</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Create a standalone flashcard set or quiz for any topic.
+              Create a standalone flashcard set or quiz for any topic, or import
+              one shared from another device.
             </p>
-            <CreateDeckDialog />
+            <div className="flex items-center justify-center gap-2">
+              <CreateDeckDialog />
+              <ImportDeckDialog
+                trigger={
+                  <Button variant="outline">
+                    <Upload />
+                    Import deck
+                  </Button>
+                }
+              />
+            </div>
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
