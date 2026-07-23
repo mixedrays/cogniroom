@@ -100,6 +100,7 @@ export default function DeckList() {
   return (
     <CollapsibleSidebarGroup
       sectionId="decks"
+      to="/decks"
       label={
         <>
           <Layers className="size-4" />

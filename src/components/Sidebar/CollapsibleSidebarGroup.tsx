@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { Link, type LinkProps } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
 import {
   SidebarGroup,
@@ -10,6 +11,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
 import { useSidebarSectionState } from "@/modules/settings";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +21,8 @@ interface CollapsibleSidebarGroupProps {
   labelClassName?: string;
   children: ReactNode;
   groupClassName?: string;
+  /** When set, the label navigates to this route; the chevron toggles the group. */
+  to?: LinkProps["to"];
 }
 
 export function CollapsibleSidebarGroup({
@@ -27,6 +31,7 @@ export function CollapsibleSidebarGroup({
   labelClassName,
   groupClassName,
   children,
+  to,
 }: CollapsibleSidebarGroupProps) {
   const { open, setOpen } = useSidebarSectionState(sectionId);
 
@@ -37,19 +42,44 @@ export function CollapsibleSidebarGroup({
       className="group/collapsible"
     >
       <SidebarGroup className={groupClassName}>
-        <SidebarGroupLabel
-          render={
-            <CollapsibleTrigger
+        {to ? (
+          <SidebarGroupLabel className="pr-0">
+            <Link
+              to={to}
               className={cn(
-                "w-full flex items-center gap-2 cursor-pointer hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                "flex flex-1 min-w-0 items-center gap-2 rounded-md cursor-pointer hover:text-sidebar-foreground",
                 labelClassName
               )}
+            >
+              {label}
+            </Link>
+            <CollapsibleTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={open ? "Collapse section" : "Expand section"}
+                >
+                  <ChevronDown className="transition-transform duration-200 group-data-open/collapsible:rotate-180" />
+                </Button>
+              }
             />
-          }
-        >
-          {label}
-          <ChevronDown className="ml-auto size-3.5 transition-transform duration-200 group-data-open/collapsible:rotate-180" />
-        </SidebarGroupLabel>
+          </SidebarGroupLabel>
+        ) : (
+          <SidebarGroupLabel
+            render={
+              <CollapsibleTrigger
+                className={cn(
+                  "w-full flex items-center gap-2 cursor-pointer hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                  labelClassName
+                )}
+              />
+            }
+          >
+            {label}
+            <ChevronDown className="ml-auto size-3.5 transition-transform duration-200 group-data-open/collapsible:rotate-180" />
+          </SidebarGroupLabel>
+        )}
         <CollapsibleContent>
           <SidebarGroupContent>{children}</SidebarGroupContent>
         </CollapsibleContent>

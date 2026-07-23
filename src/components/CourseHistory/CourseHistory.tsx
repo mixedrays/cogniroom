@@ -119,6 +119,7 @@ export default function CourseHistory() {
   return (
     <CollapsibleSidebarGroup
       sectionId="history"
+      to="/"
       label={
         <>
           <History className="size-4" />

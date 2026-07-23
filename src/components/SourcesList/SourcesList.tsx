@@ -54,6 +54,7 @@ export default function SourcesList() {
   return (
     <CollapsibleSidebarGroup
       sectionId="sources"
+      to="/sources"
       label={
         <>
           <FolderOpen className="size-4" />
