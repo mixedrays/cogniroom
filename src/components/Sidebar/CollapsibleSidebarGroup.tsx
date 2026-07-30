@@ -56,7 +56,7 @@ export function CollapsibleSidebarGroup({
             <CollapsibleTrigger
               render={
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="icon-sm"
                   aria-label={open ? "Collapse section" : "Expand section"}
                 >

@@ -150,6 +150,7 @@ export default function CourseList() {
             <>
               <CollapsibleSidebarGroup
                 sectionId="courses"
+                to="/courses"
                 label={
                   <>
                     <Book className="size-4" />
