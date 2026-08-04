@@ -81,7 +81,7 @@ const config = defineConfig({
           },
           {
             urlPattern: ({ url }) =>
-              /^\/api\/(.*\/generate|.*\/enhance|wizard-agent|wizard|agent|instructions)(\/|$)/.test(
+              /^\/api\/(.*\/generate|.*\/enhance|wizard-agent|wizard|agent|instructions|ping)(\/|$)/.test(
                 url.pathname
               ),
             handler: "NetworkOnly",

@@ -5,6 +5,7 @@ import {
   readCache,
   writeCache,
 } from "./clientStorage";
+import { isOffline } from "./online";
 
 const QUEUE_PREFIX = "_pending/reviews";
 
@@ -106,7 +107,7 @@ async function pushDeck(entry: PendingDeck): Promise<boolean> {
 }
 
 export async function flushSyncQueue(): Promise<FlushResult> {
-  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+  if (isOffline()) {
     return { synced: 0, failed: 0 };
   }
   const pending = await getPendingReviews();

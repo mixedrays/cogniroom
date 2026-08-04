@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { flushSyncQueue, getPendingReviews } from "@/lib/syncQueue";
+import { isOnline } from "@/lib/online";
 
 export function useSyncQueue(): void {
   const router = useRouter();
@@ -33,7 +34,7 @@ export function useSyncQueue(): void {
       }
     };
 
-    if (navigator.onLine) void run();
+    if (isOnline()) void run();
 
     const handleOnline = () => {
       void run();
