@@ -2,6 +2,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   BookOpen,
+  Book,
+  FolderOpen,
   Home,
   Layers,
   ListChecks,
@@ -75,6 +77,8 @@ export function CommandPalette() {
             navigate({ to: "/", search: { session: undefined } as never })
           )
         }
+        onOpenCourses={() => runCommand(() => navigate({ to: "/courses" }))}
+        onOpenSources={() => runCommand(() => navigate({ to: "/sources" }))}
         onOpenDecks={() => runCommand(() => navigate({ to: "/decks" }))}
         onOpenSettings={() => runCommand(() => openSettings())}
         onSelectCourse={(courseId) =>
@@ -98,6 +102,8 @@ interface InnerProps {
   onHome: () => void;
   onNewCourse: () => void;
   onOpenDecks: () => void;
+  onOpenCourses: () => void;
+  onOpenSources: () => void;
   onOpenSettings: () => void;
   onSelectCourse: (courseId: string) => void;
   onSelectDeck: (deckId: string) => void;
@@ -122,6 +128,8 @@ function deckIcon(kind: DeckKind) {
 function Command_Inner({
   onHome,
   onNewCourse,
+  onOpenCourses,
+  onOpenSources,
   onOpenDecks,
   onOpenSettings,
   onSelectCourse,
@@ -143,6 +151,14 @@ function Command_Inner({
           <CommandItem onSelect={onNewCourse} value="create new">
             <Plus />
             <span>Create</span>
+          </CommandItem>
+          <CommandItem onSelect={onOpenCourses} value="courses">
+            <Book />
+            <span>Courses</span>
+          </CommandItem>
+          <CommandItem onSelect={onOpenSources} value="sources">
+            <FolderOpen />
+            <span>Sources</span>
           </CommandItem>
           <CommandItem onSelect={onOpenDecks} value="decks flashcards quiz">
             <Layers />
