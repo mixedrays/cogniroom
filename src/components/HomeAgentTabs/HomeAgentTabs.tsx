@@ -168,7 +168,7 @@ export default function HomeAgentTabs({
                 size="sm"
                 className="gap-1.5 text-muted-foreground"
               >
-                <Zap className="size-3.5" />
+                <Zap />
                 Quick Create
               </Button>
             }

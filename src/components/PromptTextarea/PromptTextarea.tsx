@@ -137,7 +137,10 @@ export function PromptTextarea({
             >
               <Badge
                 variant="outline"
-                className={cn("pl-0!", a.status === "error" && "border-destructive text-destructive")}
+                className={cn(
+                  "pl-0!",
+                  a.status === "error" && "border-destructive text-destructive"
+                )}
               >
                 {onAttachmentRemove ? (
                   <button
@@ -192,9 +195,10 @@ export function PromptTextarea({
               render={
                 <Button
                   size="icon"
-                  variant="ghost"
+                  variant="secondary"
                   disabled={isInputDisabled || isUploading}
                   aria-label="Add attachment"
+                  className="bg-background/80"
                 >
                   {isUploading ? (
                     <Loader2 className="animate-spin" />
@@ -251,7 +255,7 @@ export function PromptTextarea({
           value={selectedModel}
           onValueChange={setSelectedModel}
           disabled={isInputDisabled}
-          triggerClassName="border-0 shadow-none hover:bg-accent transition-colors"
+          triggerClassName="bg-background/80"
         />
 
         <div className="ml-auto">

@@ -136,7 +136,7 @@ export function ModelSelect({
       <ComboboxTrigger
         render={
           <Button
-            variant="outline"
+            variant="secondary"
             className={cn("justify-between font-normal", triggerClassName)}
           />
         }
