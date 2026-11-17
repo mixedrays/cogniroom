@@ -25,7 +25,7 @@ export function CssThemeSelector({
   isDark,
 }: CssThemeSelectorProps) {
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
       {CSS_THEMES.map((cssTheme) => {
         const isSelected = selectedId === cssTheme.id;
         return (

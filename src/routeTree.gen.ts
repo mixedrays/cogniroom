@@ -9,28 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SourcesRouteImport } from './routes/sources'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CoursesRouteImport } from './routes/courses'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SourcesRouteImport } from './routes/sources'
+import { Route as CourseCourseIdRouteImport } from './routes/course.$courseId'
 import { Route as DecksIndexRouteImport } from './routes/decks.index'
 import { Route as DecksDeckIdRouteImport } from './routes/decks.$deckId'
-import { Route as CourseCourseIdRouteImport } from './routes/course.$courseId'
 import { Route as CourseCourseIdIndexRouteImport } from './routes/course.$courseId.index'
 import { Route as CourseCourseIdLessonLessonIdRouteImport } from './routes/course.$courseId.lesson.$lessonId'
 import { Route as CourseCourseIdLessonLessonIdIndexRouteImport } from './routes/course.$courseId.lesson.$lessonId.index'
-import { Route as CourseCourseIdLessonLessonIdQuizRouteImport } from './routes/course.$courseId.lesson.$lessonId.quiz'
-import { Route as CourseCourseIdLessonLessonIdFlashcardsRouteImport } from './routes/course.$courseId.lesson.$lessonId.flashcards'
 import { Route as CourseCourseIdLessonLessonIdExercisesRouteImport } from './routes/course.$courseId.lesson.$lessonId.exercises'
+import { Route as CourseCourseIdLessonLessonIdFlashcardsRouteImport } from './routes/course.$courseId.lesson.$lessonId.flashcards'
+import { Route as CourseCourseIdLessonLessonIdQuizRouteImport } from './routes/course.$courseId.lesson.$lessonId.quiz'
 
-const SourcesRoute = SourcesRouteImport.update({
-  id: '/sources',
-  path: '/sources',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoursesRoute = CoursesRouteImport.update({
@@ -38,9 +33,19 @@ const CoursesRoute = CoursesRouteImport.update({
   path: '/courses',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SourcesRoute = SourcesRouteImport.update({
+  id: '/sources',
+  path: '/sources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CourseCourseIdRoute = CourseCourseIdRouteImport.update({
+  id: '/course/$courseId',
+  path: '/course/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DecksIndexRoute = DecksIndexRouteImport.update({
@@ -51,11 +56,6 @@ const DecksIndexRoute = DecksIndexRouteImport.update({
 const DecksDeckIdRoute = DecksDeckIdRouteImport.update({
   id: '/decks/$deckId',
   path: '/decks/$deckId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CourseCourseIdRoute = CourseCourseIdRouteImport.update({
-  id: '/course/$courseId',
-  path: '/course/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CourseCourseIdIndexRoute = CourseCourseIdIndexRouteImport.update({
@@ -75,10 +75,10 @@ const CourseCourseIdLessonLessonIdIndexRoute =
     path: '/',
     getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
   } as any)
-const CourseCourseIdLessonLessonIdQuizRoute =
-  CourseCourseIdLessonLessonIdQuizRouteImport.update({
-    id: '/quiz',
-    path: '/quiz',
+const CourseCourseIdLessonLessonIdExercisesRoute =
+  CourseCourseIdLessonLessonIdExercisesRouteImport.update({
+    id: '/exercises',
+    path: '/exercises',
     getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
   } as any)
 const CourseCourseIdLessonLessonIdFlashcardsRoute =
@@ -87,10 +87,10 @@ const CourseCourseIdLessonLessonIdFlashcardsRoute =
     path: '/flashcards',
     getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
   } as any)
-const CourseCourseIdLessonLessonIdExercisesRoute =
-  CourseCourseIdLessonLessonIdExercisesRouteImport.update({
-    id: '/exercises',
-    path: '/exercises',
+const CourseCourseIdLessonLessonIdQuizRoute =
+  CourseCourseIdLessonLessonIdQuizRouteImport.update({
+    id: '/quiz',
+    path: '/quiz',
     getParentRoute: () => CourseCourseIdLessonLessonIdRoute,
   } as any)
 
@@ -196,18 +196,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sources': {
-      id: '/sources'
-      path: '/sources'
-      fullPath: '/sources'
-      preLoaderRoute: typeof SourcesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/courses': {
@@ -217,11 +210,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sources': {
+      id: '/sources'
+      path: '/sources'
+      fullPath: '/sources'
+      preLoaderRoute: typeof SourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course/$courseId': {
+      id: '/course/$courseId'
+      path: '/course/$courseId'
+      fullPath: '/course/$courseId'
+      preLoaderRoute: typeof CourseCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/decks/': {
@@ -236,13 +243,6 @@ declare module '@tanstack/react-router' {
       path: '/decks/$deckId'
       fullPath: '/decks/$deckId'
       preLoaderRoute: typeof DecksDeckIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/course/$courseId': {
-      id: '/course/$courseId'
-      path: '/course/$courseId'
-      fullPath: '/course/$courseId'
-      preLoaderRoute: typeof CourseCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/course/$courseId/': {
@@ -266,11 +266,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CourseCourseIdLessonLessonIdIndexRouteImport
       parentRoute: typeof CourseCourseIdLessonLessonIdRoute
     }
-    '/course/$courseId/lesson/$lessonId/quiz': {
-      id: '/course/$courseId/lesson/$lessonId/quiz'
-      path: '/quiz'
-      fullPath: '/course/$courseId/lesson/$lessonId/quiz'
-      preLoaderRoute: typeof CourseCourseIdLessonLessonIdQuizRouteImport
+    '/course/$courseId/lesson/$lessonId/exercises': {
+      id: '/course/$courseId/lesson/$lessonId/exercises'
+      path: '/exercises'
+      fullPath: '/course/$courseId/lesson/$lessonId/exercises'
+      preLoaderRoute: typeof CourseCourseIdLessonLessonIdExercisesRouteImport
       parentRoute: typeof CourseCourseIdLessonLessonIdRoute
     }
     '/course/$courseId/lesson/$lessonId/flashcards': {
@@ -280,11 +280,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CourseCourseIdLessonLessonIdFlashcardsRouteImport
       parentRoute: typeof CourseCourseIdLessonLessonIdRoute
     }
-    '/course/$courseId/lesson/$lessonId/exercises': {
-      id: '/course/$courseId/lesson/$lessonId/exercises'
-      path: '/exercises'
-      fullPath: '/course/$courseId/lesson/$lessonId/exercises'
-      preLoaderRoute: typeof CourseCourseIdLessonLessonIdExercisesRouteImport
+    '/course/$courseId/lesson/$lessonId/quiz': {
+      id: '/course/$courseId/lesson/$lessonId/quiz'
+      path: '/quiz'
+      fullPath: '/course/$courseId/lesson/$lessonId/quiz'
+      preLoaderRoute: typeof CourseCourseIdLessonLessonIdQuizRouteImport
       parentRoute: typeof CourseCourseIdLessonLessonIdRoute
     }
   }
