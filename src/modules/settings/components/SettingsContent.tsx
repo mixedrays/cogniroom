@@ -19,6 +19,13 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AppearanceSettings } from "./AppearanceSettings";
 import { LLMSettings } from "./LLMSettings";
 import { ApiKeySettings } from "./ApiKeySettings";
@@ -38,6 +45,8 @@ const NAV_ITEMS = [
 ] as const;
 
 type SettingsTab = (typeof NAV_ITEMS)[number]["key"];
+
+const SELECT_ITEMS = NAV_ITEMS.map(({ key, label }) => ({ value: key, label }));
 
 interface SettingsContentProps {
   defaultTab?: SettingsTab;
@@ -76,7 +85,7 @@ export function SettingsContent({
 
   return (
     <SidebarProvider className={cn("min-h-0 flex-1", className)}>
-      <Sidebar collapsible="none" className="border-r">
+      <Sidebar collapsible="none" className="hidden border-r md:flex">
         <SidebarContent>
           <SidebarGroup>
             <SidebarMenu>
@@ -107,7 +116,24 @@ export function SettingsContent({
         <div className="flex items-center gap-1.5 px-4 py-4">
           <span className="text-muted-foreground">Settings</span>
           <ChevronRightIcon className="size-3.5 text-muted-foreground" />
-          <span className="font-medium">{activeLabel}</span>
+          <span className="font-medium max-md:hidden">{activeLabel}</span>
+          <Select
+            items={SELECT_ITEMS}
+            value={activeTab}
+            onValueChange={(v) => v && setActiveTab(v)}
+          >
+            <SelectTrigger size="sm" className="md:hidden">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {NAV_ITEMS.map((item) => (
+                <SelectItem key={item.key} value={item.key}>
+                  <item.icon />
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div ref={scrollAreaRef} className="p-4 h-full overflow-auto">
