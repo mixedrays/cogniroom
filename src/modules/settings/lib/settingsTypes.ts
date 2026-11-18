@@ -1,3 +1,5 @@
+import { DEFAULT_MODEL } from "@/lib/llm-models";
+
 // Settings Types for Theme Configuration System
 
 export type ThemeMode = "light" | "dark" | "system";
@@ -52,7 +54,7 @@ export const DEFAULT_SETTINGS: Settings = {
     radius: 0.625, // Default radius in rem
   },
   llm: {
-    defaultModel: "gpt-4.1-mini",
+    defaultModel: DEFAULT_MODEL,
   },
   sidebar: {
     collapsedSections: {},

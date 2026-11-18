@@ -2,6 +2,12 @@ import { describe, it, expect } from "vitest";
 import { ALL_MODELS, DEFAULT_MODEL, resolveModelId, providers } from "../index";
 import type { AvailableModelsId } from "../index";
 
+// Picks change with every models.config.ts edit; take a non-default id per provider.
+const pickedId = (providerId: string) =>
+  Object.keys(providers.find((p) => p.id === providerId)?.models ?? {}).find(
+    (id) => id !== DEFAULT_MODEL
+  )!;
+
 describe("DEFAULT_MODEL", () => {
   it("is a real, registered model id", () => {
     expect(DEFAULT_MODEL in ALL_MODELS).toBe(true);
@@ -20,20 +26,22 @@ describe("ALL_MODELS", () => {
 
 describe("resolveModelId", () => {
   it("returns a known model unchanged", () => {
-    expect(resolveModelId("gpt-5-mini")).toBe("gpt-5-mini");
+    const id = pickedId("openai");
+    expect(resolveModelId(id)).toBe(id);
   });
 
   it("resolves ids from non-default providers", () => {
     // Anthropic and OpenRouter ids must round-trip too — the union is honest
     // about every live provider, not just OpenAI.
-    expect(resolveModelId("claude-sonnet-4-6")).toBe("claude-sonnet-4-6");
-    expect(resolveModelId("anthropic/claude-opus-4.7")).toBe(
-      "anthropic/claude-opus-4.7"
-    );
+    for (const providerId of ["anthropic", "openrouter"]) {
+      const id = pickedId(providerId);
+      expect(resolveModelId(id)).toBe(id);
+    }
   });
 
   it("trims surrounding whitespace before validating", () => {
-    expect(resolveModelId("  gpt-5-mini  ")).toBe("gpt-5-mini");
+    const id = pickedId("openai");
+    expect(resolveModelId(`  ${id}  `)).toBe(id);
   });
 
   it("falls back to DEFAULT_MODEL for unknown ids", () => {
@@ -48,7 +56,7 @@ describe("resolveModelId", () => {
   });
 
   it("returns a value assignable to AvailableModelsId", () => {
-    const resolved: AvailableModelsId = resolveModelId("gpt-5-mini");
-    expect(resolved).toBe("gpt-5-mini");
+    const resolved: AvailableModelsId = resolveModelId(DEFAULT_MODEL);
+    expect(resolved).toBe(DEFAULT_MODEL);
   });
 });

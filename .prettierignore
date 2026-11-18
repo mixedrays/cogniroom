@@ -7,3 +7,5 @@ pnpm-lock.yaml
 package-lock.json
 yarn.lock
 src/components/ui
+src/lib/llm-models/models.catalog.json
+src/lib/llm-models/models.generated.json

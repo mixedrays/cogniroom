@@ -103,6 +103,8 @@ CogniRoom - A platform for creating, managing, and tracking skill learning roadm
 | `npm run validate:content`| Validate generated content (bundled validator)       |
 | `npm run build:validator` | Rebuild the standalone content-validator bundle      |
 | `npm run validate`        | Run all checks (typecheck, lint, validator, tests)   |
+| `npm run models:update`   | Update AI SDKs (same major), refresh OpenRouter catalog snapshot, rebuild models, print review summary |
+| `npm run models:build`    | Rebuild `models.generated.json` offline after editing `src/lib/llm-models/models.config.ts` |
 
 ## Layout and Design
 
