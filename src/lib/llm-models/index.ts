@@ -5,6 +5,7 @@ import type {
 } from "./types";
 import type { AvailableModelsId } from "./providers";
 import { providers } from "./providers";
+import { modelsConfig } from "./models.config";
 import {
   getModelLabel as _getModelLabel,
   getValidModel as _getValidModel,
@@ -15,15 +16,9 @@ export type {
   ModelStats,
   ModelCapabilities,
   ProviderConfig,
-  ProviderModelDefinitions,
   ProviderModels,
 } from "./types";
-export type {
-  AvailableModelsId,
-  OpenAIAvailableModelsIds,
-  AnthropicAvailableModelsIds,
-  OpenRouterAvailableModelsIds,
-} from "./providers";
+export type { AvailableModelsId, ProviderId } from "./providers";
 export {
   getPricePerToken,
   isFreeModel,
@@ -34,14 +29,10 @@ export {
   getProviderEnvKeyName,
   getProviderLocalStorageKeyName,
 } from "./utils";
-export {
-  providers,
-  openaiProvider,
-  anthropicProvider,
-  openrouterProvider,
-} from "./providers";
+export { providers } from "./providers";
 
-export const DEFAULT_MODEL = "gpt-5-mini" satisfies AvailableModelsId;
+export const DEFAULT_MODEL =
+  modelsConfig.defaultModel satisfies AvailableModelsId;
 
 /**
  * All models from all registered providers, merged into a single record.
